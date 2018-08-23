@@ -9,6 +9,6 @@ Analyse package for actigraphy data
 
 ## Local installation
 
-`cd pyActigraphy/pyActigraphy`
+`cd pyActigraphy/`
 
 `pip install -e .`
