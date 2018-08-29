@@ -1,6 +1,6 @@
 import os.path as op
 
-import actimetry
+import pyActigraphy
 import inspect
 import pandas as pd
 
@@ -10,12 +10,12 @@ data_dir = op.join(op.dirname(op.abspath(FILE)), 'data')
 awd_path = op.join(data_dir, 'test_sample.AWD')
 
 # read AWD with default parameters
-rawAWD = actimetry.io.read_raw_awd(awd_path)
+rawAWD = pyActigraphy.io.read_raw_awd(awd_path)
 
 
 def test_instance_awd():
 
-    assert isinstance(rawAWD, actimetry.io.awd.RawAWD)
+    assert isinstance(rawAWD, pyActigraphy.io.awd.RawAWD)
 
 
 def test_read_raw_awd_name():

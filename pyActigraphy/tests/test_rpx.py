@@ -1,6 +1,6 @@
 import os.path as op
 
-import actimetry
+import pyActigraphy
 import inspect
 import pandas as pd
 
@@ -10,13 +10,13 @@ data_dir = op.join(op.dirname(op.abspath(FILE)), 'data')
 rpx_path = op.join(data_dir, 'test_sample.csv')
 
 # read RPX with default parameters
-rawRPX = actimetry.io.read_raw_rpx(rpx_path)
+rawRPX = pyActigraphy.io.read_raw_rpx(rpx_path)
 
 
 def test_instance_rpx():
     """is rawRPX an instance of : actimetry.io.read_raw_rpx(rpx_path ?
     if true return True, else AssertionError"""
-    assert isinstance(rawRPX, actimetry.io.rpx.RawRPX)
+    assert isinstance(rawRPX, pyActigraphy.io.rpx.RawRPX)
 
 
 def test_read_raw_rpx_name():

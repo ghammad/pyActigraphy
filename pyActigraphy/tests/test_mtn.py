@@ -1,6 +1,6 @@
 import os.path as op
 
-import actimetry
+import pyActigraphy
 import inspect
 import pandas as pd
 
@@ -10,19 +10,19 @@ data_dir = op.join(op.dirname(op.abspath(FILE)), 'data')
 mtn_path = op.join(data_dir, 'test_sample.mtn')
 
 # read MTN with default parameters
-rawMTN = actimetry.io.read_raw_mtn(mtn_path, header_size=17)
+rawMTN = pyActigraphy.io.read_raw_mtn(mtn_path)
 
 
 def test_instance_mtn():
     """is rawMTN an instance of : actimetry.io.read_raw_mtn(mtn_path ?
     if true return True, else AssertionError"""
-    assert isinstance(rawMTN, actimetry.io.mtn.RawMTN)
+    assert isinstance(rawMTN, pyActigraphy.io.mtn.RawMTN)
 
 
 def test_read_raw_mtn_name():
     """Is the name of the file "text_sample" ?
     if true continue, else AssertionError"""
-    assert rawMTN.name == 'test_sample'
+    assert rawMTN.name == 'TEST_SAMPLE'
 
 
 def test_read_raw_mtn_uuid():

@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
-import xmltodict
 import os
 
+from lxml import etree
 from ..base import BaseRaw
 
 
@@ -32,7 +32,7 @@ class RawMTN(BaseRaw):
     def __init__(
         self,
         input_fname,
-        header_size=16,
+        # header_size=16,
         start_time=None,
         period=None,
         data_dtype=np.int,
@@ -51,11 +51,11 @@ class RawMTN(BaseRaw):
         name = self.__extract_mtn_name(raw_data)
         uuid = self.__extract_mtn_uuid(raw_data)
         start = self.__extract_mtn_start_time(raw_data)
-        frequency = self.__extract_frequency(raw_data, header_size)
-        axial_mode = self.__extract_axial_mode(raw_data, header_size)
+        frequency = self.__extract_frequency(raw_data)
+        axial_mode = self.__extract_axial_mode(raw_data)
 
-        motion = self.__extract_motion(raw_data, header_size, data_dtype)
-        light = self.__extract_light(raw_data, header_size, light_dtype)
+        motion = self.__extract_motion(raw_data, data_dtype)
+        light = self.__extract_light(raw_data, light_dtype)
 
         # index the motion time serie
         index_data = pd.Series(
@@ -104,54 +104,82 @@ class RawMTN(BaseRaw):
         )
 
     def __reading_and_parsing_file(self, input_fname):
-        with open(input_fname, encoding='utf-8') as fd:
-            doc = xmltodict.parse(fd.read())
-            return doc['motionfile']['log2']['change']
+        return etree.parse(input_fname).getroot()
 
-    def __extract_mtn_name(self, raw_data):
+    def __extract_mtn_name(self, tree):
         """ Extract name from the MTN file"""
-        return raw_data[0]['property']['content']
+        elem = tree.xpath(
+            "//log2/change/property[name = '+UserID']//following-sibling::content"
+        )
+        return elem[0].text
+        # return raw_data[0]['property']['content']
 
-    def __extract_mtn_uuid(self, raw_data):
+    def __extract_mtn_uuid(self, tree):
         """ Extract device name and serial number (white space separation)"""
+        device = tree.xpath(
+            "//log2/change/property[name = '=Device']//following-sibling::content"
+        )
+        serial = tree.xpath(
+            "//log2/change/property[name = '=SerialNo']//following-sibling::content"
+        )
         return "{} {}".format(
-            raw_data[6]['property']['content'],
-            raw_data[7]['property']['content']
+            device[0].text,
+            serial[0].text
         )
 
-    def __extract_mtn_start_time(self, raw_data):
+    def __extract_mtn_start_time(self, tree):
         """ Extract start time from the MTN file"""
-        return pd.to_datetime(raw_data[13]['property']['content'])
+        elem = tree.xpath(
+            "//log2/change/property[name = '=StartTime']//following-sibling::content"
+        )
+        return pd.to_datetime(elem[0].text)
+        # return pd.to_datetime(raw_data[13]['property']['content'])
 
-    def __extract_frequency(self, raw_data, header_size):
+    def __extract_frequency(self, tree):
         """ Return acquisition frequency after time conversion in second"""
+        elem = tree.xpath(
+            "//log2/change/channel[name = 'motion']//following-sibling::epoch"
+        )
         return pd.Timedelta(
-            int(raw_data[header_size]['channel']['epoch']),
+            # int(raw_data[header_size]['channel']['epoch']),
+            int(elem[0].text),
             unit='s'
         )
 
-    def __extract_frequency_light(self, raw_data, header_size):
+    def __extract_frequency_light(self, tree):
         """ Return light frequency after time conversion in second"""
         # Use a try statement as there might be no light measurement.
+        elem = tree.xpath(
+            "//log2/change/channel[name = 'Light']//following-sibling::epoch"
+        )
+        freq = None
         try:
             freq = pd.Timedelta(
-                int(raw_data[header_size+1]['channel']['epoch']),
+                # int(raw_data[header_size+1]['channel']['epoch']),
+                int(elem[0].text),
                 unit='s'
             )
         except IndexError:
             print('Could not find light frequency.')
-            return None
-        else:
-            return freq
 
-    def __extract_axial_mode(self, raw_data, header_size):
+        return freq
+
+    def __extract_axial_mode(self, tree):
         """ Extract axial mode (mono-axial or tri-axial)"""
-        return raw_data[header_size]['channel']['units']
+        elem = tree.xpath(
+            "//log2/change/channel[name = 'motion']//following-sibling::units"
+        )
+        # return raw_data[header_size]['channel']['units']
+        return elem[0].text
 
-    def __extract_motion(self, raw_data, header_size, dtype):
+    def __extract_motion(self, tree, dtype):
         """ Extract motion measurement from the MTN file"""
+        elem = tree.xpath(
+            "//log2/change/channel[name = 'motion']//following-sibling::data"
+        )
         motion = np.fromstring(
-            raw_data[header_size]['channel']['data']['#text'].replace(
+            # raw_data[header_size]['channel']['data']['#text'].replace(
+            elem[0].text.replace(
                 '\n',
                 ''
             ),
@@ -160,12 +188,15 @@ class RawMTN(BaseRaw):
         )
         return motion
 
-    def __extract_light(self, raw_data, header_size, dtype):
+    def __extract_light(self, tree, dtype):
         """ Extract light measurement from the MTN file (if any)"""
         # Use a try statement as there might be no light measurement.
+        elem = tree.xpath(
+            "//log2/change/channel[name = 'Light']//following-sibling::data"
+        )
         try:
             light = np.fromstring(
-                raw_data[header_size+1]['channel']['data']['#text'].replace(
+                elem[0].text.replace(
                     '\n',
                     ''
                 ),
@@ -181,7 +212,7 @@ class RawMTN(BaseRaw):
 
 def read_raw_mtn(
     input_fname,
-    header_size=16,
+    # header_size=16,
     start_time=None,
     period=None,
     data_dtype=np.int,
@@ -213,7 +244,7 @@ def read_raw_mtn(
 
     return RawMTN(
         input_fname=input_fname,
-        header_size=header_size,
+        # header_size=header_size,
         start_time=start_time,
         period=period,
         data_dtype=data_dtype,
