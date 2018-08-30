@@ -62,7 +62,7 @@ setup(
         'Topic :: Actigraphy :: Actimetry',
 
         # Pick your license as you wish
-        'License :: OSI Approved :: GNU GPL-2.0 License',
+        'License :: OSI Approved :: GNU GPL-3.0 License',
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
@@ -99,7 +99,7 @@ setup(
         'pyActigraphy': ['tests/data/*']
     },
 
-    license='GNU GPL-2.0',
+    license='GNU GPL-3.0',
 
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
