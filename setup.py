@@ -99,7 +99,7 @@ setup(
         'pyActigraphy': ['tests/data/*']
     },
 
-    license='MIT',
+    license='GNU GPL-2.0',
 
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
