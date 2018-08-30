@@ -3,6 +3,7 @@ import glob
 from pyActigraphy.metrics import ForwardMetricsMixin
 from joblib import Parallel, delayed
 from ..awd import read_raw_awd
+from ..mtn import read_raw_mtn
 from ..rpx import read_raw_rpx
 
 
@@ -47,15 +48,16 @@ def read_raw(input_path, reader_type, n_jobs=1):
             E.g. '/path/to/my/files/*.csv'
         reader_type: str
             Reader type.
-            Supported types: AWD (MotionWatch) and RPX (Respironics)
+            Supported types: AWD (ActiWatch), MTN (MotionWatch8)
+            and RPX (Respironics)
 
         Returns
         -------
         raw : list
-            A list of instances of RawAWD or RawRPX
+            A list of instances of RawAWD, RawMTN or RawRPX
         """
 
-        supported_types = ['AWD', 'RPX']
+        supported_types = ['AWD', 'MTN', 'RPX']
         if reader_type not in supported_types:
             raise ValueError(
                 'Type {0} unsupported. Supported types: {1}'.format(
@@ -72,6 +74,7 @@ def read_raw(input_path, reader_type, n_jobs=1):
 
         readers = {
             'AWD': lambda files: parallel_reader(n_jobs, read_raw_awd, files),
+            'MTN': lambda files: parallel_reader(n_jobs, read_raw_mtn, files),
             'RPX': lambda files: parallel_reader(n_jobs, read_raw_rpx, files)
             # 'AWD': lambda files: [read_raw_awd(ifile) for ifile in files],
             # 'RPX': lambda files: [read_raw_rpx(ifile) for ifile in files]

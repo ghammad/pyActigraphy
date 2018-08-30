@@ -23,6 +23,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
     ):
 
         self.__name = name
+        self.__display_name = name
         self.__uuid = uuid
         self.__format = format
         self.__axial_mode = axial_mode
@@ -43,6 +44,15 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
     def name(self):
         """The study name as extracted from the raw file."""
         return self.__name
+
+    @property
+    def display_name(self):
+        """The name to be used for display."""
+        return self.__display_name
+
+    @display_name.setter
+    def display_name(self, value):
+        self.__display_name = value
 
     @property
     def uuid(self):
