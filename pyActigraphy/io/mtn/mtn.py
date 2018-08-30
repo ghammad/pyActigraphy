@@ -109,7 +109,8 @@ class RawMTN(BaseRaw):
     def __extract_mtn_name(self, tree):
         """ Extract name from the MTN file"""
         elem = tree.xpath(
-            "//log2/change/property[name = '+UserID']//following-sibling::content"
+            ("//log2/change/property[name = '+UserID']"
+             "//following-sibling::content")
         )
         return elem[0].text
         # return raw_data[0]['property']['content']
@@ -117,10 +118,12 @@ class RawMTN(BaseRaw):
     def __extract_mtn_uuid(self, tree):
         """ Extract device name and serial number (white space separation)"""
         device = tree.xpath(
-            "//log2/change/property[name = '=Device']//following-sibling::content"
+            ("//log2/change/property[name = '=Device']"
+             "//following-sibling::content")
         )
         serial = tree.xpath(
-            "//log2/change/property[name = '=SerialNo']//following-sibling::content"
+            ("//log2/change/property[name = '=SerialNo']"
+             "//following-sibling::content")
         )
         return "{} {}".format(
             device[0].text,
@@ -130,7 +133,8 @@ class RawMTN(BaseRaw):
     def __extract_mtn_start_time(self, tree):
         """ Extract start time from the MTN file"""
         elem = tree.xpath(
-            "//log2/change/property[name = '=StartTime']//following-sibling::content"
+            ("//log2/change/property[name = '=StartTime']"
+             "//following-sibling::content")
         )
         return pd.to_datetime(elem[0].text)
         # return pd.to_datetime(raw_data[13]['property']['content'])
