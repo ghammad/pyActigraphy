@@ -55,30 +55,25 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
-        'Intended Audience :: Developers',
-        'Topic :: Software Development :: Build Tools',
+        'Intended Audience :: Researchers',
+        'Topic :: Actigraphy :: Actimetry',
 
         # Pick your license as you wish
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: GNU GPL-3.0 License',
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
     ],
 
     # This field adds keywords for your project which will appear on the
     # project page. What does your project relate to?
     #
     # Note that this is a string of words separated by whitespace, not a list.
-    keywords='actigraphy actimetry analysis',  # Optional
+    keywords='actigraphy actimetry analysis python open-source',  # Optional
 
     # Specify package directories manually or use find_packages().
     #
@@ -93,7 +88,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         'joblib', 'pandas', 'numba', 'numpy', 'pyexcel', 'pyexcel-ods3',
-        'scipy', 'statsmodels', 'xmltodict'
+        'scipy', 'statsmodels'
     ],  # Optional
 
     # Data files included in your packages that need to be installed.
@@ -101,10 +96,10 @@ setup(
     # If using Python 2.6 or earlier, then these have to be included in
     # MANIFEST.in as well.
     package_data={  # Optional
-        'pyActigraphy': ['tests/data/test_sample.AWD']
+        'pyActigraphy': ['tests/data/*']
     },
 
-    license='MIT',
+    license='GNU GPL-3.0',
 
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
