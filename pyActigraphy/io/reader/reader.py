@@ -16,26 +16,34 @@ class RawReader(ForwardMetricsMixin):
         List of instances of RawXXX classes
     """
 
-    def __init__(self, readers, reader_type):
-
-        # store list of readers
-        self.__readers = readers
+    def __init__(self, reader_type, readers=[]):
 
         # store reader_type
         self.__reader_type = reader_type
 
-    @property
-    def readers(self):
-        """The list of RawXXX readers."""
-        return self.__readers
+        # store list of readers
+        self.__readers = readers
 
     @property
     def reader_type(self):
         """The type of RawXXX readers."""
         return self.__reader_type
 
-    # def IS(self):
-    #     return [reader.IS() for reader in self.__readers]
+    @property
+    def readers(self):
+        """The list of RawXXX readers."""
+        return self.__readers
+
+    def append(self, raw_reader):
+        if raw_reader.format != self.__reader_type:
+            # [TODO]: use isinstance instead
+            # and allow multiple types for the same reader
+            raise TypeError('Wrong reader type: {}. Should be: {}'.format(
+                raw_reader.format,
+                self.__reader_type
+            ))
+        else:
+            self.__readers.append(raw_reader)
 
 
 def read_raw(input_path, reader_type, n_jobs=1):
@@ -76,8 +84,6 @@ def read_raw(input_path, reader_type, n_jobs=1):
             'AWD': lambda files: parallel_reader(n_jobs, read_raw_awd, files),
             'MTN': lambda files: parallel_reader(n_jobs, read_raw_mtn, files),
             'RPX': lambda files: parallel_reader(n_jobs, read_raw_rpx, files)
-            # 'AWD': lambda files: [read_raw_awd(ifile) for ifile in files],
-            # 'RPX': lambda files: [read_raw_rpx(ifile) for ifile in files]
         }[reader_type](files)
 
         return RawReader(readers, reader_type)
