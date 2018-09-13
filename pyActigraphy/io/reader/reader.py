@@ -45,8 +45,14 @@ class RawReader(ForwardMetricsMixin):
         else:
             self.__readers.append(raw_reader)
 
+    # def resampled_data(self, freq, binarize=False, threshold=0):
+    #     """The data resampled at the specified frequency.
+    #     If mask_inactivity is True, inactive data (0 count) are masked.
+    #     """
+    #     _parallel_reader(n_jobs, read_raw_awd, files)
 
-def read_raw(input_path, reader_type, n_jobs=1):
+
+def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
         """Reader function for multiple raw files.
 
         Parameters
@@ -58,6 +64,16 @@ def read_raw(input_path, reader_type, n_jobs=1):
             Reader type.
             Supported types: AWD (ActiWatch), MTN (MotionWatch8)
             and RPX (Respironics)
+        n_jobs: int
+            Number of CPU to use for parallel reading
+        prefer: str
+            Soft hint to choose the default backendself.
+            Supported option:'processes', 'threads'.
+            See joblib package documentation for more info.
+            Default is None.
+        verbose: int
+            Display a progress meter if set to a value > 0.
+            Default is 0.
 
         Returns
         -------
@@ -75,15 +91,23 @@ def read_raw(input_path, reader_type, n_jobs=1):
 
         files = glob.glob(input_path)
 
-        def parallel_reader(n_jobs, read_func, file_list):
-            return Parallel(n_jobs=n_jobs)(
+        def parallel_reader(
+            n_jobs, read_func, file_list, prefer=None, verbose=0
+        ):
+            return Parallel(n_jobs=n_jobs, prefer=prefer, verbose=verbose)(
                 delayed(read_func)(file) for file in file_list
             )
 
         readers = {
-            'AWD': lambda files: parallel_reader(n_jobs, read_raw_awd, files),
-            'MTN': lambda files: parallel_reader(n_jobs, read_raw_mtn, files),
-            'RPX': lambda files: parallel_reader(n_jobs, read_raw_rpx, files)
+            'AWD': lambda files: parallel_reader(
+                n_jobs, read_raw_awd, files, prefer, verbose
+            ),
+            'MTN': lambda files: parallel_reader(
+                n_jobs, read_raw_mtn, files, prefer, verbose
+            ),
+            'RPX': lambda files: parallel_reader(
+                n_jobs, read_raw_rpx, files, prefer, verbose
+            )
         }[reader_type](files)
 
-        return RawReader(readers, reader_type)
+        return RawReader(reader_type, readers)
