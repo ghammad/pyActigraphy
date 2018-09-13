@@ -569,19 +569,19 @@ class MetricsMixin(object):
 class ForwardMetricsMixin(object):
     """ Mixin Class """
 
-    def Mask_fraction(self):
+    def mask_fraction(self):
 
         return {
             iread.display_name: iread.mask_fraction() for iread in self.readers
         }
 
-    def Start_time(self):
+    def start_time(self):
 
         return {
             iread.display_name: str(iread.start_time) for iread in self.readers
         }
 
-    def Duration(self):
+    def duration(self):
 
         return {
             iread.display_name: str(iread.duration()) for iread in self.readers
@@ -830,9 +830,9 @@ class ForwardMetricsMixin(object):
 
         # dict of dictionnaries
         ldic = {}
-        ldic['Start_time'] = self.Start_time()
-        ldic['Mask_fraction'] = self.Mask_fraction()
-        ldic['Duration'] = self.Duration()
+        ldic['Start_time'] = self.start_time()
+        ldic['Mask_fraction'] = self.mask_fraction()
+        ldic['Duration'] = self.duration()
         ldic['ADAT'] = self.ADAT()
         ldic['ADATp'] = self.ADATp()
         ldic['L5'] = self.L5()

@@ -1,5 +1,9 @@
 import glob
+import numpy as np
+import warnings
 
+from pandas import Timedelta
+from pandas.tseries.frequencies import to_offset
 from pyActigraphy.metrics import ForwardMetricsMixin
 from joblib import Parallel, delayed
 from ..awd import read_raw_awd
@@ -32,7 +36,7 @@ class RawReader(ForwardMetricsMixin):
     @property
     def readers(self):
         """The list of RawXXX readers."""
-        return self.__readers
+        return np.asarray(self.__readers)
 
     def append(self, raw_reader):
         if raw_reader.format != self.__reader_type:
@@ -45,11 +49,53 @@ class RawReader(ForwardMetricsMixin):
         else:
             self.__readers.append(raw_reader)
 
-    # def resampled_data(self, freq, binarize=False, threshold=0):
-    #     """The data resampled at the specified frequency.
-    #     If mask_inactivity is True, inactive data (0 count) are masked.
-    #     """
-    #     _parallel_reader(n_jobs, read_raw_awd, files)
+    def resampled_data(
+        self, freq,
+        binarize=False, threshold=0,
+        n_jobs=1, prefer=None, verbose=0
+    ):
+        """The data resampled at the specified frequency.
+        If mask_inactivity is True, inactive data (0 count) are masked.
+        """
+
+        # Check if resampling is possible
+
+        # 1. check if resampling freq is lower than th lowest acquistion freq.
+        freq = to_offset(freq).delta
+        freqs = [reader.frequency for reader in self.readers]
+        if freq <= min(freqs):
+            warnings.warn(
+                'Resampling frequency equal to or lower than the lowest' +
+                ' acquisition frequency found in the list of readers.' +
+                ' Returning original data.',
+                UserWarning
+            )
+            return self.readers
+
+        # 2. check if resampling freq is a multiple of the acquistion freq.
+        if False in [(freq % ifreq) == Timedelta(0) for ifreq in freqs]:
+            warnings.warn(
+                'Resampling frequency is *not* a multiple of the' +
+                ' acquisition frequencies found in the list of readers.' +
+                ' Returning original data.',
+                UserWarning
+            )
+            return self.readers
+
+        def parallel_resampling(rawReader, freq, binarize, threshold):
+            return (
+                rawReader.display_name,
+                rawReader.resampled_data(freq, binarize, threshold)
+            )
+
+        return dict(Parallel(n_jobs=n_jobs, prefer=prefer, verbose=verbose)(
+            delayed(parallel_resampling)(
+                rawReader=reader,
+                freq=freq,
+                binarize=binarize,
+                threshold=threshold
+            ) for reader in self.readers
+        ))
 
 
 def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
