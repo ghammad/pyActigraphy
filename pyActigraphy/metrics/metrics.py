@@ -569,28 +569,28 @@ class MetricsMixin(object):
 class ForwardMetricsMixin(object):
     """ Mixin Class """
 
-    def Mask_fraction(self):
+    def mask_fraction(self):
 
         return {
-            iread.name: iread.mask_fraction() for iread in self.readers
+            iread.display_name: iread.mask_fraction() for iread in self.readers
         }
 
-    def Start_time(self):
+    def start_time(self):
 
         return {
-            iread.name: str(iread.start_time) for iread in self.readers
+            iread.display_name: str(iread.start_time) for iread in self.readers
         }
 
-    def Duration(self):
+    def duration(self):
 
         return {
-            iread.name: str(iread.duration()) for iread in self.readers
+            iread.display_name: str(iread.duration()) for iread in self.readers
         }
 
     def ADAT(self, binarize=True, threshold=4):
 
         return {
-            iread.name: iread.ADAT(
+            iread.display_name: iread.ADAT(
                 binarize=binarize,
                 threshold=threshold
             ) for iread in self.readers
@@ -599,7 +599,7 @@ class ForwardMetricsMixin(object):
     def ADATp(self, period='7D', binarize=True, threshold=4, verbose=False):
 
         return {
-            iread.name: iread.ADATp(
+            iread.display_name: iread.ADATp(
                 period=period,
                 binarize=binarize,
                 threshold=threshold,
@@ -610,7 +610,7 @@ class ForwardMetricsMixin(object):
     def L5(self, binarize=True, threshold=4):
 
         return {
-            iread.name: iread.L5(
+            iread.display_name: iread.L5(
                 binarize=binarize,
                 threshold=threshold
             ) for iread in self.readers
@@ -619,7 +619,7 @@ class ForwardMetricsMixin(object):
     def M10(self, binarize=True, threshold=4):
 
         return {
-            iread.name: iread.M10(
+            iread.display_name: iread.M10(
                 binarize=binarize,
                 threshold=threshold
             ) for iread in self.readers
@@ -628,7 +628,7 @@ class ForwardMetricsMixin(object):
     def RA(self, binarize=True, threshold=4):
 
         return {
-            iread.name: iread.RA(
+            iread.display_name: iread.RA(
                 binarize=binarize,
                 threshold=threshold
             ) for iread in self.readers
@@ -637,7 +637,7 @@ class ForwardMetricsMixin(object):
     def L5p(self, period='7D', binarize=True, threshold=4, verbose=False):
 
         return {
-            iread.name: iread.L5p(
+            iread.display_name: iread.L5p(
                 period=period,
                 binarize=binarize,
                 threshold=threshold,
@@ -648,7 +648,7 @@ class ForwardMetricsMixin(object):
     def M10p(self, period='7D', binarize=True, threshold=4, verbose=False):
 
         return {
-            iread.name: iread.M10p(
+            iread.display_name: iread.M10p(
                 period=period,
                 binarize=binarize,
                 threshold=threshold,
@@ -659,7 +659,7 @@ class ForwardMetricsMixin(object):
     def RAp(self, period='7D', binarize=True, threshold=4, verbose=False):
 
         return {
-            iread.name: iread.RAp(
+            iread.display_name: iread.RAp(
                 period=period,
                 binarize=binarize,
                 threshold=threshold,
@@ -670,7 +670,7 @@ class ForwardMetricsMixin(object):
     def IS(self, freq='1H', binarize=True, threshold=4):
 
         return {
-            iread.name: iread.IS(
+            iread.display_name: iread.IS(
                 freq=freq,
                 binarize=binarize,
                 threshold=threshold
@@ -689,7 +689,7 @@ class ForwardMetricsMixin(object):
     ):
 
         return {
-            iread.name: iread.ISm(
+            iread.display_name: iread.ISm(
                 freqs=freqs,
                 binarize=binarize,
                 threshold=threshold
@@ -700,7 +700,7 @@ class ForwardMetricsMixin(object):
             binarize=True, threshold=4, verbose=False):
 
         return {
-            iread.name: iread.ISp(
+            iread.display_name: iread.ISp(
                 period=period,
                 freq=freq,
                 binarize=binarize,
@@ -712,7 +712,7 @@ class ForwardMetricsMixin(object):
     def IV(self, freq='1H', binarize=True, threshold=4):
 
         return {
-            iread.name: iread.IV(
+            iread.display_name: iread.IV(
                 freq=freq,
                 binarize=binarize,
                 threshold=threshold
@@ -731,7 +731,7 @@ class ForwardMetricsMixin(object):
     ):
 
         return {
-            iread.name: iread.IVm(
+            iread.display_name: iread.IVm(
                 freqs=freqs,
                 binarize=binarize,
                 threshold=threshold
@@ -742,7 +742,7 @@ class ForwardMetricsMixin(object):
             binarize=True, threshold=4, verbose=False):
 
         return {
-            iread.name: iread.IVp(
+            iread.display_name: iread.IVp(
                 period=period,
                 freq=freq,
                 binarize=binarize,
@@ -754,7 +754,7 @@ class ForwardMetricsMixin(object):
     def kRA(self, threshold=4, start=None, period=None, frac=.3, it=0):
 
         return {
-            iread.name: iread.kRA(
+            iread.display_name: iread.kRA(
                 threshold=threshold,
                 start=start,
                 period=period,
@@ -766,7 +766,7 @@ class ForwardMetricsMixin(object):
     def kAR(self, threshold=4, start=None, period=None, frac=.3, it=0):
 
         return {
-            iread.name: iread.kAR(
+            iread.display_name: iread.kAR(
                 threshold=threshold,
                 start=start,
                 period=period,
@@ -778,7 +778,7 @@ class ForwardMetricsMixin(object):
     def AonT(self, freq='5min', whs=12, binarize=True, threshold=4):
 
         return {
-            iread.name: iread.AonT(
+            iread.display_name: iread.AonT(
                 freq=freq,
                 whs=whs,
                 binarize=binarize,
@@ -789,7 +789,7 @@ class ForwardMetricsMixin(object):
     def AoffT(self, freq='5min', whs=12, binarize=True, threshold=4):
 
         return {
-            iread.name: iread.AoffT(
+            iread.display_name: iread.AoffT(
                 freq=freq,
                 whs=whs,
                 binarize=binarize,
@@ -807,7 +807,7 @@ class ForwardMetricsMixin(object):
     ):
 
         return {
-            iread.name: iread.fSoD(
+            iread.display_name: iread.fSoD(
                 freq=freq,
                 whs=whs,
                 period=period,
@@ -818,7 +818,8 @@ class ForwardMetricsMixin(object):
     def daily_light_average(self):
 
         return {
-            iread.name: iread.daily_light_average() for iread in self.readers
+            iread.display_name:
+            iread.daily_light_average() for iread in self.readers
         }
 
     def Summary(self, mask_inactivity=True):
@@ -829,9 +830,9 @@ class ForwardMetricsMixin(object):
 
         # dict of dictionnaries
         ldic = {}
-        ldic['Start_time'] = self.Start_time()
-        ldic['Mask_fraction'] = self.Mask_fraction()
-        ldic['Duration'] = self.Duration()
+        ldic['Start_time'] = self.start_time()
+        ldic['Mask_fraction'] = self.mask_fraction()
+        ldic['Duration'] = self.duration()
         ldic['ADAT'] = self.ADAT()
         ldic['ADATp'] = self.ADATp()
         ldic['L5'] = self.L5()
