@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 # from ..io.base import BaseRaw
+from joblib import Parallel, delayed
 
 
 class FLM():
@@ -75,6 +76,54 @@ class FLM():
         self.__beta = results.params
         y_est = np.dot(X, self.beta)
         return y_est
+
+    def fit_reader(
+        self, reader,
+        verbose_fit=False,
+        n_jobs=1, prefer=None, verbose_parallel=0
+    ):
+        """Fit the actigraphy data contained in a reader using a basis function
+        expansion.
+
+        Parameters
+        ----------
+        reader : instance of RawReader
+            Raw measurements to be fitted.
+        verbose_fit : bool.
+            If True, print the fit summary.
+            Default is False.
+        n_jobs: int
+            Number of CPU to use for parallel fitting
+        prefer: str
+            Soft hint to choose the default backendself.
+            Supported option:'processes', 'threads'.
+            See joblib package documentation for more info.
+            Default is None.
+        verbose_parallel: int
+            Display a progress meter if set to a value > 0.
+            Default is 0.
+
+        Returns
+        -------
+        y_est : ndarray
+            Returns an array with functional forms of the actigraphy data.
+        """
+        # avoid Parallel overhead if n_job == 1
+        if(n_jobs == 1):
+            return dict([
+                (raw.display_name, self.fit(raw, verbose_fit))
+                for raw in reader.readers
+            ])
+        else:
+            def parallel_fitting(raw, verbose_fit):
+                return (raw.display_name, self.fit(raw, verbose_fit))
+            return dict(Parallel(
+                n_jobs=n_jobs, prefer=prefer, verbose=verbose_parallel
+            )(
+                delayed(parallel_fitting)(
+                    raw=raw, verbose_fit=verbose_fit
+                ) for raw in reader.readers
+            ))
 
     @property
     def sampling_freq(self):
