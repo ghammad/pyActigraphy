@@ -128,6 +128,30 @@ class FLM():
                 ) for raw in reader.readers
             ))
 
+    def smooth(self, raw, fwhm):
+        """Smooth the actigraphy data using a gaussian kernel.
+
+        Parameters
+        ----------
+        raw : instance of BaseRaw or its child classes
+            Raw measurements to be smoothed.
+        fwhm : float.
+            Full-width at half-maximum of the gaussian kernel.
+
+        Returns
+        -------
+        y_est : ndarray
+            Returns the smoothed form of the actigraphy data.
+        """
+
+        return spm1d.util.smooth(
+            raw.average_daily_activity(
+                binarize=False,
+                freq=self.sampling_freq
+            ),
+            fwhm=fwhm
+        )
+
     @property
     def sampling_freq(self):
         """The sampling frequency of the basis functions."""
