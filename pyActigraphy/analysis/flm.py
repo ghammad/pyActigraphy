@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import spm1d
 import statsmodels.api as sm
 # from ..io.base import BaseRaw
 from joblib import Parallel, delayed
@@ -8,9 +9,9 @@ from joblib import Parallel, delayed
 class FLM():
     """ Class for Functional Linear Modelling"""
 
-    def __init__(self, basis, sampling_freq, max_order):
+    def __init__(self, basis, sampling_freq, max_order=None):
 
-        bases = ('fourier', 'ssa', 'wavelet')
+        bases = ('fourier', 'spline', 'ssa', 'wavelet')
         if basis not in bases:
             raise ValueError(
                 '`basis` must be "%s". You passed: "%s"' %
@@ -55,6 +56,8 @@ class FLM():
         y_est : ndarray
             Returns the functional form of the actigraphy data.
         """
+
+        # Fourier
         if self.basis_functions is None:
             print("Create first the basis functions: {}".format(self.__basis))
             self.__create_basis_functions()

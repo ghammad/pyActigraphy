@@ -274,7 +274,7 @@ class MetricsMixin(object):
     """ Mixin Class """
 
     def average_daily_activity(
-        self, freq='1H', cyclic=False, binarize=True, threshold=4
+        self, freq=None, cyclic=False, binarize=True, threshold=4
     ):
 
         data = self.resampled_data(freq, binarize, threshold)
@@ -283,7 +283,7 @@ class MetricsMixin(object):
 
         return avgdaily
 
-    def average_daily_light(self, freq='1H', cyclic=False):
+    def average_daily_light(self, freq=None, cyclic=False):
         """Average daily light (in lux)"""
 
         light = self.resampled_light(freq)
