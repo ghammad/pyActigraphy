@@ -17,6 +17,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
         format,
         axial_mode,
         start_time,
+        period,
         frequency,
         data,
         light
@@ -28,6 +29,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
         self.__format = format
         self.__axial_mode = axial_mode
         self.__start_time = start_time
+        self.__period = period
         self.__frequency = frequency
         self.__data = data
 
@@ -71,8 +73,23 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     @property
     def start_time(self):
-        """The start time of data acquistion as extracted from the raw file."""
+        """The start time of data acquistion as extracted from the raw file or
+        specified by the user."""
         return self.__start_time
+
+    @start_time.setter
+    def start_time(self, value):
+        self.__start_time = value
+
+    @property
+    def period(self):
+        """The period of data acquistion as extracted from the raw file or
+        specified by the user."""
+        return self.__period
+
+    @period.setter
+    def period(self, value):
+        self.__period = value
 
     @property
     def frequency(self):
@@ -95,7 +112,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
             data = self.raw_data.where(self.mask > 0)
         else:
             data = self.raw_data
-        return data
+        return data[self.start_time:self.start_time+self.period]
 
     @property
     def raw_light(self):
@@ -110,9 +127,10 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
         to filter out inactive data.
         """
         if self.mask_inactivity is True:
-            return self.raw_light.where(self.mask > 0)
+            light = self.raw_light.where(self.mask > 0)
         else:
-            return self.raw_light
+            light = self.raw_light
+        return light[self.start_time:self.start_time+self.period]
 
     @property
     def mask_inactivity(self):

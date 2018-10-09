@@ -82,14 +82,21 @@ class RawMTN(BaseRaw):
         else:
             index_light = None
 
-        if start_time is not None and period is not None:
+        if start_time is not None:
             start_time = pd.to_datetime(start_time)
-            period = pd.Timedelta(period)
-            index_data = index_data[start_time:start_time+period]
-            if index_light is not None:
-                index_light[start_time:start_time+period]
         else:
             start_time = start
+
+        if period is not None:
+            period = pd.Timedelta(period)
+            stop_time = start_time+period
+        else:
+            period = stop_time - start_time
+            stop_time = index_data.index[-1]
+
+        index_data = index_data[start_time:stop_time]
+        if index_light is not None:
+            index_light[start_time:stop_time]
 
         # call __init__ function of the base class
         super().__init__(
@@ -98,6 +105,7 @@ class RawMTN(BaseRaw):
             format='MTN',
             axial_mode=axial_mode,
             start_time=start_time,
+            period=period,
             frequency=pd.Timedelta(frequency),
             data=index_data,
             light=index_light
