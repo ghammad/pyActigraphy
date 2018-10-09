@@ -82,7 +82,7 @@ class RawRPX(BaseRaw):
         for line in header:
             if 'Identité' in line:
                 name = re.sub(
-                    '[^\w\s]', '', line.split(delimiter)[1]
+                    r'[^\w\s]', '', line.split(delimiter)[1]
                 ).strip()
                 break
         return name
@@ -90,7 +90,7 @@ class RawRPX(BaseRaw):
     def __extract_rpx_uuid(self, header, delimiter):
         for line in header:
             if 'Numéro de série de l\'Actiwatch' in line:
-                uuid = re.sub('[\W_]+', '', line.split(delimiter)[1])
+                uuid = re.sub(r'[\W_]+', '', line.split(delimiter)[1])
                 break
         return uuid
 
@@ -99,11 +99,11 @@ class RawRPX(BaseRaw):
         for line in header:
             if 'Date de début de la collecte des données' in line:
                 start_time.append(
-                    re.sub('[^\d./]+', '', line.split(delimiter)[1])
+                    re.sub(r'[^\d./]+', '', line.split(delimiter)[1])
                 )
             elif 'Heure de début de la collecte des données' in line:
                 start_time.append(
-                    re.sub('[^\d.:]+', '', line.split(delimiter)[1])
+                    re.sub(r'[^\d.:]+', '', line.split(delimiter)[1])
                 )
         return pd.to_datetime(' '.join(start_time), dayfirst=True)
 
@@ -111,7 +111,7 @@ class RawRPX(BaseRaw):
         for line in header:
             if 'Longueur de la période' in line:
                 frequency = pd.Timedelta(
-                    re.sub('([^\s\w])+', '', line.split(delimiter)[3])
+                    re.sub(r'([^\s\w])+', '', line.split(delimiter)[3])
                     .replace('\xa0', ' ').strip()
                 )
                 break

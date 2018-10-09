@@ -91,7 +91,7 @@ class RawAWD(BaseRaw):
         )
 
     def __extract_awd_name(self, header):
-        return re.sub('[^\w\s:]\r\n', '', header[0])
+        return re.sub(r'[^\w\s:]\r\n', '', header[0])
 
     def __extract_awd_uuid(self, header):
         return header[5]
