@@ -265,5 +265,5 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     @property
     def sleep_diary(self):
-        """ The SleepDiary class instaciation."""
+        """ The SleepDiary class instanciation."""
         return self.__sleep_diary
