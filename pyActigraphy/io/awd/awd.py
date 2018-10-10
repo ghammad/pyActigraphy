@@ -80,8 +80,8 @@ class RawAWD(BaseRaw):
             period = pd.Timedelta(period)
             stop_time = start_time+period
         else:
-            period = stop_time - start_time
             stop_time = index_data.index[-1]
+            period = stop_time - start_time
 
         index_data = index_data[start_time:stop_time]
 
