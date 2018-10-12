@@ -108,6 +108,9 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
         If mask_inactivity is set to true, the `mask` is used
         to filter out inactive data.
         """
+        if self.__data is None:
+            return self.__data
+
         if self.mask_inactivity is True:
             data = self.raw_data.where(self.mask > 0)
         else:
@@ -126,6 +129,9 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
         If mask_inactivity is set to true, the `mask` is used
         to filter out inactive data.
         """
+        if self.__light is None:
+            return self.__light
+
         if self.mask_inactivity is True:
             light = self.raw_light.where(self.mask > 0)
         else:
