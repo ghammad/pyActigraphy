@@ -16,12 +16,6 @@ def _silverman_factor(n, d):
 
 def _get_kernel_size(data, method, use_fwhm):
 
-    methods = ('scotts', 'silverman')
-    if method not in methods:
-        raise ValueError(
-            '`method` must be "%s". You passed: "%s"' %
-            ('" or "'.join(methods), method)
-        )
     # In order to mimic scipy.kde, the kernel covariance matrix is weighted
     # by the input data covariance matrix (N.B. in 1d, this simplifies...)
     data_std = data.std(ddof=1)
@@ -32,10 +26,28 @@ def _get_kernel_size(data, method, use_fwhm):
     if use_fwhm:
         data_std *= sd2fwhm
 
-    if method == 'scotts':
-        kernel_size = _scotts_factor(data.size, 1)*data_std
-    elif method == 'silverman':
-        kernel_size = _silverman_factor(data.size, 1)*data_std
+    methods = ('scotts', 'silverman')
+    if isinstance(method, str):
+        if method not in methods:
+            raise ValueError(
+                '`method` must be "{}". You passed: "{}’"'.format(
+                    '" or "'.join(methods),
+                    method
+                )
+            )
+        elif method == 'scotts':
+            kernel_size = _scotts_factor(data.size, 1)*data_std
+        elif method == 'silverman':
+            kernel_size = _silverman_factor(data.size, 1)*data_std
+    elif np.isscalar(method):
+        kernel_size = method
+    else:
+        raise ValueError(
+            '`method` must be "{}". You passed: "{}’"'.format(
+                '" or "'.join(methods+['a scalar.']),
+                method
+            )
+        )
 
     return kernel_size
 
@@ -57,7 +69,7 @@ class FLM():
         self.__nsamples = None
         self.__max_order = max_order
         self.__basis_functions = None
-        self.__beta = None
+        self.__beta = {}
 
     def __create_basis_functions(self, T):
 
@@ -111,7 +123,7 @@ class FLM():
             if verbose:
                 print(results.summary())
 
-            self.__beta = results.params
+            self.__beta[raw.display_name] = results.params
 
         # Spline
         elif self.__basis == 'spline':
@@ -126,13 +138,17 @@ class FLM():
                 print('Finding the {}-degree B-spline representation of'
                       'the input data'.format(k))
 
-            self.__beta = list(splrep(t, daily_avg.values, k=k))
+            self.__beta[raw.display_name] = list(
+                splrep(t, daily_avg.values, k=k)
+            )
 
-    def evaluate(self, r=10):
+    def evaluate(self, raw, r=10):
         """Evaluate the basis function expansion.
 
         Parameters
         ----------
+        raw : instance of BaseRaw or its child classes
+            Raw measurements used to create the basis functions.
         r : int
             Ratio between the number of points at which the basis functions are
             evaluated and the number of points at which the basis functions
@@ -146,7 +162,7 @@ class FLM():
             Returns the functional form of the actigraphy data.
         """
 
-        if self.beta is None:
+        if not self.beta:
             raise ValueError(
                 'The basis function expansion parameters are empty.\n'
                 'Please run the `self.fit` method first.'
@@ -155,7 +171,7 @@ class FLM():
         # Fourier
         if self.__basis == 'fourier':
             X = np.stack(self.basis_functions, axis=1)
-            y_est = np.dot(X, self.beta)
+            y_est = np.dot(X, self.beta[raw.display_name])
             return y_est
 
         # Spline
@@ -163,7 +179,7 @@ class FLM():
             from scipy.interpolate import splev
             T = self.nsamples
             t = np.linspace(0, T, r*T, endpoint=False, dtype=np.float)
-            y_est = splev(t, tuple(self.beta))
+            y_est = splev(t, tuple(self.beta[raw.display_name]))
             return y_est
 
     def fit_reader(
