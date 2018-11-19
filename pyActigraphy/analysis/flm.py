@@ -14,6 +14,32 @@ def _silverman_factor(n, d):
     return np.power(n*(d+2.0)/4.0, -1./(d+4))
 
 
+def _get_kernel_size(data, method, use_fwhm):
+
+    methods = ('scotts', 'silverman')
+    if method not in methods:
+        raise ValueError(
+            '`method` must be "%s". You passed: "%s"' %
+            ('" or "'.join(methods), method)
+        )
+    # In order to mimic scipy.kde, the kernel covariance matrix is weighted
+    # by the input data covariance matrix (N.B. in 1d, this simplifies...)
+    data_std = data.std(ddof=1)
+
+    # If Scotts' or Silverman's method is used, apply a factor
+    # sqrt(8*log(2)) to convert sd to fwhm, if required
+    sd2fwhm = np.sqrt(8*np.log(2))
+    if use_fwhm:
+        data_std *= sd2fwhm
+
+    if method == 'scotts':
+        kernel_size = _scotts_factor(data.size, 1)*data_std
+    elif method == 'silverman':
+        kernel_size = _silverman_factor(data.size, 1)*data_std
+
+    return kernel_size
+
+
 class FLM():
     """ Class for Functional Linear Modelling"""
 
@@ -234,7 +260,7 @@ class FLM():
                 ) for raw in reader.readers
             ))
 
-    def smooth(self, raw, binarize=False, method='scotts'):
+    def smooth(self, raw, binarize=False, method='scotts', verbose=False):
         """Smooth the actigraphy data using a gaussian kernel.
 
         Parameters
@@ -244,11 +270,14 @@ class FLM():
         binarize: bool.
             If True, the data are binarized (i.e 0 or 1).
             Default is False.
-        method : str, float.
+        method: str, float.
             Method to calculate the full-width at half-maximum of the gaussian
             kernel. Available methods are `scotts`, `silverman`. Method can be
             a scalar value too.
             Default is `scotts`.
+        verbose: bool.
+            If True, print the kernel size used to smooth the data.
+            Default is False.
 
         Returns
         -------
@@ -261,19 +290,11 @@ class FLM():
             freq=self.sampling_freq
         )
 
-        # In order to mimic scipy.kde, the kernel covariance matrix is weighted
-        # by the input data covariance matrix (N.B. in 1d, this simplifies...)
-        sd2fwhm = np.sqrt(8*np.log(2))
-        data_std = daily_avg.values.std(ddof=1)
+        # Calculate optimal kernel size
+        fwhm = _get_kernel_size(daily_avg.values, method=method, use_fwhm=True)
 
-        # If Scotts' or Silverman's method is used, apply a factor
-        # sqrt(8*log(2)) to convert sd to fwhm.
-        if method == 'scotts':
-            fwhm = _scotts_factor(daily_avg.index.size, 1)*sd2fwhm*data_std
-        elif method == 'silverman':
-            fwhm = _silverman_factor(daily_avg.index.size, 1)*sd2fwhm*data_std
-        elif np.isscalar(method) and not isinstance(method, str):
-            fwhm = method
+        if verbose:
+            print('Kernel size used to smooth the data: {}'.format(fwhm))
 
         return spm1d.util.smooth(
             daily_avg,
