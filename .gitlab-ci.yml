@@ -18,21 +18,29 @@ cache:
     - .cache/pip
     - venv/
 
+stages:
+  - build
+  - test
+  - deploy
+
 before_script:
   - python -V               # Print out python version for debugging
   - pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
 
-test:
-  script:
-  - python setup.py test
-
 run:
+  stage: build
   script:
   - pip install -e .
 
+test:
+  stage: test
+  script:
+  - python setup.py test
+
 pages:
+  stage: deploy
   script:
   - pip install sphinx sphinx-bootstrap-theme
   - cd docs ; make html
