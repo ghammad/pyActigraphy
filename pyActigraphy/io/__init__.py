@@ -7,11 +7,14 @@
 # from . import awd
 # from . import rpx
 
-# from .base import BaseRaw
-from .reader import read_raw
+from .base import BaseRaw
 
+from .reader import read_raw
 from .awd import read_raw_awd
 from .mtn import read_raw_mtn
 from .rpx import read_raw_rpx
 
-__all__ = ["read_raw", "read_raw_awd", "read_raw_mtn", "read_raw_rpx"]
+__all__ = [
+    "BaseRaw",
+    "read_raw", "read_raw_awd", "read_raw_mtn", "read_raw_rpx"
+]

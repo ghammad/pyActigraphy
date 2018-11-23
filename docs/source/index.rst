@@ -70,14 +70,14 @@ There are plenty of ways to contribute to this package, including (but not limit
 * improve the documentation
 * hug or high-five the authors when you meet them!
 
-Content
-=======
-
-.. toctree::
-   :maxdepth: 1
-
-   api
-   quickstart
+.. Content
+.. =======
+..
+.. .. toctree::
+..    :maxdepth: 1
+..
+..    api
+..    quickstart
 
 Authors
 =======

@@ -52,6 +52,24 @@ class RawReader(ForwardMetricsMixin):
         else:
             self.__readers.append(raw_reader)
 
+    def mask_fraction(self):
+
+        return {
+            read.display_name: read.mask_fraction() for read in self.__readers
+        }
+
+    def start_time(self):
+
+        return {
+            iread.display_name: iread.start_time for iread in self.__readers
+        }
+
+    def duration(self):
+
+        return {
+            iread.display_name: iread.duration() for iread in self.__readers
+        }
+
     def resampled_data(
         self, freq,
         binarize=False, threshold=0,

@@ -1,8 +1,20 @@
+:orphan:
+
+.. _api_reference:
+
+=============
 API Reference
-*************
+=============
 
 .. contents:: Table of Contents
-   :depth: 2
+    :local:
+    :depth: 2
+
+:mod:`pyActigraphy`:
+
+.. automodule:: pyActigraphy
+   :no-members:
+   :no-inherited-members:
 
 I/O
 ===
@@ -11,65 +23,109 @@ Uniform API to read multiple actigraphy data formats.
 Currently, the supported formats are:
 
 * ActiWatch (CamNtech): .awd
-* Respironics (Philips): .rpx
 * MotionWatch8 (CamNtech): .mtn
+* Respironics (Philips): .rpx
 
-Generator functions
------------------------
+Reading raw data
+----------------
+:mod:`pyActigraphy.io`:
+
 .. currentmodule:: pyActigraphy.io
+
+.. automodule:: pyActigraphy.io
+   :no-members:
+   :no-inherited-members:
+
 .. autosummary::
-    :toctree: _autosummary
+  :toctree: _autosummary/
+  :template: function.rst
 
     read_raw
     read_raw_awd
     read_raw_mtn
     read_raw_rpx
 
-AWD
----
-.. currentmodule:: pyActigraphy.io.awd.awd
+
+Reader classes
+--------------
+.. currentmodule:: pyActigraphy.io
 .. autosummary::
-    :toctree: _autosummary
+  :toctree: _autosummary/
+  :template: class.rst
 
-    RawAWD
+    base.BaseRaw
+    awd.awd.RawAWD
+    mtn.mtn.RawMTN
+    rpx.rpx.RawRPX
+    reader.reader.RawReader
 
-MTN
----
-.. currentmodule:: pyActigraphy.io.mtn.mtn
-.. autosummary::
-    :toctree: _autosummary
-
-    RawMTN
-
-RPX
----
-.. currentmodule:: pyActigraphy.io.rpx.rpx
-.. autosummary::
-    :toctree: _autosummary
-
-    RawRPX
 
 Metrics
 =======
 
-API to calculate various wake/sleep cycle-related variables.
+API to calculate various activity/rest cycle-related variables.
+
+:mod:`pyActigraphy.metrics`:
+
+.. currentmodule:: pyActigraphy.metrics
+
+.. automodule:: pyActigraphy.metrics
+   :no-members:
+   :no-inherited-members:
+
+.. autosummary::
+   :toctree: _autosummary/
+   :template: class.rst
+
+   metrics.MetricsMixin
+   metrics.ForwardMetricsMixin
+
+
+Distributions
+-------------
+.. autosummary::
+   :toctree: _autosummary
+   :template: function.rst
+
+   metrics.MetricsMixin.average_daily_activity
+   metrics.MetricsMixin.average_daily_light
+
+
+Activity variables
+------------------
+.. autosummary::
+    :toctree: _autosummary
+    :template: function.rst
+
+    metrics.MetricsMixin.ADAT
+    metrics.MetricsMixin.ADATp
 
 Non-parametric variables
 ------------------------
-.. currentmodule:: pyActigraphy.metrics.metrics.MetricsMixin
 .. autosummary::
-    .. :template: module.rst
     :toctree: _autosummary
+    :template: function.rst
 
-    IS
-    ISm
-    ISp
-    IV
-    IVm
-    IVp
-    L5
-    L5p
-    M10
-    M10p
-    RA
-    RAp
+    metrics.MetricsMixin.IS
+    metrics.MetricsMixin.ISm
+    metrics.MetricsMixin.ISp
+    metrics.MetricsMixin.IV
+    metrics.MetricsMixin.IVm
+    metrics.MetricsMixin.IVp
+    metrics.MetricsMixin.L5
+    metrics.MetricsMixin.L5p
+    metrics.MetricsMixin.M10
+    metrics.MetricsMixin.M10p
+    metrics.MetricsMixin.RA
+    metrics.MetricsMixin.RAp
+
+Transition probability variables
+--------------------------------
+.. autosummary::
+    :toctree: _autosummary
+    :template: function.rst
+
+    metrics.MetricsMixin.pAR
+    metrics.MetricsMixin.pRA
+    metrics.MetricsMixin.kAR
+    metrics.MetricsMixin.kRA

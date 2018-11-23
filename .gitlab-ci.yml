@@ -37,7 +37,8 @@ run:
 test:
   stage: test
   script:
-  - python setup.py test
+  - python -m pytest -vv --disable-pytest-warnings pyActigraphy/tests/
+  # - python setup.py test
 
 pages:
   stage: deploy

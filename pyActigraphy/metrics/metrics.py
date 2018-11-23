@@ -423,6 +423,43 @@ class MetricsMixin(object):
 
     # @lru_cache(maxsize=6)
     def IS(self, freq='1H', binarize=True, threshold=4):
+        """Interdaily stability
+
+        Source:\n
+        Eus J. W. Van Someren, Dick F. Swaab, Christopher C. Colenda, Wayne
+        Cohen, W. Vaughn McCall & Peter B. Rosenquist (1999)\n
+        `Bright Light Therapy: Improved Sensitivity to Its Effects on
+        Rest-Activity Rhythms in Alzheimer Patients by Application of
+        Nonparametric Methods`,\nChronobiology International, 16:4, 505-518,
+        DOI: 10.3109/07420529908998724
+
+        ## Definition of the Interdaily stability (IS):
+
+        \\begin{equation*}
+        IS = \\frac{d^{24h}}{d^{1h}}
+        \\end{equation*}
+
+        with:
+
+        \\begin{equation*}
+        d^{1h}=\\sum_{i}^{n}\\frac{\\left( x_{i}-\\bar{x}\\right)^{2}}{n}
+        \\end{equation*}
+
+        where $x_{i}$ is the number of active (counts higher than a predefined
+        threshold) minutes during the $i^{th}$ period, $\\bar{x}$ is the mean
+        of all data and $n$ is the number of periods covered by the actigraphy
+        data and with:
+
+        \\begin{equation*}
+        d^{24h}=\\sum_{i}^{p}\\frac{\\left(\\bar{x}_{h,i}-\\bar{x}\\right)^{2}}{p}
+        \\end{equation*}
+
+        where $\\bar{x}^{h,i}$ is the average number of active minutes over
+        the $i^{th}$ period and p is the number of periods per day.
+        The average runs over all the days.
+
+
+        """
 
         data = self.resampled_data(
             freq=freq,
@@ -569,23 +606,26 @@ class MetricsMixin(object):
 class ForwardMetricsMixin(object):
     """ Mixin Class """
 
-    def mask_fraction(self):
-
-        return {
-            iread.display_name: iread.mask_fraction() for iread in self.readers
-        }
-
-    def start_time(self):
-
-        return {
-            iread.display_name: str(iread.start_time) for iread in self.readers
-        }
-
-    def duration(self):
-
-        return {
-            iread.display_name: str(iread.duration()) for iread in self.readers
-        }
+    # def mask_fraction(self):
+    #
+    #     return {
+    #         iread.display_name:
+    # iread.mask_fraction() for iread in self.readers
+    #     }
+    #
+    # def start_time(self):
+    #
+    #     return {
+    #         iread.display_name:
+    # str(iread.start_time) for iread in self.readers
+    #     }
+    #
+    # def duration(self):
+    #
+    #     return {
+    #         iread.display_name:
+    # str(iread.duration()) for iread in self.readers
+    #     }
 
     def ADAT(self, binarize=True, threshold=4):
 
