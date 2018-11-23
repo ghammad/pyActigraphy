@@ -37,6 +37,7 @@ run:
 test:
   stage: test
   script:
+  - pip install pytest
   - python -m pytest -vv --disable-pytest-warnings pyActigraphy/tests/
   # - python setup.py test
 
