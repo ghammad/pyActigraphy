@@ -87,6 +87,7 @@ Distributions
    :toctree: _autosummary
    :template: function.rst
 
+   metrics._average_daily_activity
    metrics.MetricsMixin.average_daily_activity
    metrics.MetricsMixin.average_daily_light
 
