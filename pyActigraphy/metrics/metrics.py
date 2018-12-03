@@ -5,6 +5,20 @@ import numpy as np
 from statistics import mean
 import statsmodels.api as sm
 
+__all__ = [
+    'MetricsMixin',
+    'ForwardMetricsMixin',
+    '_average_daily_activity',
+    '_average_daily_total_activity',
+    '_interdaily_stability',
+    '_intradaily_variability',
+    '_lmx', '_interval_maker',
+    '_count_consecutive_values',
+    '_count_consecutive_zeros',
+    '_transition_prob',
+    '_transition_prob_sustain_region',
+    '_td_format']
+
 
 def _average_daily_activity(data, cyclic=False):
     """Calculate the average daily activity distribution"""
@@ -42,42 +56,7 @@ def _average_daily_total_activity(data):
 
 
 def _interdaily_stability(data):
-    """Calculate the interdaily stability as defined in
-    [Eus J. W. Van Someren, Dick F. Swaab, Christopher C. Colenda, Wayne Cohen,
-    W. Vaughn McCall & Peter B. Rosenquist (1999) Bright Light Therapy:
-    Improved Sensitivity to Its Effects on Rest-Activity Rhythms in Alzheimer
-    Patients by Application of Nonparametric Methods,
-    Chronobiology International, 16:4, 505-518, DOI: 10.3109/07420529908998724]
-
-    ## Definition of the Interdaily stability (IS):
-
-    \begin{equation*}
-    IS = \frac{d^{24h}}{d^{1h}}
-    \end{equation*}
-
-    with:
-
-    \begin{equation*}
-    d^{1h}=\sum_{i}^{n}\frac{\left( x_{i}-\bar{x}\right)^{2}}{n}
-    \end{equation*}
-
-    where $x_{i}$ is the number of active (counts higher than a predefined
-    threshold) minutes during the $i^{th}$ period, $\bar{x}$ is the mean of all
-    data and $n$ is the number of periods covered by the actigraphy data,
-
-    and with:
-
-    \begin{equation*}
-    d^{24h}=\sum_{i}^{p}\frac{\left( \bar{x}_{h,i}-\bar{x}\right)^{2}}{p}
-    \end{equation*}
-
-    where $\bar{x}^{h,i}$ is the average number of active minutes over
-    the $i^{th}$ period and p is the number of periods per day.
-    The average runs over all the days.
-
-
-    """
-    # resampled_data = data.resample(freq).sum()
+    r"""Calculate the interdaily stability"""
 
     d_24h = data.groupby([
         data.index.hour,
@@ -91,36 +70,8 @@ def _interdaily_stability(data):
 
 
 def _intradaily_variability(data):
-    """Calculate the intradaily variability as defined in
-    [Eus J. W. Van Someren, Dick F. Swaab, Christopher C. Colenda, Wayne Cohen,
-    W. Vaughn McCall & Peter B. Rosenquist (1999) Bright Light Therapy:
-    Improved Sensitivity to Its Effects on Rest-Activity Rhythms in Alzheimer
-    Patients by Application of Nonparametric Methods,
-    Chronobiology International, 16:4, 505-518, DOI: 10.3109/07420529908998724]
+    r"""Calculate the intradaily variability"""
 
-    ## Definition of the Intradaily variability (IV):
-
-    \begin{equation*}
-    IV = \frac{c^{1h}}{d^{1h}}
-    \end{equation*}
-
-    with:
-
-    \begin{equation*}
-    d^{1h}=\sum_{i}^{n}\frac{\left( x_{i}-\bar{x}\right)^{2}}{n}
-    \end{equation*}
-
-    where $x_{i}$ is the number of active (counts higher than a predefined
-    threshold) minutes during the $i^{th}$ period, $\bar{x}$ is the mean of all
-    data and $n$ is the number of periods covered by the actigraphy data,
-
-    and with:
-
-    \begin{equation*}
-    c^{1h}=\sum_{i}^{n-1}\frac{\left( x_{i+1}-x_{i}\right)^{2}}{n-1}
-    \end{equation*}.
-
-    """
     c_1h = data.diff(1).pow(2).mean()
 
     d_1h = data.var()
@@ -276,7 +227,34 @@ class MetricsMixin(object):
     def average_daily_activity(
         self, freq='1H', cyclic=False, binarize=True, threshold=4
     ):
+        r"""Average daily activity distribution
 
+        Calculate the daily profile of activity. Data are averaged over all the
+        days.
+
+        Parameters
+        ----------
+        freq: str, optional
+            Data resampling frequency.
+            Cf. #timeseries-offset-aliases in
+            <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+            Default is '1H'.
+        cyclic: bool, optional
+            If set to True, two daily profiles are concatenated to ensure
+            continuity between the last point of the day and the first one.
+            Default is False.
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+
+        Returns
+        -------
+        raw : pandas.Series
+            A Series containing the daily activity profile with a 24h index.
+        """
         data = self.resampled_data(freq, binarize, threshold)
 
         avgdaily = _average_daily_activity(data, cyclic=cyclic)
@@ -284,7 +262,29 @@ class MetricsMixin(object):
         return avgdaily
 
     def average_daily_light(self, freq='1H', cyclic=False):
-        """Average daily light (in lux)"""
+        r"""Average daily light distribution
+
+        Calculate the daily profile of light exposure (in lux). Data are
+        averaged over all the days.
+
+        Parameters
+        ----------
+        freq: str, optional
+            Data resampling frequency.
+            Cf. #timeseries-offset-aliases in
+            <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+            Default is '1H'.
+        cyclic: bool, optional
+            If set to True, two daily profiles are concatenated to ensure
+            continuity between the last point of the day and the first one.
+            Default is False.
+
+        Returns
+        -------
+        raw : pandas.Series
+            A Series containing the daily profile of light exposure with a 24h
+            index.
+        """
 
         light = self.resampled_light(freq)
 
@@ -293,6 +293,23 @@ class MetricsMixin(object):
         return avgdaily_light
 
     def ADAT(self, binarize=True, threshold=4):
+        """Total average daily activity
+
+        Calculate the total activity counts, averaged over all the days.
+
+        Parameters
+        ----------
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+
+        Returns
+        -------
+        adat : int
+        """
 
         if binarize is True:
             data = self.binarized_data(threshold)
@@ -304,6 +321,30 @@ class MetricsMixin(object):
         return adat
 
     def ADATp(self, period='7D', binarize=True, threshold=4, verbose=False):
+        """Total average daily activity per period
+
+        Calculate the total activity counts, averaged over each consecutive
+        period contained in the data. The number of periods
+
+        Parameters
+        ----------
+        period: str, optional
+            Time length of the period to be considered. Must be understandable
+            by pandas.Timedelta
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+        verbose: bool, optional
+            If set to True, display the number of periods found in the data.
+            Also display the time not accounted for.
+
+        Returns
+        -------
+        adatp : list of int
+        """
 
         if binarize is True:
             data = self.binarized_data(threshold)
@@ -423,6 +464,38 @@ class MetricsMixin(object):
 
     # @lru_cache(maxsize=6)
     def IS(self, freq='1H', binarize=True, threshold=4):
+        r"""Interdaily stability
+
+        The Interdaily stability (IS) [1]_ quantifies the repeatibilty of the
+        daily rest-activity pattern over each day contained in the activity
+        recording. This variable is defined as the following:
+
+        .. math:: IS = \frac{d^{24h}}{d^{1h}}
+
+        with:
+
+        .. math:: d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}
+
+        where :math:`x_{i}` is the number of active (counts higher than a
+        predefined threshold) minutes during the :math:`i^{th}` period,
+        :math:`\bar{x}` is the mean of all data and :math:`n` is the number of
+        periods covered by the actigraphy data and with:
+
+        .. math:: d^{24h} = \sum_{i}^{p} \frac{
+                \left( \bar{x}_{h,i} - \bar{x} \right)^{2}
+            }{p}
+
+        where :math:`\bar{x}^{h,i}` is the average number of active minutes
+        over the :math:`i^{th}` period and :math:`p` is the number of periods
+        per day. The average runs over all the days.
+
+        .. [1] Eus J. W. Van Someren, Dick F. Swaab, Christopher C. Colenda,
+        Wayne Cohen, W. Vaughn McCall & Peter B. Rosenquist, `Bright Light
+        Therapy: Improved Sensitivity to Its Effects on Rest-Activity Rhythms
+        in Alzheimer Patients by Application of Nonparametric Methods`
+        Chronobiology International, 16:4, 505-518,
+        DOI: 10.3109/07420529908998724
+        """
 
         data = self.resampled_data(
             freq=freq,
@@ -462,7 +535,36 @@ class MetricsMixin(object):
 
     # @lru_cache(maxsize=6)
     def IV(self, freq='1H', binarize=True, threshold=4):
+        r"""Interdaily stability
 
+        The Interdaily stability (IS) [1]_ quantifies the repeatibilty of the
+        daily rest-activity pattern over each day contained in the activity
+        recording. This variable is defined as the following:
+
+        .. math:: IV = \frac{c^{1h}}{d^{1h}}
+
+        with:
+
+        .. math:: d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}
+
+        where :math:`x_{i}` is the number of active (counts higher than a
+        predefined threshold) minutes during the :math:`i^{th}` period,
+        :math:`\bar{x}` is the mean of all data and :math:`n` is the number of
+        periods covered by the actigraphy data,
+
+        and with:
+
+        .. math:: c^{1h} = \sum_{i}^{n-1} \frac{
+                \left( x_{i+1} - x_{i} \right)^{2}
+            }{n-1}
+
+        .. [1] Eus J. W. Van Someren, Dick F. Swaab, Christopher C. Colenda,
+        Wayne Cohen, W. Vaughn McCall & Peter B. Rosenquist, `Bright Light
+        Therapy: Improved Sensitivity to Its Effects on Rest-Activity Rhythms
+        in Alzheimer Patients by Application of Nonparametric Methods`
+        Chronobiology International, 16:4, 505-518,
+        DOI: 10.3109/07420529908998724
+        """
         data = self.resampled_data(freq, binarize, threshold)
 
         return _intradaily_variability(data)
@@ -569,23 +671,26 @@ class MetricsMixin(object):
 class ForwardMetricsMixin(object):
     """ Mixin Class """
 
-    def mask_fraction(self):
-
-        return {
-            iread.display_name: iread.mask_fraction() for iread in self.readers
-        }
-
-    def start_time(self):
-
-        return {
-            iread.display_name: str(iread.start_time) for iread in self.readers
-        }
-
-    def duration(self):
-
-        return {
-            iread.display_name: str(iread.duration()) for iread in self.readers
-        }
+    # def mask_fraction(self):
+    #
+    #     return {
+    #         iread.display_name:
+    # iread.mask_fraction() for iread in self.readers
+    #     }
+    #
+    # def start_time(self):
+    #
+    #     return {
+    #         iread.display_name:
+    # str(iread.start_time) for iread in self.readers
+    #     }
+    #
+    # def duration(self):
+    #
+    #     return {
+    #         iread.display_name:
+    # str(iread.duration()) for iread in self.readers
+    #     }
 
     def ADAT(self, binarize=True, threshold=4):
 

@@ -4,6 +4,8 @@
 #
 # License: BSD (3-clause)
 
+from .reader import RawReader
+
 from .reader import read_raw
 
-__all__ = ["read_raw"]
+__all__ = ["RawReader", "read_raw"]

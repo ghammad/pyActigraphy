@@ -44,12 +44,12 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     @property
     def name(self):
-        """The study name as extracted from the raw file."""
+        r"""Study name as extracted from the raw file."""
         return self.__name
 
     @property
     def display_name(self):
-        """The name to be used for display."""
+        r"""Name to be used for display."""
         return self.__display_name
 
     @display_name.setter
@@ -58,22 +58,22 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     @property
     def uuid(self):
-        """The UUID of the device used to acquire the data"""
+        r"""UUID of the device used to acquire the data"""
         return self.__uuid
 
     @property
     def format(self):
-        """The format of the raw data file (AWD,RPX,MTN,...)"""
+        r"""Format of the raw data file (AWD,RPX,MTN,...)"""
         return self.__format
 
     @property
     def axial_mode(self):
-        """The acquistion mode (mono-axial or tri-axial)"""
+        r"""Acquistion mode (mono-axial or tri-axial)"""
         return self.__axial_mode
 
     @property
     def start_time(self):
-        """The start time of data acquistion as extracted from the raw file or
+        r"""Start time of data acquistion as extracted from the raw file or
         specified by the user."""
         return self.__start_time
 
@@ -83,7 +83,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     @property
     def period(self):
-        """The period of data acquistion as extracted from the raw file or
+        r"""Period of data acquistion as extracted from the raw file or
         specified by the user."""
         return self.__period
 
@@ -93,18 +93,18 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     @property
     def frequency(self):
-        """The acquisition frequency as extracted from the raw file."""
+        r"""Acquisition frequency as extracted from the raw file."""
         return self.__frequency
 
     @property
     def raw_data(self):
-        """The indexed data extracted from the raw file."""
+        r"""Indexed data extracted from the raw file."""
         return self.__data
 
     # TODO: @lru_cache(maxsize=6) ???
     @property
     def data(self):
-        """The indexed data extracted from the raw file.
+        r"""Indexed data extracted from the raw file.
         If mask_inactivity is set to true, the `mask` is used
         to filter out inactive data.
         """
@@ -119,13 +119,13 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     @property
     def raw_light(self):
-        """The light measurement performed by the device"""
+        r"""Light measurement performed by the device"""
         return self.__light
 
     # TODO: @lru_cache(maxsize=6) ???
     @property
     def light(self):
-        """The indexed light extracted from the raw file.
+        r"""Indexed light extracted from the raw file.
         If mask_inactivity is set to true, the `mask` is used
         to filter out inactive data.
         """
@@ -140,7 +140,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     @property
     def mask_inactivity(self):
-        """ The switch to mask inactive data."""
+        r"""Switch to mask inactive data."""
         return self.__mask_inactivity
 
     @mask_inactivity.setter
@@ -149,7 +149,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     @property
     def inactivity_length(self):
-        """ The length of the inactivity mask."""
+        r"""Length of the inactivity mask."""
         return self.__inactivity_length
 
     @inactivity_length.setter
@@ -158,7 +158,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     @property
     def mask(self):
-        """ The mask used to filter out inactive data."""
+        r"""Mask used to filter out inactive data."""
         if self.__mask is None:
             # Create a mask if it does not exist
             if self.inactivity_length is not None:
@@ -177,6 +177,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     @property
     def exclude_if_mask(self):
+        r"""Boolean to exclude partially masked data when resampling"""
         return self.__exclude_if_mask
 
     @exclude_if_mask.setter
@@ -184,18 +185,19 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
         self.__exclude_if_mask = value
 
     def mask_fraction(self):
+        r"""Fraction of masked data"""
         return 1.-(self.mask.sum()/len(self.mask))
 
     def length(self):
-        """ Number of data acquisition points"""
+        r"""Number of data acquisition points"""
         return len(self.data)
 
     def time_range(self):
-        """ Range (in days, hours, etc) of the data acquistion period"""
+        r"""Range (in days, hours, etc) of the data acquistion period"""
         return (self.data.index[-1]-self.data.index[0])
 
     def duration(self):
-        """ Duration (in days, hours, etc) of the data acquistion period"""
+        r"""Duration (in days, hours, etc) of the data acquistion period"""
         return self.frequency * self.length()
 
     def binarized_data(self, threshold):
@@ -207,7 +209,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     # TODO: @lru_cache(maxsize=6) ???
     def resampled_data(self, freq, binarize=False, threshold=0):
-        """The data resampled at the specified frequency.
+        r"""Data resampled at the specified frequency.
         If mask_inactivity is True, the `mask` is used to filter inactive data.
         """
         if binarize is False:
@@ -235,7 +237,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     # TODO: @lru_cache(maxsize=6) ???
     def resampled_light(self, freq):
-        """The light meeasurement, resampled at the specified frequency.
+        """Light measurement, resampled at the specified frequency.
         """
         light = self.light
 
@@ -260,7 +262,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
                 NOWEAR='#ee4035'
             )
     ):
-        """Reader function for sleep diaries.
+        r"""Reader function for sleep diaries.
 
         Parameters
         ----------
@@ -289,5 +291,5 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
 
     @property
     def sleep_diary(self):
-        """ The SleepDiary class instanciation."""
+        """ :class:`SleepDiary` class instanciation."""
         return self.__sleep_diary

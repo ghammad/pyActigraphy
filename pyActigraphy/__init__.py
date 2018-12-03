@@ -1,4 +1,4 @@
-"""CRC Software for actigraphy data analysis."""
+"""GIGA-CRC In Vivo Imaging Software for actigraphy data analysis."""
 
 # PEP0440 compatible formatted version, see:
 # https://www.python.org/dev/peps/pep-0440/

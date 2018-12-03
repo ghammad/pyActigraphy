@@ -6,7 +6,7 @@ from ..base import BaseRaw
 
 
 class RawAWD(BaseRaw):
-    """Raw object from .AWD file (recorded by ActiWatches)
+    r"""Raw object from .AWD file (recorded by ActiWatches)
 
     Parameters
     ----------
@@ -103,7 +103,7 @@ def read_raw_awd(
     period=None,
     dtype=np.int
 ):
-    """Reader function for raw AWD file.
+    r"""Reader function for raw AWD file.
 
     Parameters
     ----------

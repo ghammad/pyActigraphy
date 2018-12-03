@@ -6,9 +6,9 @@
 
 # from . import metrics
 
-from .metrics import _average_daily_activity
-from .metrics import ForwardMetricsMixin, MetricsMixin
-
-__all__ = ["ForwardMetricsMixin",
-           "MetricsMixin",
-           "_average_daily_activity"]
+from .metrics import (MetricsMixin, ForwardMetricsMixin,
+                      _average_daily_activity, _average_daily_total_activity,
+                      _interdaily_stability, _intradaily_variability,
+                      _lmx,  _interval_maker, _count_consecutive_values,
+                      _count_consecutive_zeros, _transition_prob,
+                      _transition_prob_sustain_region, _td_format)
