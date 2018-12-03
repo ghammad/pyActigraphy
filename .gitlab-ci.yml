@@ -51,4 +51,4 @@ pages:
     paths:
     - public
   only:
-  - feature/docs
+  - master

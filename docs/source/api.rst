@@ -1,10 +1,6 @@
-:orphan:
-
-.. _api_reference:
-
-=============
-API Reference
-=============
+====================
+Python API Reference
+====================
 
 .. contents:: Table of Contents
     :local:
@@ -34,11 +30,10 @@ Reading raw data
 
 .. automodule:: pyActigraphy.io
    :no-members:
-   :no-inherited-members:
 
 .. autosummary::
-  :toctree: _autosummary/
-  :template: function.rst
+   :toctree: _autosummary/
+   :template: function.rst
 
     read_raw
     read_raw_awd
@@ -48,85 +43,58 @@ Reading raw data
 
 Reader classes
 --------------
-.. currentmodule:: pyActigraphy.io
-.. autosummary::
-  :toctree: _autosummary/
-  :template: class.rst
+.. currentmodule:: pyActigraphy.io.BaseRaw
+.. autoclass:: pyActigraphy.io.BaseRaw
 
-    base.BaseRaw
-    awd.awd.RawAWD
-    mtn.mtn.RawMTN
-    rpx.rpx.RawRPX
-    reader.reader.RawReader
+    .. rubric:: Attributes
+    .. autoautosummary:: pyActigraphy.io.BaseRaw
+        :attributes:
 
+    .. rubric:: Methods
+    .. autosummary::
+        :toctree: _autosummary/
 
-Metrics
-=======
+        duration
+        length
+        time_range
+        mask_fraction
+        binarized_data
+        resampled_data
+        resampled_light
+        read_sleep_diary
 
-API to calculate various activity/rest cycle-related variables.
+    .. rubric:: Non-parametric methods
+    .. autosummary::
+        :toctree: _autosummary/
 
-:mod:`pyActigraphy.metrics`:
+        IS
+        ISm
+        ISp
+        IV
+        IVm
+        IVp
+        L5
+        L5p
+        M10
+        M10p
 
-.. currentmodule:: pyActigraphy.metrics
+    .. autoautosummary:: pyActigraphy.io.BaseRaw
+        :methods:
 
-.. automodule:: pyActigraphy.metrics
-   :no-members:
-   :no-inherited-members:
+.. currentmodule:: pyActigraphy.io.RawReader
+.. autoclass:: pyActigraphy.io.RawReader
 
-.. autosummary::
-   :toctree: _autosummary/
-   :template: class.rst
+    .. rubric:: Attributes
+    .. autoautosummary:: pyActigraphy.io.RawReader
+        :attributes:
 
-   metrics.MetricsMixin
-   metrics.ForwardMetricsMixin
+    .. rubric:: Methods
+    .. autosummary::
+        :toctree: _autosummary/
 
-
-Distributions
--------------
-.. autosummary::
-   :toctree: _autosummary
-   :template: function.rst
-
-   metrics._average_daily_activity
-   metrics.MetricsMixin.average_daily_activity
-   metrics.MetricsMixin.average_daily_light
-
-
-Activity variables
-------------------
-.. autosummary::
-    :toctree: _autosummary
-    :template: function.rst
-
-    metrics.MetricsMixin.ADAT
-    metrics.MetricsMixin.ADATp
-
-Non-parametric variables
-------------------------
-.. autosummary::
-    :toctree: _autosummary
-    :template: function.rst
-
-    metrics.MetricsMixin.IS
-    metrics.MetricsMixin.ISm
-    metrics.MetricsMixin.ISp
-    metrics.MetricsMixin.IV
-    metrics.MetricsMixin.IVm
-    metrics.MetricsMixin.IVp
-    metrics.MetricsMixin.L5
-    metrics.MetricsMixin.L5p
-    metrics.MetricsMixin.M10
-    metrics.MetricsMixin.M10p
-    metrics.MetricsMixin.RA
-    metrics.MetricsMixin.RAp
-
-Transition probability variables
---------------------------------
-.. autosummary::
-    :toctree: _autosummary
-    :template: function.rst
-
-    metrics.MetricsMixin.pAR
-    metrics.MetricsMixin.pRA
-    metrics.MetricsMixin.kAR
-    metrics.MetricsMixin.kRA
+        append
+        mask_fraction
+        start_time
+        duration
+        resampled_data
+        read_sst_log

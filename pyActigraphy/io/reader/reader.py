@@ -13,7 +13,7 @@ from pyActigraphy.filters import SSTLog
 
 
 class RawReader(ForwardMetricsMixin):
-    """Reader for multiple Raw files
+    r"""Reader for multiple Raw files
 
     Parameters
     ----------
@@ -33,12 +33,12 @@ class RawReader(ForwardMetricsMixin):
 
     @property
     def reader_type(self):
-        """The type of RawXXX readers."""
+        r"""The type of RawXXX readers."""
         return self.__reader_type
 
     @property
     def readers(self):
-        """The list of RawXXX readers."""
+        r"""The list of RawXXX readers."""
         return np.asarray(self.__readers)
 
     def append(self, raw_reader):
@@ -75,7 +75,7 @@ class RawReader(ForwardMetricsMixin):
         binarize=False, threshold=0,
         n_jobs=1, prefer=None, verbose=0
     ):
-        """The data resampled at the specified frequency.
+        r"""Data resampled at the specified frequency.
         If mask_inactivity is True, inactive data (0 count) are masked.
         """
 
@@ -123,7 +123,7 @@ class RawReader(ForwardMetricsMixin):
             input_fname,
             header_size=1
     ):
-        """Reader function for start/stop-time log files.
+        r"""Reader function for start/stop-time log files.
 
         Parameters
         ----------
@@ -141,11 +141,11 @@ class RawReader(ForwardMetricsMixin):
 
     @property
     def sst_log(self):
-        """ The SSTLog class instanciation."""
+        r""":class:`SSTLog` class instanciation."""
         return self.__sst_log
 
     def apply_sst(self, verbose=False):
-        """ Set start time and duration in all readers """
+        r"""Set start time and duration in all readers """
         if self.sst_log is not None:
             for reader in self.readers:
                 if reader.display_name in self.sst_log.log.index:
@@ -168,7 +168,7 @@ class RawReader(ForwardMetricsMixin):
 
 
 def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
-        """Reader function for multiple raw files.
+        r"""Reader function for multiple raw files.
 
         Parameters
         ----------

@@ -18,11 +18,63 @@ import time
 # sys.path.insert(0, os.path.abspath('.'))
 import sphinx_bootstrap_theme
 
+from sphinx.ext.autosummary import Autosummary
+from sphinx.ext.autosummary import get_documenter
+from docutils.parsers.rst import directives
+from sphinx.util.inspect import safe_getattr
+import re
+
 # sys.path.insert(0, os.path.abspath(os.path.pardir))
 sys.path.insert(0, os.path.abspath('../..'))
 import pyActigraphy
 
+
+class AutoAutoSummary(Autosummary):
+
+    option_spec = {
+        'methods': directives.unchanged,
+        'attributes': directives.unchanged
+    }
+
+    required_arguments = 1
+
+    @staticmethod
+    def get_members(obj, typ, include_public=None):
+        if not include_public:
+            include_public = []
+        items = []
+        for name in dir(obj):
+            try:
+                documenter = get_documenter(safe_getattr(obj, name), obj)
+            except AttributeError:
+                continue
+            if documenter.objtype == typ:
+                items.append(name)
+        public = [x for x in items if x in include_public or not x.startswith('_')]
+        return public, items
+
+    def run(self):
+        clazz = str(self.arguments[0])
+        try:
+            (module_name, class_name) = clazz.rsplit('.', 1)
+            m = __import__(module_name, globals(), locals(), [class_name])
+            c = getattr(m, class_name)
+            if 'methods' in self.options:
+                _, methods = self.get_members(c, 'method', ['__init__'])
+
+                self.content = ["~%s.%s" % (clazz, method) for method in methods if not method.startswith('_')]
+            if 'attributes' in self.options:
+                _, attribs = self.get_members(c, 'attribute')
+                self.content = ["~%s.%s" % (clazz, attrib) for attrib in attribs if not attrib.startswith('_')]
+        finally:
+            return super(AutoAutoSummary, self).run()
+
+
+def setup(app):
+    app.add_directive('autoautosummary', AutoAutoSummary)
+
 # -- Project information -----------------------------------------------------
+
 
 project = 'pyActigraphy'
 copyright = '2018-{}, Grégory Hammad'.format(time.strftime("%Y"))
@@ -75,7 +127,7 @@ language = None
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
 exclude_trees = ['_build']
-exclude_patterns = ['source/_autosummary']
+# exclude_patterns = ['source/_autosummary']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
