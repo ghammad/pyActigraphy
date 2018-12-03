@@ -225,7 +225,7 @@ class MetricsMixin(object):
     """ Mixin Class """
 
     def average_daily_activity(
-        self, freq='1H', cyclic=False, binarize=True, threshold=4
+        self, freq, cyclic=False, binarize=True, threshold=4
     ):
         r"""Average daily activity distribution
 
@@ -238,7 +238,6 @@ class MetricsMixin(object):
             Data resampling frequency.
             Cf. #timeseries-offset-aliases in
             <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
-            Default is '1H'.
         cyclic: bool, optional
             If set to True, two daily profiles are concatenated to ensure
             continuity between the last point of the day and the first one.
@@ -261,7 +260,7 @@ class MetricsMixin(object):
 
         return avgdaily
 
-    def average_daily_light(self, freq='1H', cyclic=False):
+    def average_daily_light(self, freq, cyclic=False):
         r"""Average daily light distribution
 
         Calculate the daily profile of light exposure (in lux). Data are
@@ -273,7 +272,6 @@ class MetricsMixin(object):
             Data resampling frequency.
             Cf. #timeseries-offset-aliases in
             <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
-            Default is '1H'.
         cyclic: bool, optional
             If set to True, two daily profiles are concatenated to ensure
             continuity between the last point of the day and the first one.

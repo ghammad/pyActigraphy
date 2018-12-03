@@ -217,12 +217,16 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
         else:
             data = self.binarized_data(threshold)
 
-        if to_offset(freq).delta <= self.frequency:
+        if freq is None:
+            return data
+        elif to_offset(freq).delta < self.frequency:
             warnings.warn(
-                'Resampling frequency equal to or lower than the acquisition' +
+                'Resampling frequency lower than the acquisition' +
                 ' frequency. Returning original data.',
                 UserWarning
             )
+            return data
+        elif to_offset(freq).delta == self.frequency:
             return data
 
         resampled_data = data.resample(freq).sum()
