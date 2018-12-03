@@ -22,7 +22,14 @@ class RawRPX(BaseRaw):
         Delimiter to use when reading the input file.
     """
 
-    def __init__(self, input_fname, header_offset=15, delimiter=','):
+    def __init__(
+        self,
+        input_fname,
+        header_offset=15,
+        start_time=None,
+        period=None,
+        delimiter=','
+    ):
 
         # get absolute file path
         input_fname = os.path.abspath(input_fname)
@@ -41,12 +48,12 @@ class RawRPX(BaseRaw):
         # extract informations from the header
         name = self.__extract_rpx_name(header, delimiter)
         uuid = self.__extract_rpx_uuid(header, delimiter)
-        start_time = self.__extract_rpx_start_time(header, delimiter)
+        start = self.__extract_rpx_start_time(header, delimiter)
         frequency = self.__extract_rpx_frequency(header, delimiter)
         axial_mode = 'DUMMY [TODO]: extract from header if possible'
 
         # read data file
-        raw_data = pd.read_csv(
+        index_data = pd.read_csv(
             input_fname,
             encoding='utf-8',
             skiprows=num+header_offset,
@@ -64,7 +71,21 @@ class RawRPX(BaseRaw):
         ).dropna(subset=['Activité'])
 
         # verify that the start time and the first date index matches
-        self.__check_rpx_start_time(raw_data, start_time)
+        self.__check_rpx_start_time(index_data, start)
+
+        if start_time is not None:
+            start_time = pd.to_datetime(start_time)
+        else:
+            start_time = start
+
+        if period is not None:
+            period = pd.Timedelta(period)
+            stop_time = start_time+period
+        else:
+            stop_time = index_data.index[-1]
+            period = stop_time - start_time
+
+        index_data = index_data[start_time:stop_time]
 
         # call __init__ function of the base class
         super().__init__(
@@ -73,16 +94,17 @@ class RawRPX(BaseRaw):
             format='RPX',
             axial_mode=axial_mode,
             start_time=start_time,
+            period=period,
             frequency=pd.Timedelta(frequency),
-            data=raw_data['Activité'],
-            light=raw_data['Lumière blanche']
+            data=index_data['Activité'],
+            light=index_data['Lumière blanche']
         )
 
     def __extract_rpx_name(self, header, delimiter):
         for line in header:
             if 'Identité' in line:
                 name = re.sub(
-                    '[^\w\s]', '', line.split(delimiter)[1]
+                    r'[^\w\s]', '', line.split(delimiter)[1]
                 ).strip()
                 break
         return name
@@ -90,7 +112,7 @@ class RawRPX(BaseRaw):
     def __extract_rpx_uuid(self, header, delimiter):
         for line in header:
             if 'Numéro de série de l\'Actiwatch' in line:
-                uuid = re.sub('[\W_]+', '', line.split(delimiter)[1])
+                uuid = re.sub(r'[\W_]+', '', line.split(delimiter)[1])
                 break
         return uuid
 
@@ -99,11 +121,11 @@ class RawRPX(BaseRaw):
         for line in header:
             if 'Date de début de la collecte des données' in line:
                 start_time.append(
-                    re.sub('[^\d./]+', '', line.split(delimiter)[1])
+                    re.sub(r'[^\d./]+', '', line.split(delimiter)[1])
                 )
             elif 'Heure de début de la collecte des données' in line:
                 start_time.append(
-                    re.sub('[^\d.:]+', '', line.split(delimiter)[1])
+                    re.sub(r'[^\d.:]+', '', line.split(delimiter)[1])
                 )
         return pd.to_datetime(' '.join(start_time), dayfirst=True)
 
@@ -111,7 +133,7 @@ class RawRPX(BaseRaw):
         for line in header:
             if 'Longueur de la période' in line:
                 frequency = pd.Timedelta(
-                    re.sub('([^\s\w])+', '', line.split(delimiter)[3])
+                    re.sub(r'([^\s\w])+', '', line.split(delimiter)[3])
                     .replace('\xa0', ' ').strip()
                 )
                 break

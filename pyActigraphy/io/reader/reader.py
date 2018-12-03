@@ -9,10 +9,11 @@ from joblib import Parallel, delayed
 from ..awd import read_raw_awd
 from ..mtn import read_raw_mtn
 from ..rpx import read_raw_rpx
+from pyActigraphy.filters import SSTLog
 
 
 class RawReader(ForwardMetricsMixin):
-    """Reader for multiple Raw files
+    r"""Reader for multiple Raw files
 
     Parameters
     ----------
@@ -28,14 +29,16 @@ class RawReader(ForwardMetricsMixin):
         # store list of readers
         self.__readers = readers
 
+        self.__sst_log = None
+
     @property
     def reader_type(self):
-        """The type of RawXXX readers."""
+        r"""The type of RawXXX readers."""
         return self.__reader_type
 
     @property
     def readers(self):
-        """The list of RawXXX readers."""
+        r"""The list of RawXXX readers."""
         return np.asarray(self.__readers)
 
     def append(self, raw_reader):
@@ -49,12 +52,30 @@ class RawReader(ForwardMetricsMixin):
         else:
             self.__readers.append(raw_reader)
 
+    def mask_fraction(self):
+
+        return {
+            read.display_name: read.mask_fraction() for read in self.__readers
+        }
+
+    def start_time(self):
+
+        return {
+            iread.display_name: iread.start_time for iread in self.__readers
+        }
+
+    def duration(self):
+
+        return {
+            iread.display_name: iread.duration() for iread in self.__readers
+        }
+
     def resampled_data(
         self, freq,
         binarize=False, threshold=0,
         n_jobs=1, prefer=None, verbose=0
     ):
-        """The data resampled at the specified frequency.
+        r"""Data resampled at the specified frequency.
         If mask_inactivity is True, inactive data (0 count) are masked.
         """
 
@@ -97,9 +118,57 @@ class RawReader(ForwardMetricsMixin):
             ) for reader in self.readers
         ))
 
+    def read_sst_log(
+            self,
+            input_fname,
+            header_size=1
+    ):
+        r"""Reader function for start/stop-time log files.
+
+        Parameters
+        ----------
+        input_fname: str
+            Path to the start/stop-time log file.
+        header_size: int
+            Header size (i.e. number of lines) of the sst log file.
+            Default is 1.
+        """
+
+        self.__sst_log = SSTLog(
+            input_fname=input_fname,
+            header_size=header_size
+        )
+
+    @property
+    def sst_log(self):
+        r""":class:`SSTLog` class instanciation."""
+        return self.__sst_log
+
+    def apply_sst(self, verbose=False):
+        r"""Set start time and duration in all readers """
+        if self.sst_log is not None:
+            for reader in self.readers:
+                if reader.display_name in self.sst_log.log.index:
+                    if verbose:
+                        print('Found an entry in SST log file for '
+                              '{}'.format(reader.display_name))
+                    # Retrieve start_time and duration from sst_log by position
+                    # in order to avoid mis-spelling of the index names.
+                    start_time = self.sst_log.log.loc[reader.display_name][0]
+                    period = self.sst_log.log.loc[reader.display_name][2]
+                    reader.start_time = start_time
+                    reader.period = period
+                else:
+                    if verbose:
+                        print('Could not find an entry in SST log file for '
+                              '{}'.format(reader.display_name))
+        else:
+            print('Could not find a SST log file. Please run the read_sst_log'
+                  ' function before using the `apply_sst` function.')
+
 
 def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
-        """Reader function for multiple raw files.
+        r"""Reader function for multiple raw files.
 
         Parameters
         ----------
