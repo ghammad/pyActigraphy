@@ -1,7 +1,7 @@
-.. pyActigraphy documentation master file, created by
-   sphinx-quickstart on Wed Nov 21 14:58:06 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. image:: https://img.shields.io/badge/License-GPL%20v3-blue.svg
+  :target: https://www.gnu.org/licenses/gpl-3.0
+.. image:: https://gitlab.uliege.be/CyclotronResearchCentre/Studies/CogNap/Actigraphy/pyActigraphy/badges/master/pipeline.svg
+  :target: https://gitlab.uliege.be/CyclotronResearchCentre/Studies/CogNap/Actigraphy/pyActigraphy/commits/master
 
 **pyActigraphy**
 ================
@@ -86,10 +86,3 @@ Acknowledgments
 
 * **Aubin Ardois** `@aardoi <https://github.com/aardoi>`_ developed the first version of the MTN class during his internship at the CRC, in May-August 2018.
 * The CRC colleagues for their support, ideas, etc.
-
-.. Indices and tables
-.. ==================
-..
-.. * :ref:`genindex`
-.. * :ref:`modindex`
-.. * :ref:`search`
