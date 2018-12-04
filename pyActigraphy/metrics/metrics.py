@@ -1183,6 +1183,69 @@ class MetricsMixin(object):
         return results
 
     def pRA(self, threshold, start=None, period=None):
+        r"""Rest->Activity transition probability distribution
+
+        Conditional probability, pRA(t), that an individual would be
+        resting at time (t+1) given that the individual had been continuously
+        active for the preceding t epochs, defined in [1]_ as:
+
+        .. math::
+            pRA(t) = p(A|R_t) = \frac{N_t - N_{t+1}}{N_t}
+
+        with :math:`N_t`, the total number of sequences of rest (i.e. activity
+        below threshold) of duration :math:`t` or longer.
+
+        Parameters
+        ----------
+        threshold: int
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+        start: str, optional
+            If not None, the actigraphy recording is truncated to
+            'start:start+period', each day. Start string format: 'HH:MM:SS'.
+            Default is None
+        period: str, optional
+            Time period for the calculation of pRA.
+            Default is None.
+
+        Returns
+        -------
+        pra: pandas.core.series.Series
+            Transition probabilities (pRA(t)), calculated for all t values.
+        pra_weights: pandas.core.series.Series
+            Weights are defined as the square root of the number of activity
+            sequences contributing to each probability estimate.
+
+        Notes
+        -----
+
+        pRA is corrected for discontinuities due to sparse data, as defined in
+        [1]_.
+
+        References
+        ----------
+
+        .. [1] Lim, A. S. P., Yu, L., Costa, M. D., Buchman, A. S.,
+               Bennett, D. A., Leurgans, S. E., & Saper, C. B. (2011).
+               Quantification of the Fragmentation of Rest-Activity Patterns in
+               Elderly Individuals Using a State Transition Analysis. Sleep,
+               34(11), 1569–1581. http://doi.org/10.5665/sleep.1400
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> pRA, pRA_weights = rawAWD.pRA(4, start='00:00:00', period='8H')
+            >>> pRA
+            counts
+            1      0.169043
+            2      0.144608
+            3      0.163324
+            (...)
+            481    0.001157
+            Name: counts, dtype: float64
+        """
 
         # Restrict data range to period 'Start, Start+Period'
         if start is not None:
@@ -1203,6 +1266,69 @@ class MetricsMixin(object):
         return pRA, pRA_weights
 
     def pAR(self, threshold, start=None, period=None):
+        r"""Activity->Rest transition probability distribution
+
+        Conditional probability, pAR(t), that an individual would be
+        active at time (t+1) given that the individual had been continuously
+        resting for the preceding t epochs, defined in [1]_ as:
+
+        .. math::
+            pAR(t) = p(R|A_t) = \frac{N_t - N_{t+1}}{N_t}
+
+        with :math:`N_t`, the total number of sequences of activity (i.e.
+        activity above threshold) of duration :math:`t` or longer.
+
+        Parameters
+        ----------
+        threshold: int
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+        start: str, optional
+            If not None, the actigraphy recording is truncated to
+            'start:start+period', each day. Start string format: 'HH:MM:SS'.
+            Default is None
+        period: str, optional
+            Time period for the calculation of pAR.
+            Default is None.
+
+        Returns
+        -------
+        par: pandas.core.series.Series
+            Transition probabilities (pAR(t)), calculated for all t values.
+        par_weights: pandas.core.series.Series
+            Weights are defined as the square root of the number of activity
+            sequences contributing to each probability estimate.
+
+        Notes
+        -----
+
+        pAR is corrected for discontinuities due to sparse data, as defined in
+        [1]_.
+
+        References
+        ----------
+
+        .. [1] Lim, A. S. P., Yu, L., Costa, M. D., Buchman, A. S.,
+               Bennett, D. A., Leurgans, S. E., & Saper, C. B. (2011).
+               Quantification of the Fragmentation of Rest-Activity Patterns in
+               Elderly Individuals Using a State Transition Analysis. Sleep,
+               34(11), 1569–1581. http://doi.org/10.5665/sleep.1400
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> pAR, pAR_weights = rawAWD.pAR(4, start='00:00:00', period='8H')
+            >>> pAR
+            counts
+            1      0.169043
+            2      0.144608
+            3      0.163324
+            (...)
+            481    0.001157
+            Name: counts, dtype: float64
+        """
 
         # Restrict data range to period 'Start, Start+Period'
         if start is not None:
@@ -1223,6 +1349,54 @@ class MetricsMixin(object):
         return pAR, pAR_weights
 
     def kRA(self, threshold, start=None, period=None, frac=.3, it=0):
+        r"""Rest->Activity transition probability
+
+        Weighted average value of pRA(t) within the constant regions, defined
+        as the longest stretch within which the LOWESS curve varied by no more
+        than 1 standard deviation of the pRA(t) curve [1]_.
+
+        Parameters
+        ----------
+        threshold: int
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+        start: str, optional
+            If not None, the actigraphy recording is truncated to
+            'start:start+period', each day. Start string format: 'HH:MM:SS'.
+            Default is None
+        period: str, optional
+            Time period for the calculation of pRA.
+            Default is None.
+        frac: float
+            Fraction of the data used when estimating each value.
+            Default is 0.3.
+        it: int
+            Number of residual-based reweightings to perform.
+            Default is 0.
+
+        Returns
+        -------
+        kra: float
+
+        References
+        ----------
+
+        .. [1] Lim, A. S. P., Yu, L., Costa, M. D., Buchman, A. S.,
+               Bennett, D. A., Leurgans, S. E., & Saper, C. B. (2011).
+               Quantification of the Fragmentation of Rest-Activity Patterns in
+               Elderly Individuals Using a State Transition Analysis. Sleep,
+               34(11), 1569–1581. http://doi.org/10.5665/sleep.1400
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.kRA(4)
+            0.09144435545010564
+            >>> rawAWD.kRA(4, start='00:00:00', period='8H')
+            0.13195826220778709
+        """
 
         # Calculate the pRA probabilities and their weights.
         pRA, pRA_weights = self.pRA(threshold, start=start, period=period)
@@ -1237,6 +1411,54 @@ class MetricsMixin(object):
         return kRA
 
     def kAR(self, threshold, start=None, period=None, frac=.3, it=0):
+        r"""Rest->Activity transition probability
+
+        Weighted average value of pAR(t) within the constant regions, defined
+        as the longest stretch within which the LOWESS curve varied by no more
+        than 1 standard deviation of the pAR(t) curve [1]_.
+
+        Parameters
+        ----------
+        threshold: int
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+        start: str, optional
+            If not None, the actigraphy recording is truncated to
+            'start:start+period', each day. Start string format: 'HH:MM:SS'.
+            Default is None
+        period: str, optional
+            Time period for the calculation of pRA.
+            Default is None.
+        frac: float
+            Fraction of the data used when estimating each value.
+            Default is 0.3.
+        it: int
+            Number of residual-based reweightings to perform.
+            Default is 0.
+
+        Returns
+        -------
+        kar: float
+
+        References
+        ----------
+
+        .. [1] Lim, A. S. P., Yu, L., Costa, M. D., Buchman, A. S.,
+               Bennett, D. A., Leurgans, S. E., & Saper, C. B. (2011).
+               Quantification of the Fragmentation of Rest-Activity Patterns in
+               Elderly Individuals Using a State Transition Analysis. Sleep,
+               34(11), 1569–1581. http://doi.org/10.5665/sleep.1400
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.kAR(4)
+            0.041397590252332916
+            >>> rawAWD.kAR(4, start='08:00:00', period='12H')
+            0.04372712642257519
+        """
 
         # Calculate the pAR probabilities and their weights.
         pAR, pAR_weights = self.pAR(threshold, start=start, period=period)
