@@ -105,7 +105,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
-    'nbsphinx'
+    'nbsphinx',
+    'numpydoc'
 ]
 
 # Generate the API documentation when building
@@ -134,6 +135,10 @@ exclude_patterns = ['_build', '**.ipynb_checkpoints']
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+# Numpydoc options
+numpydoc_show_class_members = False
+numpydoc_show_inherited_class_members = False
+numpydoc_class_members_toctree = False
 
 # -- Options for HTML output -------------------------------------------------
 

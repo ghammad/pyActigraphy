@@ -77,24 +77,11 @@ Reader classes
         L5p
         M10
         M10p
+        RA
+        RAp
 
     .. autoautosummary:: pyActigraphy.io.BaseRaw
         :methods:
 
 .. currentmodule:: pyActigraphy.io.RawReader
 .. autoclass:: pyActigraphy.io.RawReader
-
-    .. rubric:: Attributes
-    .. autoautosummary:: pyActigraphy.io.RawReader
-        :attributes:
-
-    .. rubric:: Methods
-    .. autosummary::
-        :toctree: _autosummary/
-
-        append
-        mask_fraction
-        start_time
-        duration
-        resampled_data
-        read_sst_log
