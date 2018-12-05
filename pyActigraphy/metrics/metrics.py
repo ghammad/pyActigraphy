@@ -79,20 +79,22 @@ def _intradaily_variability(data):
     return (c_1h / d_1h)
 
 
-def _lmx(data, epochs, lowest=True):
+def _lmx(data, period, lowest=True):
     """Calculate the start time and mean activity of the period of
     lowest/highest activity"""
 
     avgdaily = _average_daily_activity(data=data, cyclic=True)
 
-    mean_activity = avgdaily.rolling(epochs).sum().shift(-epochs+1)
+    n_epochs = int(pd.Timedelta(period)/avgdaily.index.freq)
+
+    mean_activity = avgdaily.rolling(period).sum().shift(-n_epochs+1)
 
     if lowest:
         t_start = mean_activity.idxmin()
     else:
         t_start = mean_activity.idxmax()
 
-    lmx = mean_activity[t_start]/epochs
+    lmx = mean_activity[t_start]/n_epochs
     return t_start, lmx
 
 
@@ -382,8 +384,11 @@ class MetricsMixin(object):
         Notes
         -----
 
-        The L5 [1]_ variable is calculated as the sum of the average daily
-        activities during the 5 least active hours.
+        The L5 [1]_ variable is calculated as the mean, per acquisition period,
+        of the average daily activities during the 5 least active hours.
+
+        .. warning:: The value of this variable depends on the length of the
+                     acquisition period.
 
         References
         ----------
@@ -410,9 +415,9 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        n_epochs = int(pd.Timedelta('5H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('5H')/self.frequency)
 
-        _, l5 = _lmx(data, n_epochs, lowest=True)
+        _, l5 = _lmx(data, '5H', lowest=True)
 
         return l5
 
@@ -439,8 +444,11 @@ class MetricsMixin(object):
         Notes
         -----
 
-        The M10 [1]_ variable is calculated as the sum of the average daily
-        activities during the 10 most active hours.
+        The M10 [1]_ variable is calculated as the mean, per acquisition period
+        , of the average daily activities during the 10 most active hours.
+
+        .. warning:: The value of this variable depends on the length of the
+                     acquisition period.
 
         References
         ----------
@@ -467,9 +475,9 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        n_epochs = int(pd.Timedelta('10H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('10H')/self.frequency)
 
-        _, m10 = _lmx(data, n_epochs, lowest=False)
+        _, m10 = _lmx(data, '10H', lowest=False)
 
         return m10
 
@@ -529,10 +537,10 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        n_epochs = int(pd.Timedelta('5H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('5H')/self.frequency)
 
-        _, l5 = _lmx(data, n_epochs, lowest=True)
-        _, m10 = _lmx(data, n_epochs*2, lowest=False)
+        _, l5 = _lmx(data, '5H', lowest=True)
+        _, m10 = _lmx(data, '10H', lowest=False)
 
         return (m10-l5)/(m10+l5)
 
@@ -567,8 +575,11 @@ class MetricsMixin(object):
         Notes
         -----
 
-        The L5 [1]_ variable is calculated as the sum of the average daily
-        activities during the 5 least active hours.
+        The L5 [1]_ variable is calculated as the mean, per acquisition period,
+        of the average daily activities during the 5 least active hours.
+
+        .. warning:: The value of this variable depends on the length of the
+                     acquisition period.
 
         References
         ----------
@@ -597,14 +608,14 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        n_epochs = int(pd.Timedelta('5H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('5H')/self.frequency)
 
         intervals = _interval_maker(data.index, period, verbose)
 
         results = [
             _lmx(
                 data[time[0]:time[1]],
-                n_epochs,
+                '5H',
                 lowest=True
             ) for time in intervals
         ]
@@ -641,8 +652,11 @@ class MetricsMixin(object):
         Notes
         -----
 
-        The M10 [1]_ variable is calculated as the sum of the average daily
-        activities during the 10 most active hours.
+        The M10 [1]_ variable is calculated as the mean, per acquisition period
+        , of the average daily activities during the 10 most active hours.
+
+        .. warning:: The value of this variable depends on the length of the
+                     acquisition period.
 
         References
         ----------
@@ -671,14 +685,14 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        n_epochs = int(pd.Timedelta('10H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('10H')/self.frequency)
 
         intervals = _interval_maker(data.index, period, verbose)
 
         results = [
             _lmx(
                 data[time[0]:time[1]],
-                n_epochs,
+                '10H',
                 lowest=False
             ) for time in intervals
         ]
@@ -748,7 +762,7 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        n_epochs = int(pd.Timedelta('5H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('5H')/self.frequency)
 
         intervals = _interval_maker(data.index, period, verbose)
 
@@ -756,8 +770,8 @@ class MetricsMixin(object):
 
         for time in intervals:
             data_subset = data[time[0]:time[1]]
-            _, l5 = _lmx(data_subset, n_epochs, lowest=True)
-            _, m10 = _lmx(data_subset, n_epochs*2, lowest=False)
+            _, l5 = _lmx(data_subset, '5H', lowest=True)
+            _, m10 = _lmx(data_subset, '10H', lowest=False)
             results.append((m10-l5)/(m10+l5))
 
         return results
