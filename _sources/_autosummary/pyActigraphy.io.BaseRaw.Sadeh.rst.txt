@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.Sadeh
+=============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.Sadeh

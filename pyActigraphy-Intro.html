@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Notebook to analyze actigraphy data &#8212; pyActigraphy 0.1.dev0 documentation</title>
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="pyActigraphy" href="index.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html"><span><img src="_static/pyActigraphy_logo.png"></span>
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.dev0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="quickstart.html">Quick Start</a></li>
+                <li><a href="documentation.html">Documentation</a></li>
+                <li><a href="api.html">API</a></li>
+                <li><a href="auto_examples/index.html">Examples</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Notebook to analyze actigraphy data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Read-an-individual-actigraphy-file">Read an individual actigraphy file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Binary-data">Binary data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Hourly-average-activity">Hourly average activity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Activity-onset/offset-time">Activity onset/offset time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Total-daily-average-activity">Total daily average activity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Interdaily-stability-(IS)">Interdaily stability (IS)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Intradaily-variability-(IV)">Intradaily variability (IV)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Least-and-most-active-periods-(L5-&amp;-M10)">Least and most active periods (L5 &amp; M10)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Fragmentation">Fragmentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Sleep-scoring-algorithms">Sleep scoring algorithms</a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/pyActigraphy-Intro.ipynb.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput,
+div.nbinput div.prompt,
+div.nbinput div.input_area,
+div.nbinput div[class*=highlight],
+div.nbinput div[class*=highlight] pre,
+div.nboutput,
+div.nbinput div.prompt,
+div.nbinput div.output_area,
+div.nboutput div[class*=highlight],
+div.nboutput div[class*=highlight] pre {
+    background: none;
+    border: none;
+    padding: 0 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+/* avoid gaps between output lines */
+div.nboutput div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput,
+div.nboutput {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput,
+    div.nboutput {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput div.prompt pre {
+    color: #303F9F;
+}
+
+/* output prompt */
+div.nboutput div.prompt pre {
+    color: #D84315;
+}
+
+/* all prompts */
+div.nbinput div.prompt,
+div.nboutput div.prompt {
+    min-width: 9ex;
+    padding-top: 0.4em;
+    padding-right: 0.4em;
+    text-align: right;
+    flex: 0;
+}
+@media (max-width: 540px) {
+    div.nbinput div.prompt,
+    div.nboutput div.prompt {
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput div.prompt.empty {
+        padding: 0;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput div.prompt pre,
+div.nboutput div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput div.input_area,
+div.nboutput div.output_area {
+    padding: 0.4em;
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput div.input_area,
+    div.nboutput div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput div.input_area {
+    border: 1px solid #cfcfcf;
+    border-radius: 2px;
+    background: #f7f7f7;
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.pngmath center alignment in output cells */
+div.nboutput div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+</style>
+<div class="section" id="Notebook-to-analyze-actigraphy-data">
+<h1>Notebook to analyze actigraphy data<a class="headerlink" href="#Notebook-to-analyze-actigraphy-data" title="Permalink to this headline">¶</a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pyActigraphy</span> <span class="k">as</span> <span class="nn">actimetry</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">plotly.plotly</span> <span class="k">as</span> <span class="nn">py</span>
+<span class="kn">from</span> <span class="nn">plotly</span> <span class="k">import</span> <span class="n">tools</span>
+<span class="kn">from</span> <span class="nn">plotly</span> <span class="k">import</span> <span class="n">__version__</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">__version__</span><span class="p">)</span> <span class="c1"># requires version &gt;= 1.9.0</span>
+
+<span class="kn">from</span> <span class="nn">plotly.graph_objs</span> <span class="k">import</span> <span class="n">FigureWidget</span><span class="p">,</span> <span class="n">Layout</span><span class="p">,</span> <span class="n">Scatter</span>
+<span class="c1">#from plotly.offline import init_notebook_mode</span>
+
+<span class="c1">#init_notebook_mode(connected=False)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+3.4.1
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># create objects for layout and traces</span>
+<span class="n">layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">()</span><span class="c1">#autosize=False, width=1000, height=800, title=&quot;&quot;,xaxis=dict(title=&quot;&quot;), showlegend=True)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Read-an-individual-actigraphy-file">
+<h2>Read an individual actigraphy file<a class="headerlink" href="#Read-an-individual-actigraphy-file" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span> <span class="o">=</span> <span class="n">actimetry</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw_awd</span><span class="p">(</span><span class="s1">&#39;../../pyActigraphy/tests/data/test_sample.AWD&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="…-and-retrieve-header-info">
+<h3>… and retrieve header info<a class="headerlink" href="#…-and-retrieve-header-info" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[6]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&#39;TEST_SAMPLE&#39;
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">start_time</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[7]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Timestamp(&#39;2018-01-01 08:30:00&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">duration</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[8]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Timedelta(&#39;8 days 03:18:00&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">uuid</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[9]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>&#39;myUUID&#39;
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">frequency</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Out[10]:
+</pre></div>
+</div>
+<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
+<span></span>Timedelta(&#39;0 days 00:01:00&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Plot-the-data">
+<h3>Plot the data<a class="headerlink" href="#Plot-the-data" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">layout</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Actigraphy data&quot;</span><span class="p">,</span><span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Date time&quot;</span><span class="p">),</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">FigureWidget</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">data</span><span class="p">)],</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "c6757d151ade404ba416d2c5c1bce369", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+</div>
+</div>
+<div class="section" id="Binary-data">
+<h2>Binary data<a class="headerlink" href="#Binary-data" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">binary</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">FigureWidget</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">binary</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">binary</span><span class="p">)],</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "7ab10ba1ecae43f5890b45f1e0c3fd06", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="section" id="Create-mask-for-periods-of-inactivity">
+<h3>Create mask for periods of inactivity<a class="headerlink" href="#Create-mask-for-periods-of-inactivity" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">inactivity_length</span> <span class="o">=</span> <span class="mi">240</span> <span class="c1"># times the acquisition frequency</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">create_inactivity_mask</span><span class="p">(</span><span class="n">inactivity_length</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">layout</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Inactivity mask&quot;</span><span class="p">,</span><span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Date time&quot;</span><span class="p">),</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">FigureWidget</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">mask</span><span class="p">)],</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"model_id": "ca11004df9504611835d5abdac5cf6c3", "version_major": 2, "version_minor": 0}</script></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1">#enable masking</span>
+<span class="n">raw</span><span class="o">.</span><span class="n">mask_inactivity</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="Hourly-average-activity">
+<h2>Hourly average activity<a class="headerlink" href="#Hourly-average-activity" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">resampling_freq</span> <span class="o">=</span> <span class="s1">&#39;15min&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">average_daily_activity</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">average_daily_activity</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="n">resampling_freq</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">layout</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Average hourly activity&quot;</span><span class="p">,</span><span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Date time&quot;</span><span class="p">),</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [59]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">FigureWidget</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">average_daily_activity</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">average_daily_activity</span><span class="p">)</span>
+<span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+<span class="ansi-red-fg">---------------------------------------------------------------------------</span>
+<span class="ansi-red-fg">AttributeError</span>                            Traceback (most recent call last)
+<span class="ansi-green-fg">&lt;ipython-input-59-8b805a6d0f76&gt;</span> in <span class="ansi-cyan-fg">&lt;module&gt;</span><span class="ansi-blue-fg">()</span>
+<span class="ansi-green-intense-fg ansi-bold">      1</span> FigureWidget(data=[
+<span class="ansi-green-fg">----&gt; 2</span><span class="ansi-red-fg">     </span>Scatter<span class="ansi-blue-fg">(</span>x<span class="ansi-blue-fg">=</span>average_daily_activity<span class="ansi-blue-fg">.</span>index<span class="ansi-blue-fg">.</span>value<span class="ansi-blue-fg">,</span> y<span class="ansi-blue-fg">=</span>average_daily_activity<span class="ansi-blue-fg">)</span>
+<span class="ansi-green-intense-fg ansi-bold">      3</span> ], layout=layout)
+
+<span class="ansi-red-fg">AttributeError</span>: &#39;TimedeltaIndex&#39; object has no attribute &#39;value&#39;
+</pre></div></div>
+</div>
+</div>
+<div class="section" id="Activity-onset/offset-time">
+<h2>Activity onset/offset time<a class="headerlink" href="#Activity-onset/offset-time" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">help</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">AonT</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">AonT</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">AoffT</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;15min&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Total-daily-average-activity">
+<h2>Total daily average activity<a class="headerlink" href="#Total-daily-average-activity" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">ADAT</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">help</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">ADATp</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">ADATp</span><span class="p">(</span><span class="s1">&#39;5D&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Interdaily-stability-(IS)">
+<h2>Interdaily stability (IS)<a class="headerlink" href="#Interdaily-stability-(IS)" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Default settings: resampling rate=1H, binarize data, threshold=4</span>
+<span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Custom settings: resampling rate=&#39;30min&#39;, binarize data, threshold=4</span>
+<span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;30min&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Custom settings: resampling rate=&#39;5min&#39;, non-binarize data</span>
+<span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">duration</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">ISp</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="s1">&#39;5D&#39;</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">help</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">ISm</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">ISm</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">ISm</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">ISm</span><span class="p">(</span><span class="n">freqs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;10min&#39;</span><span class="p">,</span><span class="s1">&#39;30min&#39;</span><span class="p">,</span><span class="s1">&#39;1H&#39;</span><span class="p">],</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Intradaily-variability-(IV)">
+<h2>Intradaily variability (IV)<a class="headerlink" href="#Intradaily-variability-(IV)" title="Permalink to this headline">¶</a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Default settings: resampling rate=1H, raw data</span>
+<span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Custom settings: resampling rate=&#39;30min&#39;, binarize data, threshold=4</span>
+<span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;30min&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="c1"># Custom settings: resampling rate=&#39;5min&#39;, non-binarize data</span>
+<span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IVp</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="s1">&#39;5D&#39;</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IVm</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IVm</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IVm</span><span class="p">(</span><span class="n">freqs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;10min&#39;</span><span class="p">,</span><span class="s1">&#39;30min&#39;</span><span class="p">,</span><span class="s1">&#39;1H&#39;</span><span class="p">],</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Least-and-most-active-periods-(L5-&amp;-M10)">
+<h2>Least and most active periods (L5 &amp; M10)<a class="headerlink" href="#Least-and-most-active-periods-(L5-&-M10)" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="L5,-mean-activity-of-the-least-active-5-hour-period">
+<h3>L5, mean activity of the least active 5-hour period<a class="headerlink" href="#L5,-mean-activity-of-the-least-active-5-hour-period" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">L5</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">L5</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">L5p</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="s1">&#39;5D&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="M10,-the-most-active-10-hour-period">
+<h3>M10, the most active 10-hour period<a class="headerlink" href="#M10,-the-most-active-10-hour-period" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">M10</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">M10p</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="s1">&#39;5D&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Relative-amplitude">
+<h3>Relative amplitude<a class="headerlink" href="#Relative-amplitude" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">RAp</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="s1">&#39;5D&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="Fragmentation">
+<h2>Fragmentation<a class="headerlink" href="#Fragmentation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="Quantity-the-Rest-to-activity-transition-probability">
+<h3>Quantity the Rest-to-activity transition probability<a class="headerlink" href="#Quantity-the-Rest-to-activity-transition-probability" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">help</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">kRA</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="Rest-to-activity-(kRA)">
+<h4>Rest to activity (kRA)<a class="headerlink" href="#Rest-to-activity-(kRA)" title="Permalink to this headline">¶</a></h4>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">pRA</span><span class="p">,</span> <span class="n">pRA_weights</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">pRA</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s1">&#39;00:00:00&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;8H&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">layout</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Rest-&gt;Activity transition probability&quot;</span><span class="p">,</span><span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Time [min]&quot;</span><span class="p">),</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">FigureWidget</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span>
+    <span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">pRA</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">pRA</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers&#39;</span><span class="p">)</span>
+<span class="p">],</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">kRA</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">kRA</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s1">&#39;00:00:00&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;8H&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Activity-to-rest-(kAR)">
+<h4>Activity to rest (kAR)<a class="headerlink" href="#Activity-to-rest-(kAR)" title="Permalink to this headline">¶</a></h4>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">kAR</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">raw</span><span class="o">.</span><span class="n">kAR</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="s1">&#39;08:00:00&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;12H&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="Sleep-scoring-algorithms">
+<h2>Sleep scoring algorithms<a class="headerlink" href="#Sleep-scoring-algorithms" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="Cole-Kripke-algorithm">
+<h3>Cole-Kripke algorithm<a class="headerlink" href="#Cole-Kripke-algorithm" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">help</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">CK</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">CK</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">CK</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">layout</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Cole-Kripke Sleep scoring&quot;</span><span class="p">,</span><span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Date time&quot;</span><span class="p">),</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">FigureWidget</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">CK</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">CK</span><span class="p">)],</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Sadeh-algorithm">
+<h3>Sadeh algorithm<a class="headerlink" href="#Sadeh-algorithm" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">sadeh</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">Sadeh</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">layout</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Sadeh Sleep scoring&quot;</span><span class="p">,</span><span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Date time&quot;</span><span class="p">),</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">FigureWidget</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">sadeh</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">sadeh</span><span class="p">)],</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="SCRIPPS-algorithm">
+<h3>SCRIPPS algorithm<a class="headerlink" href="#SCRIPPS-algorithm" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">help</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">Scripps</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">Scripps</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">Scripps</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">layout</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Scripps Sleep scoring&quot;</span><span class="p">,</span><span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Date time&quot;</span><span class="p">),</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">FigureWidget</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Scripps</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">Scripps</span><span class="p">)],</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="Sleep-over-Daytime">
+<h3>Sleep over Daytime<a class="headerlink" href="#Sleep-over-Daytime" title="Permalink to this headline">¶</a></h3>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">help</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">SoD</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">SoD</span> <span class="o">=</span> <span class="n">raw</span><span class="o">.</span><span class="n">SoD</span><span class="p">(</span><span class="n">algo</span><span class="o">=</span><span class="s1">&#39;unanimous&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
+<span></span>In [ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">layout</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Sleep over Daytime&quot;</span><span class="p">,</span><span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Date time&quot;</span><span class="p">),</span> <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">FigureWidget</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="n">Scatter</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">SoD</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">SoD</span><span class="p">)],</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2018, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

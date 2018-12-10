@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.pAR
+===========================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.pAR

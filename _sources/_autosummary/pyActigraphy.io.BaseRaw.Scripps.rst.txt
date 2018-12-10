@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.Scripps
+===============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.Scripps

@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.duration
+================================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.duration

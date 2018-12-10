@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.ISm
+===========================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.ISm

@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.resampled\_light
+========================================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.resampled_light

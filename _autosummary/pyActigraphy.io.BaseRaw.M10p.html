@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pyActigraphy.io.BaseRaw.M10p &#8212; pyActigraphy 0.1.dev0 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pyActigraphy_logo.png"></span>
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.dev0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../quickstart.html">Quick Start</a></li>
+                <li><a href="../documentation.html">Documentation</a></li>
+                <li><a href="../api.html">API</a></li>
+                <li><a href="../auto_examples/index.html">Examples</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../_sources/_autosummary/pyActigraphy.io.BaseRaw.M10p.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="pyactigraphy-io-baseraw-m10p">
+<h1>pyActigraphy.io.BaseRaw.M10p<a class="headerlink" href="#pyactigraphy-io-baseraw-m10p" title="Permalink to this headline">¶</a></h1>
+<dl class="method">
+<dt id="pyActigraphy.io.BaseRaw.M10p">
+<code class="descclassname">BaseRaw.</code><code class="descname">M10p</code><span class="sig-paren">(</span><em>period='7D'</em>, <em>binarize=True</em>, <em>threshold=4</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.M10p" title="Permalink to this definition">¶</a></dt>
+<dd><p>M10 per period</p>
+<p>The M10 variable is calculated for each consecutive period found in the
+actigraphy recording.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>period</strong> (<em>str</em><em>, </em><em>optional</em>) – Time period for the calculation of IS
+Default is ‘7D’.</li>
+<li><strong>binarize</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, the data are binarized.
+Default is True.</li>
+<li><strong>threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – If binarize is set to True, data above this threshold are set to 1
+and to 0 otherwise.
+Default is 4.</li>
+<li><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, display the number of periods found in the activity
+recording, as well as the time not accounted for.
+Default is False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>m10p</strong></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of float</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The M10 <a class="reference internal" href="#rc1cfa75e4f59-1" id="id1">[1]</a> variable is calculated as the mean, per acquisition period
+, of the average daily activities during the 10 most active hours.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The value of this variable depends on the length of the
+acquisition period.</p>
+</div>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="rc1cfa75e4f59-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.
+(1997). Long-Term Fitness Training Improves the Circadian
+Rest-Activity Rhythm in Healthy Elderly Males.
+Journal of Biological Rhythms, 12(2), 146–156.
+<a class="reference external" href="http://doi.org/10.1177/074873049701200206">http://doi.org/10.1177/074873049701200206</a></td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span> <span class="o">=</span> <span class="n">pyActigraphy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw_awd</span><span class="p">(</span><span class="n">fpath</span> <span class="o">+</span> <span class="s1">&#39;SUBJECT_01.AWD&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span><span class="o">.</span><span class="n">duration</span><span class="p">()</span>
+<span class="go">Timedelta(&#39;12 days 18:41:00&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span><span class="o">.</span><span class="n">M10p</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="s1">&#39;5D&#39;</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">Number of periods: 2</span>
+<span class="go">Time unaccounted for: 2 days, 19h, 0m, 0s</span>
+<span class="go">[0.XXXX, 0.XXXX]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2018, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

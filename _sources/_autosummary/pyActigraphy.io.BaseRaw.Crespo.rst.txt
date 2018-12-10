@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.Crespo
+==============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.Crespo

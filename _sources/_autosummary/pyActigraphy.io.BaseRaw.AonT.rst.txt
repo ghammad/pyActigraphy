@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.AonT
+============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.AonT

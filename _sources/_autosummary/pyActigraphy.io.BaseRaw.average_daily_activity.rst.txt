@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.average\_daily\_activity
+================================================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.average_daily_activity

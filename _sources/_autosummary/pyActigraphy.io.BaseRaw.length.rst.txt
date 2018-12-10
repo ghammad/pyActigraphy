@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.length
+==============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.length

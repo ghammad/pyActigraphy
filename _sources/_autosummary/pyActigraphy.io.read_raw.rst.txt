@@ -1,0 +1,10 @@
+pyActigraphy.io.read_raw
+========================
+
+.. currentmodule:: pyActigraphy.io
+
+.. autofunction:: read_raw
+
+.. raw:: html
+
+    <div style='clear:both'></div>

@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.ADAT
+============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.ADAT

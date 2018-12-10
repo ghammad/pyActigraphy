@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pyActigraphy.io.reader.reader &#8212; pyActigraphy 0.1.dev0 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html"><span><img src="../../../../_static/pyActigraphy_logo.png"></span>
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.dev0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../../quickstart.html">Quick Start</a></li>
+                <li><a href="../../../../documentation.html">Documentation</a></li>
+                <li><a href="../../../../api.html">API</a></li>
+                <li><a href="../../../../auto_examples/index.html">Examples</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for pyActigraphy.io.reader.reader</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="k">import</span> <span class="n">Timedelta</span>
+<span class="kn">from</span> <span class="nn">pandas.tseries.frequencies</span> <span class="k">import</span> <span class="n">to_offset</span>
+<span class="kn">from</span> <span class="nn">pyActigraphy.metrics</span> <span class="k">import</span> <span class="n">ForwardMetricsMixin</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="k">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">..awd</span> <span class="k">import</span> <span class="n">read_raw_awd</span>
+<span class="kn">from</span> <span class="nn">..mtn</span> <span class="k">import</span> <span class="n">read_raw_mtn</span>
+<span class="kn">from</span> <span class="nn">..rpx</span> <span class="k">import</span> <span class="n">read_raw_rpx</span>
+<span class="kn">from</span> <span class="nn">pyActigraphy.filters</span> <span class="k">import</span> <span class="n">SSTLog</span>
+
+
+<div class="viewcode-block" id="RawReader"><a class="viewcode-back" href="../../../../api.html#pyActigraphy.io.RawReader">[docs]</a><span class="k">class</span> <span class="nc">RawReader</span><span class="p">(</span><span class="n">ForwardMetricsMixin</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader for multiple Raw files</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    readers: list</span>
+<span class="sd">        List of instances of RawXXX classes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader_type</span><span class="p">,</span> <span class="n">readers</span><span class="o">=</span><span class="p">[]):</span>
+
+        <span class="c1"># store reader_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__reader_type</span> <span class="o">=</span> <span class="n">reader_type</span>
+
+        <span class="c1"># store list of readers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__readers</span> <span class="o">=</span> <span class="n">readers</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sst_log</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reader_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;The type of RawXXX readers.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reader_type</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">readers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;The list of RawXXX readers.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__readers</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_reader</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">raw_reader</span><span class="o">.</span><span class="n">format</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reader_type</span><span class="p">:</span>
+            <span class="c1"># [TODO]: use isinstance instead</span>
+            <span class="c1"># and allow multiple types for the same reader</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Wrong reader type: </span><span class="si">{}</span><span class="s1">. Should be: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">raw_reader</span><span class="o">.</span><span class="n">format</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__reader_type</span>
+            <span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__readers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">raw_reader</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">mask_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">read</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">read</span><span class="o">.</span><span class="n">mask_fraction</span><span class="p">()</span> <span class="k">for</span> <span class="n">read</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">start_time</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">duration</span><span class="p">()</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">resampled_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span>
+        <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Data resampled at the specified frequency.</span>
+<span class="sd">        If mask_inactivity is True, inactive data (0 count) are masked.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check if resampling is possible</span>
+
+        <span class="c1"># 1. check if resampling freq is lower than th lowest acquistion freq.</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="n">to_offset</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span><span class="o">.</span><span class="n">delta</span>
+        <span class="n">freqs</span> <span class="o">=</span> <span class="p">[</span><span class="n">reader</span><span class="o">.</span><span class="n">frequency</span> <span class="k">for</span> <span class="n">reader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">freq</span> <span class="o">&lt;=</span> <span class="nb">min</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s1">&#39;Resampling frequency equal to or lower than the lowest&#39;</span> <span class="o">+</span>
+                <span class="s1">&#39; acquisition frequency found in the list of readers.&#39;</span> <span class="o">+</span>
+                <span class="s1">&#39; Returning original data.&#39;</span><span class="p">,</span>
+                <span class="ne">UserWarning</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+
+        <span class="c1"># 2. check if resampling freq is a multiple of the acquistion freq.</span>
+        <span class="k">if</span> <span class="kc">False</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">freq</span> <span class="o">%</span> <span class="n">ifreq</span><span class="p">)</span> <span class="o">==</span> <span class="n">Timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">ifreq</span> <span class="ow">in</span> <span class="n">freqs</span><span class="p">]:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s1">&#39;Resampling frequency is *not* a multiple of the&#39;</span> <span class="o">+</span>
+                <span class="s1">&#39; acquisition frequencies found in the list of readers.&#39;</span> <span class="o">+</span>
+                <span class="s1">&#39; Returning original data.&#39;</span><span class="p">,</span>
+                <span class="ne">UserWarning</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+
+        <span class="k">def</span> <span class="nf">parallel_resampling</span><span class="p">(</span><span class="n">rawReader</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">rawReader</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span>
+                <span class="n">rawReader</span><span class="o">.</span><span class="n">resampled_data</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">parallel_resampling</span><span class="p">)(</span>
+                <span class="n">rawReader</span><span class="o">=</span><span class="n">reader</span><span class="p">,</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">reader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">read_sst_log</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">input_fname</span><span class="p">,</span>
+            <span class="n">header_size</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for start/stop-time log files.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_fname: str</span>
+<span class="sd">            Path to the start/stop-time log file.</span>
+<span class="sd">        header_size: int</span>
+<span class="sd">            Header size (i.e. number of lines) of the sst log file.</span>
+<span class="sd">            Default is 1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sst_log</span> <span class="o">=</span> <span class="n">SSTLog</span><span class="p">(</span>
+            <span class="n">input_fname</span><span class="o">=</span><span class="n">input_fname</span><span class="p">,</span>
+            <span class="n">header_size</span><span class="o">=</span><span class="n">header_size</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sst_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;:class:`SSTLog` class instanciation.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sst_log</span>
+
+    <span class="k">def</span> <span class="nf">apply_sst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set start time and duration in all readers &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sst_log</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">reader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">reader</span><span class="o">.</span><span class="n">display_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sst_log</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Found an entry in SST log file for &#39;</span>
+                              <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">display_name</span><span class="p">))</span>
+                    <span class="c1"># Retrieve start_time and duration from sst_log by position</span>
+                    <span class="c1"># in order to avoid mis-spelling of the index names.</span>
+                    <span class="n">start_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sst_log</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">reader</span><span class="o">.</span><span class="n">display_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">period</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sst_log</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">reader</span><span class="o">.</span><span class="n">display_name</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="n">reader</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">start_time</span>
+                    <span class="n">reader</span><span class="o">.</span><span class="n">period</span> <span class="o">=</span> <span class="n">period</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not find an entry in SST log file for &#39;</span>
+                              <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">display_name</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not find a SST log file. Please run the read_sst_log&#39;</span>
+                  <span class="s1">&#39; function before using the `apply_sst` function.&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="read_raw"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw.html#pyActigraphy.io.read_raw">[docs]</a><span class="k">def</span> <span class="nf">read_raw</span><span class="p">(</span><span class="n">input_path</span><span class="p">,</span> <span class="n">reader_type</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for multiple raw files.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_path: str</span>
+<span class="sd">            Path to the files. Accept wild cards.</span>
+<span class="sd">            E.g. &#39;/path/to/my/files/*.csv&#39;</span>
+<span class="sd">        reader_type: str</span>
+<span class="sd">            Reader type.</span>
+<span class="sd">            Supported types: AWD (ActiWatch), MTN (MotionWatch8)</span>
+<span class="sd">            and RPX (Respironics)</span>
+<span class="sd">        n_jobs: int</span>
+<span class="sd">            Number of CPU to use for parallel reading</span>
+<span class="sd">        prefer: str</span>
+<span class="sd">            Soft hint to choose the default backendself.</span>
+<span class="sd">            Supported option:&#39;processes&#39;, &#39;threads&#39;.</span>
+<span class="sd">            See joblib package documentation for more info.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        verbose: int</span>
+<span class="sd">            Display a progress meter if set to a value &gt; 0.</span>
+<span class="sd">            Default is 0.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        raw : list</span>
+<span class="sd">            A list of instances of RawAWD, RawMTN or RawRPX</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">supported_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AWD&#39;</span><span class="p">,</span> <span class="s1">&#39;MTN&#39;</span><span class="p">,</span> <span class="s1">&#39;RPX&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">reader_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_types</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Type </span><span class="si">{0}</span><span class="s1"> unsupported. Supported types: </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">reader_type</span><span class="p">,</span> <span class="n">supported_types</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">parallel_reader</span><span class="p">(</span>
+            <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_func</span><span class="p">,</span> <span class="n">file_list</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)(</span>
+                <span class="n">delayed</span><span class="p">(</span><span class="n">read_func</span><span class="p">)(</span><span class="n">file</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span>
+            <span class="p">)</span>
+
+        <span class="n">readers</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;AWD&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
+                <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_awd</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;MTN&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
+                <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_mtn</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;RPX&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
+                <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_rpx</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span>
+            <span class="p">)</span>
+        <span class="p">}[</span><span class="n">reader_type</span><span class="p">](</span><span class="n">files</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">RawReader</span><span class="p">(</span><span class="n">reader_type</span><span class="p">,</span> <span class="n">readers</span><span class="p">)</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2018, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

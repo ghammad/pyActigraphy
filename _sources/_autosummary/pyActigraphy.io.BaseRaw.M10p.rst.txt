@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.M10p
+============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.M10p

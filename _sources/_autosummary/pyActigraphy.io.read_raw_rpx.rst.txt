@@ -1,0 +1,10 @@
+pyActigraphy.io.read_raw_rpx
+============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. autofunction:: read_raw_rpx
+
+.. raw:: html
+
+    <div style='clear:both'></div>

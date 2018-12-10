@@ -1,0 +1,1918 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>pyActigraphy.metrics.metrics &#8212; pyActigraphy 0.1.dev0 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../index.html"><span><img src="../../../_static/pyActigraphy_logo.png"></span>
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.1.dev0</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../quickstart.html">Quick Start</a></li>
+                <li><a href="../../../documentation.html">Documentation</a></li>
+                <li><a href="../../../api.html">API</a></li>
+                <li><a href="../../../auto_examples/index.html">Examples</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for pyActigraphy.metrics.metrics</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1"># from functools import lru_cache</span>
+<span class="c1"># from ..sleep import _td_format</span>
+<span class="kn">from</span> <span class="nn">statistics</span> <span class="k">import</span> <span class="n">mean</span>
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;MetricsMixin&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ForwardMetricsMixin&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_average_daily_activity&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_average_daily_total_activity&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_interdaily_stability&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_intradaily_variability&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_lmx&#39;</span><span class="p">,</span> <span class="s1">&#39;_interval_maker&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_count_consecutive_values&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_count_consecutive_zeros&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_transition_prob&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_transition_prob_sustain_region&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;_td_format&#39;</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_average_daily_activity</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the average daily activity distribution&quot;&quot;&quot;</span>
+
+    <span class="n">avgdaily</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">second</span>
+    <span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">cyclic</span><span class="p">:</span>
+        <span class="n">avgdaily</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">avgdaily</span><span class="p">,</span> <span class="n">avgdaily</span><span class="p">])</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">timedelta_range</span><span class="p">(</span>
+            <span class="n">start</span><span class="o">=</span><span class="s1">&#39;0 day&#39;</span><span class="p">,</span>
+            <span class="n">end</span><span class="o">=</span><span class="s1">&#39;2 days&#39;</span><span class="p">,</span>
+            <span class="n">freq</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span>
+            <span class="n">closed</span><span class="o">=</span><span class="s1">&#39;left&#39;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">timedelta_range</span><span class="p">(</span>
+            <span class="n">start</span><span class="o">=</span><span class="s1">&#39;0 day&#39;</span><span class="p">,</span>
+            <span class="n">end</span><span class="o">=</span><span class="s1">&#39;1 day&#39;</span><span class="p">,</span>
+            <span class="n">freq</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span>
+            <span class="n">closed</span><span class="o">=</span><span class="s1">&#39;left&#39;</span>
+        <span class="p">)</span>
+
+    <span class="n">avgdaily</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+
+    <span class="k">return</span> <span class="n">avgdaily</span>
+
+
+<span class="k">def</span> <span class="nf">_average_daily_total_activity</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;1D&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_interdaily_stability</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the interdaily stability&quot;&quot;&quot;</span>
+
+    <span class="n">d_24h</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">second</span><span class="p">]</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">var</span><span class="p">()</span>
+
+    <span class="n">d_1h</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">var</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">d_24h</span> <span class="o">/</span> <span class="n">d_1h</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_intradaily_variability</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the intradaily variability&quot;&quot;&quot;</span>
+
+    <span class="n">c_1h</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="n">d_1h</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">var</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">c_1h</span> <span class="o">/</span> <span class="n">d_1h</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_lmx</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the start time and mean activity of the period of</span>
+<span class="sd">    lowest/highest activity&quot;&quot;&quot;</span>
+
+    <span class="n">avgdaily</span> <span class="o">=</span> <span class="n">_average_daily_activity</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">n_epochs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">period</span><span class="p">)</span><span class="o">/</span><span class="n">avgdaily</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+
+    <span class="n">mean_activity</span> <span class="o">=</span> <span class="n">avgdaily</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">period</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="o">-</span><span class="n">n_epochs</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">lowest</span><span class="p">:</span>
+        <span class="n">t_start</span> <span class="o">=</span> <span class="n">mean_activity</span><span class="o">.</span><span class="n">idxmin</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">t_start</span> <span class="o">=</span> <span class="n">mean_activity</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span>
+
+    <span class="n">lmx</span> <span class="o">=</span> <span class="n">mean_activity</span><span class="p">[</span><span class="n">t_start</span><span class="p">]</span><span class="o">/</span><span class="n">n_epochs</span>
+    <span class="k">return</span> <span class="n">t_start</span><span class="p">,</span> <span class="n">lmx</span>
+
+
+<span class="k">def</span> <span class="nf">_interval_maker</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="c1"># TODO: test if period is a valid string</span>
+
+    <span class="p">(</span><span class="n">num_periods</span><span class="p">,</span> <span class="n">td</span><span class="p">)</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Number of periods: </span><span class="si">{0}</span><span class="se">\n</span><span class="s2"> Time unaccounted for: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">num_periods</span><span class="p">,</span>
+            <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> days, </span><span class="si">{}</span><span class="s1">h, </span><span class="si">{}</span><span class="s1">m, </span><span class="si">{}</span><span class="s1">s&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">td</span><span class="o">.</span><span class="n">days</span><span class="p">,</span>
+                <span class="n">td</span><span class="o">.</span><span class="n">seconds</span><span class="o">//</span><span class="mi">3600</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">td</span><span class="o">.</span><span class="n">seconds</span><span class="o">//</span><span class="mi">60</span><span class="p">)</span> <span class="o">%</span> <span class="mi">60</span><span class="p">,</span>
+                <span class="n">td</span><span class="o">.</span><span class="n">seconds</span> <span class="o">%</span> <span class="mi">60</span>
+            <span class="p">)</span>
+        <span class="p">))</span>
+
+    <span class="n">intervals</span> <span class="o">=</span> <span class="p">[(</span>
+        <span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">*</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">period</span><span class="p">),</span>
+        <span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">period</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_periods</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">intervals</span>
+
+
+<span class="k">def</span> <span class="nf">_count_consecutive_values</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Create a count list for identical consecutive numbers</span>
+<span class="sd">    together with a state for each series:</span>
+<span class="sd">     - 1 if the sum of the consecutive series numbers is positive</span>
+<span class="sd">     - 0 otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">consecutive_values</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
+        <span class="c1"># create identical &#39;labels&#39; for identical consecutive numbers</span>
+        <span class="p">[</span><span class="n">data</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">ne</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()]</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)])</span>
+    <span class="c1"># rename columns</span>
+    <span class="n">consecutive_values</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;counts&#39;</span><span class="p">,</span> <span class="s1">&#39;state&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">consecutive_values</span>
+
+
+<span class="k">def</span> <span class="nf">_count_consecutive_zeros</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">ccz</span> <span class="o">=</span> <span class="n">_count_consecutive_values</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">ccz</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ccz</span><span class="p">[</span><span class="s1">&#39;counts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+    <span class="n">ccz</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ccz</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ccz</span><span class="p">[</span><span class="n">ccz</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_transition_prob</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">from_zero_to_one</span><span class="p">):</span>
+
+    <span class="c1"># Create a list of consecutive sequence of active/rest epochs</span>
+    <span class="n">ccv</span> <span class="o">=</span> <span class="n">_count_consecutive_values</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="c1"># filter out sequences of active epochs</span>
+    <span class="k">if</span> <span class="n">from_zero_to_one</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">bouts</span> <span class="o">=</span> <span class="n">ccv</span><span class="p">[</span><span class="n">ccv</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">][</span><span class="s1">&#39;counts&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">bouts</span> <span class="o">=</span> <span class="n">ccv</span><span class="p">[</span><span class="n">ccv</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">][</span><span class="s1">&#39;counts&#39;</span><span class="p">]</span>
+    <span class="c1"># Count the number of sequences of length N for N=1...Nmax</span>
+    <span class="n">Nt</span> <span class="o">=</span> <span class="n">bouts</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">bouts</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="c1"># Create its reverse cumulative sum so that Nt at index t is equal to</span>
+    <span class="c1"># the number of sequences of lengths t or longer.</span>
+    <span class="n">Nt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">Nt</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="c1"># Rest-&gt;Activity (or Activity-&gt;Rest) transition probability at time t,</span>
+    <span class="c1"># defined as the number of sequences for which R-&gt;A at time t+1 / Nt</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">Nt</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">Nt</span>
+    <span class="c1"># Correct pRA for discontinuities due to sparse data</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">prob</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+    <span class="c1"># Define the weights as the square root of the number of runs</span>
+    <span class="c1"># contributing to each probability estimate</span>
+    <span class="n">prob_weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Nt</span><span class="o">+</span><span class="n">Nt</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">prob</span><span class="p">,</span> <span class="n">prob_weights</span>
+
+
+<span class="k">def</span> <span class="nf">_transition_prob_sustain_region</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">prob_weights</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+    <span class="c1"># Fit the &#39;prob&#39; distribution with a LOWESS</span>
+    <span class="n">lowess</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">nonparametric</span><span class="o">.</span><span class="n">lowess</span><span class="p">(</span>
+        <span class="n">prob</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">prob</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">return_sorted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="n">frac</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="n">it</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Calculate the pRA std</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">prob</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
+    <span class="c1"># Check which residuals are below 1 sigma</span>
+    <span class="n">prob_residuals_below_one_std</span> <span class="o">=</span> <span class="n">_count_consecutive_values</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">prob</span><span class="o">-</span><span class="n">lowess</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">std</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Find the index of the longest series of consecutive values below 1 SD</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">prob_residuals_below_one_std</span><span class="p">[</span>
+        <span class="n">prob_residuals_below_one_std</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="p">][</span><span class="s1">&#39;counts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span>
+
+    <span class="c1"># Calculate the cumulative sum of the indices of series of consecutive</span>
+    <span class="c1"># values of residuals below 1 SD in order to find the number of points</span>
+    <span class="c1"># before the &quot;index&quot;.</span>
+    <span class="n">prob_cumsum</span> <span class="o">=</span> <span class="n">prob_residuals_below_one_std</span><span class="p">[</span><span class="s1">&#39;counts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+
+    <span class="c1"># Calculate the start and end indices</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">prob_cumsum</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">min</span><span class="p">():</span>
+        <span class="n">start_index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">start_index</span> <span class="o">=</span> <span class="n">prob_cumsum</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="c1"># start_index = prob_cumsum[index]+1</span>
+    <span class="n">end_index</span> <span class="o">=</span> <span class="n">prob_cumsum</span><span class="p">[</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">kProb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span>
+        <span class="n">prob</span><span class="p">[</span><span class="n">start_index</span><span class="p">:</span><span class="n">end_index</span><span class="p">],</span>
+        <span class="n">weights</span><span class="o">=</span><span class="n">prob_weights</span><span class="p">[</span><span class="n">start_index</span><span class="p">:</span><span class="n">end_index</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">kProb</span>
+
+
+<span class="k">def</span> <span class="nf">_td_format</span><span class="p">(</span><span class="n">td</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">{:02}</span><span class="s1">:</span><span class="si">{:02}</span><span class="s1">:</span><span class="si">{:02}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">td</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">hours</span><span class="p">,</span>
+        <span class="n">td</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">minutes</span><span class="p">,</span>
+        <span class="n">td</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">seconds</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">MetricsMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">average_daily_activity</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average daily activity distribution</span>
+
+<span class="sd">        Calculate the daily profile of activity. Data are averaged over all the</span>
+<span class="sd">        days.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        freq: str, optional</span>
+<span class="sd">            Data resampling frequency.</span>
+<span class="sd">            Cf. #timeseries-offset-aliases in</span>
+<span class="sd">            &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        cyclic: bool, optional</span>
+<span class="sd">            If set to True, two daily profiles are concatenated to ensure</span>
+<span class="sd">            continuity between the last point of the day and the first one.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        raw : pandas.Series</span>
+<span class="sd">            A Series containing the daily activity profile with a 24h index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resampled_data</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
+        <span class="n">avgdaily</span> <span class="o">=</span> <span class="n">_average_daily_activity</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="n">cyclic</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">avgdaily</span>
+
+    <span class="k">def</span> <span class="nf">average_daily_light</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average daily light distribution</span>
+
+<span class="sd">        Calculate the daily profile of light exposure (in lux). Data are</span>
+<span class="sd">        averaged over all the days.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        freq: str, optional</span>
+<span class="sd">            Data resampling frequency.</span>
+<span class="sd">            Cf. #timeseries-offset-aliases in</span>
+<span class="sd">            &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        cyclic: bool, optional</span>
+<span class="sd">            If set to True, two daily profiles are concatenated to ensure</span>
+<span class="sd">            continuity between the last point of the day and the first one.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        raw : pandas.Series</span>
+<span class="sd">            A Series containing the daily profile of light exposure with a 24h</span>
+<span class="sd">            index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resampled_light</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
+
+        <span class="n">avgdaily_light</span> <span class="o">=</span> <span class="n">_average_daily_activity</span><span class="p">(</span><span class="n">light</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="n">cyclic</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">avgdaily_light</span>
+
+    <span class="k">def</span> <span class="nf">ADAT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Total average daily activity</span>
+
+<span class="sd">        Calculate the total activity counts, averaged over all the days.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        adat : int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">binarize</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">adat</span> <span class="o">=</span> <span class="n">_average_daily_total_activity</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">adat</span>
+
+    <span class="k">def</span> <span class="nf">ADATp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Total average daily activity per period</span>
+
+<span class="sd">        Calculate the total activity counts, averaged over each consecutive</span>
+<span class="sd">        period contained in the data. The number of periods</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        period: str, optional</span>
+<span class="sd">            Time length of the period to be considered. Must be understandable</span>
+<span class="sd">            by pandas.Timedelta</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            If set to True, display the number of periods found in the data.</span>
+<span class="sd">            Also display the time not accounted for.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        adatp : list of int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">binarize</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">_interval_maker</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">_average_daily_total_activity</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">intervals</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">def</span> <span class="nf">L5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;L5</span>
+
+<span class="sd">        Mean activity during the 5 least active hours of the day.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        l5: float</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        The L5 [1]_ variable is calculated as the mean, per acquisition period,</span>
+<span class="sd">        of the average daily activities during the 5 least active hours.</span>
+
+<span class="sd">        .. warning:: The value of this variable depends on the length of the</span>
+<span class="sd">                     acquisition period.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.</span>
+<span class="sd">               (1997). Long-Term Fitness Training Improves the Circadian</span>
+<span class="sd">               Rest-Activity Rhythm in Healthy Elderly Males.</span>
+<span class="sd">               Journal of Biological Rhythms, 12(2), 146–156.</span>
+<span class="sd">               http://doi.org/10.1177/074873049701200206</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.L5()</span>
+<span class="sd">            0.XXXX</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.L5(binarize=False)</span>
+<span class="sd">            0.XXXX</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">binarize</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="c1"># n_epochs = int(pd.Timedelta(&#39;5H&#39;)/self.frequency)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">l5</span> <span class="o">=</span> <span class="n">_lmx</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;5H&#39;</span><span class="p">,</span> <span class="n">lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">l5</span>
+
+    <span class="k">def</span> <span class="nf">M10</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;M10</span>
+
+<span class="sd">        Mean activity during the 10 most active hours of the day.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        m10: float</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        The M10 [1]_ variable is calculated as the mean, per acquisition period</span>
+<span class="sd">        , of the average daily activities during the 10 most active hours.</span>
+
+<span class="sd">        .. warning:: The value of this variable depends on the length of the</span>
+<span class="sd">                     acquisition period.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.</span>
+<span class="sd">               (1997). Long-Term Fitness Training Improves the Circadian</span>
+<span class="sd">               Rest-Activity Rhythm in Healthy Elderly Males.</span>
+<span class="sd">               Journal of Biological Rhythms, 12(2), 146–156.</span>
+<span class="sd">               http://doi.org/10.1177/074873049701200206</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.M10()</span>
+<span class="sd">            0.XXXX</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.M10(binarize=False)</span>
+<span class="sd">            0.XXXX</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">binarize</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="c1"># n_epochs = int(pd.Timedelta(&#39;10H&#39;)/self.frequency)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">m10</span> <span class="o">=</span> <span class="n">_lmx</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;10H&#39;</span><span class="p">,</span> <span class="n">lowest</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">m10</span>
+
+    <span class="k">def</span> <span class="nf">RA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Relative rest/activity amplitude</span>
+
+<span class="sd">        Relative amplitude between the mean activity during the 10 most active</span>
+<span class="sd">        hours of the day and the mean activity during the 5 least active hours</span>
+<span class="sd">        of the day.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ra: float</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        The RA [1]_ variable is calculated as:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            RA = \frac{M10 - L5}{M10 + L5}</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.</span>
+<span class="sd">               (1997). Long-Term Fitness Training Improves the Circadian</span>
+<span class="sd">               Rest-Activity Rhythm in Healthy Elderly Males.</span>
+<span class="sd">               Journal of Biological Rhythms, 12(2), 146–156.</span>
+<span class="sd">               http://doi.org/10.1177/074873049701200206</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.RA()</span>
+<span class="sd">            0.XXXX</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.RA(binarize=False)</span>
+<span class="sd">            0.XXXX</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">binarize</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="c1"># n_epochs = int(pd.Timedelta(&#39;5H&#39;)/self.frequency)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">l5</span> <span class="o">=</span> <span class="n">_lmx</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;5H&#39;</span><span class="p">,</span> <span class="n">lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">m10</span> <span class="o">=</span> <span class="n">_lmx</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;10H&#39;</span><span class="p">,</span> <span class="n">lowest</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">m10</span><span class="o">-</span><span class="n">l5</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">m10</span><span class="o">+</span><span class="n">l5</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">L5p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;L5 per period</span>
+
+<span class="sd">        The L5 variable is calculated for each consecutive period found in the</span>
+<span class="sd">        actigraphy recording.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        period: str, optional</span>
+<span class="sd">            Time period for the calculation of IS</span>
+<span class="sd">            Default is &#39;7D&#39;.</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            If set to True, display the number of periods found in the activity</span>
+<span class="sd">            recording, as well as the time not accounted for.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        l5p: list of float</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        The L5 [1]_ variable is calculated as the mean, per acquisition period,</span>
+<span class="sd">        of the average daily activities during the 5 least active hours.</span>
+
+<span class="sd">        .. warning:: The value of this variable depends on the length of the</span>
+<span class="sd">                     acquisition period.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.</span>
+<span class="sd">               (1997). Long-Term Fitness Training Improves the Circadian</span>
+<span class="sd">               Rest-Activity Rhythm in Healthy Elderly Males.</span>
+<span class="sd">               Journal of Biological Rhythms, 12(2), 146–156.</span>
+<span class="sd">               http://doi.org/10.1177/074873049701200206</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.duration()</span>
+<span class="sd">            Timedelta(&#39;12 days 18:41:00&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.L5p(period=&#39;5D&#39;,verbose=True)</span>
+<span class="sd">            Number of periods: 2</span>
+<span class="sd">            Time unaccounted for: 2 days, 19h, 0m, 0s</span>
+<span class="sd">            [0.XXXX, 0.XXXX]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">binarize</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="c1"># n_epochs = int(pd.Timedelta(&#39;5H&#39;)/self.frequency)</span>
+
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">_interval_maker</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">_lmx</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                <span class="s1">&#39;5H&#39;</span><span class="p">,</span>
+                <span class="n">lowest</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">intervals</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">M10p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;M10 per period</span>
+
+<span class="sd">        The M10 variable is calculated for each consecutive period found in the</span>
+<span class="sd">        actigraphy recording.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        period: str, optional</span>
+<span class="sd">            Time period for the calculation of IS</span>
+<span class="sd">            Default is &#39;7D&#39;.</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            If set to True, display the number of periods found in the activity</span>
+<span class="sd">            recording, as well as the time not accounted for.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        m10p: list of float</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        The M10 [1]_ variable is calculated as the mean, per acquisition period</span>
+<span class="sd">        , of the average daily activities during the 10 most active hours.</span>
+
+<span class="sd">        .. warning:: The value of this variable depends on the length of the</span>
+<span class="sd">                     acquisition period.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.</span>
+<span class="sd">               (1997). Long-Term Fitness Training Improves the Circadian</span>
+<span class="sd">               Rest-Activity Rhythm in Healthy Elderly Males.</span>
+<span class="sd">               Journal of Biological Rhythms, 12(2), 146–156.</span>
+<span class="sd">               http://doi.org/10.1177/074873049701200206</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.duration()</span>
+<span class="sd">            Timedelta(&#39;12 days 18:41:00&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.M10p(period=&#39;5D&#39;,verbose=True)</span>
+<span class="sd">            Number of periods: 2</span>
+<span class="sd">            Time unaccounted for: 2 days, 19h, 0m, 0s</span>
+<span class="sd">            [0.XXXX, 0.XXXX]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">binarize</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="c1"># n_epochs = int(pd.Timedelta(&#39;10H&#39;)/self.frequency)</span>
+
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">_interval_maker</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">_lmx</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                <span class="s1">&#39;10H&#39;</span><span class="p">,</span>
+                <span class="n">lowest</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">intervals</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">RAp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;RA per period</span>
+
+<span class="sd">        The RA variable is calculated for each consecutive period found in the</span>
+<span class="sd">        actigraphy recording.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        period: str, optional</span>
+<span class="sd">            Time period for the calculation of IS</span>
+<span class="sd">            Default is &#39;7D&#39;.</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            If set to True, display the number of periods found in the activity</span>
+<span class="sd">            recording, as well as the time not accounted for.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        rap: list of float</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        The RA [1]_ variable is calculated as:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            RA = \frac{M10 - L5}{M10 + L5}</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.</span>
+<span class="sd">               (1997). Long-Term Fitness Training Improves the Circadian</span>
+<span class="sd">               Rest-Activity Rhythm in Healthy Elderly Males.</span>
+<span class="sd">               Journal of Biological Rhythms, 12(2), 146–156.</span>
+<span class="sd">               http://doi.org/10.1177/074873049701200206</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.duration()</span>
+<span class="sd">            Timedelta(&#39;12 days 18:41:00&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.RAp(period=&#39;5D&#39;,verbose=True)</span>
+<span class="sd">            Number of periods: 2</span>
+<span class="sd">            Time unaccounted for: 2 days, 19h, 0m, 0s</span>
+<span class="sd">            [0.XXXX, 0.XXXX]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">binarize</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="c1"># n_epochs = int(pd.Timedelta(&#39;5H&#39;)/self.frequency)</span>
+
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">_interval_maker</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">intervals</span><span class="p">:</span>
+            <span class="n">data_subset</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">l5</span> <span class="o">=</span> <span class="n">_lmx</span><span class="p">(</span><span class="n">data_subset</span><span class="p">,</span> <span class="s1">&#39;5H&#39;</span><span class="p">,</span> <span class="n">lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">m10</span> <span class="o">=</span> <span class="n">_lmx</span><span class="p">(</span><span class="n">data_subset</span><span class="p">,</span> <span class="s1">&#39;10H&#39;</span><span class="p">,</span> <span class="n">lowest</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">m10</span><span class="o">-</span><span class="n">l5</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">m10</span><span class="o">+</span><span class="n">l5</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="c1"># @lru_cache(maxsize=6)</span>
+    <span class="k">def</span> <span class="nf">IS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Interdaily stability</span>
+
+<span class="sd">        The Interdaily stability (IS) quantifies the repeatibilty of the</span>
+<span class="sd">        daily rest-activity pattern over each day contained in the activity</span>
+<span class="sd">        recording.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        freq: str, optional</span>
+<span class="sd">            Data resampling `frequency string</span>
+<span class="sd">            &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;`_.</span>
+<span class="sd">            Default is &#39;1H&#39;.</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        is: float</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        This variable is defined in ref [1]_:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            IS = \frac{d^{24h}}{d^{1h}}</span>
+
+<span class="sd">        with:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}</span>
+
+<span class="sd">        where :math:`x_{i}` is the number of active (counts higher than a</span>
+<span class="sd">        predefined threshold) minutes during the :math:`i^{th}` period,</span>
+<span class="sd">        :math:`\bar{x}` is the mean of all data and :math:`n` is the number of</span>
+<span class="sd">        periods covered by the actigraphy data and with:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            d^{24h} = \sum_{i}^{p} \frac{</span>
+<span class="sd">                      \left( \bar{x}_{h,i} - \bar{x} \right)^{2}</span>
+<span class="sd">                      }{p}</span>
+
+<span class="sd">        where :math:`\bar{x}^{h,i}` is the average number of active minutes</span>
+<span class="sd">        over the :math:`i^{th}` period and :math:`p` is the number of periods</span>
+<span class="sd">        per day. The average runs over all the days.</span>
+
+<span class="sd">        For the record, tt is the 24h value from the chi-square periodogram</span>
+<span class="sd">        (Sokolove and Bushel1 1978).</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Witting W., Kwa I.H., Eikelenboom P., Mirmiran M., Swaab D.F.</span>
+<span class="sd">               Alterations in the circadian rest–activity rhythm in aging and</span>
+<span class="sd">               Alzheimer׳s disease. Biol Psychiatry. 1990;27:563–572.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.IS()</span>
+<span class="sd">            0.6900175913031027</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.IS(freq=&#39;30min&#39;, binarize=True, threshold=4)</span>
+<span class="sd">            0.6245582891144925</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.IS(freq=&#39;1H&#39;, binarize=False)</span>
+<span class="sd">            0.5257020914453097</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resampled_data</span><span class="p">(</span>
+            <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+            <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">_interdaily_stability</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">ISm</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">freqs</span><span class="o">=</span><span class="p">[</span>
+            <span class="s1">&#39;1T&#39;</span><span class="p">,</span> <span class="s1">&#39;2T&#39;</span><span class="p">,</span> <span class="s1">&#39;3T&#39;</span><span class="p">,</span> <span class="s1">&#39;4T&#39;</span><span class="p">,</span> <span class="s1">&#39;5T&#39;</span><span class="p">,</span> <span class="s1">&#39;6T&#39;</span><span class="p">,</span> <span class="s1">&#39;8T&#39;</span><span class="p">,</span> <span class="s1">&#39;9T&#39;</span><span class="p">,</span> <span class="s1">&#39;10T&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;12T&#39;</span><span class="p">,</span> <span class="s1">&#39;15T&#39;</span><span class="p">,</span> <span class="s1">&#39;16T&#39;</span><span class="p">,</span> <span class="s1">&#39;18T&#39;</span><span class="p">,</span> <span class="s1">&#39;20T&#39;</span><span class="p">,</span> <span class="s1">&#39;24T&#39;</span><span class="p">,</span> <span class="s1">&#39;30T&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;32T&#39;</span><span class="p">,</span> <span class="s1">&#39;36T&#39;</span><span class="p">,</span> <span class="s1">&#39;40T&#39;</span><span class="p">,</span> <span class="s1">&#39;45T&#39;</span><span class="p">,</span> <span class="s1">&#39;48T&#39;</span><span class="p">,</span> <span class="s1">&#39;60T&#39;</span>
+        <span class="p">],</span>
+        <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average interdaily stability</span>
+
+<span class="sd">        ISm [1]_ is the average of the IS values obtained with resampling</span>
+<span class="sd">        periods divisors of 1440 between 1 and 60 min.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        freq: str, optional</span>
+<span class="sd">            Data resampling `frequency strings</span>
+<span class="sd">            &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;`_.</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is set to 4.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ism: float</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        By default, the resampling periods are 1, 2, 3, 4, 5, 6, 8, 9, 10, 12,</span>
+<span class="sd">        15, 16, 18, 20, 24, 30, 32, 36, 40, 45, 48 and 60 min.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Gonçalves, B. S., Cavalcanti, P. R., Tavares, G. R.,</span>
+<span class="sd">               Campos, T. F., &amp; Araujo, J. F. (2014). Nonparametric methods in</span>
+<span class="sd">               actigraphy: An update. Sleep science (Sao Paulo, Brazil), 7(3),</span>
+<span class="sd">               158-64.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.ISm()</span>
+<span class="sd">            0.5758268227551039</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.ISm(binarize=False)</span>
+<span class="sd">            0.3915874151855646</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.ISm(freqs=[&#39;10min&#39;,&#39;30min&#39;,&#39;1H&#39;], binarize=False)</span>
+<span class="sd">            0.44598210450842063</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resampled_data</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span> <span class="k">for</span> <span class="n">freq</span> <span class="ow">in</span> <span class="n">freqs</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">mean</span><span class="p">([</span><span class="n">_interdaily_stability</span><span class="p">(</span><span class="n">datum</span><span class="p">)</span> <span class="k">for</span> <span class="n">datum</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">ISp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span>
+            <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Interdaily stability per period</span>
+
+<span class="sd">        The IS is calculated for each consecutive period found in the</span>
+<span class="sd">        actigraphy recording.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        period: str, optional</span>
+<span class="sd">            Time period for the calculation of IS</span>
+<span class="sd">            Default is &#39;7D&#39;.</span>
+<span class="sd">        freq: str, optional</span>
+<span class="sd">            Data resampling `frequency string</span>
+<span class="sd">            &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;`_.</span>
+<span class="sd">            Default is &#39;1H&#39;.</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            If set to True, display the number of periods found in the activity</span>
+<span class="sd">            recording, as well as the time not accounted for.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        isp: list of float</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        Periods are consecutive and all of the required duration. If the last</span>
+<span class="sd">        consecutive period is shorter than required, the IS is not calculated</span>
+<span class="sd">        for that period.</span>
+
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.duration()</span>
+<span class="sd">            Timedelta(&#39;12 days 18:41:00&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.ISp(period=&#39;5D&#39;,verbose=True)</span>
+<span class="sd">            Number of periods: 2</span>
+<span class="sd">            Time unaccounted for: 2 days, 19h, 0m, 0s</span>
+<span class="sd">            [0.7565263007902066, 0.866544730769211]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resampled_data</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">_interval_maker</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">_interdaily_stability</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span> <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">intervals</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="c1"># @lru_cache(maxsize=6)</span>
+    <span class="k">def</span> <span class="nf">IV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Intradaily variability</span>
+
+<span class="sd">        The Intradaily Variability (IV) quantifies the variability of the</span>
+<span class="sd">        activity recording. This variable thus measures the rest or activity</span>
+<span class="sd">        fragmentation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        freq: str, optional</span>
+<span class="sd">            Data resampling `frequency string</span>
+<span class="sd">            &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;`_.</span>
+<span class="sd">            Default is &#39;1H&#39;.</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        iv: float</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        It is defined in ref [1]_:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            IV = \frac{c^{1h}}{d^{1h}}</span>
+
+<span class="sd">        with:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}</span>
+
+<span class="sd">        where :math:`x_{i}` is the number of active (counts higher than a</span>
+<span class="sd">        predefined threshold) minutes during the :math:`i^{th}` period,</span>
+<span class="sd">        :math:`\bar{x}` is the mean of all data and :math:`n` is the number of</span>
+<span class="sd">        periods covered by the actigraphy data,</span>
+
+<span class="sd">        and with:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            c^{1h} = \sum_{i}^{n-1} \frac{</span>
+<span class="sd">                        \left( x_{i+1} - x_{i} \right)^{2}</span>
+<span class="sd">                     }{n-1}</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Witting W., Kwa I.H., Eikelenboom P., Mirmiran M., Swaab D.F.</span>
+<span class="sd">               Alterations in the circadian rest–activity rhythm in aging and</span>
+<span class="sd">               Alzheimer׳s disease. Biol Psychiatry. 1990;27:563–572.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.IV()</span>
+<span class="sd">            0.46185426426324316</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.IV(freq=&#39;30min&#39;, binarize=True, threshold=4)</span>
+<span class="sd">            0.4150769573937417</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.IV(freq=&#39;1H&#39;, binarize=False)</span>
+<span class="sd">            0.7859579446494547</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resampled_data</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_intradaily_variability</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">IVm</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">freqs</span><span class="o">=</span><span class="p">[</span>
+            <span class="s1">&#39;1T&#39;</span><span class="p">,</span> <span class="s1">&#39;2T&#39;</span><span class="p">,</span> <span class="s1">&#39;3T&#39;</span><span class="p">,</span> <span class="s1">&#39;4T&#39;</span><span class="p">,</span> <span class="s1">&#39;5T&#39;</span><span class="p">,</span> <span class="s1">&#39;6T&#39;</span><span class="p">,</span> <span class="s1">&#39;8T&#39;</span><span class="p">,</span> <span class="s1">&#39;9T&#39;</span><span class="p">,</span> <span class="s1">&#39;10T&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;12T&#39;</span><span class="p">,</span> <span class="s1">&#39;15T&#39;</span><span class="p">,</span> <span class="s1">&#39;16T&#39;</span><span class="p">,</span> <span class="s1">&#39;18T&#39;</span><span class="p">,</span> <span class="s1">&#39;20T&#39;</span><span class="p">,</span> <span class="s1">&#39;24T&#39;</span><span class="p">,</span> <span class="s1">&#39;30T&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;32T&#39;</span><span class="p">,</span> <span class="s1">&#39;36T&#39;</span><span class="p">,</span> <span class="s1">&#39;40T&#39;</span><span class="p">,</span> <span class="s1">&#39;45T&#39;</span><span class="p">,</span> <span class="s1">&#39;48T&#39;</span><span class="p">,</span> <span class="s1">&#39;60T&#39;</span>
+        <span class="p">],</span>
+        <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average intradaily variability</span>
+
+<span class="sd">        IVm [1]_ is the average of the IV values obtained with resampling</span>
+<span class="sd">        periods divisors of 1440 between 1 and 60 min.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        freq: str, optional</span>
+<span class="sd">            Data resampling `frequency strings</span>
+<span class="sd">            &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;`_.</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is set to 4.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ivm: float</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        By default, the resampling periods are 1, 2, 3, 4, 5, 6, 8, 9, 10, 12,</span>
+<span class="sd">        15, 16, 18, 20, 24, 30, 32, 36, 40, 45, 48 and 60 min.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Gonçalves, B. S., Cavalcanti, P. R., Tavares, G. R.,</span>
+<span class="sd">               Campos, T. F., &amp; Araujo, J. F. (2014). Nonparametric methods in</span>
+<span class="sd">               actigraphy: An update. Sleep science (Sao Paulo, Brazil), 7(3),</span>
+<span class="sd">               158-64.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.IVm()</span>
+<span class="sd">            0.3482306825356382</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.IVm(binarize=False)</span>
+<span class="sd">            0.6414533006190071</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.IVm(freqs=[&#39;10min&#39;,&#39;30min&#39;,&#39;1H&#39;], binarize=False)</span>
+<span class="sd">            0.7124465677737196</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resampled_data</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span> <span class="k">for</span> <span class="n">freq</span> <span class="ow">in</span> <span class="n">freqs</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">mean</span><span class="p">([</span><span class="n">_intradaily_variability</span><span class="p">(</span><span class="n">datum</span><span class="p">)</span> <span class="k">for</span> <span class="n">datum</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">IVp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span>
+            <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Intradaily variability per period</span>
+
+<span class="sd">        The IV is calculated for each consecutive period found in the</span>
+<span class="sd">        actigraphy recording.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        period: str, optional</span>
+<span class="sd">            Time period for the calculation of IS</span>
+<span class="sd">            Default is &#39;7D&#39;.</span>
+<span class="sd">        freq: str, optional</span>
+<span class="sd">            Data resampling `frequency string</span>
+<span class="sd">            &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;`_.</span>
+<span class="sd">            Default is &#39;1H&#39;.</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            If set to True, display the number of periods found in the activity</span>
+<span class="sd">            recording, as well as the time not accounted for.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ivp: list of float</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        Periods are consecutive and all of the required duration. If the last</span>
+<span class="sd">        consecutive period is shorter than required, the IV is not calculated</span>
+<span class="sd">        for that period.</span>
+
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.duration()</span>
+<span class="sd">            Timedelta(&#39;12 days 18:41:00&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.IVp(period=&#39;5D&#39;,verbose=True)</span>
+<span class="sd">            Number of periods: 2</span>
+<span class="sd">            Time unaccounted for: 2 days, 19h, 0m, 0s</span>
+<span class="sd">            [0.4011232866522594, 0.5340044506337185]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resampled_data</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
+        <span class="n">intervals</span> <span class="o">=</span> <span class="n">_interval_maker</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">_intradaily_variability</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+            <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">intervals</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">def</span> <span class="nf">pRA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability distribution</span>
+
+<span class="sd">        Conditional probability, pRA(t), that an individual would be</span>
+<span class="sd">        resting at time (t+1) given that the individual had been continuously</span>
+<span class="sd">        active for the preceding t epochs, defined in [1]_ as:</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            pRA(t) = p(A|R_t) = \frac{N_t - N_{t+1}}{N_t}</span>
+
+<span class="sd">        with :math:`N_t`, the total number of sequences of rest (i.e. activity</span>
+<span class="sd">        below threshold) of duration :math:`t` or longer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold: int</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">        start: str, optional</span>
+<span class="sd">            If not None, the actigraphy recording is truncated to</span>
+<span class="sd">            &#39;start:start+period&#39;, each day. Start string format: &#39;HH:MM:SS&#39;.</span>
+<span class="sd">            Default is None</span>
+<span class="sd">        period: str, optional</span>
+<span class="sd">            Time period for the calculation of pRA.</span>
+<span class="sd">            Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pra: pandas.core.series.Series</span>
+<span class="sd">            Transition probabilities (pRA(t)), calculated for all t values.</span>
+<span class="sd">        pra_weights: pandas.core.series.Series</span>
+<span class="sd">            Weights are defined as the square root of the number of activity</span>
+<span class="sd">            sequences contributing to each probability estimate.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        pRA is corrected for discontinuities due to sparse data, as defined in</span>
+<span class="sd">        [1]_.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Lim, A. S. P., Yu, L., Costa, M. D., Buchman, A. S.,</span>
+<span class="sd">               Bennett, D. A., Leurgans, S. E., &amp; Saper, C. B. (2011).</span>
+<span class="sd">               Quantification of the Fragmentation of Rest-Activity Patterns in</span>
+<span class="sd">               Elderly Individuals Using a State Transition Analysis. Sleep,</span>
+<span class="sd">               34(11), 1569–1581. http://doi.org/10.5665/sleep.1400</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; pRA, pRA_weights = rawAWD.pRA(4, start=&#39;00:00:00&#39;, period=&#39;8H&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; pRA</span>
+<span class="sd">            counts</span>
+<span class="sd">            1      0.169043</span>
+<span class="sd">            2      0.144608</span>
+<span class="sd">            3      0.163324</span>
+<span class="sd">            (...)</span>
+<span class="sd">            481    0.001157</span>
+<span class="sd">            Name: counts, dtype: float64</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Restrict data range to period &#39;Start, Start+Period&#39;</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">_td_format</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">+</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span>
+                <span class="n">threshold</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">between_time</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="c1"># Rest-&gt;Activity transition probability:</span>
+        <span class="n">pRA</span><span class="p">,</span> <span class="n">pRA_weights</span> <span class="o">=</span> <span class="n">_transition_prob</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="kc">True</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pRA</span><span class="p">,</span> <span class="n">pRA_weights</span>
+
+    <span class="k">def</span> <span class="nf">pAR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity-&gt;Rest transition probability distribution</span>
+
+<span class="sd">        Conditional probability, pAR(t), that an individual would be</span>
+<span class="sd">        active at time (t+1) given that the individual had been continuously</span>
+<span class="sd">        resting for the preceding t epochs, defined in [1]_ as:</span>
+
+<span class="sd">        .. math::</span>
+<span class="sd">            pAR(t) = p(R|A_t) = \frac{N_t - N_{t+1}}{N_t}</span>
+
+<span class="sd">        with :math:`N_t`, the total number of sequences of activity (i.e.</span>
+<span class="sd">        activity above threshold) of duration :math:`t` or longer.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold: int</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">        start: str, optional</span>
+<span class="sd">            If not None, the actigraphy recording is truncated to</span>
+<span class="sd">            &#39;start:start+period&#39;, each day. Start string format: &#39;HH:MM:SS&#39;.</span>
+<span class="sd">            Default is None</span>
+<span class="sd">        period: str, optional</span>
+<span class="sd">            Time period for the calculation of pAR.</span>
+<span class="sd">            Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        par: pandas.core.series.Series</span>
+<span class="sd">            Transition probabilities (pAR(t)), calculated for all t values.</span>
+<span class="sd">        par_weights: pandas.core.series.Series</span>
+<span class="sd">            Weights are defined as the square root of the number of activity</span>
+<span class="sd">            sequences contributing to each probability estimate.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        pAR is corrected for discontinuities due to sparse data, as defined in</span>
+<span class="sd">        [1]_.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Lim, A. S. P., Yu, L., Costa, M. D., Buchman, A. S.,</span>
+<span class="sd">               Bennett, D. A., Leurgans, S. E., &amp; Saper, C. B. (2011).</span>
+<span class="sd">               Quantification of the Fragmentation of Rest-Activity Patterns in</span>
+<span class="sd">               Elderly Individuals Using a State Transition Analysis. Sleep,</span>
+<span class="sd">               34(11), 1569–1581. http://doi.org/10.5665/sleep.1400</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; pAR, pAR_weights = rawAWD.pAR(4, start=&#39;00:00:00&#39;, period=&#39;8H&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; pAR</span>
+<span class="sd">            counts</span>
+<span class="sd">            1      0.169043</span>
+<span class="sd">            2      0.144608</span>
+<span class="sd">            3      0.163324</span>
+<span class="sd">            (...)</span>
+<span class="sd">            481    0.001157</span>
+<span class="sd">            Name: counts, dtype: float64</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Restrict data range to period &#39;Start, Start+Period&#39;</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="n">_td_format</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">start</span><span class="p">)</span><span class="o">+</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span>
+                <span class="n">threshold</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">between_time</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="c1"># Activity-&gt;Rest transition probability:</span>
+        <span class="n">pAR</span><span class="p">,</span> <span class="n">pAR_weights</span> <span class="o">=</span> <span class="n">_transition_prob</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="kc">False</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pAR</span><span class="p">,</span> <span class="n">pAR_weights</span>
+
+    <span class="k">def</span> <span class="nf">kRA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability</span>
+
+<span class="sd">        Weighted average value of pRA(t) within the constant regions, defined</span>
+<span class="sd">        as the longest stretch within which the LOWESS curve varied by no more</span>
+<span class="sd">        than 1 standard deviation of the pRA(t) curve [1]_.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold: int</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">        start: str, optional</span>
+<span class="sd">            If not None, the actigraphy recording is truncated to</span>
+<span class="sd">            &#39;start:start+period&#39;, each day. Start string format: &#39;HH:MM:SS&#39;.</span>
+<span class="sd">            Default is None</span>
+<span class="sd">        period: str, optional</span>
+<span class="sd">            Time period for the calculation of pRA.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        frac: float</span>
+<span class="sd">            Fraction of the data used when estimating each value.</span>
+<span class="sd">            Default is 0.3.</span>
+<span class="sd">        it: int</span>
+<span class="sd">            Number of residual-based reweightings to perform.</span>
+<span class="sd">            Default is 0.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        kra: float</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Lim, A. S. P., Yu, L., Costa, M. D., Buchman, A. S.,</span>
+<span class="sd">               Bennett, D. A., Leurgans, S. E., &amp; Saper, C. B. (2011).</span>
+<span class="sd">               Quantification of the Fragmentation of Rest-Activity Patterns in</span>
+<span class="sd">               Elderly Individuals Using a State Transition Analysis. Sleep,</span>
+<span class="sd">               34(11), 1569–1581. http://doi.org/10.5665/sleep.1400</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.kRA(4)</span>
+<span class="sd">            0.09144435545010564</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.kRA(4, start=&#39;00:00:00&#39;, period=&#39;8H&#39;)</span>
+<span class="sd">            0.13195826220778709</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Calculate the pRA probabilities and their weights.</span>
+        <span class="n">pRA</span><span class="p">,</span> <span class="n">pRA_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pRA</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+        <span class="c1"># Fit the pRA distribution with a LOWESS and return mean value for</span>
+        <span class="c1"># the constant region (i.e. the region where |pRA-lowess|&lt;1SD)</span>
+        <span class="n">kRA</span> <span class="o">=</span> <span class="n">_transition_prob_sustain_region</span><span class="p">(</span>
+            <span class="n">pRA</span><span class="p">,</span>
+            <span class="n">pRA_weights</span><span class="p">,</span>
+            <span class="n">frac</span><span class="o">=</span><span class="n">frac</span><span class="p">,</span>
+            <span class="n">it</span><span class="o">=</span><span class="n">it</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">kRA</span>
+
+    <span class="k">def</span> <span class="nf">kAR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability</span>
+
+<span class="sd">        Weighted average value of pAR(t) within the constant regions, defined</span>
+<span class="sd">        as the longest stretch within which the LOWESS curve varied by no more</span>
+<span class="sd">        than 1 standard deviation of the pAR(t) curve [1]_.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold: int</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">        start: str, optional</span>
+<span class="sd">            If not None, the actigraphy recording is truncated to</span>
+<span class="sd">            &#39;start:start+period&#39;, each day. Start string format: &#39;HH:MM:SS&#39;.</span>
+<span class="sd">            Default is None</span>
+<span class="sd">        period: str, optional</span>
+<span class="sd">            Time period for the calculation of pRA.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        frac: float</span>
+<span class="sd">            Fraction of the data used when estimating each value.</span>
+<span class="sd">            Default is 0.3.</span>
+<span class="sd">        it: int</span>
+<span class="sd">            Number of residual-based reweightings to perform.</span>
+<span class="sd">            Default is 0.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        kar: float</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Lim, A. S. P., Yu, L., Costa, M. D., Buchman, A. S.,</span>
+<span class="sd">               Bennett, D. A., Leurgans, S. E., &amp; Saper, C. B. (2011).</span>
+<span class="sd">               Quantification of the Fragmentation of Rest-Activity Patterns in</span>
+<span class="sd">               Elderly Individuals Using a State Transition Analysis. Sleep,</span>
+<span class="sd">               34(11), 1569–1581. http://doi.org/10.5665/sleep.1400</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">            &gt;&gt;&gt; import pyActigraphy</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD = pyActigraphy.io.read_raw_awd(fpath + &#39;SUBJECT_01.AWD&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.kAR(4)</span>
+<span class="sd">            0.041397590252332916</span>
+<span class="sd">            &gt;&gt;&gt; rawAWD.kAR(4, start=&#39;08:00:00&#39;, period=&#39;12H&#39;)</span>
+<span class="sd">            0.04372712642257519</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Calculate the pAR probabilities and their weights.</span>
+        <span class="n">pAR</span><span class="p">,</span> <span class="n">pAR_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pAR</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+        <span class="c1"># Fit the pAR distribution with a LOWESS and return mean value for</span>
+        <span class="c1"># the constant region (i.e. the region where |pAR-lowess|&lt;1SD)</span>
+        <span class="n">kAR</span> <span class="o">=</span> <span class="n">_transition_prob_sustain_region</span><span class="p">(</span>
+            <span class="n">pAR</span><span class="p">,</span>
+            <span class="n">pAR_weights</span><span class="p">,</span>
+            <span class="n">frac</span><span class="o">=</span><span class="n">frac</span><span class="p">,</span>
+            <span class="n">it</span><span class="o">=</span><span class="n">it</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">kAR</span>
+
+
+<span class="k">class</span> <span class="nc">ForwardMetricsMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
+
+    <span class="c1"># def mask_fraction(self):</span>
+    <span class="c1">#</span>
+    <span class="c1">#     return {</span>
+    <span class="c1">#         iread.display_name:</span>
+    <span class="c1"># iread.mask_fraction() for iread in self.readers</span>
+    <span class="c1">#     }</span>
+    <span class="c1">#</span>
+    <span class="c1"># def start_time(self):</span>
+    <span class="c1">#</span>
+    <span class="c1">#     return {</span>
+    <span class="c1">#         iread.display_name:</span>
+    <span class="c1"># str(iread.start_time) for iread in self.readers</span>
+    <span class="c1">#     }</span>
+    <span class="c1">#</span>
+    <span class="c1"># def duration(self):</span>
+    <span class="c1">#</span>
+    <span class="c1">#     return {</span>
+    <span class="c1">#         iread.display_name:</span>
+    <span class="c1"># str(iread.duration()) for iread in self.readers</span>
+    <span class="c1">#     }</span>
+
+    <span class="k">def</span> <span class="nf">ADAT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">ADAT</span><span class="p">(</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">ADATp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">ADATp</span><span class="p">(</span>
+                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">L5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">L5</span><span class="p">(</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">M10</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">M10</span><span class="p">(</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">RA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">RA</span><span class="p">(</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">L5p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">L5p</span><span class="p">(</span>
+                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">M10p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">M10p</span><span class="p">(</span>
+                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">RAp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">RAp</span><span class="p">(</span>
+                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">IS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">IS</span><span class="p">(</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">ISm</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">freqs</span><span class="o">=</span><span class="p">[</span>
+            <span class="s1">&#39;1T&#39;</span><span class="p">,</span> <span class="s1">&#39;2T&#39;</span><span class="p">,</span> <span class="s1">&#39;3T&#39;</span><span class="p">,</span> <span class="s1">&#39;4T&#39;</span><span class="p">,</span> <span class="s1">&#39;5T&#39;</span><span class="p">,</span> <span class="s1">&#39;6T&#39;</span><span class="p">,</span> <span class="s1">&#39;8T&#39;</span><span class="p">,</span> <span class="s1">&#39;9T&#39;</span><span class="p">,</span> <span class="s1">&#39;10T&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;12T&#39;</span><span class="p">,</span> <span class="s1">&#39;15T&#39;</span><span class="p">,</span> <span class="s1">&#39;16T&#39;</span><span class="p">,</span> <span class="s1">&#39;18T&#39;</span><span class="p">,</span> <span class="s1">&#39;20T&#39;</span><span class="p">,</span> <span class="s1">&#39;24T&#39;</span><span class="p">,</span> <span class="s1">&#39;30T&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;32T&#39;</span><span class="p">,</span> <span class="s1">&#39;36T&#39;</span><span class="p">,</span> <span class="s1">&#39;40T&#39;</span><span class="p">,</span> <span class="s1">&#39;45T&#39;</span><span class="p">,</span> <span class="s1">&#39;48T&#39;</span><span class="p">,</span> <span class="s1">&#39;60T&#39;</span>
+        <span class="p">],</span>
+        <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span>
+    <span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">ISm</span><span class="p">(</span>
+                <span class="n">freqs</span><span class="o">=</span><span class="n">freqs</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">ISp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span>
+            <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">ISp</span><span class="p">(</span>
+                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">IV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">IV</span><span class="p">(</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">IVm</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">freqs</span><span class="o">=</span><span class="p">[</span>
+            <span class="s1">&#39;1T&#39;</span><span class="p">,</span> <span class="s1">&#39;2T&#39;</span><span class="p">,</span> <span class="s1">&#39;3T&#39;</span><span class="p">,</span> <span class="s1">&#39;4T&#39;</span><span class="p">,</span> <span class="s1">&#39;5T&#39;</span><span class="p">,</span> <span class="s1">&#39;6T&#39;</span><span class="p">,</span> <span class="s1">&#39;8T&#39;</span><span class="p">,</span> <span class="s1">&#39;9T&#39;</span><span class="p">,</span> <span class="s1">&#39;10T&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;12T&#39;</span><span class="p">,</span> <span class="s1">&#39;15T&#39;</span><span class="p">,</span> <span class="s1">&#39;16T&#39;</span><span class="p">,</span> <span class="s1">&#39;18T&#39;</span><span class="p">,</span> <span class="s1">&#39;20T&#39;</span><span class="p">,</span> <span class="s1">&#39;24T&#39;</span><span class="p">,</span> <span class="s1">&#39;30T&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;32T&#39;</span><span class="p">,</span> <span class="s1">&#39;36T&#39;</span><span class="p">,</span> <span class="s1">&#39;40T&#39;</span><span class="p">,</span> <span class="s1">&#39;45T&#39;</span><span class="p">,</span> <span class="s1">&#39;48T&#39;</span><span class="p">,</span> <span class="s1">&#39;60T&#39;</span>
+        <span class="p">],</span>
+        <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span>
+    <span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">IVm</span><span class="p">(</span>
+                <span class="n">freqs</span><span class="o">=</span><span class="n">freqs</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">IVp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span>
+            <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">IVp</span><span class="p">(</span>
+                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">kRA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">kRA</span><span class="p">(</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+                <span class="n">frac</span><span class="o">=</span><span class="n">frac</span><span class="p">,</span>
+                <span class="n">it</span><span class="o">=</span><span class="n">it</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">kAR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">kAR</span><span class="p">(</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+                <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+                <span class="n">frac</span><span class="o">=</span><span class="n">frac</span><span class="p">,</span>
+                <span class="n">it</span><span class="o">=</span><span class="n">it</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">AonT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span> <span class="n">whs</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">AonT</span><span class="p">(</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+                <span class="n">whs</span><span class="o">=</span><span class="n">whs</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">AoffT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span> <span class="n">whs</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">AoffT</span><span class="p">(</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+                <span class="n">whs</span><span class="o">=</span><span class="n">whs</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">fSoD</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span>
+        <span class="n">whs</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="n">start</span><span class="o">=</span><span class="s1">&#39;12:00:00&#39;</span><span class="p">,</span>
+        <span class="n">period</span><span class="o">=</span><span class="s1">&#39;5h&#39;</span><span class="p">,</span>
+        <span class="n">algo</span><span class="o">=</span><span class="s1">&#39;unanimous&#39;</span>
+    <span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">fSoD</span><span class="p">(</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+                <span class="n">whs</span><span class="o">=</span><span class="n">whs</span><span class="p">,</span>
+                <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+                <span class="n">algo</span><span class="o">=</span><span class="n">algo</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">daily_light_average</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">daily_light_average</span><span class="p">()</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">Summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inactivity</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+        <span class="c1"># set inactivity mask</span>
+        <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span><span class="p">:</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">mask_inactivity</span> <span class="o">=</span> <span class="n">mask_inactivity</span>
+
+        <span class="c1"># dict of dictionnaries</span>
+        <span class="n">ldic</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;Start_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;Mask_fraction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_fraction</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;Duration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;ADAT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ADAT</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;ADATp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ADATp</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;L5&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L5</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;M10&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">M10</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;RA&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RA</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;L5p&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L5p</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;M10p&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">M10p</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;RAp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RAp</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;IS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">IS</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;IV&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">IV</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;ISm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ISm</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;IVm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">IVm</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;ISp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ISp</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;IVp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">IVp</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;kRA(night)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kRA</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s1">&#39;00:00:00&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;5h&#39;</span><span class="p">)</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;kAR(Mid-day)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kAR</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s1">&#39;12:00:00&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;5h&#39;</span><span class="p">)</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;AonT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AonT</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;AoffT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AoffT</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;fSoD(Mid-day)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fSoD</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader_type</span> <span class="o">==</span> <span class="s1">&#39;RPX&#39;</span><span class="p">:</span>
+            <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;daily_light_average&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">daily_light_average</span><span class="p">()</span>
+
+        <span class="c1"># list keys of dictionnaries whose number of columns is variable:</span>
+        <span class="n">var_dic</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ADATp&#39;</span><span class="p">,</span> <span class="s1">&#39;L5p&#39;</span><span class="p">,</span> <span class="s1">&#39;M10p&#39;</span><span class="p">,</span> <span class="s1">&#39;RAp&#39;</span><span class="p">,</span> <span class="s1">&#39;ISp&#39;</span><span class="p">,</span> <span class="s1">&#39;IVp&#39;</span><span class="p">]</span>
+
+        <span class="c1"># list of corresponding dataframes</span>
+        <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">ldic</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">var_dic</span><span class="p">:</span>
+                <span class="c1"># Get max length of value arrays</span>
+                <span class="n">max_length</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">values</span><span class="p">())])</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_length</span><span class="p">):</span>
+                    <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">key</span><span class="o">+</span><span class="s1">&#39;(duration=</span><span class="si">{0}</span><span class="s1">,period=</span><span class="si">{1}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
+                <span class="n">index</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span>
+                <span class="n">columns</span><span class="o">=</span><span class="n">columns</span>
+            <span class="p">)</span>
+            <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="c1"># join the dataframes recursively</span>
+        <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">((</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">y</span><span class="p">)),</span> <span class="n">dfs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2018, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.L5p
+===========================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.L5p

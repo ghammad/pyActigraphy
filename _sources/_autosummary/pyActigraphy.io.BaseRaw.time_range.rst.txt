@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.time\_range
+===================================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.time_range

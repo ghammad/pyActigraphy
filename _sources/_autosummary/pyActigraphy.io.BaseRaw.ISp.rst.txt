@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.ISp
+===========================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.ISp

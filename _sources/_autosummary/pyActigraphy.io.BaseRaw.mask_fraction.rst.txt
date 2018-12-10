@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.mask\_fraction
+======================================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.mask_fraction

@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.SoD
+===========================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.SoD

@@ -1,0 +1,10 @@
+pyActigraphy.io.read_raw_mtn
+============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. autofunction:: read_raw_mtn
+
+.. raw:: html
+
+    <div style='clear:both'></div>

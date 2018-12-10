@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.AoffT
+=============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.AoffT

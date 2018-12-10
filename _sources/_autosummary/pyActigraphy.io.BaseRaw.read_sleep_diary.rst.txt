@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.read\_sleep\_diary
+==========================================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.read_sleep_diary

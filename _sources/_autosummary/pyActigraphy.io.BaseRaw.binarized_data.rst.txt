@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.binarized\_data
+=======================================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.binarized_data
