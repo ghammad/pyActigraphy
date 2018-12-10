@@ -42,7 +42,7 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=find_version(name, "__init__.py")
+    version=find_version("pyActigraphy", "__init__.py"),
     # version='0.1',
 
     # One-line description
