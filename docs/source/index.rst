@@ -54,10 +54,18 @@ It is strongly recommended to use the latest version of the pyActigraphy package
   git checkout develop
   pip install -e .
 
-Tutorials
-=========
+Quick start
+===========
 
-`pyActigraphy-Tutorial <https://gitlab.uliege.be/CyclotronResearchCentre/Studies/CogNap/Actigraphy/pyActigraphy-Tutorial>`_ :
+The following notebook introduces the basic functionalities of the pyActigraphy
+package:
+
+.. toctree::
+   :maxdepth: 1
+
+   pyActigraphy-Intro.ipynb
+
+`pyActigraphy-Tutorial <https://github.com/ghammad/pyActigraphy-Tutorial>`_ :
 Slides presenting the overall project as well as notebooks illustrating how to use the pyActigraphy package.
 
 Contributing
@@ -73,8 +81,10 @@ There are plenty of ways to contribute to this package, including (but not limit
 Authors
 =======
 
- * **Grégory Hammad** `@ghammad <https://gitlab.com/ghammad>`_ - *Initial and main developer*
- * **Mathilde Reyt** `@ReytMathilde <https://gitlab.com/ReytMathilde>`_
+ * **Grégory Hammad** `@ghammad <https://github.com/ghammad>`_ - *Initial and main developer*
+ * **Mathilde Reyt** `@ReytMathilde <https://github.com/ReytMathilde>`_
+
+See also the list of `contributors<https://github.com/ghammad/pyActigraphy/contributors>`_ who participated in this project.
 
 License
 =======
