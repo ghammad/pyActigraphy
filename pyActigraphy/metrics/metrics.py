@@ -79,20 +79,22 @@ def _intradaily_variability(data):
     return (c_1h / d_1h)
 
 
-def _lmx(data, epochs, lowest=True):
+def _lmx(data, period, lowest=True):
     """Calculate the start time and mean activity of the period of
     lowest/highest activity"""
 
     avgdaily = _average_daily_activity(data=data, cyclic=True)
 
-    mean_activity = avgdaily.rolling(epochs).sum().shift(-epochs+1)
+    n_epochs = int(pd.Timedelta(period)/avgdaily.index.freq)
+
+    mean_activity = avgdaily.rolling(period).sum().shift(-n_epochs+1)
 
     if lowest:
         t_start = mean_activity.idxmin()
     else:
         t_start = mean_activity.idxmax()
 
-    lmx = mean_activity[t_start]/epochs
+    lmx = mean_activity[t_start]/n_epochs
     return t_start, lmx
 
 
@@ -360,93 +362,407 @@ class MetricsMixin(object):
         return results
 
     def L5(self, binarize=True, threshold=4):
+        r"""L5
+
+        Mean activity during the 5 least active hours of the day.
+
+        Parameters
+        ----------
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+
+        Returns
+        -------
+        l5: float
+
+
+        Notes
+        -----
+
+        The L5 [1]_ variable is calculated as the mean, per acquisition period,
+        of the average daily activities during the 5 least active hours.
+
+        .. warning:: The value of this variable depends on the length of the
+                     acquisition period.
+
+        References
+        ----------
+
+        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.
+               (1997). Long-Term Fitness Training Improves the Circadian
+               Rest-Activity Rhythm in Healthy Elderly Males.
+               Journal of Biological Rhythms, 12(2), 146–156.
+               http://doi.org/10.1177/074873049701200206
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.L5()
+            0.XXXX
+            >>> rawAWD.L5(binarize=False)
+            0.XXXX
+        """
 
         if binarize is True:
             data = self.binarized_data(threshold)
         else:
             data = self.data
 
-        n_epochs = int(pd.Timedelta('5H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('5H')/self.frequency)
 
-        _, l5 = _lmx(data, n_epochs, lowest=True)
+        _, l5 = _lmx(data, '5H', lowest=True)
 
         return l5
 
     def M10(self, binarize=True, threshold=4):
+        r"""M10
+
+        Mean activity during the 10 most active hours of the day.
+
+        Parameters
+        ----------
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+
+        Returns
+        -------
+        m10: float
+
+
+        Notes
+        -----
+
+        The M10 [1]_ variable is calculated as the mean, per acquisition period
+        , of the average daily activities during the 10 most active hours.
+
+        .. warning:: The value of this variable depends on the length of the
+                     acquisition period.
+
+        References
+        ----------
+
+        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.
+               (1997). Long-Term Fitness Training Improves the Circadian
+               Rest-Activity Rhythm in Healthy Elderly Males.
+               Journal of Biological Rhythms, 12(2), 146–156.
+               http://doi.org/10.1177/074873049701200206
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.M10()
+            0.XXXX
+            >>> rawAWD.M10(binarize=False)
+            0.XXXX
+        """
 
         if binarize is True:
             data = self.binarized_data(threshold)
         else:
             data = self.data
 
-        n_epochs = int(pd.Timedelta('10H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('10H')/self.frequency)
 
-        _, m10 = _lmx(data, n_epochs, lowest=False)
+        _, m10 = _lmx(data, '10H', lowest=False)
 
         return m10
 
     def RA(self, binarize=True, threshold=4):
+        r"""Relative rest/activity amplitude
+
+        Relative amplitude between the mean activity during the 10 most active
+        hours of the day and the mean activity during the 5 least active hours
+        of the day.
+
+        Parameters
+        ----------
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+
+        Returns
+        -------
+        ra: float
+
+
+        Notes
+        -----
+
+        The RA [1]_ variable is calculated as:
+
+        .. math::
+
+            RA = \frac{M10 - L5}{M10 + L5}
+
+        References
+        ----------
+
+        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.
+               (1997). Long-Term Fitness Training Improves the Circadian
+               Rest-Activity Rhythm in Healthy Elderly Males.
+               Journal of Biological Rhythms, 12(2), 146–156.
+               http://doi.org/10.1177/074873049701200206
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.RA()
+            0.XXXX
+            >>> rawAWD.RA(binarize=False)
+            0.XXXX
+        """
 
         if binarize is True:
             data = self.binarized_data(threshold)
         else:
             data = self.data
 
-        n_epochs = int(pd.Timedelta('5H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('5H')/self.frequency)
 
-        _, l5 = _lmx(data, n_epochs, lowest=True)
-        _, m10 = _lmx(data, n_epochs*2, lowest=False)
+        _, l5 = _lmx(data, '5H', lowest=True)
+        _, m10 = _lmx(data, '10H', lowest=False)
 
         return (m10-l5)/(m10+l5)
 
     def L5p(self, period='7D', binarize=True, threshold=4, verbose=False):
+        r"""L5 per period
+
+        The L5 variable is calculated for each consecutive period found in the
+        actigraphy recording.
+
+        Parameters
+        ----------
+        period: str, optional
+            Time period for the calculation of IS
+            Default is '7D'.
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+        verbose: bool, optional
+            If set to True, display the number of periods found in the activity
+            recording, as well as the time not accounted for.
+            Default is False.
+
+        Returns
+        -------
+        l5p: list of float
+
+
+        Notes
+        -----
+
+        The L5 [1]_ variable is calculated as the mean, per acquisition period,
+        of the average daily activities during the 5 least active hours.
+
+        .. warning:: The value of this variable depends on the length of the
+                     acquisition period.
+
+        References
+        ----------
+
+        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.
+               (1997). Long-Term Fitness Training Improves the Circadian
+               Rest-Activity Rhythm in Healthy Elderly Males.
+               Journal of Biological Rhythms, 12(2), 146–156.
+               http://doi.org/10.1177/074873049701200206
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.duration()
+            Timedelta('12 days 18:41:00')
+            >>> rawAWD.L5p(period='5D',verbose=True)
+            Number of periods: 2
+            Time unaccounted for: 2 days, 19h, 0m, 0s
+            [0.XXXX, 0.XXXX]
+        """
 
         if binarize is True:
             data = self.binarized_data(threshold)
         else:
             data = self.data
 
-        n_epochs = int(pd.Timedelta('5H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('5H')/self.frequency)
 
         intervals = _interval_maker(data.index, period, verbose)
 
         results = [
             _lmx(
                 data[time[0]:time[1]],
-                n_epochs,
+                '5H',
                 lowest=True
             ) for time in intervals
         ]
         return [res[1] for res in results]
 
     def M10p(self, period='7D', binarize=True, threshold=4, verbose=False):
+        r"""M10 per period
+
+        The M10 variable is calculated for each consecutive period found in the
+        actigraphy recording.
+
+        Parameters
+        ----------
+        period: str, optional
+            Time period for the calculation of IS
+            Default is '7D'.
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+        verbose: bool, optional
+            If set to True, display the number of periods found in the activity
+            recording, as well as the time not accounted for.
+            Default is False.
+
+        Returns
+        -------
+        m10p: list of float
+
+
+        Notes
+        -----
+
+        The M10 [1]_ variable is calculated as the mean, per acquisition period
+        , of the average daily activities during the 10 most active hours.
+
+        .. warning:: The value of this variable depends on the length of the
+                     acquisition period.
+
+        References
+        ----------
+
+        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.
+               (1997). Long-Term Fitness Training Improves the Circadian
+               Rest-Activity Rhythm in Healthy Elderly Males.
+               Journal of Biological Rhythms, 12(2), 146–156.
+               http://doi.org/10.1177/074873049701200206
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.duration()
+            Timedelta('12 days 18:41:00')
+            >>> rawAWD.M10p(period='5D',verbose=True)
+            Number of periods: 2
+            Time unaccounted for: 2 days, 19h, 0m, 0s
+            [0.XXXX, 0.XXXX]
+        """
 
         if binarize is True:
             data = self.binarized_data(threshold)
         else:
             data = self.data
 
-        n_epochs = int(pd.Timedelta('10H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('10H')/self.frequency)
 
         intervals = _interval_maker(data.index, period, verbose)
 
         results = [
             _lmx(
                 data[time[0]:time[1]],
-                n_epochs,
+                '10H',
                 lowest=False
             ) for time in intervals
         ]
         return [res[1] for res in results]
 
     def RAp(self, period='7D', binarize=True, threshold=4, verbose=False):
+        r"""RA per period
+
+        The RA variable is calculated for each consecutive period found in the
+        actigraphy recording.
+
+        Parameters
+        ----------
+        period: str, optional
+            Time period for the calculation of IS
+            Default is '7D'.
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+        verbose: bool, optional
+            If set to True, display the number of periods found in the activity
+            recording, as well as the time not accounted for.
+            Default is False.
+
+        Returns
+        -------
+        rap: list of float
+
+
+        Notes
+        -----
+
+        The RA [1]_ variable is calculated as:
+
+        .. math::
+
+            RA = \frac{M10 - L5}{M10 + L5}
+
+        References
+        ----------
+
+        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.
+               (1997). Long-Term Fitness Training Improves the Circadian
+               Rest-Activity Rhythm in Healthy Elderly Males.
+               Journal of Biological Rhythms, 12(2), 146–156.
+               http://doi.org/10.1177/074873049701200206
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.duration()
+            Timedelta('12 days 18:41:00')
+            >>> rawAWD.RAp(period='5D',verbose=True)
+            Number of periods: 2
+            Time unaccounted for: 2 days, 19h, 0m, 0s
+            [0.XXXX, 0.XXXX]
+        """
 
         if binarize is True:
             data = self.binarized_data(threshold)
         else:
             data = self.data
 
-        n_epochs = int(pd.Timedelta('5H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('5H')/self.frequency)
 
         intervals = _interval_maker(data.index, period, verbose)
 
@@ -454,8 +770,8 @@ class MetricsMixin(object):
 
         for time in intervals:
             data_subset = data[time[0]:time[1]]
-            _, l5 = _lmx(data_subset, n_epochs, lowest=True)
-            _, m10 = _lmx(data_subset, n_epochs*2, lowest=False)
+            _, l5 = _lmx(data_subset, '5H', lowest=True)
+            _, m10 = _lmx(data_subset, '10H', lowest=False)
             results.append((m10-l5)/(m10+l5))
 
         return results
@@ -464,35 +780,80 @@ class MetricsMixin(object):
     def IS(self, freq='1H', binarize=True, threshold=4):
         r"""Interdaily stability
 
-        The Interdaily stability (IS) [1]_ quantifies the repeatibilty of the
+        The Interdaily stability (IS) quantifies the repeatibilty of the
         daily rest-activity pattern over each day contained in the activity
-        recording. This variable is defined as the following:
+        recording.
 
-        .. math:: IS = \frac{d^{24h}}{d^{1h}}
+        Parameters
+        ----------
+        freq: str, optional
+            Data resampling `frequency string
+            <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
+            Default is '1H'.
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+
+        Returns
+        -------
+        is: float
+
+
+        Notes
+        -----
+
+        This variable is defined in ref [1]_:
+
+        .. math::
+
+            IS = \frac{d^{24h}}{d^{1h}}
 
         with:
 
-        .. math:: d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}
+        .. math::
+
+            d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}
 
         where :math:`x_{i}` is the number of active (counts higher than a
         predefined threshold) minutes during the :math:`i^{th}` period,
         :math:`\bar{x}` is the mean of all data and :math:`n` is the number of
         periods covered by the actigraphy data and with:
 
-        .. math:: d^{24h} = \sum_{i}^{p} \frac{
-                \left( \bar{x}_{h,i} - \bar{x} \right)^{2}
-            }{p}
+        .. math::
+
+            d^{24h} = \sum_{i}^{p} \frac{
+                      \left( \bar{x}_{h,i} - \bar{x} \right)^{2}
+                      }{p}
 
         where :math:`\bar{x}^{h,i}` is the average number of active minutes
         over the :math:`i^{th}` period and :math:`p` is the number of periods
         per day. The average runs over all the days.
 
-        .. [1] Eus J. W. Van Someren, Dick F. Swaab, Christopher C. Colenda,
-        Wayne Cohen, W. Vaughn McCall & Peter B. Rosenquist, `Bright Light
-        Therapy: Improved Sensitivity to Its Effects on Rest-Activity Rhythms
-        in Alzheimer Patients by Application of Nonparametric Methods`
-        Chronobiology International, 16:4, 505-518,
-        DOI: 10.3109/07420529908998724
+        For the record, tt is the 24h value from the chi-square periodogram
+        (Sokolove and Bushel1 1978).
+
+        References
+        ----------
+
+        .. [1] Witting W., Kwa I.H., Eikelenboom P., Mirmiran M., Swaab D.F.
+               Alterations in the circadian rest–activity rhythm in aging and
+               Alzheimer׳s disease. Biol Psychiatry. 1990;27:563–572.
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.IS()
+            0.6900175913031027
+            >>> rawAWD.IS(freq='30min', binarize=True, threshold=4)
+            0.6245582891144925
+            >>> rawAWD.IS(freq='1H', binarize=False)
+            0.5257020914453097
         """
 
         data = self.resampled_data(
@@ -512,6 +873,54 @@ class MetricsMixin(object):
         binarize=True,
         threshold=4
     ):
+        r"""Average interdaily stability
+
+        ISm [1]_ is the average of the IS values obtained with resampling
+        periods divisors of 1440 between 1 and 60 min.
+
+        Parameters
+        ----------
+        freq: str, optional
+            Data resampling `frequency strings
+            <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is set to 4.
+
+        Returns
+        -------
+        ism: float
+
+        Notes
+        -----
+
+        By default, the resampling periods are 1, 2, 3, 4, 5, 6, 8, 9, 10, 12,
+        15, 16, 18, 20, 24, 30, 32, 36, 40, 45, 48 and 60 min.
+
+        References
+        ----------
+
+        .. [1] Gonçalves, B. S., Cavalcanti, P. R., Tavares, G. R.,
+               Campos, T. F., & Araujo, J. F. (2014). Nonparametric methods in
+               actigraphy: An update. Sleep science (Sao Paulo, Brazil), 7(3),
+               158-64.
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.ISm()
+            0.5758268227551039
+            >>> rawAWD.ISm(binarize=False)
+            0.3915874151855646
+            >>> rawAWD.ISm(freqs=['10min','30min','1H'], binarize=False)
+            0.44598210450842063
+        """
 
         data = [
             self.resampled_data(freq, binarize, threshold) for freq in freqs
@@ -521,7 +930,57 @@ class MetricsMixin(object):
 
     def ISp(self, period='7D', freq='1H',
             binarize=True, threshold=4, verbose=False):
+        r"""Interdaily stability per period
 
+        The IS is calculated for each consecutive period found in the
+        actigraphy recording.
+
+        Parameters
+        ----------
+        period: str, optional
+            Time period for the calculation of IS
+            Default is '7D'.
+        freq: str, optional
+            Data resampling `frequency string
+            <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
+            Default is '1H'.
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+        verbose: bool, optional
+            If set to True, display the number of periods found in the activity
+            recording, as well as the time not accounted for.
+            Default is False.
+
+        Returns
+        -------
+        isp: list of float
+
+
+        Notes
+        -----
+
+        Periods are consecutive and all of the required duration. If the last
+        consecutive period is shorter than required, the IS is not calculated
+        for that period.
+
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.duration()
+            Timedelta('12 days 18:41:00')
+            >>> rawAWD.ISp(period='5D',verbose=True)
+            Number of periods: 2
+            Time unaccounted for: 2 days, 19h, 0m, 0s
+            [0.7565263007902066, 0.866544730769211]
+        """
         data = self.resampled_data(freq, binarize, threshold)
 
         intervals = _interval_maker(data.index, period, verbose)
@@ -533,17 +992,44 @@ class MetricsMixin(object):
 
     # @lru_cache(maxsize=6)
     def IV(self, freq='1H', binarize=True, threshold=4):
-        r"""Interdaily stability
+        r"""Intradaily variability
 
-        The Interdaily stability (IS) [1]_ quantifies the repeatibilty of the
-        daily rest-activity pattern over each day contained in the activity
-        recording. This variable is defined as the following:
+        The Intradaily Variability (IV) quantifies the variability of the
+        activity recording. This variable thus measures the rest or activity
+        fragmentation.
 
-        .. math:: IV = \frac{c^{1h}}{d^{1h}}
+        Parameters
+        ----------
+        freq: str, optional
+            Data resampling `frequency string
+            <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
+            Default is '1H'.
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+
+        Returns
+        -------
+        iv: float
+
+        Notes
+        -----
+
+        It is defined in ref [1]_:
+
+        .. math::
+
+            IV = \frac{c^{1h}}{d^{1h}}
 
         with:
 
-        .. math:: d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}
+        .. math::
+
+            d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}
 
         where :math:`x_{i}` is the number of active (counts higher than a
         predefined threshold) minutes during the :math:`i^{th}` period,
@@ -552,16 +1038,30 @@ class MetricsMixin(object):
 
         and with:
 
-        .. math:: c^{1h} = \sum_{i}^{n-1} \frac{
-                \left( x_{i+1} - x_{i} \right)^{2}
-            }{n-1}
+        .. math::
 
-        .. [1] Eus J. W. Van Someren, Dick F. Swaab, Christopher C. Colenda,
-        Wayne Cohen, W. Vaughn McCall & Peter B. Rosenquist, `Bright Light
-        Therapy: Improved Sensitivity to Its Effects on Rest-Activity Rhythms
-        in Alzheimer Patients by Application of Nonparametric Methods`
-        Chronobiology International, 16:4, 505-518,
-        DOI: 10.3109/07420529908998724
+            c^{1h} = \sum_{i}^{n-1} \frac{
+                        \left( x_{i+1} - x_{i} \right)^{2}
+                     }{n-1}
+
+        References
+        ----------
+
+        .. [1] Witting W., Kwa I.H., Eikelenboom P., Mirmiran M., Swaab D.F.
+               Alterations in the circadian rest–activity rhythm in aging and
+               Alzheimer׳s disease. Biol Psychiatry. 1990;27:563–572.
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.IV()
+            0.46185426426324316
+            >>> rawAWD.IV(freq='30min', binarize=True, threshold=4)
+            0.4150769573937417
+            >>> rawAWD.IV(freq='1H', binarize=False)
+            0.7859579446494547
         """
         data = self.resampled_data(freq, binarize, threshold)
 
@@ -577,6 +1077,54 @@ class MetricsMixin(object):
         binarize=True,
         threshold=4
     ):
+        r"""Average intradaily variability
+
+        IVm [1]_ is the average of the IV values obtained with resampling
+        periods divisors of 1440 between 1 and 60 min.
+
+        Parameters
+        ----------
+        freq: str, optional
+            Data resampling `frequency strings
+            <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is set to 4.
+
+        Returns
+        -------
+        ivm: float
+
+        Notes
+        -----
+
+        By default, the resampling periods are 1, 2, 3, 4, 5, 6, 8, 9, 10, 12,
+        15, 16, 18, 20, 24, 30, 32, 36, 40, 45, 48 and 60 min.
+
+        References
+        ----------
+
+        .. [1] Gonçalves, B. S., Cavalcanti, P. R., Tavares, G. R.,
+               Campos, T. F., & Araujo, J. F. (2014). Nonparametric methods in
+               actigraphy: An update. Sleep science (Sao Paulo, Brazil), 7(3),
+               158-64.
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.IVm()
+            0.3482306825356382
+            >>> rawAWD.IVm(binarize=False)
+            0.6414533006190071
+            >>> rawAWD.IVm(freqs=['10min','30min','1H'], binarize=False)
+            0.7124465677737196
+        """
 
         data = [
             self.resampled_data(freq, binarize, threshold) for freq in freqs
@@ -586,6 +1134,57 @@ class MetricsMixin(object):
 
     def IVp(self, period='7D', freq='1H',
             binarize=True, threshold=4, verbose=False):
+        r"""Intradaily variability per period
+
+        The IV is calculated for each consecutive period found in the
+        actigraphy recording.
+
+        Parameters
+        ----------
+        period: str, optional
+            Time period for the calculation of IS
+            Default is '7D'.
+        freq: str, optional
+            Data resampling `frequency string
+            <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
+            Default is '1H'.
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+        verbose: bool, optional
+            If set to True, display the number of periods found in the activity
+            recording, as well as the time not accounted for.
+            Default is False.
+
+        Returns
+        -------
+        ivp: list of float
+
+
+        Notes
+        -----
+
+        Periods are consecutive and all of the required duration. If the last
+        consecutive period is shorter than required, the IV is not calculated
+        for that period.
+
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.duration()
+            Timedelta('12 days 18:41:00')
+            >>> rawAWD.IVp(period='5D',verbose=True)
+            Number of periods: 2
+            Time unaccounted for: 2 days, 19h, 0m, 0s
+            [0.4011232866522594, 0.5340044506337185]
+        """
 
         data = self.resampled_data(freq, binarize, threshold)
 
@@ -598,6 +1197,69 @@ class MetricsMixin(object):
         return results
 
     def pRA(self, threshold, start=None, period=None):
+        r"""Rest->Activity transition probability distribution
+
+        Conditional probability, pRA(t), that an individual would be
+        resting at time (t+1) given that the individual had been continuously
+        active for the preceding t epochs, defined in [1]_ as:
+
+        .. math::
+            pRA(t) = p(A|R_t) = \frac{N_t - N_{t+1}}{N_t}
+
+        with :math:`N_t`, the total number of sequences of rest (i.e. activity
+        below threshold) of duration :math:`t` or longer.
+
+        Parameters
+        ----------
+        threshold: int
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+        start: str, optional
+            If not None, the actigraphy recording is truncated to
+            'start:start+period', each day. Start string format: 'HH:MM:SS'.
+            Default is None
+        period: str, optional
+            Time period for the calculation of pRA.
+            Default is None.
+
+        Returns
+        -------
+        pra: pandas.core.series.Series
+            Transition probabilities (pRA(t)), calculated for all t values.
+        pra_weights: pandas.core.series.Series
+            Weights are defined as the square root of the number of activity
+            sequences contributing to each probability estimate.
+
+        Notes
+        -----
+
+        pRA is corrected for discontinuities due to sparse data, as defined in
+        [1]_.
+
+        References
+        ----------
+
+        .. [1] Lim, A. S. P., Yu, L., Costa, M. D., Buchman, A. S.,
+               Bennett, D. A., Leurgans, S. E., & Saper, C. B. (2011).
+               Quantification of the Fragmentation of Rest-Activity Patterns in
+               Elderly Individuals Using a State Transition Analysis. Sleep,
+               34(11), 1569–1581. http://doi.org/10.5665/sleep.1400
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> pRA, pRA_weights = rawAWD.pRA(4, start='00:00:00', period='8H')
+            >>> pRA
+            counts
+            1      0.169043
+            2      0.144608
+            3      0.163324
+            (...)
+            481    0.001157
+            Name: counts, dtype: float64
+        """
 
         # Restrict data range to period 'Start, Start+Period'
         if start is not None:
@@ -618,6 +1280,69 @@ class MetricsMixin(object):
         return pRA, pRA_weights
 
     def pAR(self, threshold, start=None, period=None):
+        r"""Activity->Rest transition probability distribution
+
+        Conditional probability, pAR(t), that an individual would be
+        active at time (t+1) given that the individual had been continuously
+        resting for the preceding t epochs, defined in [1]_ as:
+
+        .. math::
+            pAR(t) = p(R|A_t) = \frac{N_t - N_{t+1}}{N_t}
+
+        with :math:`N_t`, the total number of sequences of activity (i.e.
+        activity above threshold) of duration :math:`t` or longer.
+
+        Parameters
+        ----------
+        threshold: int
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+        start: str, optional
+            If not None, the actigraphy recording is truncated to
+            'start:start+period', each day. Start string format: 'HH:MM:SS'.
+            Default is None
+        period: str, optional
+            Time period for the calculation of pAR.
+            Default is None.
+
+        Returns
+        -------
+        par: pandas.core.series.Series
+            Transition probabilities (pAR(t)), calculated for all t values.
+        par_weights: pandas.core.series.Series
+            Weights are defined as the square root of the number of activity
+            sequences contributing to each probability estimate.
+
+        Notes
+        -----
+
+        pAR is corrected for discontinuities due to sparse data, as defined in
+        [1]_.
+
+        References
+        ----------
+
+        .. [1] Lim, A. S. P., Yu, L., Costa, M. D., Buchman, A. S.,
+               Bennett, D. A., Leurgans, S. E., & Saper, C. B. (2011).
+               Quantification of the Fragmentation of Rest-Activity Patterns in
+               Elderly Individuals Using a State Transition Analysis. Sleep,
+               34(11), 1569–1581. http://doi.org/10.5665/sleep.1400
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> pAR, pAR_weights = rawAWD.pAR(4, start='00:00:00', period='8H')
+            >>> pAR
+            counts
+            1      0.169043
+            2      0.144608
+            3      0.163324
+            (...)
+            481    0.001157
+            Name: counts, dtype: float64
+        """
 
         # Restrict data range to period 'Start, Start+Period'
         if start is not None:
@@ -638,6 +1363,54 @@ class MetricsMixin(object):
         return pAR, pAR_weights
 
     def kRA(self, threshold, start=None, period=None, frac=.3, it=0):
+        r"""Rest->Activity transition probability
+
+        Weighted average value of pRA(t) within the constant regions, defined
+        as the longest stretch within which the LOWESS curve varied by no more
+        than 1 standard deviation of the pRA(t) curve [1]_.
+
+        Parameters
+        ----------
+        threshold: int
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+        start: str, optional
+            If not None, the actigraphy recording is truncated to
+            'start:start+period', each day. Start string format: 'HH:MM:SS'.
+            Default is None
+        period: str, optional
+            Time period for the calculation of pRA.
+            Default is None.
+        frac: float
+            Fraction of the data used when estimating each value.
+            Default is 0.3.
+        it: int
+            Number of residual-based reweightings to perform.
+            Default is 0.
+
+        Returns
+        -------
+        kra: float
+
+        References
+        ----------
+
+        .. [1] Lim, A. S. P., Yu, L., Costa, M. D., Buchman, A. S.,
+               Bennett, D. A., Leurgans, S. E., & Saper, C. B. (2011).
+               Quantification of the Fragmentation of Rest-Activity Patterns in
+               Elderly Individuals Using a State Transition Analysis. Sleep,
+               34(11), 1569–1581. http://doi.org/10.5665/sleep.1400
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.kRA(4)
+            0.09144435545010564
+            >>> rawAWD.kRA(4, start='00:00:00', period='8H')
+            0.13195826220778709
+        """
 
         # Calculate the pRA probabilities and their weights.
         pRA, pRA_weights = self.pRA(threshold, start=start, period=period)
@@ -652,6 +1425,54 @@ class MetricsMixin(object):
         return kRA
 
     def kAR(self, threshold, start=None, period=None, frac=.3, it=0):
+        r"""Rest->Activity transition probability
+
+        Weighted average value of pAR(t) within the constant regions, defined
+        as the longest stretch within which the LOWESS curve varied by no more
+        than 1 standard deviation of the pAR(t) curve [1]_.
+
+        Parameters
+        ----------
+        threshold: int
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+        start: str, optional
+            If not None, the actigraphy recording is truncated to
+            'start:start+period', each day. Start string format: 'HH:MM:SS'.
+            Default is None
+        period: str, optional
+            Time period for the calculation of pRA.
+            Default is None.
+        frac: float
+            Fraction of the data used when estimating each value.
+            Default is 0.3.
+        it: int
+            Number of residual-based reweightings to perform.
+            Default is 0.
+
+        Returns
+        -------
+        kar: float
+
+        References
+        ----------
+
+        .. [1] Lim, A. S. P., Yu, L., Costa, M. D., Buchman, A. S.,
+               Bennett, D. A., Leurgans, S. E., & Saper, C. B. (2011).
+               Quantification of the Fragmentation of Rest-Activity Patterns in
+               Elderly Individuals Using a State Transition Analysis. Sleep,
+               34(11), 1569–1581. http://doi.org/10.5665/sleep.1400
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD.kAR(4)
+            0.041397590252332916
+            >>> rawAWD.kAR(4, start='08:00:00', period='12H')
+            0.04372712642257519
+        """
 
         # Calculate the pAR probabilities and their weights.
         pAR, pAR_weights = self.pAR(threshold, start=start, period=period)

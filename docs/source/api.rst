@@ -63,6 +63,20 @@ Reader classes
         resampled_light
         read_sleep_diary
 
+    .. rubric:: Daily profiles
+    .. autosummary::
+        :toctree: _autosummary/
+
+        average_daily_activity
+        average_daily_light
+
+    .. rubric:: Total activity
+    .. autosummary::
+        :toctree: _autosummary/
+
+        ADAT
+        ADATp
+
     .. rubric:: Non-parametric methods
     .. autosummary::
         :toctree: _autosummary/
@@ -77,24 +91,40 @@ Reader classes
         L5p
         M10
         M10p
+        RA
+        RAp
 
-    .. autoautosummary:: pyActigraphy.io.BaseRaw
-        :methods:
-
-.. currentmodule:: pyActigraphy.io.RawReader
-.. autoclass:: pyActigraphy.io.RawReader
-
-    .. rubric:: Attributes
-    .. autoautosummary:: pyActigraphy.io.RawReader
-        :attributes:
-
-    .. rubric:: Methods
+    .. rubric:: Transition probabilities
     .. autosummary::
         :toctree: _autosummary/
 
-        append
-        mask_fraction
-        start_time
-        duration
-        resampled_data
-        read_sst_log
+        pRA
+        pAR
+        kRA
+        kAR
+
+    .. rubric:: Activity/Rest identification
+    .. autosummary::
+        :toctree: _autosummary/
+
+        Crespo
+        CK
+        Sadeh
+        Scripps
+        SoD
+        fSoD
+
+    .. rubric:: Activity onset/offset
+    .. autosummary::
+        :toctree: _autosummary/
+
+        AoffT
+        AonT
+        Crespo_AoT
+
+
+    .. .. autoautosummary:: pyActigraphy.io.BaseRaw
+    ..     :methods:
+
+.. currentmodule:: pyActigraphy.io.RawReader
+.. autoclass:: pyActigraphy.io.RawReader

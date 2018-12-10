@@ -1,11 +1,28 @@
 from setuptools import setup, find_packages
 from os import path
+import re
 
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
+
+
+# Get the version of the packages
+def read(*parts):
+    with open(path.join(here, *parts), 'r') as fp:
+        return fp.read()
+
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
+
 
 setup(
     # Name of your project. Determine how users can install this project, e.g.:
@@ -25,7 +42,8 @@ setup(
     # For a discussion on single-sourcing the version across setup.py and the
     # project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version='0.1',
+    version=find_version("pyActigraphy", "__init__.py"),
+    # version='0.1',
 
     # One-line description
     description='Analysis package for actigraphy data',
@@ -58,11 +76,11 @@ setup(
         'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
-        'Intended Audience :: Researchers',
-        'Topic :: Actigraphy :: Actimetry',
+        'Intended Audience :: Science/Research',
+        'Topic :: Scientific/Engineering :: Physics',
 
         # Pick your license as you wish
-        'License :: OSI Approved :: GNU GPL-3.0 License',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
