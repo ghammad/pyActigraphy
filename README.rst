@@ -55,16 +55,20 @@ It is strongly recommended to use the latest version of the pyActigraphy package
 Quick start
 ===========
 
-The following notebook introduces the basic functionalities of the pyActigraphy
-package:
+The following example illustrates how to calculate the interdaily stability
+with the pyActigraphy package:
 
-.. toctree::
-   :maxdepth: 1
+.. code-block:: python
 
-   pyActigraphy-Intro.ipynb
+  >>> import pyActigraphy
+  >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+  >>> rawAWD.IS()
+  0.6900175913031027
+  >>> rawAWD.IS(freq='30min', binarize=True, threshold=4)
+  0.6245582891144925
+  >>> rawAWD.IS(freq='1H', binarize=False)
+  0.5257020914453097
 
-`pyActigraphy-Tutorial <https://github.com/ghammad/pyActigraphy-Tutorial>`_ :
-Slides presenting the overall project as well as notebooks illustrating how to use the pyActigraphy package.
 
 Contributing
 ============
@@ -79,10 +83,10 @@ There are plenty of ways to contribute to this package, including (but not limit
 Authors
 =======
 
- * **Grégory Hammad** `@ghammad <https://github.com/ghammad>`_ - *Initial and main developer*
- * **Mathilde Reyt** `@ReytMathilde <https://github.com/ReytMathilde>`_
+* **Grégory Hammad** `@ghammad <https://github.com/ghammad>`_ - *Initial and main developer*
+* **Mathilde Reyt** `@ReytMathilde <https://github.com/ReytMathilde>`_
 
-See also the list of `contributors<https://github.com/ghammad/pyActigraphy/contributors>`_ who participated in this project.
+See also the list of `contributors <https://github.com/ghammad/pyActigraphy/contributors>`_ who participated in this project.
 
 License
 =======

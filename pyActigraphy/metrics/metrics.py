@@ -403,7 +403,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.L5()
             0.XXXX
             >>> rawAWD.L5(binarize=False)
@@ -463,7 +463,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.M10()
             0.XXXX
             >>> rawAWD.M10(binarize=False)
@@ -525,7 +525,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.RA()
             0.XXXX
             >>> rawAWD.RA(binarize=False)
@@ -594,7 +594,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.duration()
             Timedelta('12 days 18:41:00')
             >>> rawAWD.L5p(period='5D',verbose=True)
@@ -671,7 +671,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.duration()
             Timedelta('12 days 18:41:00')
             >>> rawAWD.M10p(period='5D',verbose=True)
@@ -748,7 +748,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.duration()
             Timedelta('12 days 18:41:00')
             >>> rawAWD.RAp(period='5D',verbose=True)
@@ -847,7 +847,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.IS()
             0.6900175913031027
             >>> rawAWD.IS(freq='30min', binarize=True, threshold=4)
@@ -913,7 +913,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.ISm()
             0.5758268227551039
             >>> rawAWD.ISm(binarize=False)
@@ -973,7 +973,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.duration()
             Timedelta('12 days 18:41:00')
             >>> rawAWD.ISp(period='5D',verbose=True)
@@ -1055,7 +1055,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.IV()
             0.46185426426324316
             >>> rawAWD.IV(freq='30min', binarize=True, threshold=4)
@@ -1117,7 +1117,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.IVm()
             0.3482306825356382
             >>> rawAWD.IVm(binarize=False)
@@ -1177,7 +1177,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.duration()
             Timedelta('12 days 18:41:00')
             >>> rawAWD.IVp(period='5D',verbose=True)
@@ -1249,7 +1249,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> pRA, pRA_weights = rawAWD.pRA(4, start='00:00:00', period='8H')
             >>> pRA
             counts
@@ -1332,7 +1332,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> pAR, pAR_weights = rawAWD.pAR(4, start='00:00:00', period='8H')
             >>> pAR
             counts
@@ -1405,7 +1405,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.kRA(4)
             0.09144435545010564
             >>> rawAWD.kRA(4, start='00:00:00', period='8H')
@@ -1467,7 +1467,7 @@ class MetricsMixin(object):
         --------
 
             >>> import pyActigraphy
-            >>> rawAWD = actimetry.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
             >>> rawAWD.kAR(4)
             0.041397590252332916
             >>> rawAWD.kAR(4, start='08:00:00', period='12H')
