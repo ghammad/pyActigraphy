@@ -72,7 +72,7 @@ class AutoAutoSummary(Autosummary):
 
 def setup(app):
     app.add_directive('autoautosummary', AutoAutoSummary)
-
+    app.add_javascript('https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js')
 # -- Project information -----------------------------------------------------
 
 
