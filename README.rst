@@ -2,6 +2,8 @@
   :target: https://www.gnu.org/licenses/gpl-3.0
 .. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/pipeline.svg
   :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
+.. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/coverage.svg
+  :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
 
 **pyActigraphy**
 ================
