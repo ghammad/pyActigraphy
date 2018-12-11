@@ -44,9 +44,10 @@ test:
 pages:
   stage: deploy
   script:
-  - pip install sphinx sphinx-bootstrap-theme
+  - pip install sphinx sphinx-bootstrap-theme nbsphinx
+  - mkdir -p ../pyActigraphy-docs/html
   - cd docs ; make html
-  - mv build/html/ ../public/
+  - mv ../../pyActigraphy-docs/html/ ../public/
   artifacts:
     paths:
     - public
