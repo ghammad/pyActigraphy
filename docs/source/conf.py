@@ -167,10 +167,10 @@ html_theme_options = {
 
     # A list of tuples containing pages or urls to link to.
     'navbar_links': [
-        ("Quick Start", "quickstart"),
+        # ("Quick Start", "quickstart"),
         ("Documentation", "documentation"),
         ("API", "api"),
-        ("Examples", "auto_examples/index"),
+        # ("Examples", "auto_examples/index"),
     ],
 
     # Render the next and previous page links in navbar. (Default: true)
