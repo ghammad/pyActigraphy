@@ -106,7 +106,8 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'nbsphinx',
-    'numpydoc'
+    'numpydoc',
+    # 'bokeh.sphinxext.bokeh_plot'
 ]
 
 # Generate the API documentation when building
