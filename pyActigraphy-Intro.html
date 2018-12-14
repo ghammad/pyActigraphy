@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>How to read an individual actigraphy file &#8212; pyActigraphy 0.1.dev0 documentation</title>
+    <title>Introduction to pyActigraphy &#8212; pyActigraphy 0.1.dev0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -255,6 +255,8 @@ div.nboutput div.output_area.stderr {
 .ansi-bold { font-weight: bold; }
 .ansi-underline { text-decoration: underline; }
 </style>
+<div class="section" id="Introduction-to-pyActigraphy">
+<h1>Introduction to pyActigraphy<a class="headerlink" href="#Introduction-to-pyActigraphy" title="Permalink to this headline">¶</a></h1>
 <p>This introduction notebook illustrates some basic functionalities of the
 pyActigraphy package:</p>
 <ul class="simple">
@@ -262,7 +264,7 @@ pyActigraphy package:</p>
 <li>Inspecting the file header content</li>
 <li>Visualising the actigraphy data</li>
 </ul>
-<p>First, load the pyActigraphy package, as well as a few others:</p>
+<p>First, load the pyActigraphy package:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre>
 <span></span>In [1]:
@@ -270,17 +272,6 @@ pyActigraphy package:</p>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [2]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span> <span class="c1"># package for data manipulation</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span> <span class="c1"># package for scientific computations</span>
 </pre></div>
 </div>
 </div>
@@ -305,7 +296,7 @@ pyActigraphy package:</p>
 <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script><script type="text/javascript">if (window.MathJax) {MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script><script>requirejs.config({paths: { 'plotly': ['https://cdn.plot.ly/plotly-latest.min']},});if(!window._Plotly) {require(['plotly'],function(plotly) {window._Plotly=plotly;});}</script></div>
 </div>
 <div class="section" id="How-to-read-an-individual-actigraphy-file">
-<h1>How to read an individual actigraphy file<a class="headerlink" href="#How-to-read-an-individual-actigraphy-file" title="Permalink to this headline">¶</a></h1>
+<h2>How to read an individual actigraphy file<a class="headerlink" href="#How-to-read-an-individual-actigraphy-file" title="Permalink to this headline">¶</a></h2>
 <p>pyActigraphy reads several actigraphy file formats:</p>
 <ul class="simple">
 <li>awd (Actiwatch)</li>
@@ -342,7 +333,7 @@ So the commands below remain valid, whatever the type of actigraphy file
 that is read.</p>
 </div>
 <div class="section" id="How-to-retrieve-header-info">
-<h1>How to retrieve header info<a class="headerlink" href="#How-to-retrieve-header-info" title="Permalink to this headline">¶</a></h1>
+<h2>How to retrieve header info<a class="headerlink" href="#How-to-retrieve-header-info" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li>Subject’s name:</li>
 </ul>
@@ -459,8 +450,8 @@ that is read.</p>
 </div>
 </div>
 </div>
-<div class="section" id="Plot-the-data">
-<h1>Plot the data<a class="headerlink" href="#Plot-the-data" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="How-to-plot-the-data">
+<h2>How to plot the data<a class="headerlink" href="#How-to-plot-the-data" title="Permalink to this headline">¶</a></h2>
 <p>Several python packages are available to visualise data, such as
 <a class="reference external" href="https://matplotlib.org/">Matplotlib</a> or
 <a class="reference external" href="http://bokeh.pydata.org/en/latest/">Bokeh</a>.</p>
@@ -502,6 +493,7 @@ an interactive viewer but feel free to use the package you prefer.</p>
 <script type="application/vnd.jupyter.widget-state+json">
 {"state": {}, "version_major": 2, "version_minor": 0}
 </script></div>
+</div>
 
 
     </div>

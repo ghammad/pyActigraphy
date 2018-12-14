@@ -95,29 +95,53 @@
 <dt id="pyActigraphy.io.BaseRaw.SoD">
 <code class="descclassname">BaseRaw.</code><code class="descname">SoD</code><span class="sig-paren">(</span><em>freq='5min'</em>, <em>whs=4</em>, <em>start='12:00:00'</em>, <em>period='5h'</em>, <em>algo='unanimous'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.SoD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sleep over Daytime</p>
-<blockquote>
-<div>Apply a sleep scoring algorithm over a ‘period’ period starting
-from the activity onset time (AOT)</div></blockquote>
+<p>Quantify the volume of epochs identified as sleep over daytime (SoD),
+using sleep-wake scoring algorithms.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>freq</strong> (<em>str</em>) – Alias of a timeseries offset. Default: ‘5min’</li>
-<li><strong>whs</strong> (<em>int</em>) – Window half size. Default: 4</li>
-<li><strong>start</strong> (<em>str</em>) – Start time of the period of interest. Default: ‘AonT’
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>freq</strong> (<em>str</em><em>, </em><em>optional</em>) – Resampling frequency.
+Default is ‘5min’</li>
+<li><strong>whs</strong> (<em>int</em><em>, </em><em>optional</em>) – Window half size.
+Default is 4</li>
+<li><strong>start</strong> (<em>str</em><em>, </em><em>optional</em>) – Start time of the period of interest.
+Default: ‘12:00:00’
 Supported times: ‘AonT’, ‘AoffT’, any ‘HH:MM:SS’</li>
-<li><strong>period</strong> (<em>str</em>) – Timedelta. Default: ‘10h’</li>
-<li><strong>algo</strong> (<em>str</em>) – <p>Sleep scoring algorithm to use. Default: ‘unanimous’.
-Supported algorithms:</p>
-<blockquote>
-<div>’ck’, ‘sadeh’, ‘scripps’, ‘majority’, ‘unanimous’</div></blockquote>
-</li>
+<li><strong>period</strong> (<em>str</em><em>, </em><em>optional</em>) – Period length.
+Default is ‘10h’</li>
+<li><strong>algo</strong> (<em>str</em><em>, </em><em>optional</em>) – Sleep scoring algorithm to use.
+Default is ‘unanimous’.
+Supported algorithms: ‘ck’, ‘sadeh’, ‘scripps’, ‘majority’,
+‘unanimous’</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>sod</strong> – Time series containing the epochs of rest (1) and
+activity (0) over the specified period.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.core.Series</p>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span> <span class="o">=</span> <span class="n">pyActigraphy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw_awd</span><span class="p">(</span><span class="n">fpath</span> <span class="o">+</span> <span class="s1">&#39;SUBJECT_01.AWD&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SoD</span> <span class="o">=</span> <span class="n">rawAWD</span><span class="o">.</span><span class="n">SoD</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">SoD</span>
+<span class="go">2018-03-26 04:16:00    1</span>
+<span class="go">2018-03-26 04:17:00    1</span>
+<span class="go">2018-03-26 04:18:00    1</span>
+<span class="go">(...)</span>
+<span class="go">2018-04-05 16:59:00    0</span>
+<span class="go">2018-04-05 16:59:00    0</span>
+<span class="go">2018-04-05 17:00:00    0</span>
+<span class="go">Length: 3175, dtype: int64</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>

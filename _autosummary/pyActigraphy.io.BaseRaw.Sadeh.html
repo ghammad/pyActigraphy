@@ -94,43 +94,63 @@
 <dl class="method">
 <dt id="pyActigraphy.io.BaseRaw.Sadeh">
 <code class="descclassname">BaseRaw.</code><code class="descname">Sadeh</code><span class="sig-paren">(</span><em>offset=7.601</em>, <em>weights=array([-0.065</em>, <em>-1.08</em>, <em>-0.056</em>, <em>-0.703])</em>, <em>threshold=0.0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.Sadeh" title="Permalink to this definition">¶</a></dt>
-<dd><p>Activity-Based Sleep-Wake Identification: An Empirical Test of
-Methodological Issues [Sleep. 17(3):201-207].</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>PS = 7.601 - 0.065·mean_W5 - 1.08·NAT</dt>
-<dd><ul class="first last simple">
-<li>0.056·sd_Last6 - 0.703·logAct</li>
-</ul>
-</dd>
-</dl>
-</div></blockquote>
-<p>with:
-- PS &gt;= 0 == sleep, PS &lt; 0 == wake;
-- mean_W5 is the average number of activity counts during the scored
-epoch and the window of five epochs preceding and following it;
-- sd_Last6 is the standard deviation of the activity counts during
-the scored epoch and the five epochs preceding it;
-- NAT is the number of epochs with activity level equal to or higher
-than 50 but lower than 100 activity counts in a window of 11 minutes
-that includes the scored epoch and the five epochs preceding and
-following it;
-- logAct is the natural logarithm of the number of activity counts
-during the scored epoch + 1.</p>
+<dd><p>Sadeh algorithm for sleep identification</p>
+<p>Algorithm for automatic sleep scoring based on wrist activity,
+developped by Sadeh et al <a class="reference internal" href="#r84df5a90cd40-1" id="id1">[1]</a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>offset</strong> (<em>float</em>) – Offset parameter in Sadeh’s equation. Default is 7.601.</li>
-<li><strong>weights</strong> (<em>array-like</em>) – Array of weighting factors for mean_W5, NAT, sd_Last6 and logAct.
+<li><strong>offset</strong> (<em>float</em><em>, </em><em>optional</em>) – Offset parameter.
+Default is 7.601.</li>
+<li><strong>weights</strong> (<em>np.array</em>) – Array of weighting factors for mean_W5, NAT, sd_Last6 and logAct.
 Default is [-0.065, -1.08, -0.056, -0.703].</li>
-<li><strong>threshold</strong> (<em>float</em>) – Threshold value for scoring sleep/wake. Default is 0.0.</li>
+<li><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold value for scoring sleep/wake.
+Default is 0.0.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>The output variable PS of the Sadeh algorithm is defined in <a class="reference internal" href="#r84df5a90cd40-2" id="id2">[2]</a> as:</p>
+<div class="math notranslate nohighlight">
+\[PS = 7.601 - 0.065·mean_W5 - 1.08·NAT - 0.056·sd_Last6 - 0.703·logAct\]</div>
+<p>with:</p>
+<ul class="simple">
+<li>PS &gt;= 0 == sleep, PS &lt; 0 == wake;</li>
+<li>mean_W5, the average number of activity counts during the scored
+epoch and the window of five epochs preceding and following it;</li>
+<li>sd_Last6, the standard deviation of the activity counts during
+the scored epoch and the five epochs preceding it;</li>
+<li>NAT, the number of epochs with activity level equal to or higher
+than 50 but lower than 100 activity counts in a window of 11 minutes
+that includes the scored epoch and the five epochs preceding and
+following it;</li>
+<li>logAct, the natural logarithm of the number of activity counts during
+the scored epoch + 1.</li>
+</ul>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r84df5a90cd40-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Sadeh, A., Alster, J., Urbach, D., &amp; Lavie, P. (1989).
+Actigraphically based automatic bedtime sleep-wake scoring:
+validity and clinical applications.
+Journal of ambulatory monitoring, 2(3), 209-216.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="r84df5a90cd40-2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Sadeh, A., Sharkey, M., &amp; Carskadon, M. A. (1994).
+Activity-Based Sleep-Wake Identification: An Empirical Test of
+Methodological Issues. Sleep, 17(3), 201–207.
+<a class="reference external" href="http://doi.org/10.1093/sleep/17.3.201">http://doi.org/10.1093/sleep/17.3.201</a></td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
 </dd></dl>
 
 </div>

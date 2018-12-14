@@ -94,7 +94,56 @@
 <dl class="method">
 <dt id="pyActigraphy.io.BaseRaw.AonT">
 <code class="descclassname">BaseRaw.</code><code class="descname">AonT</code><span class="sig-paren">(</span><em>freq='5min'</em>, <em>whs=12</em>, <em>binarize=True</em>, <em>threshold=4</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.AonT" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Activity onset time.</p>
+<p>Activity onset time derived from the daily activity profile.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>freq</strong> (<em>str</em><em>, </em><em>optional</em>) – Data resampling <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/timeseries.html">frequency string</a>.
+Default is ‘5min’.</li>
+<li><strong>whs</strong> (<em>int</em><em>, </em><em>optional</em>) – Window half size.
+Default is 12.</li>
+<li><strong>binarize</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, the data are binarized.
+Default is True.</li>
+<li><strong>threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – If binarize is set to True, data above this threshold are set to 1
+and to 0 otherwise.
+Default is 4.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>aot</strong> – Activity onset time.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Timedelta</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This automatic detection of the activity onset time is based on the
+daily activity profile. It returns the time point where difference
+between the mean activity over <span class="math notranslate nohighlight">\(whs\)</span> epochs before and after this
+time point is maximum:</p>
+<div class="math notranslate nohighlight">
+\[AonT = \max_{t}(
+\frac{\sum_{i=-whs}^{0} x_{t+i}}{\sum_{i=1}^{whs} x_{t+i}} - 1
+)\]</div>
+<p>with:</p>
+<ul class="simple">
+<li><span class="math notranslate nohighlight">\(x_{i}\)</span> is the activity count at time <span class="math notranslate nohighlight">\(i\)</span>.</li>
+</ul>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span> <span class="o">=</span> <span class="n">pyActigraphy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw_awd</span><span class="p">(</span><span class="n">fpath</span> <span class="o">+</span> <span class="s1">&#39;SUBJECT_01.AWD&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">raw</span><span class="o">.</span><span class="n">AonT</span><span class="p">()</span>
+<span class="go">Timedelta(&#39;0 days 07:15:00&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">raw</span><span class="o">.</span><span class="n">AonT</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">Timedelta(&#39;0 days 07:05:00&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
 
 </div>
 

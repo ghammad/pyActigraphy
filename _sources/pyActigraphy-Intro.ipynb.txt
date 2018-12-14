@@ -4,6 +4,13 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
+    "# Introduction to pyActigraphy"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
     "This introduction notebook illustrates some basic functionalities of the pyActigraphy package:\n",
     "\n",
     "* Reading files\n",
@@ -15,7 +22,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "First, load the pyActigraphy package, as well as a few others:"
+    "First, load the pyActigraphy package:"
    ]
   },
   {
@@ -31,22 +38,6 @@
    "outputs": [],
    "source": [
     "import pyActigraphy"
-   ]
-  },
-  {
-   "cell_type": "code",
-   "execution_count": 2,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2018-12-11T14:54:10.865970Z",
-     "start_time": "2018-12-11T14:54:10.862398Z"
-    },
-    "scrolled": true
-   },
-   "outputs": [],
-   "source": [
-    "import pandas as pd # package for data manipulation\n",
-    "import numpy as np # package for scientific computations"
    ]
   },
   {
@@ -325,7 +316,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Plot the data"
+    "## How to plot the data"
    ]
   },
   {

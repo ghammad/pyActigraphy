@@ -94,49 +94,71 @@
 <dl class="method">
 <dt id="pyActigraphy.io.BaseRaw.Crespo">
 <code class="descclassname">BaseRaw.</code><code class="descname">Crespo</code><span class="sig-paren">(</span><em>zeta=15</em>, <em>zeta_r=30</em>, <em>zeta_a=2</em>, <em>t=0.33</em>, <em>alpha='8h'</em>, <em>beta='1h'</em>, <em>estimate_zeta=False</em>, <em>seq_length_max=100</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.Crespo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Automatic identification of activity-rest periods based on actigraphy,
-C. Crespo et al. [Med. Biol. Eng. Comp (2012) 50:329-340]</p>
+<dd><p>Crespo algorithm for activity/rest identification</p>
+<p>Algorithm for automatic identification of activity-rest periods based
+on actigraphy, developped by Crespo et al. <a class="reference internal" href="#r80abbf70343c-1" id="id1">[1]</a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>zeta</strong> (<em>int</em>) – Maximum number of consecutive zeroes considered valid.
+<li><strong>zeta</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of consecutive zeroes considered valid.
 Default is 15.</li>
-<li><strong>zeta_r</strong> (<em>int</em>) – Maximum number of consecutive zeroes considered valid (rest).
+<li><strong>zeta_r</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of consecutive zeroes considered valid (rest).
 Default is 30.</li>
-<li><strong>zeta_a</strong> (<em>int</em>) – Maximum number of consecutive zeroes considered valid (active).
+<li><strong>zeta_a</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of consecutive zeroes considered valid (active).
 Default is 2.</li>
-<li><strong>t</strong> (<em>float</em>) – Percentile for invalid zeroes. Percentile values above 33% bias the
-results towards wake classifications and percentiles below 33%
-towards rest classifications assuming a standard 8 h of sleep
-for every 24 h.
+<li><strong>t</strong> (<em>float</em><em>, </em><em>optional</em>) – Percentile for invalid zeroes.
 Default is 0.33.</li>
-<li><strong>alpha</strong> (<em>offset</em>) – Average hours of sleep per night. During preprocessing, the data
-are padded at the beginning/end with a sequence of ‘alpha/freq/2’
-elements, equal to the maximal value found in the actigraphy data.
+<li><strong>alpha</strong> (<em>str</em><em>, </em><em>optional</em>) – Average hours of sleep per night.
 Default is ‘8h’.</li>
-<li><strong>beta</strong> (<em>offset</em>) – Length of the padding sequence used during the processing.
+<li><strong>beta</strong> (<em>str</em><em>, </em><em>optional</em>) – Length of the padding sequence used during the processing.
 Default is ‘1h’.</li>
-<li><strong>estimate_zeta</strong> (<em>Boolean</em>) – If set to True, zeta values are estimated from the distribution of
+<li><strong>estimate_zeta</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, zeta values are estimated from the distribution of
 ratios of the number of series of consecutive zeroes to
 the number of series randomly chosen from the actigraphy data.
 Default is False.</li>
-<li><strong>seq_length_max</strong> (<em>int</em>) – Maximal length of the aforementioned random series.
+<li><strong>seq_length_max</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximal length of the aforementioned random series.
 Default is 100.</li>
-<li><strong>verbose</strong> – If set to True, print the estimated values of zeta.
+<li><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, print the estimated values of zeta.
 Default is False.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>crespo</strong> – Time series containing the estimated periods of rest-activity.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>crespo</strong> – Time series containing the estimated periods of rest (0) and
+activity (1).</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Instance of pandas.Series</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.core.Series</p>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r80abbf70343c-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Crespo, C., Aboy, M., Fernández, J. R., &amp; Mojón, A. (2012).
+Automatic identification of activity–rest periods based on
+actigraphy. Medical &amp; Biological Engineering &amp; Computing, 50(4),
+329–340. <a class="reference external" href="http://doi.org/10.1007/s11517-012-0875-y">http://doi.org/10.1007/s11517-012-0875-y</a></td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span> <span class="o">=</span> <span class="n">pyActigraphy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw_awd</span><span class="p">(</span><span class="n">fpath</span> <span class="o">+</span> <span class="s1">&#39;SUBJECT_01.AWD&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">crespo</span> <span class="o">=</span> <span class="n">rawAWD</span><span class="o">.</span><span class="n">Crespo</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">crespo</span>
+<span class="go">2018-03-26 14:16:00    1</span>
+<span class="go">2018-03-26 14:17:00    0</span>
+<span class="go">2018-03-26 14:18:00    0</span>
+<span class="go">(...)</span>
+<span class="go">2018-04-06 08:22:00    0</span>
+<span class="go">2018-04-06 08:23:00    0</span>
+<span class="go">2018-04-06 08:24:00    1</span>
+<span class="go">Length: 15489, dtype: int64</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>

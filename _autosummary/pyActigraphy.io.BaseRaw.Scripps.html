@@ -94,33 +94,58 @@
 <dl class="method">
 <dt id="pyActigraphy.io.BaseRaw.Scripps">
 <code class="descclassname">BaseRaw.</code><code class="descname">Scripps</code><span class="sig-paren">(</span><em>scale=0.204</em>, <em>window=array([0.0064</em>, <em>0.0074</em>, <em>0.0112</em>, <em>0.0112</em>, <em>0.0118</em>, <em>0.0118</em>, <em>0.0128</em>, <em>0.0188</em>, <em>0.028</em>, <em>0.0664</em>, <em>0.03</em>, <em>0.0112</em>, <em>0.01</em>, <em>0.</em>, <em>0.</em>, <em>0.</em>, <em>0.</em>, <em>0.</em>, <em>0.</em>, <em>0.</em>, <em>0.    ])</em>, <em>threshold=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.Scripps" title="Permalink to this definition">¶</a></dt>
-<dd><p>Scripps Clinic algorithm for sleep-wake scoring.
-[J. Sleep Res. (2010) 19, 612-619]</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>D = P*(</dt>
-<dd>[W_{-10},..,W_{0},..,W_{+10}] dot
-[A_{-10},..,A_{0},..,A_{+10}]</dd>
-</dl>
-<p>)</p>
-</div></blockquote>
-<p>with:
-- D &lt; 1 == sleep, D &gt;= 1 == wake;
-- P, scale factor;
-- W_{0}, W_{-1}, W_{+1}, …, weighting factors for the present epoch,
-the previous epoch, the following epoch, etc.;
-- A_{0}, A_{-1}, A_{+1}, …, activity scores for the present epoch,
-the previous epoch, the following epoch, etc.</p>
+<dd><p>Scripps Clinic algorithm for sleep-wake identification.</p>
+<p>Algorithm for automatic sleep scoring based on wrist activity,
+developed by Kripke et al <a class="reference internal" href="#ree68f4bfc34f-1" id="id1">[1]</a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>scale</strong> (<em>float</em>) – scale parameter P</li>
-<li><strong>win</strong> (<em>np.array</em>) – array of weighting factors (W_{i})</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>scale</strong> (<em>float</em><em>, </em><em>optional</em>) – Scale parameter P
+Default is 0.204.</li>
+<li><strong>window</strong> (<em>np.array</em><em>, </em><em>optional</em>) – Array of weighting factors <span class="math notranslate nohighlight">\(W_{i}\)</span>
+Default values are identical to those found in the original
+publication <a class="reference internal" href="#ree68f4bfc34f-1" id="id2">[1]</a>.</li>
+<li><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold value for scoring sleep/wake.
+Default is 1.0.</li>
 </ul>
 </td>
 </tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>scripps</strong> – Time series containing the <cite>D</cite> scores (0: sleep, 1: wake) for each
+epoch.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.core.Series</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The output variable D of the Scripps algorithm is defined in <a class="reference internal" href="#ree68f4bfc34f-1" id="id3">[1]</a> as:</p>
+<div class="math notranslate nohighlight">
+\[D = P*(
+    [W_{-10},\dots,W_{0},\dots,W_{+10}]
+    \cdot
+    [A_{-10},\dots,A_{0},\dots,A_{+10}])\]</div>
+<p>with:</p>
+<ul class="simple">
+<li>D &lt; 1 == sleep, D &gt;= 1 == wake;</li>
+<li>P, scale factor;</li>
+<li><span class="math notranslate nohighlight">\(W_{0},W_{-1},W_{+1},\dots\)</span>, weighting factors for the present
+epoch, the previous epoch, the following epoch, etc.;</li>
+<li><span class="math notranslate nohighlight">\(A_{0},A_{-1},A_{+1},\dots\)</span>, activity scores for the present
+epoch, the previous epoch, the following epoch, etc.</li>
+</ul>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="ree68f4bfc34f-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>, <a class="fn-backref" href="#id3">3</a>)</em> Kripke, D. F., Hahn, E. K., Grizas, A. P., Wadiak, K. H.,
+Loving, R. T., Poceta, J. S., … Kline, L. E. (2010).
+Wrist actigraphic scoring for sleep laboratory patients:
+algorithm development. Journal of Sleep Research, 19(4),
+612–619. <a class="reference external" href="http://doi.org/10.1111/j.1365-2869.2010.00835.x">http://doi.org/10.1111/j.1365-2869.2010.00835.x</a></td></tr>
 </tbody>
 </table>
 </dd></dl>

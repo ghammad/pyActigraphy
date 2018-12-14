@@ -95,8 +95,10 @@
 <dt id="pyActigraphy.io.BaseRaw.Crespo_AoT">
 <code class="descclassname">BaseRaw.</code><code class="descname">Crespo_AoT</code><span class="sig-paren">(</span><em>zeta=15</em>, <em>zeta_r=30</em>, <em>zeta_a=2</em>, <em>t=0.33</em>, <em>alpha='8h'</em>, <em>beta='1h'</em>, <em>estimate_zeta=False</em>, <em>seq_length_max=100</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.Crespo_AoT" title="Permalink to this definition">¶</a></dt>
 <dd><p>Automatic identification of activity onset/offset times, based on
-the CRESPO algorithm.
-C. Crespo et al. [Med. Biol. Eng. Comp (2012) 50:329-340]</p>
+the Crespo algorithm.</p>
+<p>Identification of the activity onset and offset time using the
+algorithm for automatic identification of activity-rest periods based
+on actigraphy, developped by Crespo et al. <a class="reference internal" href="#r60ddf557e056-1" id="id1">[1]</a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -108,14 +110,9 @@ Default is 15.</li>
 Default is 30.</li>
 <li><strong>zeta_a</strong> (<em>int</em>) – Maximum number of consecutive zeroes considered valid (active).
 Default is 2.</li>
-<li><strong>t</strong> (<em>float</em>) – Percentile for invalid zeroes. Percentile values above 33% bias the
-results towards wake classifications and percentiles below 33%
-towards rest classifications assuming a standard 8 h of sleep
-for every 24 h.
+<li><strong>t</strong> (<em>float</em>) – Percentile for invalid zeroes.
 Default is 0.33.</li>
-<li><strong>alpha</strong> (<em>offset</em>) – Average hours of sleep per night. During preprocessing, the data
-are padded at the beginning/end with a sequence of ‘alpha/freq/2’
-elements, equal to the maximal value found in the actigraphy data.
+<li><strong>alpha</strong> (<em>offset</em>) – Average hours of sleep per night.
 Default is ‘8h’.</li>
 <li><strong>beta</strong> (<em>offset</em>) – Length of the padding sequence used during the processing.
 Default is ‘1h’.</li>
@@ -139,6 +136,17 @@ respectively.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="r60ddf557e056-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Crespo, C., Aboy, M., Fernández, J. R., &amp; Mojón, A. (2012).
+Automatic identification of activity–rest periods based on
+actigraphy. Medical &amp; Biological Engineering &amp; Computing, 50(4),
+329–340. <a class="reference external" href="http://doi.org/10.1007/s11517-012-0875-y">http://doi.org/10.1007/s11517-012-0875-y</a></td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
 </dd></dl>
 
 </div>

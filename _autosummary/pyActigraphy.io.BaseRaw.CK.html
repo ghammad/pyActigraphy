@@ -94,30 +94,59 @@
 <dl class="method">
 <dt id="pyActigraphy.io.BaseRaw.CK">
 <code class="descclassname">BaseRaw.</code><code class="descname">CK</code><span class="sig-paren">(</span><em>scale=1e-05, window=array([ 400,  600,  300,  400, 1400,  500,  350,    0,    0], dtype=int32), threshold=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.CK" title="Permalink to this definition">¶</a></dt>
-<dd><p>Automatic scoring methods from Cole and Kripke
-to distinguish sleep from wakefulness based on wrist activity
-[Sleep, 15(5):461-469]:</p>
-<blockquote>
-<div>D = P*([W_{-4},..,W_{0},..,W_{+2}] dot [A_{-4},..,A_{0},..,A_{+2}])</div></blockquote>
-<p>with:
-- D &lt; 1 == sleep, D &gt;= 1 == wake;
-- P, scale factor;
-- W_{0}, W_{-1}, W_{+1}, …, weighting factors for the present minute,
-the previous minute, the following minute, etc.;
-- A_{0}, A_{-1}, A_{+1}, …, activity scores for the present minute,
-the previous minute, the following minute, etc.</p>
+<dd><p>Cole&amp;Kripke algorithm for sleep-wake identification.</p>
+<p>Algorithm for automatic sleep scoring based on wrist activity,
+developped by Cole, Kripke et al <a class="reference internal" href="#rb23f536509f7-1" id="id1">[1]</a>.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>scale</strong> (<em>float</em>) – scale parameter P</li>
-<li><strong>win</strong> (<em>np.array</em>) – array of weighting factors (W_{i})</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>scale</strong> (<em>float</em><em>, </em><em>optional</em>) – Scale parameter P.
+Default is 0.00001.</li>
+<li><strong>window</strong> (<em>np.array</em>) – Array of weighting factors, <span class="math notranslate nohighlight">\(W_{i}\)</span>.
+Default is [400, 600, 300, 400, 1400, 500, 350, 0, 0]</li>
+<li><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold value for scoring sleep/wake.
+Default is 1.0.</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ck</strong> – Time series containing the <cite>D</cite> scores (0: sleep, 1: wake) for each
+epoch.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.core.Series</p>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<p>The output variable D of the CK algorithm is defined in <a class="reference internal" href="#rb23f536509f7-1" id="id2">[1]</a> as:</p>
+<div class="math notranslate nohighlight">
+\[D = P*(
+    [W_{-4},\dots,W_{0},\dots,W_{+2}]
+    \cdot
+    [A_{-4},\dots,A_{0},\dots,A_{+2}])\]</div>
+<p>with:</p>
+<ul class="simple">
+<li>D &lt; 1 == sleep, D &gt;= 1 == wake;</li>
+<li>P, scale factor;</li>
+<li><span class="math notranslate nohighlight">\(W_{0},W_{-1},W_{+1},\dots\)</span>, weighting factors for the present
+minute, the previous minute, the following minute, etc.;</li>
+<li><span class="math notranslate nohighlight">\(A_{0},A_{-1},A_{+1},\dots\)</span>, activity scores for the present
+minute, the previous minute, the following minute, etc.</li>
+</ul>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="rb23f536509f7-1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>)</em> Cole, R. J., Kripke, D. F., Gruen, W., Mullaney, D. J.,
+&amp; Gillin, J. C. (1992). Automatic Sleep/Wake Identification
+From Wrist Activity. Sleep, 15(5), 461–469.
+<a class="reference external" href="http://doi.org/10.1093/sleep/15.5.461">http://doi.org/10.1093/sleep/15.5.461</a></td></tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
 </dd></dl>
 
 </div>
