@@ -1,10 +1,11 @@
 from generate_dataset import generate_gaussian_noise
 from generate_dataset import generate_series
+from generate_dataset import generate_squarewave
 from generate_dataset import generate_sinewave
 
 import pandas as pd
 import pyActigraphy
-import pytest
+from pytest import approx
 
 sampling_period = 60
 frequency = pd.Timedelta(sampling_period, unit='s')
@@ -17,7 +18,11 @@ gaussian_noise = generate_series(
     start=start_time,
     sampling_period=sampling_period
 )
-
+square_wave = generate_series(
+    generate_squarewave(N=N-1),
+    start=start_time,
+    sampling_period=sampling_period
+)
 sine_wave = generate_series(
     generate_sinewave(N=N-1),
     start=start_time,
@@ -35,7 +40,17 @@ raw_gaussian = pyActigraphy.io.BaseRaw(
     data=gaussian_noise,
     light=None
 )
-
+raw_squarewave = pyActigraphy.io.BaseRaw(
+    name='raw_square',
+    uuid='XXXXXXXX',
+    format='CUSTOM',
+    axial_mode=None,
+    start_time=pd.to_datetime(start_time),
+    period=period,
+    frequency=frequency,
+    data=square_wave,
+    light=None
+)
 raw_sinewave = pyActigraphy.io.BaseRaw(
     name='raw_sinewave',
     uuid='XXXXXXXX',
@@ -53,25 +68,40 @@ def test_rar_is_gaussian():
 
     assert raw_gaussian.IS(
         freq='1min', binarize=False
-        ) == pytest.approx(1/period.days, rel=0.1)
+        ) == approx(1/period.days, rel=0.1)
 
 
 def test_rar_is_sinewave():
 
     assert raw_sinewave.IS(
         freq='1min', binarize=False
-        ) == pytest.approx(1.0, 0.01)
+        ) == approx(1.0, 0.01)
 
 
 def test_rar_iv_gaussian():
 
     assert raw_gaussian.IV(
         freq='1min', binarize=False
-        ) == pytest.approx(2.0, 0.01)
+        ) == approx(2.0, 0.01)
 
 
 def test_rar_iv_sinewave():
 
     assert raw_sinewave.IV(
         freq='1min', binarize=False
-        ) == pytest.approx(0.0, abs=0.001)
+        ) == approx(0.0, abs=0.001)
+
+
+def test_rar_l5_squarewave():
+
+    assert raw_squarewave.L5(binarize=False) == -100.0
+
+
+def test_rar_m10_squarewave():
+
+    assert raw_squarewave.M10(binarize=False) == 100.0
+
+
+def test_rar_ra_squarewave():
+
+    assert raw_squarewave.RA(binarize=True) == approx(1.0)
