@@ -5,5 +5,6 @@
 # License: BSD (3-clause)
 
 from .flm import FLM
+from .ssa import SSA
 
-__all__ = ["FLM"]
+__all__ = ["FLM", "SSA"]
