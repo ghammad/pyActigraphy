@@ -44,7 +44,8 @@ test:
 pages:
   stage: deploy
   script:
-  - pip install sphinx sphinx-bootstrap-theme nbsphinx
+  - apt-get update && apt-get -y install pandoc
+  - pip install sphinx sphinx-bootstrap-theme numpydoc nbsphinx
   - mkdir -p ../pyActigraphy-docs/html
   - cd docs ; make html
   - mv ../../pyActigraphy-docs/html/ ../public/
