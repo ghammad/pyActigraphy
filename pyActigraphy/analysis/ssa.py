@@ -5,15 +5,13 @@ import pandas as pd
 from scipy import linalg
 
 
-# @jit(float64[:, :](float64[:, :], float64[:], float64[:, :], int32),
-#      nopython=True,
-#      parallel=True)
 @jit(nopython=True, parallel=True)
 def _x_elementary(U, s, Vh, L, K, i):
-    # TODO: check if i is in range
-    # L, K = U[:, i].shape[0], Vh[i].shape[0]
-    sVh_i = s*Vh[i]
+
     X_i = np.empty((L, K), dtype=np.float32)
+
+    # Implement the dot product s * U[,i] x Vh[i].T
+    sVh_i = s*Vh[i]
     for j in prange(L):
         X_i[j] = U[j, i]*sVh_i
 
@@ -60,6 +58,10 @@ class SSA():
         self.__window_dim = int(pd.Timedelta(window_length)/self.__freq)
         self.__L = self.__window_dim
         self.__K = len(data.values) - self.__L + 1
+        self.__U = None
+        self.__sigma = None
+        self.__Vh = None
+        self.__lambda_s = None
 
     @property
     def window_dim(self):
@@ -236,7 +238,7 @@ class SSA():
         ----------
         r: int
             Index of the elementary matrix to be diagonal-averaged.
-            Must lower or equal to the embedding dimension, L.
+            Must be lower than or equal to the embedding dimension, L.
 
         Returns
         -------
@@ -293,3 +295,31 @@ class SSA():
         X_tilde = _diagonal_averaging(self.X_elementary(r))
 
         return X_tilde
+
+    def reconstructed_signal(self, n):
+        r'''Reconstructed signal from diagonal averaged matrices.
+
+        Parameters
+        ----------
+        n: array of int
+            Indices of the diagonal-averaged matrices to merge.
+            Must be lower than or equal to the embedding dimension, L.
+
+        Returns
+        -------
+        reco: pandas.Series
+
+        '''
+
+        X_tildes = [self.X_tilde(i) for i in n]
+
+        # add the X_tilde matrices recursively
+        from functools import reduce
+        X_reco = reduce((lambda x, y: np.add(x, y)), X_tildes)
+
+        reco_signal = pd.Series(
+            data=X_reco,
+            index=self.__data.index
+        )
+
+        return reco_signal
