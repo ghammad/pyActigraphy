@@ -21,7 +21,7 @@ def _activity_onset_time(data, whs=4):
     r = avgdaily.rolling(whs*2, center=True)
 
     aot = r.apply(
-        lambda x: np.mean(x[whs:-1])/np.mean(x[0:whs])-1,
+        lambda x: np.mean(x[whs:])/np.mean(x[0:whs])-1,
         raw=False
     ).idxmax()
 
@@ -35,7 +35,7 @@ def _activity_offset_time(data, whs=4):
     r = avgdaily.rolling(whs*2, center=True)
 
     aot = r.apply(
-        lambda x: np.mean(x[0:whs])/np.mean(x[whs:-1])-1,
+        lambda x: np.mean(x[0:whs])/np.mean(x[whs:])-1,
         raw=False
     ).idxmax()
 
@@ -158,12 +158,121 @@ class ScoringMixin(object):
     """
 
     def AonT(self, freq='5min', whs=12, binarize=True, threshold=4):
+        r"""Activity onset time.
 
+        Activity onset time derived from the daily activity profile.
+
+        Parameters
+        ----------
+        freq: str, optional
+            Data resampling `frequency string
+            <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
+            Default is '5min'.
+        whs: int, optional
+            Window half size.
+            Default is 12.
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+
+        Returns
+        -------
+        aot: Timedelta
+            Activity onset time.
+
+
+        Notes
+        -----
+
+        This automatic detection of the activity onset time is based on the
+        daily activity profile. It returns the time point where difference
+        between the mean activity over :math:`whs` epochs before and after this
+        time point is maximum:
+
+        .. math::
+            AonT = \max_{t}(
+            \frac{\sum_{i=-whs}^{0} x_{t+i}}{\sum_{i=1}^{whs} x_{t+i}} - 1
+            )
+
+        with:
+
+        * :math:`x_{i}` is the activity count at time :math:`i`.
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> raw.AonT()
+            Timedelta('0 days 07:15:00')
+            >>> raw.AonT(binarize=False)
+            Timedelta('0 days 07:05:00')
+
+        """
         data = self.resampled_data(freq, binarize, threshold)
 
         return _activity_onset_time(data, whs=whs)
 
     def AoffT(self, freq='5min', whs=12, binarize=True, threshold=4):
+        r"""Activity offset time.
+
+        Activity offset time derived from the daily activity profile.
+
+        Parameters
+        ----------
+        freq: str, optional
+            Data resampling `frequency string
+            <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
+            Default is '5min'.
+        whs: int, optional
+            Window half size.
+            Default is 12.
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+
+        Returns
+        -------
+        aot: Timedelta
+            Activity offset time.
+
+
+        Notes
+        -----
+
+        This automatic detection of the activity offset time is based on the
+        daily activity profile. It returns the time point where relative
+        difference between the mean activity over :math:`whs` epochs after and
+        before this time point is maximum:
+
+        .. math::
+            AoffT = \max_{t}(
+            \frac{\sum_{i=1}^{whs} x_{t+i}}{\sum_{i=-whs}^{0} x_{t+i}} - 1
+            )
+
+        with:
+
+        * :math:`x_{i}` is the activity count at time :math:`i`.
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> raw.AoffT()
+            Timedelta('0 days 23:20:00')
+            >>> raw.AoffT(binarize=False)
+            Timedelta('0 days 23:05:00')
+
+        """
 
         data = self.resampled_data(freq, binarize, threshold)
 
@@ -176,26 +285,64 @@ class ScoringMixin(object):
         threshold=1.0
     ):
 
-        """Automatic scoring methods from Cole and Kripke
-        to distinguish sleep from wakefulness based on wrist activity
-        [Sleep, 15(5):461-469]:
+        r"""Cole&Kripke algorithm for sleep-wake identification.
 
-            D = P*([W_{-4},..,W_{0},..,W_{+2}] dot [A_{-4},..,A_{0},..,A_{+2}])
+        Algorithm for automatic sleep scoring based on wrist activity,
+        developped by Cole, Kripke et al [1]_.
 
-        with:
-        - D < 1 == sleep, D >= 1 == wake;
-        - P, scale factor;
-        - W_{0}, W_{-1}, W_{+1}, ..., weighting factors for the present minute,
-        the previous minute, the following minute, etc.;
-        - A_{0}, A_{-1}, A_{+1}, ..., activity scores for the present minute,
-        the previous minute, the following minute, etc.
 
         Parameters
         ----------
-        scale: float
-            scale parameter P
-        win: np.array
-            array of weighting factors (W_{i})
+        scale: float, optional
+            Scale parameter P.
+            Default is 0.00001.
+        window: np.array
+            Array of weighting factors, :math:`W_{i}`.
+            Default is [400, 600, 300, 400, 1400, 500, 350, 0, 0]
+        threshold: float, optional
+            Threshold value for scoring sleep/wake.
+            Default is 1.0.
+
+        Returns
+        -------
+        ck: pandas.core.Series
+            Time series containing the `D` scores (0: sleep, 1: wake) for each
+            epoch.
+
+        Notes
+        -----
+
+        The output variable D of the CK algorithm is defined in [1]_ as:
+
+        .. math::
+
+            D = P*(
+                [W_{-4},\dots,W_{0},\dots,W_{+2}]
+                \cdot
+                [A_{-4},\dots,A_{0},\dots,A_{+2}])
+
+        with:
+
+        * D < 1 == sleep, D >= 1 == wake;
+        * P, scale factor;
+        * :math:`W_{0},W_{-1},W_{+1},\dots`, weighting factors for the present
+          minute, the previous minute, the following minute, etc.;
+        * :math:`A_{0},A_{-1},A_{+1},\dots`, activity scores for the present
+          minute, the previous minute, the following minute, etc.
+
+
+        References
+        ----------
+
+        .. [1] Cole, R. J., Kripke, D. F., Gruen, W., Mullaney, D. J.,
+               & Gillin, J. C. (1992). Automatic Sleep/Wake Identification
+               From Wrist Activity. Sleep, 15(5), 461–469.
+               http://doi.org/10.1093/sleep/15.5.461
+
+        Examples
+        --------
+
+
         """
 
         return _cole_kripke(self.data, scale, window, threshold)
@@ -207,34 +354,65 @@ class ScoringMixin(object):
         threshold=0.0
     ):
 
-        """ Activity-Based Sleep-Wake Identification: An Empirical Test of
-        Methodological Issues [Sleep. 17(3):201-207].
+        r"""Sadeh algorithm for sleep identification
 
-            PS = 7.601 - 0.065·mean_W5 - 1.08·NAT
-                 - 0.056·sd_Last6 - 0.703·logAct
-
-        with:
-        - PS >= 0 == sleep, PS < 0 == wake;
-        - mean_W5 is the average number of activity counts during the scored
-        epoch and the window of five epochs preceding and following it;
-        - sd_Last6 is the standard deviation of the activity counts during
-        the scored epoch and the five epochs preceding it;
-        - NAT is the number of epochs with activity level equal to or higher
-        than 50 but lower than 100 activity counts in a window of 11 minutes
-        that includes the scored epoch and the five epochs preceding and
-        following it;
-        - logAct is the natural logarithm of the number of activity counts
-        during the scored epoch + 1.
+        Algorithm for automatic sleep scoring based on wrist activity,
+        developped by Sadeh et al [1]_.
 
         Parameters
         ----------
-        offset: float
-            Offset parameter in Sadeh's equation. Default is 7.601.
-        weights: array-like
+        offset: float, optional
+            Offset parameter.
+            Default is 7.601.
+        weights: np.array
             Array of weighting factors for mean_W5, NAT, sd_Last6 and logAct.
             Default is [-0.065, -1.08, -0.056, -0.703].
-        threshold: float
-            Threshold value for scoring sleep/wake. Default is 0.0.
+        threshold: float, optional
+            Threshold value for scoring sleep/wake.
+            Default is 0.0.
+
+        Returns
+        -------
+
+        Notes
+        -----
+
+        The output variable PS of the Sadeh algorithm is defined in [2]_ as:
+
+        .. math::
+
+            PS = 7.601 - 0.065·mean_W5 - 1.08·NAT - 0.056·sd_Last6 - 0.703·logAct
+
+        with:
+
+        * PS >= 0 == sleep, PS < 0 == wake;
+        * mean_W5, the average number of activity counts during the scored
+          epoch and the window of five epochs preceding and following it;
+        * sd_Last6, the standard deviation of the activity counts during
+          the scored epoch and the five epochs preceding it;
+        * NAT, the number of epochs with activity level equal to or higher
+          than 50 but lower than 100 activity counts in a window of 11 minutes
+          that includes the scored epoch and the five epochs preceding and
+          following it;
+        * logAct, the natural logarithm of the number of activity counts during
+          the scored epoch + 1.
+
+        References
+        ----------
+
+        .. [1] Sadeh, A., Alster, J., Urbach, D., & Lavie, P. (1989).
+               Actigraphically based automatic bedtime sleep-wake scoring:
+               validity and clinical applications.
+               Journal of ambulatory monitoring, 2(3), 209-216.
+        .. [2] Sadeh, A., Sharkey, M., & Carskadon, M. A. (1994).
+               Activity-Based Sleep-Wake Identification: An Empirical Test of
+               Methodological Issues. Sleep, 17(3), 201–207.
+               http://doi.org/10.1093/sleep/17.3.201
+
+        Examples
+        --------
+
+
         """
 
         return _sadeh(self.data, offset, weights, threshold)
@@ -268,28 +446,64 @@ class ScoringMixin(object):
         threshold=1.0
     ):
 
-        """Scripps Clinic algorithm for sleep-wake scoring.
-        [J. Sleep Res. (2010) 19, 612-619]
+        r"""Scripps Clinic algorithm for sleep-wake identification.
 
-            D = P*(
-                [W_{-10},..,W_{0},..,W_{+10}] dot
-                [A_{-10},..,A_{0},..,A_{+10}]
-            )
+        Algorithm for automatic sleep scoring based on wrist activity,
+        developed by Kripke et al [1]_.
 
-        with:
-        - D < 1 == sleep, D >= 1 == wake;
-        - P, scale factor;
-        - W_{0}, W_{-1}, W_{+1}, ..., weighting factors for the present epoch,
-        the previous epoch, the following epoch, etc.;
-        - A_{0}, A_{-1}, A_{+1}, ..., activity scores for the present epoch,
-        the previous epoch, the following epoch, etc.
 
         Parameters
         ----------
-        scale: float
-            scale parameter P
-        win: np.array
-            array of weighting factors (W_{i})
+        scale: float, optional
+            Scale parameter P
+            Default is 0.204.
+        window: np.array, optional
+            Array of weighting factors :math:`W_{i}`
+            Default values are identical to those found in the original
+            publication [1]_.
+        threshold: float, optional
+            Threshold value for scoring sleep/wake.
+            Default is 1.0.
+
+        Returns
+        -------
+
+        scripps: pandas.core.Series
+            Time series containing the `D` scores (0: sleep, 1: wake) for each
+            epoch.
+
+
+        Notes
+        -----
+
+        The output variable D of the Scripps algorithm is defined in [1]_ as:
+
+        .. math::
+
+            D = P*(
+                [W_{-10},\dots,W_{0},\dots,W_{+10}]
+                \cdot
+                [A_{-10},\dots,A_{0},\dots,A_{+10}])
+
+        with:
+
+        * D < 1 == sleep, D >= 1 == wake;
+        * P, scale factor;
+        * :math:`W_{0},W_{-1},W_{+1},\dots`, weighting factors for the present
+          epoch, the previous epoch, the following epoch, etc.;
+        * :math:`A_{0},A_{-1},A_{+1},\dots`, activity scores for the present
+          epoch, the previous epoch, the following epoch, etc.
+
+
+        References
+        ----------
+
+        .. [1] Kripke, D. F., Hahn, E. K., Grizas, A. P., Wadiak, K. H.,
+               Loving, R. T., Poceta, J. S., … Kline, L. E. (2010).
+               Wrist actigraphic scoring for sleep laboratory patients:
+               algorithm development. Journal of Sleep Research, 19(4),
+               612–619. http://doi.org/10.1111/j.1365-2869.2010.00835.x
+
         """
 
         return _scripps(self.data, scale, window, threshold)
@@ -303,30 +517,58 @@ class ScoringMixin(object):
         algo='unanimous'
     ):
 
-        """ Sleep over Daytime
+        r"""Sleep over Daytime
 
-            Apply a sleep scoring algorithm over a 'period' period starting
-            from the activity onset time (AOT)
+        Quantify the volume of epochs identified as sleep over daytime (SoD),
+        using sleep-wake scoring algorithms.
 
         Parameters
         ----------
-        freq: str
-            Alias of a timeseries offset. Default: '5min'
-        whs: int
-            Window half size. Default: 4
-        start: str
-            Start time of the period of interest. Default: 'AonT'
+        freq: str, optional
+            Resampling frequency.
+            Default is '5min'
+        whs: int, optional
+            Window half size.
+            Default is 4
+        start: str, optional
+            Start time of the period of interest.
+            Default: '12:00:00'
             Supported times: 'AonT', 'AoffT', any 'HH:MM:SS'
-        period: str
-            Timedelta. Default: '10h'
-        algo: str
-            Sleep scoring algorithm to use. Default: 'unanimous'.
-            Supported algorithms:
-                'ck', 'sadeh', 'scripps', 'majority', 'unanimous'
+        period: str, optional
+            Period length.
+            Default is '10h'
+        algo: str, optional
+            Sleep scoring algorithm to use.
+            Default is 'unanimous'.
+            Supported algorithms: 'ck', 'sadeh', 'scripps', 'majority',
+            'unanimous'
+
+        Returns
+        -------
+        sod: pandas.core.Series
+            Time series containing the epochs of rest (1) and
+            activity (0) over the specified period.
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> SoD = rawAWD.SoD()
+            >>> SoD
+            2018-03-26 04:16:00    1
+            2018-03-26 04:17:00    1
+            2018-03-26 04:18:00    1
+            (...)
+            2018-04-05 16:59:00    0
+            2018-04-05 16:59:00    0
+            2018-04-05 17:00:00    0
+            Length: 3175, dtype: int64
+
         """
 
         # Regex pattern for HH:MM:SS time string
-        pattern = re.compile("^([0-1]\d|2[0-3])(?::([0-5]\d))(?::([0-5]\d))$")
+        pattern = re.compile(r"^([0-1]\d|2[0-3])(?::([0-5]\d))(?::([0-5]\d))$")
         if start == 'AonT':
             td = _activity_onset_time(self.data, freq=freq, whs=whs)
         elif start == 'AoffT':
@@ -346,8 +588,9 @@ class ScoringMixin(object):
                 ts_days,
                 scale=0.00001,
                 window=np.array(
-                    [400, 600, 300, 400, 1400, 500, 350, 0, 0], np.int32
-                    ),
+                    [400, 600, 300, 400, 1400, 500, 350, 0, 0],
+                    np.int32
+                ),
                 threshold=1.0
             )
         elif algo == 'sadeh':
@@ -361,29 +604,31 @@ class ScoringMixin(object):
             sod = _scripps(
                 ts_days,
                 scale=0.204,
-                window=np.array([
-                    0.0064,  # b_{-10}
-                    0.0074,  # b_{-9}
-                    0.0112,  # b_{-8}
-                    0.0112,  # b_{-7}
-                    0.0118,  # b_{-6}
-                    0.0118,  # b_{-5}
-                    0.0128,  # b_{-4}
-                    0.0188,  # b_{-3}
-                    0.0280,  # b_{-2}
-                    0.0664,  # b_{-1}
-                    0.0300,  # b_{+0}
-                    0.0112,  # b_{+1}
-                    0.0100,  # b_{+2}
-                    0.0000,  # b_{+3}
-                    0.0000,  # b_{+4}
-                    0.0000,  # b_{+5}
-                    0.0000,  # b_{+6}
-                    0.0000,  # b_{+7}
-                    0.0000,  # b_{+8}
-                    0.0000,  # b_{+9}
-                    0.0000   # b_{+10}
-                    ], np.float),
+                window=np.array(
+                    [
+                        0.0064,  # b_{-10}
+                        0.0074,  # b_{-9}
+                        0.0112,  # b_{-8}
+                        0.0112,  # b_{-7}
+                        0.0118,  # b_{-6}
+                        0.0118,  # b_{-5}
+                        0.0128,  # b_{-4}
+                        0.0188,  # b_{-3}
+                        0.0280,  # b_{-2}
+                        0.0664,  # b_{-1}
+                        0.0300,  # b_{+0}
+                        0.0112,  # b_{+1}
+                        0.0100,  # b_{+2}
+                        0.0000,  # b_{+3}
+                        0.0000,  # b_{+4}
+                        0.0000,  # b_{+5}
+                        0.0000,  # b_{+6}
+                        0.0000,  # b_{+7}
+                        0.0000,  # b_{+8}
+                        0.0000,  # b_{+9}
+                        0.0000   # b_{+10}
+                    ], np.float
+                ),
                 threshold=1.0
             )
         elif algo == 'majority':
@@ -391,8 +636,9 @@ class ScoringMixin(object):
                 ts_days,
                 scale=0.00001,
                 window=np.array(
-                    [400, 600, 300, 400, 1400, 500, 350, 0, 0], np.int32
-                    ),
+                    [400, 600, 300, 400, 1400, 500, 350, 0, 0],
+                    np.int32
+                ),
                 threshold=1.0
             )
             sadeh = _sadeh(
@@ -404,29 +650,32 @@ class ScoringMixin(object):
             scripps = _scripps(
                 ts_days,
                 scale=0.204,
-                window=np.array([
-                    0.0064,  # b_{-10}
-                    0.0074,  # b_{-9}
-                    0.0112,  # b_{-8}
-                    0.0112,  # b_{-7}
-                    0.0118,  # b_{-6}
-                    0.0118,  # b_{-5}
-                    0.0128,  # b_{-4}
-                    0.0188,  # b_{-3}
-                    0.0280,  # b_{-2}
-                    0.0664,  # b_{-1}
-                    0.0300,  # b_{+0}
-                    0.0112,  # b_{+1}
-                    0.0100,  # b_{+2}
-                    0.0000,  # b_{+3}
-                    0.0000,  # b_{+4}
-                    0.0000,  # b_{+5}
-                    0.0000,  # b_{+6}
-                    0.0000,  # b_{+7}
-                    0.0000,  # b_{+8}
-                    0.0000,  # b_{+9}
-                    0.0000   # b_{+10}
-                    ], np.float),
+                window=np.array(
+                    [
+                        0.0064,  # b_{-10}
+                        0.0074,  # b_{-9}
+                        0.0112,  # b_{-8}
+                        0.0112,  # b_{-7}
+                        0.0118,  # b_{-6}
+                        0.0118,  # b_{-5}
+                        0.0128,  # b_{-4}
+                        0.0188,  # b_{-3}
+                        0.0280,  # b_{-2}
+                        0.0664,  # b_{-1}
+                        0.0300,  # b_{+0}
+                        0.0112,  # b_{+1}
+                        0.0100,  # b_{+2}
+                        0.0000,  # b_{+3}
+                        0.0000,  # b_{+4}
+                        0.0000,  # b_{+5}
+                        0.0000,  # b_{+6}
+                        0.0000,  # b_{+7}
+                        0.0000,  # b_{+8}
+                        0.0000,  # b_{+9}
+                        0.0000   # b_{+10}
+                    ],
+                    np.float
+                ),
                 threshold=1.0
             )
             sod = ((ck + sadeh + scripps) > 1).astype(int)
@@ -435,8 +684,9 @@ class ScoringMixin(object):
                 ts_days,
                 scale=0.00001,
                 window=np.array(
-                    [400, 600, 300, 400, 1400, 500, 350, 0, 0], np.int32
-                    ),
+                    [400, 600, 300, 400, 1400, 500, 350, 0, 0],
+                    np.int32
+                ),
                 threshold=1.0
             )
             sadeh = _sadeh(
@@ -448,29 +698,32 @@ class ScoringMixin(object):
             scripps = _scripps(
                 ts_days,
                 scale=0.204,
-                window=np.array([
-                    0.0064,  # b_{-10}
-                    0.0074,  # b_{-9}
-                    0.0112,  # b_{-8}
-                    0.0112,  # b_{-7}
-                    0.0118,  # b_{-6}
-                    0.0118,  # b_{-5}
-                    0.0128,  # b_{-4}
-                    0.0188,  # b_{-3}
-                    0.0280,  # b_{-2}
-                    0.0664,  # b_{-1}
-                    0.0300,  # b_{+0}
-                    0.0112,  # b_{+1}
-                    0.0100,  # b_{+2}
-                    0.0000,  # b_{+3}
-                    0.0000,  # b_{+4}
-                    0.0000,  # b_{+5}
-                    0.0000,  # b_{+6}
-                    0.0000,  # b_{+7}
-                    0.0000,  # b_{+8}
-                    0.0000,  # b_{+9}
-                    0.0000   # b_{+10}
-                    ], np.float),
+                window=np.array(
+                    [
+                        0.0064,  # b_{-10}
+                        0.0074,  # b_{-9}
+                        0.0112,  # b_{-8}
+                        0.0112,  # b_{-7}
+                        0.0118,  # b_{-6}
+                        0.0118,  # b_{-5}
+                        0.0128,  # b_{-4}
+                        0.0188,  # b_{-3}
+                        0.0280,  # b_{-2}
+                        0.0664,  # b_{-1}
+                        0.0300,  # b_{+0}
+                        0.0112,  # b_{+1}
+                        0.0100,  # b_{+2}
+                        0.0000,  # b_{+3}
+                        0.0000,  # b_{+4}
+                        0.0000,  # b_{+5}
+                        0.0000,  # b_{+6}
+                        0.0000,  # b_{+7}
+                        0.0000,  # b_{+8}
+                        0.0000,  # b_{+9}
+                        0.0000   # b_{+10}
+                    ],
+                    np.float
+                ),
                 threshold=1.0
             )
             sod = ((ck * sadeh * scripps) > 0).astype(int)
@@ -485,6 +738,50 @@ class ScoringMixin(object):
         period='5h',
         algo='unanimous'
     ):
+
+        r"""Fraction of Sleep over Daytime
+
+        Fractional volume of epochs identified as sleep over daytime (SoD),
+        using sleep-wake scoring algorithms.
+
+        Parameters
+        ----------
+        freq: str, optional
+            Resampling frequency.
+            Default is '5min'
+        whs: int, optional
+            Window half size.
+            Default is 4
+        start: str, optional
+            Start time of the period of interest.
+            Default: '12:00:00'
+            Supported times: 'AonT', 'AoffT', any 'HH:MM:SS'
+        period: str, optional
+            Period length.
+            Default is '10h'
+        algo: str, optional
+            Sleep scoring algorithm to use.
+            Default is 'unanimous'.
+            Supported algorithms: 'ck', 'sadeh', 'scripps', 'majority',
+            'unanimous'
+
+        Returns
+        -------
+        fsod: float
+            Fraction of epochs scored as sleep, relatively to the length of
+            the specified period.
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> raw.fSoD()
+            0.17763779527559054
+            >>> raw.fSoD(algo='ck')
+            0.23811023622047245
+
+        """
 
         SoD = self.SoD(
             freq=freq, whs=whs, start=start, period=period, algo=algo
@@ -514,50 +811,72 @@ class ScoringMixin(object):
         verbose=False
     ):
 
-        """Automatic identification of activity-rest periods based on actigraphy,
-        C. Crespo et al. [Med. Biol. Eng. Comp (2012) 50:329-340]
+        r"""Crespo algorithm for activity/rest identification
+
+        Algorithm for automatic identification of activity-rest periods based
+        on actigraphy, developped by Crespo et al. [1]_.
 
         Parameters
         ----------
-        zeta: int
+        zeta: int, optional
             Maximum number of consecutive zeroes considered valid.
             Default is 15.
-        zeta_r: int
+        zeta_r: int, optional
             Maximum number of consecutive zeroes considered valid (rest).
             Default is 30.
-        zeta_a: int
+        zeta_a: int, optional
             Maximum number of consecutive zeroes considered valid (active).
             Default is 2.
-        t: float
-            Percentile for invalid zeroes. Percentile values above 33% bias the
-            results towards wake classifications and percentiles below 33%
-            towards rest classifications assuming a standard 8 h of sleep
-            for every 24 h.
+        t: float, optional
+            Percentile for invalid zeroes.
             Default is 0.33.
-        alpha: offset
-            Average hours of sleep per night. During preprocessing, the data
-            are padded at the beginning/end with a sequence of 'alpha/freq/2'
-            elements, equal to the maximal value found in the actigraphy data.
+        alpha: str, optional
+            Average hours of sleep per night.
             Default is '8h'.
-        beta: offset
+        beta: str, optional
             Length of the padding sequence used during the processing.
             Default is '1h'.
-        estimate_zeta: Boolean
+        estimate_zeta: bool, optional
             If set to True, zeta values are estimated from the distribution of
             ratios of the number of series of consecutive zeroes to
             the number of series randomly chosen from the actigraphy data.
             Default is False.
-        seq_length_max: int
+        seq_length_max: int, optional
             Maximal length of the aforementioned random series.
             Default is 100.
-        verbose:
+        verbose: bool, optional
             If set to True, print the estimated values of zeta.
             Default is False.
 
         Returns
         -------
-        crespo : Instance of pandas.Series
-            Time series containing the estimated periods of rest-activity.
+        crespo : pandas.core.Series
+            Time series containing the estimated periods of rest (0) and
+            activity (1).
+
+        References
+        ----------
+
+        .. [1] Crespo, C., Aboy, M., Fernández, J. R., & Mojón, A. (2012).
+               Automatic identification of activity–rest periods based on
+               actigraphy. Medical & Biological Engineering & Computing, 50(4),
+               329–340. http://doi.org/10.1007/s11517-012-0875-y
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> crespo = rawAWD.Crespo()
+            >>> crespo
+            2018-03-26 14:16:00    1
+            2018-03-26 14:17:00    0
+            2018-03-26 14:18:00    0
+            (...)
+            2018-04-06 08:22:00    0
+            2018-04-06 08:23:00    0
+            2018-04-06 08:24:00    1
+            Length: 15489, dtype: int64
         """
 
         # 1. Pre-processing
@@ -737,8 +1056,11 @@ class ScoringMixin(object):
     ):
 
         """Automatic identification of activity onset/offset times, based on
-        the CRESPO algorithm.
-        C. Crespo et al. [Med. Biol. Eng. Comp (2012) 50:329-340]
+        the Crespo algorithm.
+
+        Identification of the activity onset and offset time using the
+        algorithm for automatic identification of activity-rest periods based
+        on actigraphy, developped by Crespo et al. [1]_.
 
         Parameters
         ----------
@@ -752,15 +1074,10 @@ class ScoringMixin(object):
             Maximum number of consecutive zeroes considered valid (active).
             Default is 2.
         t: float
-            Percentile for invalid zeroes. Percentile values above 33% bias the
-            results towards wake classifications and percentiles below 33%
-            towards rest classifications assuming a standard 8 h of sleep
-            for every 24 h.
+            Percentile for invalid zeroes.
             Default is 0.33.
         alpha: offset
-            Average hours of sleep per night. During preprocessing, the data
-            are padded at the beginning/end with a sequence of 'alpha/freq/2'
-            elements, equal to the maximal value found in the actigraphy data.
+            Average hours of sleep per night.
             Default is '8h'.
         beta: offset
             Length of the padding sequence used during the processing.
@@ -782,6 +1099,18 @@ class ScoringMixin(object):
         aot : (ndarray, ndarray)
             Arrays containing the estimated activity onset and offset times,
             respectively.
+
+        References
+        ----------
+
+        .. [1] Crespo, C., Aboy, M., Fernández, J. R., & Mojón, A. (2012).
+               Automatic identification of activity–rest periods based on
+               actigraphy. Medical & Biological Engineering & Computing, 50(4),
+               329–340. http://doi.org/10.1007/s11517-012-0875-y
+
+        Examples
+        --------
+
         """
 
         crespo = self.Crespo(

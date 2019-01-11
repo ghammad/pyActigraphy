@@ -72,7 +72,7 @@ class AutoAutoSummary(Autosummary):
 
 def setup(app):
     app.add_directive('autoautosummary', AutoAutoSummary)
-
+    app.add_javascript('https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js')
 # -- Project information -----------------------------------------------------
 
 
@@ -106,7 +106,8 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'nbsphinx',
-    'numpydoc'
+    'numpydoc',
+    # 'bokeh.sphinxext.bokeh_plot'
 ]
 
 # Generate the API documentation when building
@@ -167,10 +168,10 @@ html_theme_options = {
 
     # A list of tuples containing pages or urls to link to.
     'navbar_links': [
-        ("Quick Start", "quickstart"),
+        # ("Quick Start", "quickstart"),
         ("Documentation", "documentation"),
         ("API", "api"),
-        ("Examples", "auto_examples/index"),
+        # ("Examples", "auto_examples/index"),
     ],
 
     # Render the next and previous page links in navbar. (Default: true)
