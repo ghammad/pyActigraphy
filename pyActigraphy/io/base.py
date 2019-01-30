@@ -297,3 +297,7 @@ class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
     def sleep_diary(self):
         """ :class:`SleepDiary` class instanciation."""
         return self.__sleep_diary
+
+    @sleep_diary.setter
+    def sleep_diary(self, value):
+        self.__sleep_diary = value
