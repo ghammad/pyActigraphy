@@ -5,10 +5,10 @@ import warnings
 from pandas.tseries.frequencies import to_offset
 from ..filters import FiltersMixin
 from ..metrics import MetricsMixin
-from ..sleep import SleepDiary, ScoringMixin
+from ..sleep import SleepDiary, ScoringMixin, SleepBoutMixin
 
 
-class BaseRaw(ScoringMixin, MetricsMixin, FiltersMixin):
+class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
     """Base class for raw data."""
     def __init__(
         self,
