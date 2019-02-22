@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import warnings
 
-from scipy.optimize import curve_fit
+from lmfit import fit_report, minimize, Parameters
 from scipy.stats import pearsonr
 
 
@@ -34,8 +34,14 @@ def _inflexion_points(df_dx, d2f_dx2):
     return _extrema_points(d2f_dx2, df_dx)
 
 
-def _cosine(x, A, T, phi, offset):
+def _cosine(x, params):
     r'''1-harmonic cosine function'''
+
+    A = params['amp']
+    phi = params['phase']
+    T = params['period']
+    offset = params['offset']
+
     return A*np.cos(2*np.pi/T*x+phi) + offset
 
 
@@ -83,9 +89,9 @@ class LIDS():
         self.__fit_func = func
 
     @property
-    def lids_fit_args(self):
+    def lids_fit_params(self):
         r'''Arguments of the fit function to LIDS oscillations'''
-        return self.__fit_args
+        return self.__fit_params
 
     @property
     def lids_fit_period(self):
@@ -128,7 +134,7 @@ class LIDS():
         r'''Smooth LIDS data with a centered moving average using a `win_size`
         window'''
 
-        return lids.rolling(win_size, center=True).mean().dropna()
+        return lids.rolling(win_size, center=True, min_periods=1).mean()
 
     def lids_transform(self, ts, win_td='30min', resampling_freq=None):
         r'''Apply LIDS transformation to activity data
@@ -174,38 +180,98 @@ class LIDS():
 
         return smooth_lids
 
-    def lids_fit(self, lids, p0, method='lm', bounds=(-np.inf, np.inf)):
+    def lids_fit(
+        self,
+        lids,
+        p0=None,
+        bounds=('30min', '180min'),
+        step='5min',
+        verbose=False
+    ):
         r'''Fit oscillations of the LIDS data
+
+        The fit is performed with a fixed period ranging from 30 min to 180 min
+        with a step of 5 min by default. The best-fit criterion is the maximal
+        Munich Rhythmicity Index (MRI).
 
         Parameters
         ----------
         lids: pandas.Series
             Output data from LIDS transformation.
-        p0: array
+        p0: array, optional
             Initial values of the fit parameters.
-        method: str, optional
-            Method used to fit the data.
-            Cf. `scipy.optimize.curve_fit` function.
-            Default is 'lm'.
-        bounds : 2-tuple of array_like, optional
-            Lower and upper bounds on parameters.
-            Defaults to no bounds.
+        bounds: 2-tuple of str, optional
+            Lower and upper bounds on periods to be tested.
+            Default is ('30min','180min').
+        step: str, optional
+            Time delta between the periods to be tested.
+        verbose: bool, optional
+            If set to True, display fit informations
         '''
 
         x = np.arange(lids.index.size)
 
-        # Fit data with 1-harmonic cosine function
-        popt, pcov = curve_fit(
-            self.lids_fit_func,
-            x,
-            lids.values,
-            p0=p0,
-            method=method
+        # Define periods
+        period_start = pd.Timedelta(bounds[0])/self.__freq
+        period_end = pd.Timedelta(bounds[1])/self.__freq
+        period_range = period_end-period_start
+        period_step = pd.Timedelta(step)/self.__freq
+        test_periods = np.linspace(
+            period_start,
+            period_end,
+            num=int(period_range/period_step)
         )
 
-        self.__fit_args = (popt, pcov)
+        # Fit parameters
+        params = Parameters()
+        params.add('amp', value=50, min=0, max=100)
+        params.add('offset', value=50, min=0, max=100)
+        params.add('phase', value=0.0, min=-np.inf, max=np.inf)
+        params.add('period', value=test_periods[0], vary=False)  # Fixed period
 
-    def lids_pearsonr(self, lids):
+        # TODO: include reading values from p0
+
+        # Define residuals
+        def residual(params, x, data):
+            model = self.lids_fit_func(x, params)
+            return (data-model)
+
+        # Fit data with 1-harmonic cosine function for each test period
+        fit_results = []
+        mri = -np.inf
+        for test_period in test_periods:
+            # Fix test period
+            params['period'].value = test_period
+            # Minimize residuals
+            out = minimize(residual, params, args=(x,  lids.values))
+            # Print fit parameters if verbose
+            if verbose:
+                print(fit_report(out))
+                # out.params.pretty_print()
+            # Store fit results
+            fit_results.append(out)
+            # Calculate the MR index
+            pearson_r = self.lids_pearson_r(lids, out.params)[0]
+            # Oscillation range = [-A,+A] => 2*A
+            # oscillation_range = 2*out.params['amp'].value
+            # mri_tmp = pearson_r*oscillation_range
+            mri_tmp = self.lids_mri(lids, out.params)
+            if verbose:
+                print('Pearson r: {}'.format(pearson_r))
+                print('MRI: {}'.format(mri_tmp))
+
+            # If the newly calculated MRI is higher than the current MRI
+            if mri_tmp > mri:
+                # Store MRI
+                mri = mri_tmp
+                # Store fit parameters
+                self.__fit_params = out.params
+                self.lids_fit_period = out.params['period'].value
+
+        if verbose:
+            print('Highest MRI: {}'.format(mri))
+
+    def lids_pearson_r(self, lids, params=None):
         r'''Pearson correlation factor
 
         Pearson correlation factor between LIDS data and its fit function
@@ -214,14 +280,58 @@ class LIDS():
         ----------
         lids: pandas.Series
             Output data from LIDS transformation.
+        params: lmfit.Parameters, optional
+            Parameters for the fit function.
+            If None, self.lids_fit_params is used instead.
+            Default is None.
 
         Returns
         -------
         r: numpy.float64
-
+            Pearson’s correlation coefficient
+        p: numpy.float64
+            2-tailed p-value
         '''
+
         x = np.arange(lids.index.size)
-        return pearsonr(lids, self.lids_fit_func(x, *self.lids_fit_args[0]))
+        if params is None:
+            params = self.lids_fit_params
+        return pearsonr(lids, self.lids_fit_func(x, params))
+
+    def lids_mri(self, lids, params=None):
+        r'''Munich Rhythmicity Index
+
+        The Munich Rhythmicity Index (MRI) is defined as
+        :math:`MRI = A \times r` with :math:`A`, the cosine fit amplitude and
+        :math:`r`, the bivariate correlation coefficient (a.k.a. Pearson'r).
+
+        Parameters
+        ----------
+        lids: pandas.Series
+            Output data from LIDS transformation.
+        params: lmfit.Parameters, optional
+            Parameters for the fit function.
+            If None, self.lids_fit_params is used instead.
+            Default is None.
+
+        Returns
+        -------
+        mri: numpy.float64
+            Munich Rhythmicity Index
+        '''
+        if params is None:
+            params = self.lids_fit_params
+
+        # Pearson's r
+        pearson_r = self.lids_pearson_r(lids, params)[0]
+
+        # Oscillation range = [-A,+A] => 2*A
+        oscillation_range = 2*params['amp'].value
+
+        # MRI
+        mri = pearson_r*oscillation_range
+
+        return mri
 
     def lids_period(self, freq='s'):
         r'''LIDS period
@@ -276,7 +386,7 @@ class LIDS():
             # TODO: evaluate if raise ValueError('') more appropriate
             return None
 
-        if self.lids_fit_args is None:
+        if self.lids_fit_params is None:
             warnings.warn(
                 'LIDS fit parameters are not set. '
                 'Run lids_fit() before calling this function.\n'
@@ -285,22 +395,24 @@ class LIDS():
             )
             return None
 
-        from scipy.misc import derivative
+        # from scipy.misc import derivative
 
         # Fit support range
         x = np.arange(lids.index.size, step=step)
 
         # LIDS fit derivatives (1st and 2nd)
-        df_dx = derivative(
-            func=self.lids_fit_func,
-            x0=x, dx=step, n=1,
-            args=self.lids_fit_args[0]
-        )
-        d2f_dx2 = derivative(
-            func=self.lids_fit_func,
-            x0=x, dx=step, n=2,
-            args=self.lids_fit_args[0]
-        )
+        df_dx = np.gradient(self.lids_fit_func(x, self.lids_fit_params), step)
+        # derivative(
+        #     func=self.lids_fit_func,
+        #     x0=x, dx=step, n=1,
+        #     args=self.lids_fit_params
+        # )
+        d2f_dx2 = np.gradient(df_dx, step)
+        # derivative(
+        #     func=self.lids_fit_func,
+        #     x0=x, dx=step, n=2,
+        #     args=self.lids_fit_params
+        # )
 
         # Index of the 1st maxima (i.e 1st maximum of the LIDS oscillations)
         first_max_idx = np.argmax(_extrema_points(df_dx, d2f_dx2))
