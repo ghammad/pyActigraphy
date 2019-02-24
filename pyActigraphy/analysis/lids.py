@@ -45,6 +45,19 @@ def _cosine(x, params):
     return A*np.cos(2*np.pi/T*x+phi) + offset
 
 
+def _lfm(x, params):
+    r'''Linear frequency modulated cosine function'''
+
+    A = params['amp']
+    k = params['k']
+    phi = params['phase']
+    T = params['period']
+    offset = params['offset']
+    slope = params['slope']
+
+    return A*np.cos(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
+
+
 class LIDS():
     """
     Class for Locomotor inactivity during sleep (LIDS) Analysis
@@ -55,19 +68,26 @@ class LIDS():
 
     """
 
-    def __init__(self):
+    def __init__(self, fit_func='cosine'):
+
+        fit_funcs = {'cosine': _cosine, 'chirp': _lfm}
+        if fit_func not in fit_funcs.keys:
+            raise ValueError(
+                '`Fit function` must be "%s". You passed: "%s"' %
+                ('" or "'.join(list(fit_funcs.keys)), fit_func)
+            )
 
         self.__freq = None  # pd.Timedelta
         self.__lids_func = lambda x: 100/(x+1)  # LIDS transformation function
-        self.__fit_func = _cosine  # Default fit function to LIDS oscillations
+        self.__fit_func = fit_funcs[fit_func]  # Fit function to LIDS
 
         params = Parameters()
         params.add('amp', value=50, min=0, max=100)
-        # params.add('k', value=-.0001, min=-np.inf, max=np.inf)
+        params.add('k', value=-.0001, min=-1, max=1)
         params.add('offset', value=100, min=0, max=100)
-        params.add('phase',  value=0.0, min=-np.pi, max=np.pi)
+        params.add('phase', value=0.0, min=-np.pi, max=np.pi)
         params.add('period', value=9, min=0)  # Dummy value
-        # params.add('slope', value=-0.5)
+        params.add('slope', value=-0.5)
 
         self.__fit_params = params
         self.__fit_results = None
