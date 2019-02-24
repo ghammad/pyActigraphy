@@ -60,7 +60,17 @@ class LIDS():
         self.__freq = None  # pd.Timedelta
         self.__lids_func = lambda x: 100/(x+1)  # LIDS transformation function
         self.__fit_func = _cosine  # Default fit function to LIDS oscillations
-        self.__fit_args = None
+
+        params = Parameters()
+        params.add('amp', value=50, min=0, max=100)
+        # params.add('k', value=-.0001, min=-np.inf, max=np.inf)
+        params.add('offset', value=100, min=0, max=100)
+        params.add('phase',  value=0.0, min=-np.pi, max=np.pi)
+        params.add('period', value=9, min=0)  # Dummy value
+        # params.add('slope', value=-0.5)
+
+        self.__fit_params = params
+        self.__fit_results = None
         self.__fit_period = None
 
     @property
@@ -92,6 +102,21 @@ class LIDS():
     def lids_fit_params(self):
         r'''Arguments of the fit function to LIDS oscillations'''
         return self.__fit_params
+
+    @lids_fit_params.setter
+    def lids_fit_params(self, params):
+        r'''Arguments of the fit function to LIDS oscillations'''
+        self.__fit_params = params
+
+    @property
+    def lids_fit_results(self):
+        r'''Results of the LIDS fit'''
+        return self.__fit_results
+
+    @lids_fit_results.setter
+    def lids_fit_results(self, results):
+        r'''Results of the LIDS fit'''
+        self.__fit_results = results
 
     @property
     def lids_fit_period(self):
@@ -183,7 +208,6 @@ class LIDS():
     def lids_fit(
         self,
         lids,
-        p0=None,
         bounds=('30min', '180min'),
         step='5min',
         verbose=False
@@ -198,8 +222,6 @@ class LIDS():
         ----------
         lids: pandas.Series
             Output data from LIDS transformation.
-        p0: array, optional
-            Initial values of the fit parameters.
         bounds: 2-tuple of str, optional
             Lower and upper bounds on periods to be tested.
             Default is ('30min','180min').
@@ -216,20 +238,15 @@ class LIDS():
         period_end = pd.Timedelta(bounds[1])/self.__freq
         period_range = period_end-period_start
         period_step = pd.Timedelta(step)/self.__freq
+
         test_periods = np.linspace(
             period_start,
             period_end,
-            num=int(period_range/period_step)
+            num=int(period_range/period_step)+1
         )
 
-        # Fit parameters
-        params = Parameters()
-        params.add('amp', value=50, min=0, max=100)
-        params.add('offset', value=50, min=0, max=100)
-        params.add('phase', value=0.0, min=-np.inf, max=np.inf)
-        params.add('period', value=test_periods[0], vary=False)  # Fixed period
-
-        # TODO: include reading values from p0
+        # Set period as a fixed parameter
+        self.lids_fit_params['period'].vary = False
 
         # Define residuals
         def residual(params, x, data):
@@ -237,25 +254,21 @@ class LIDS():
             return (data-model)
 
         # Fit data with 1-harmonic cosine function for each test period
-        fit_results = []
         mri = -np.inf
+        fit_result_tmp = None
         for test_period in test_periods:
             # Fix test period
-            params['period'].value = test_period
+            self.lids_fit_params['period'].value = test_period
             # Minimize residuals
-            out = minimize(residual, params, args=(x,  lids.values))
+            fit_result_tmp = minimize(
+                residual, self.lids_fit_params, args=(x,  lids.values)
+            )
             # Print fit parameters if verbose
             if verbose:
-                print(fit_report(out))
-                # out.params.pretty_print()
-            # Store fit results
-            fit_results.append(out)
+                print(fit_report(fit_result_tmp))
             # Calculate the MR index
-            pearson_r = self.lids_pearson_r(lids, out.params)[0]
-            # Oscillation range = [-A,+A] => 2*A
-            # oscillation_range = 2*out.params['amp'].value
-            # mri_tmp = pearson_r*oscillation_range
-            mri_tmp = self.lids_mri(lids, out.params)
+            pearson_r = self.lids_pearson_r(lids, fit_result_tmp.params)[0]
+            mri_tmp = self.lids_mri(lids, fit_result_tmp.params)
             if verbose:
                 print('Pearson r: {}'.format(pearson_r))
                 print('MRI: {}'.format(mri_tmp))
@@ -265,8 +278,11 @@ class LIDS():
                 # Store MRI
                 mri = mri_tmp
                 # Store fit parameters
-                self.__fit_params = out.params
-                self.lids_fit_period = out.params['period'].value
+                fit_result = fit_result_tmp
+
+        self.lids_fit_results = fit_result
+        self.lids_fit_params = fit_result.params
+        self.lids_fit_period = fit_result.params['period'].value
 
         if verbose:
             print('Highest MRI: {}'.format(mri))
@@ -468,6 +484,10 @@ class LIDS():
 
         # Resample LIDS data to restore the original bin width of its Index
         # Infer missing data via interpolation
-        lids_resampled = lids_rescaled.resample(self.freq).mean()
+        lids_resampled = lids_rescaled.resample(
+            self.freq
+            # label='right',
+            # closed='right'
+        ).mean()
 
         return lids_resampled.interpolate(method='linear')
