@@ -71,7 +71,7 @@ class LIDS():
     def __init__(self, fit_func='cosine'):
 
         fit_funcs = {'cosine': _cosine, 'chirp': _lfm}
-        if fit_func not in fit_funcs.keys:
+        if fit_func not in fit_funcs.keys():
             raise ValueError(
                 '`Fit function` must be "%s". You passed: "%s"' %
                 ('" or "'.join(list(fit_funcs.keys)), fit_func)
