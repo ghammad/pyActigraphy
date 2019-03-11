@@ -1362,7 +1362,9 @@ class MetricsMixin(object):
 
         return pAR, pAR_weights
 
-    def kRA(self, threshold, start=None, period=None, frac=.3, it=0):
+    def kRA(
+        self, threshold, start=None, period=None, frac=.3, it=0, logit=False
+    ):
         r"""Rest->Activity transition probability
 
         Weighted average value of pRA(t) within the constant regions, defined
@@ -1381,12 +1383,16 @@ class MetricsMixin(object):
         period: str, optional
             Time period for the calculation of pRA.
             Default is None.
-        frac: float
+        frac: float, optional
             Fraction of the data used when estimating each value.
             Default is 0.3.
-        it: int
+        it: int, optional
             Number of residual-based reweightings to perform.
             Default is 0.
+        logit: bool, optional
+            If True, the kRA value is logit-transformed (ln(p/1-p)). Useful
+            when kRA is used in a regression model.
+            Default is False.
 
         Returns
         -------
@@ -1422,9 +1428,11 @@ class MetricsMixin(object):
             frac=frac,
             it=it
             )
-        return kRA
+        return np.log(kRA/(1-kRA)) if logit else kRA
 
-    def kAR(self, threshold, start=None, period=None, frac=.3, it=0):
+    def kAR(
+        self, threshold, start=None, period=None, frac=.3, it=0, logit=False
+    ):
         r"""Rest->Activity transition probability
 
         Weighted average value of pAR(t) within the constant regions, defined
@@ -1449,6 +1457,10 @@ class MetricsMixin(object):
         it: int
             Number of residual-based reweightings to perform.
             Default is 0.
+        logit: bool, optional
+            If True, the kRA value is logit-transformed (ln(p/1-p)). Useful
+            when kRA is used in a regression model.
+            Default is False.
 
         Returns
         -------
@@ -1484,7 +1496,7 @@ class MetricsMixin(object):
             frac=frac,
             it=it
             )
-        return kAR
+        return np.log(kAR/(1-kAR)) if logit else kAR
 
 
 class ForwardMetricsMixin(object):
