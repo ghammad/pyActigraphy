@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import warnings
 
+from functools import reduce
 from lmfit import fit_report, minimize, Parameters
 from scipy.stats import pearsonr
 
@@ -511,3 +512,82 @@ class LIDS():
         ).mean()
 
         return lids_resampled.interpolate(method='linear')
+
+    def lids_summary(self, lids, verbose=False):
+        r'''Calculate summary statistics for LIDS
+
+        Fit all LIDS-transformed bouts and calculate the mean period, the mean
+        mri, the mean number of LIDS cycles and the dampening factor of the
+        mean LIDS profile.
+
+        Parameters
+        ----------
+        lids: pandas.Series
+            Output data from LIDS transformation.
+        verbose: bool, optional
+            If set to True, print summary statistics.
+            Default is False.
+
+        Returns
+        -------
+        summary: dict
+            Dictionary with the summary statistics.
+        '''
+
+        ilids = []  # LIDS profiles
+        periods = []  # List of LIDS periods
+        mris = []  # MRI indices
+        ncycles = []  # Number of LIDS cycles/sleep bout
+
+        for idx, s in enumerate(lids):
+            # Fit LIDS data
+            self.lids_fit(s, verbose=False)
+
+            # Verify LIDS period
+            period = self.lids_period(freq='s')
+
+            # Calculate MRI
+            mri = self.lids_mri(s)
+
+            # Calculate the number of LIDS cycle (as sleep bout length/period):
+            ncycle = s.index.values.ptp()/np.timedelta64(1, 's')
+            ncycle /= period.astype(float)
+
+            if verbose:
+                print('-'*20)
+                print('Sleep bout nr {}'.format(idx))
+                print('- Period: {!s}'.format(period))
+                print('- MRI: {}'.format(mri))
+                print('- Number of cycles: {}'.format(ncycle))
+
+            # Rescale LIDS timeline to LIDS period
+            rescaled_lids = self.lids_convert_to_internal_time(s)
+
+            periods.append(period)
+            mris.append(mri)
+            ncycles.append(ncycle)
+            ilids.append(rescaled_lids)
+
+        # Create the mean LIDS profile
+        lids_profile = reduce(
+            (lambda x, y: x.add(y, fill_value=0)),
+            ilids
+        )/len(ilids)
+
+        # Fit mean LIDS profile with a pol0
+        fit_params = np.polyfit(
+            x=range(len(lids_profile.index)),
+            y=lids_profile.values,
+            deg=1
+        )
+
+        # LIDS summary
+        summary = {}
+        summary['Mean number of LIDS cycles'] = np.mean(ncycles)
+        summary['Mean LIDS period (s)'] = np.mean(periods).astype(float)
+        summary['Mean MRI'] = np.mean(mris)
+        summary[
+            'LIDS dampening factor (counts/{})'.format(self.freq)
+        ] = fit_params[0]
+
+        return summary
