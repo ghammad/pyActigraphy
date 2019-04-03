@@ -83,7 +83,9 @@ class LIDS():
 
     """
 
-    def __init__(self, fit_func='cosine'):
+    fit_func_list = ['cosine', 'chirp', 'modchirp']
+
+    def __init__(self, fit_func='cosine', fit_params=None):
 
         fit_funcs = {'cosine': _cosine, 'chirp': _lfm, 'modchirp': _lfam}
         if fit_func not in fit_funcs.keys():
@@ -96,15 +98,18 @@ class LIDS():
         self.__lids_func = lambda x: 100/(x+1)  # LIDS transformation function
         self.__fit_func = fit_funcs[fit_func]  # Fit function to LIDS
 
-        params = Parameters()
-        params.add('amp', value=50, min=0, max=100)
-        params.add('k', value=-.0001, min=-1, max=1)
-        params.add('offset', value=100, min=0, max=100)
-        params.add('phase', value=0.0, min=-np.pi, max=np.pi)
-        params.add('period', value=9, min=0)  # Dummy value
-        params.add('slope', value=-0.5)
+        if fit_params is None:
+            fit_params = Parameters()
+            fit_params.add('amp', value=50, min=0, max=100)
+            fit_params.add('mod', value=0.0001, min=-10, max=10)
+            fit_params.add('k', value=-.0001, min=-1, max=1)
+            fit_params.add('offset', value=50, min=0, max=100)
+            fit_params.add('phase', value=0.0, min=-np.pi, max=np.pi)
+            fit_params.add('period', value=9, min=0)  # Dummy value
+            fit_params.add('slope', value=-0.5)
 
-        self.__fit_params = params
+        self.__fit_params_intial_val = fit_params
+        self.__fit_params = fit_params.copy()
         self.__fit_results = None
         self.__fit_period = None
 
@@ -245,6 +250,7 @@ class LIDS():
         lids,
         bounds=('30min', '180min'),
         step='5min',
+        method='leastsq',
         verbose=False
     ):
         r'''Fit oscillations of the LIDS data
@@ -262,8 +268,18 @@ class LIDS():
             Default is ('30min','180min').
         step: str, optional
             Time delta between the periods to be tested.
+        method: str, optional
+            Name of the fitting method to use [1]_.
+            Default is 'leastsq'.
         verbose: bool, optional
             If set to True, display fit informations
+
+        References
+        ----------
+
+        .. [1] Non-Linear Least-Squares Minimization and Curve-Fitting for
+               Python.
+               https://lmfit.github.io/lmfit-py/index.html
         '''
 
         x = np.arange(lids.index.size)
@@ -291,12 +307,13 @@ class LIDS():
         # Fit data with 1-harmonic cosine function for each test period
         mri = -np.inf
         fit_result_tmp = None
+        initial_period = self.__fit_params_intial_val['period'].value
         for test_period in test_periods:
             # Fix test period
-            self.lids_fit_params['period'].value = test_period
+            self.__fit_params_intial_val['period'].value = test_period
             # Minimize residuals
             fit_result_tmp = minimize(
-                residual, self.lids_fit_params, args=(x,  lids.values)
+                residual, self.__fit_params_intial_val, args=(x,  lids.values)
             )
             # Print fit parameters if verbose
             if verbose:
@@ -314,6 +331,9 @@ class LIDS():
                 mri = mri_tmp
                 # Store fit parameters
                 fit_result = fit_result_tmp
+
+        # Set back original value
+        self.__fit_params_intial_val['period'].value = initial_period
 
         self.lids_fit_results = fit_result
         self.lids_fit_params = fit_result.params
