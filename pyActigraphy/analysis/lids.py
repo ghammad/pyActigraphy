@@ -312,9 +312,6 @@ class LIDS():
             num=int(period_range/period_step)+1
         )
 
-        # Set period as a fixed parameter
-        self.lids_fit_params['period'].vary = False
-
         # Define residuals
         def residual(params, x, data):
             model = self.lids_fit_func(x, params)
@@ -327,6 +324,8 @@ class LIDS():
         for test_period in test_periods:
             # Fix test period
             self.__fit_params_intial_val['period'].value = test_period
+            self.__fit_params_intial_val['period'].vary = False
+
             # Minimize residuals
             fit_result_tmp = minimize(
                 residual, self.__fit_params_intial_val, args=(x,  lids.values)
