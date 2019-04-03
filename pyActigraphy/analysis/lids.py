@@ -35,6 +35,12 @@ def _inflexion_points(df_dx, d2f_dx2):
     return _extrema_points(d2f_dx2, df_dx)
 
 
+def _lids_func(x):
+    r'''LIDS transformation function'''
+
+    return 100/(x+1)
+
+
 def _cosine(x, params):
     r'''1-harmonic cosine function'''
 
@@ -83,10 +89,20 @@ class LIDS():
 
     """
 
+    lids_func_list = ['lids']
     fit_func_list = ['cosine', 'chirp', 'modchirp']
 
-    def __init__(self, fit_func='cosine', fit_params=None):
+    def __init__(self, lids_func='lids', fit_func='cosine', fit_params=None):
 
+        # LIDS functions
+        lids_funcs = {'lids': _lids_func}
+        if lids_func not in lids_funcs.keys():
+            raise ValueError(
+                '`LIDS function` must be "%s". You passed: "%s"' %
+                ('" or "'.join(list(lids_funcs.keys)), lids_func)
+            )
+
+        # Fit functions
         fit_funcs = {'cosine': _cosine, 'chirp': _lfm, 'modchirp': _lfam}
         if fit_func not in fit_funcs.keys():
             raise ValueError(
@@ -95,7 +111,7 @@ class LIDS():
             )
 
         self.__freq = None  # pd.Timedelta
-        self.__lids_func = lambda x: 100/(x+1)  # LIDS transformation function
+        self.__lids_func = lids_funcs[lids_func]  # LIDS transformation fct
         self.__fit_func = fit_funcs[fit_func]  # Fit function to LIDS
 
         if fit_params is None:
