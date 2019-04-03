@@ -59,6 +59,20 @@ def _lfm(x, params):
     return A*np.cos(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
 
 
+def _lfam(x, params):
+    r'''Linear frequency and amplitude modulated cosine function'''
+
+    A = params['amp']
+    b = params['mod']
+    k = params['k']
+    phi = params['phase']
+    T = params['period']
+    offset = params['offset']
+    slope = params['slope']
+
+    return (A + b*x)*np.cos(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
+
+
 class LIDS():
     """
     Class for Locomotor inactivity during sleep (LIDS) Analysis
@@ -71,7 +85,7 @@ class LIDS():
 
     def __init__(self, fit_func='cosine'):
 
-        fit_funcs = {'cosine': _cosine, 'chirp': _lfm}
+        fit_funcs = {'cosine': _cosine, 'chirp': _lfm, 'modchirp': _lfam}
         if fit_func not in fit_funcs.keys():
             raise ValueError(
                 '`Fit function` must be "%s". You passed: "%s"' %
