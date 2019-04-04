@@ -388,9 +388,9 @@ class LIDS():
 
             # Minimize residuals
             fit_result = minimize(
-                residual,
+                _residual,
                 self.__fit_initial_params,
-                args=(x,  lids.values)
+                args=(x,  lids.values, self.lids_fit_func)
             )
             # Print fit parameters if verbose
             if verbose:
