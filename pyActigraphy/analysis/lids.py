@@ -79,6 +79,13 @@ def _lfam(x, params):
     return (A + b*x)*np.cos(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
 
 
+def _residual(params, x, data, fit_func):
+    r'''Residual function to minimize'''
+
+    model = fit_func(x, params)
+    return (data-model)
+
+
 class LIDS():
     """
     Class for Locomotor inactivity during sleep (LIDS) Analysis
@@ -317,10 +324,10 @@ class LIDS():
                https://lmfit.github.io/lmfit-py/index.html
         '''
 
-        # Define residual function to minimize
-        def residual(params, x, data):
-            model = self.lids_fit_func(x, params)
-            return (data-model)
+        # # Define residual function to minimize
+        # def residual(params, x, data):
+        #     model = self.lids_fit_func(x, params)
+        #     return (data-model)
 
         # Define the x range
         x = np.arange(lids.index.size)
@@ -350,9 +357,9 @@ class LIDS():
 
                 # Minimize residuals
                 fit_result_tmp = minimize(
-                    residual,
+                    _residual,
                     self.__fit_initial_params,
-                    args=(x,  lids.values)
+                    args=(x,  lids.values, self.lids_fit_func)
                 )
                 # Print fit parameters if verbose
                 if verbose:
@@ -510,7 +517,7 @@ class LIDS():
         onset_phase, offset_phase: numpy.float64
         '''
 
-        if self.lids_fit_period is None:
+        if self.lids_fit_results is None:
             # TODO: evaluate if raise ValueError('') more appropriate
             return None
 
