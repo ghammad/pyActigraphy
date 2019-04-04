@@ -124,10 +124,10 @@ class LIDS():
             fit_params.add('period', value=9, min=0)  # Dummy value
             fit_params.add('slope', value=-0.5)
 
-        self.__fit_params_intial_val = fit_params
-        self.__fit_params = fit_params.copy()
+        self.__fit_initial_params = fit_params
+        # self.__fit_params = None
         self.__fit_results = None
-        self.__fit_period = None
+        # self.__fit_period = None
 
     @property
     def freq(self):
@@ -155,40 +155,51 @@ class LIDS():
         self.__fit_func = func
 
     @property
-    def lids_fit_params(self):
-        r'''Arguments of the fit function to LIDS oscillations'''
-        return self.__fit_params
+    def lids_fit_initial_params(self):
+        r'''Initial parameters of the fit function to LIDS oscillations'''
+        return self.__fit_initial_params
 
-    @lids_fit_params.setter
-    def lids_fit_params(self, params):
-        r'''Arguments of the fit function to LIDS oscillations'''
-        self.__fit_params = params
+    # @property
+    # def lids_fit_params(self):
+    #     r'''Parameters of the fit function to LIDS oscillations'''
+    #     return self.__fit_params
+    #
+    # @lids_fit_params.setter
+    # def lids_fit_params(self, params):
+    #     r'''Parameters of the fit function to LIDS oscillations'''
+    #     self.__fit_params = params
 
     @property
     def lids_fit_results(self):
         r'''Results of the LIDS fit'''
-        return self.__fit_results
-
-    @lids_fit_results.setter
-    def lids_fit_results(self, results):
-        r'''Results of the LIDS fit'''
-        self.__fit_results = results
-
-    @property
-    def lids_fit_period(self):
-        r'''Period of the fit function to LIDS oscillations'''
-        if self.__fit_period is None:
+        if self.__fit_results is None:
             warnings.warn(
-                'The period of the fit to the LIDS oscillations is not set.',
+                'The fit results is None. '
+                'Run lids_fit() before accessing this attribute.',
                 UserWarning
             )
-            # TODO: evaluate if raise ValueError('') more appropriate
-        return self.__fit_period
+        return self.__fit_results
 
-    @lids_fit_period.setter
-    def lids_fit_period(self, value):
-        r'''Period of the fit function to LIDS oscillations'''
-        self.__fit_period = value
+    # @lids_fit_results.setter
+    # def lids_fit_results(self, results):
+    #     r'''Results of the LIDS fit'''
+    #     self.__fit_results = results
+    #
+    # @property
+    # def lids_fit_period(self):
+    #     r'''Period of the fit function to LIDS oscillations'''
+    #     if self.__fit_period is None:
+    #         warnings.warn(
+    #             'The period of the fit to the LIDS oscillations is not set.',
+    #             UserWarning
+    #         )
+    #         # TODO: evaluate if raise ValueError('') more appropriate
+    #     return self.__fit_period
+    #
+    # @lids_fit_period.setter
+    # def lids_fit_period(self, value):
+    #     r'''Period of the fit function to LIDS oscillations'''
+    #     self.__fit_period = value
 
     def filter(self, ts, duration_min='3H', duration_max='12H'):
         r'''Filter data according to their duration
@@ -264,9 +275,10 @@ class LIDS():
     def lids_fit(
         self,
         lids,
+        method='leastsq',
+        scan_period=True,
         bounds=('30min', '180min'),
         step='5min',
-        method='leastsq',
         verbose=False
     ):
         r'''Fit oscillations of the LIDS data
@@ -279,14 +291,21 @@ class LIDS():
         ----------
         lids: pandas.Series
             Output data from LIDS transformation.
-        bounds: 2-tuple of str, optional
-            Lower and upper bounds on periods to be tested.
-            Default is ('30min','180min').
-        step: str, optional
-            Time delta between the periods to be tested.
         method: str, optional
             Name of the fitting method to use [1]_.
             Default is 'leastsq'.
+        scan_period: bool, optional
+            If set to True, the period of the LIDS fit function is fixed and
+            varied between the specified bounds.
+            The selected period corresponds to the highest MRI value.
+            Otherwise, the period is a free parameter of the fit.
+            Default is True.
+        bounds: 2-tuple of str, optional
+            Lower and upper bounds for the periods to be tested.
+            If scan_period is set to False, the bounds are ignored.
+            Default is ('30min','180min').
+        step: str, optional
+            Time delta between the periods to be tested.
         verbose: bool, optional
             If set to True, display fit informations
 
@@ -298,64 +317,87 @@ class LIDS():
                https://lmfit.github.io/lmfit-py/index.html
         '''
 
-        x = np.arange(lids.index.size)
-
-        # Define periods
-        period_start = pd.Timedelta(bounds[0])/self.__freq
-        period_end = pd.Timedelta(bounds[1])/self.__freq
-        period_range = period_end-period_start
-        period_step = pd.Timedelta(step)/self.__freq
-
-        test_periods = np.linspace(
-            period_start,
-            period_end,
-            num=int(period_range/period_step)+1
-        )
-
-        # Define residuals
+        # Define residual function to minimize
         def residual(params, x, data):
             model = self.lids_fit_func(x, params)
             return (data-model)
 
-        # Fit data with 1-harmonic cosine function for each test period
-        mri = -np.inf
-        fit_result_tmp = None
-        initial_period = self.__fit_params_intial_val['period'].value
-        for test_period in test_periods:
-            # Fix test period
-            self.__fit_params_intial_val['period'].value = test_period
-            self.__fit_params_intial_val['period'].vary = False
+        # Define the x range
+        x = np.arange(lids.index.size)
+
+        if scan_period:
+
+            # Define bounds for the period
+            period_start = pd.Timedelta(bounds[0])/self.__freq
+            period_end = pd.Timedelta(bounds[1])/self.__freq
+            period_range = period_end-period_start
+            period_step = pd.Timedelta(step)/self.__freq
+
+            test_periods = np.linspace(
+                period_start,
+                period_end,
+                num=int(period_range/period_step)+1
+            )
+
+            # Fit data for each test period
+            mri = -np.inf
+            fit_result_tmp = None
+            initial_period = self.__fit_initial_params['period'].value
+            for test_period in test_periods:
+                # Fix test period
+                self.__fit_initial_params['period'].value = test_period
+                self.__fit_initial_params['period'].vary = False
+
+                # Minimize residuals
+                fit_result_tmp = minimize(
+                    residual,
+                    self.__fit_initial_params,
+                    args=(x,  lids.values)
+                )
+                # Print fit parameters if verbose
+                if verbose:
+                    print(fit_report(fit_result_tmp))
+                # Calculate the MR index
+                mri_tmp = self.lids_mri(lids, fit_result_tmp.params)
+                if verbose:
+                    pearson_r = self.lids_pearson_r(
+                        lids, fit_result_tmp.params)[0]
+                    print('Pearson r: {}'.format(pearson_r))
+                    print('MRI: {}'.format(mri_tmp))
+
+                # If the newly calculated MRI is higher than the current MRI
+                if mri_tmp > mri:
+                    # Store MRI
+                    mri = mri_tmp
+                    # Store fit parameters
+                    fit_result = fit_result_tmp
+
+            if verbose:
+                print('Highest MRI: {}'.format(mri))
+            # Set back original value
+            self.__fit_initial_params['period'].value = initial_period
+            self.__fit_initial_params['period'].vary = True
+        else:
 
             # Minimize residuals
-            fit_result_tmp = minimize(
-                residual, self.__fit_params_intial_val, args=(x,  lids.values)
+            fit_result = minimize(
+                residual,
+                self.__fit_initial_params,
+                args=(x,  lids.values)
             )
             # Print fit parameters if verbose
             if verbose:
-                print(fit_report(fit_result_tmp))
-            # Calculate the MR index
-            pearson_r = self.lids_pearson_r(lids, fit_result_tmp.params)[0]
-            mri_tmp = self.lids_mri(lids, fit_result_tmp.params)
+                print(fit_report(fit_result))
             if verbose:
+                # Calculate the MR index
+                pearson_r = self.lids_pearson_r(lids, fit_result.params)[0]
+                mri = self.lids_mri(lids, fit_result.params)
                 print('Pearson r: {}'.format(pearson_r))
-                print('MRI: {}'.format(mri_tmp))
+                print('MRI: {}'.format(mri))
 
-            # If the newly calculated MRI is higher than the current MRI
-            if mri_tmp > mri:
-                # Store MRI
-                mri = mri_tmp
-                # Store fit parameters
-                fit_result = fit_result_tmp
-
-        # Set back original value
-        self.__fit_params_intial_val['period'].value = initial_period
-
-        self.lids_fit_results = fit_result
-        self.lids_fit_params = fit_result.params
-        self.lids_fit_period = fit_result.params['period'].value
-
-        if verbose:
-            print('Highest MRI: {}'.format(mri))
+        self.__fit_results = fit_result
+        # self.lids_fit_params = fit_result.params
+        # self.lids_fit_period = fit_result.params['period'].value
 
     def lids_pearson_r(self, lids, params=None):
         r'''Pearson correlation factor
@@ -381,7 +423,7 @@ class LIDS():
 
         x = np.arange(lids.index.size)
         if params is None:
-            params = self.lids_fit_params
+            params = self.lids_fit_results.params
         return pearsonr(lids, self.lids_fit_func(x, params))
 
     def lids_mri(self, lids, params=None):
@@ -406,7 +448,7 @@ class LIDS():
             Munich Rhythmicity Index
         '''
         if params is None:
-            params = self.lids_fit_params
+            params = self.lids_fit_results.params
 
         # Pearson's r
         pearson_r = self.lids_pearson_r(lids, params)[0]
@@ -445,11 +487,11 @@ class LIDS():
         if self.freq is None:
             # TODO: evaluate if raise ValueError('') more appropriate
             return None
-        elif self.lids_fit_period is None:
+        elif self.lids_fit_results is None:
             # TODO: evaluate if raise ValueError('') more appropriate
             return None
         else:
-            lids_period = self.lids_fit_period*self.freq
+            lids_period = self.lids_fit_results.params['period']*self.freq
             return lids_period.astype('timedelta64[{}]'.format(freq))
 
     def lids_phases(self, lids, step=.1):
@@ -472,38 +514,24 @@ class LIDS():
             # TODO: evaluate if raise ValueError('') more appropriate
             return None
 
-        if self.lids_fit_params is None:
-            warnings.warn(
-                'LIDS fit parameters are not set. '
-                'Run lids_fit() before calling this function.\n'
-                'Returning None.',
-                UserWarning
-            )
+        if self.lids_fit_results is None:
+            # TODO: evaluate if raise ValueError('') more appropriate
             return None
 
-        # from scipy.misc import derivative
+        # Access fit parameters
+        params = self.lids_fit_results.params
 
         # Fit support range
         x = np.arange(lids.index.size, step=step)
 
         # LIDS fit derivatives (1st and 2nd)
-        df_dx = np.gradient(self.lids_fit_func(x, self.lids_fit_params), step)
-        # derivative(
-        #     func=self.lids_fit_func,
-        #     x0=x, dx=step, n=1,
-        #     args=self.lids_fit_params
-        # )
+        df_dx = np.gradient(self.lids_fit_func(x, params), step)
         d2f_dx2 = np.gradient(df_dx, step)
-        # derivative(
-        #     func=self.lids_fit_func,
-        #     x0=x, dx=step, n=2,
-        #     args=self.lids_fit_params
-        # )
 
         # Index of the 1st maxima (i.e 1st maximum of the LIDS oscillations)
         first_max_idx = np.argmax(_extrema_points(df_dx, d2f_dx2))
         # Convert the index into a phase using the fitted period
-        onset_phase = (first_max_idx*step)/self.lids_fit_period*360
+        onset_phase = (first_max_idx*step)/params['period']*360
 
         # Index of the last 'increasing' inflexion points in LIDS oscillations
         # before sleep offset
@@ -513,7 +541,7 @@ class LIDS():
             1  # to account for index shifting during reverse (-1: 0th elem)
         )
         # Convert the index into a phase using the fitted period
-        offset_phase = np.abs(last_inflex_idx*step/self.lids_fit_period*360)
+        offset_phase = np.abs(last_inflex_idx*step/params['period']*360)
 
         return onset_phase, offset_phase
 
