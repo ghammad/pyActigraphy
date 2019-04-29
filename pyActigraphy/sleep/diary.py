@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import pyexcel as pxl
+import numpy as np
 
 
 class SleepDiary():
@@ -139,3 +140,94 @@ class SleepDiary():
             self.__diary['DURATION'] = self.__diary['END']\
                 - self.__diary['START']
         return self.__diary.groupby(['TYPE'])['DURATION'].describe()
+
+    def state_infos(self, state):
+        """ Returns summary statistics for a given state
+
+        Parameters
+        ----------
+        state: str
+            State whose mean+std duration is calculated
+        Returns
+        -------
+        mean: pd.Timedelta
+            XXXX
+        std: pd.Timedelta
+            YYYY
+        """
+
+        # Re-use the summary function
+        summary = self.summary()
+
+        # Verify that the state is present in the summary object
+        present = state in self.summary().index
+        if present is False:
+            raise KeyError("{} has no value in summary".format(state))
+
+        # Access the summary object to get the mean
+        mean = summary.loc[state,'mean']
+        # Access the summary object to get the std
+        std = summary.loc[state,'std']
+
+        return mean, std
+
+    def total_bed_time(self, state='NIGHT'):
+        """ Returns the total in-bed time
+
+        Parameters
+        ----------
+        state : str, optional
+            State whose mean+std duration is calculated.
+            Default is 'NIGHT'.
+
+        Returns
+        -------
+        mean: pd.Timedelta
+            XXXX
+        std: pd.Timedelta
+            YYYY
+
+        """
+
+        return self.state_infos(state)
+
+
+    def total_nap_time(self, state='NAP'):
+        """ Returns the total nap time
+
+        Parameters
+        ----------
+        state : str, optional
+            State whose mean+std duration is calculated.
+            Default is 'NAP'.
+
+        Returns
+        -------
+        mean: pd.Timedelta
+            XXXX
+        std: pd.Timedelta
+            YYYY
+
+        """
+
+        return self.state_infos(state)
+
+    def TOffT(self, state='NOWEAR'):
+        """ Returns the total 'no-wear' time
+
+        Parameters
+        ----------
+        state : str, optional
+            State whose mean+std duration is calculated.
+            Default is 'NOWEAR'.
+
+        Returns
+        -------
+        mean: pd.Timedelta
+            XXXX
+        std: pd.Timedelta
+            YYYY
+
+        """
+
+        return self.state_infos(state)
