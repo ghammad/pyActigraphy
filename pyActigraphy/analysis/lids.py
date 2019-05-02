@@ -212,7 +212,9 @@ class LIDS():
             fit_params.add('amp', value=50, min=0, max=100)
             fit_params.add('mod', value=0.0001, min=-10, max=10)
             fit_params.add('k', value=-.0001, min=-1, max=1)
-            fit_params.add('offset', value=50, min=0, max=100)
+            # Introduce inequality amp+offset < 100
+            fit_params.add('delta', value=60, max=100, vary=True)
+            fit_params.add('offset', expr='delta-amp')
             fit_params.add('phase', value=0.0, min=-2*np.pi, max=2*np.pi)
             fit_params.add('period', value=9, min=0)  # Dummy value
             fit_params.add('slope', value=-0.5)
