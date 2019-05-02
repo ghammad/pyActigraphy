@@ -5,6 +5,7 @@ import warnings
 from functools import reduce
 from lmfit import fit_report, minimize, Parameters
 from scipy.stats import pearsonr, poisson
+from spm1d.util import smooth as spm_smooth
 
 
 def _zero_crossing_points(x):
@@ -317,13 +318,31 @@ class LIDS():
         )
         return filtered
 
-    def __smooth(self, lids, win_size):
-        r'''Smooth LIDS data with a centered moving average using a `win_size`
+    def __smooth(self, lids, method, win_size):
+        r'''Smooth LIDS data
+
+        By default, smooth with a centered moving average using a `win_size`
         window'''
 
-        return lids.rolling(win_size, center=True, min_periods=1).mean()
+        # Smooth functions
+        lids_smooth_funcs = ['mva', 'kernel', 'none']
+        if method not in lids_smooth_funcs:
+            raise ValueError(
+                '`LIDS smooth function` must be "%s". You passed: "%s"' %
+                ('" or "'.join(list(lids_smooth_funcs)), method)
+            )
 
-    def lids_transform(self, ts, win_td='30min', resampling_freq=None):
+        if method == 'mva':
+            return lids.rolling(win_size, center=True, min_periods=1).mean()
+        elif method == 'kernel':
+            smooth_lids = spm_smooth(lids.values, fwhm=win_size)
+            return pd.Series(data=smooth_lids, index=lids.index)
+        else:
+            return lids
+
+    def lids_transform(
+        self, ts, method='mva', win_td='30min', resampling_freq=None
+    ):
         r'''Apply LIDS transformation to activity data
 
         This transformation comprises:
@@ -335,6 +354,12 @@ class LIDS():
         ----------
         ts: pandas.Series
             Data identified as locomotor activity during sleep.
+        method: str, optional
+            Method to smooth the data.
+            Available options are:
+                'mva': moving average
+                'kernel': gaussian kernel
+            Default is 'mva'.
         win_td: str, optional
             Size of the moving average window.
             Default is '30min'.
@@ -363,7 +388,7 @@ class LIDS():
         win_size = int(pd.Timedelta(win_td)/self.__freq)
 
         # Smooth LIDS-transformed data
-        smooth_lids = self.__smooth(lids, win_size=win_size)
+        smooth_lids = self.__smooth(lids, method=method, win_size=win_size)
 
         return smooth_lids
 
