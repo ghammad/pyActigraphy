@@ -4,7 +4,7 @@ import warnings
 
 from functools import reduce
 from lmfit import fit_report, minimize, Parameters
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, poisson
 
 
 def _zero_crossing_points(x):
@@ -41,6 +41,23 @@ def _lids_func(x):
     return 100/(x+1)
 
 
+def _lids_inverse_func(x):
+    r'''LIDS inverse transformation function'''
+
+    return 100/x - 1
+
+
+def _lids_pmf(x_lids, mu_lids):
+    r'''Probability mass function of the LIDS'''
+
+    # Expected number of counts
+    mu = _lids_inverse_func(mu_lids)
+
+    k1 = _lids_inverse_func(x_lids)
+    k2 = _lids_inverse_func(x_lids+1)
+    return poisson.cdf(k=k1, mu=mu) - poisson.cdf(k=k2, mu=mu)
+
+
 def _cosine(x, params):
     r'''1-harmonic cosine function'''
 
@@ -49,7 +66,7 @@ def _cosine(x, params):
     T = params['period']
     offset = params['offset']
 
-    return A*np.cos(2*np.pi/T*x+phi) + offset
+    return A*np.sin(2*np.pi/T*x+phi) + offset
 
 
 def _lfm(x, params):
@@ -62,7 +79,7 @@ def _lfm(x, params):
     offset = params['offset']
     slope = params['slope']
 
-    return A*np.cos(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
+    return A*np.sin(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
 
 
 def _lfam(x, params):
@@ -76,7 +93,7 @@ def _lfam(x, params):
     offset = params['offset']
     slope = params['slope']
 
-    return (A + b*x)*np.cos(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
+    return (A + b*x)*np.sin(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
 
 
 def _residual(params, x, data, fit_func):
@@ -84,6 +101,50 @@ def _residual(params, x, data, fit_func):
 
     model = fit_func(x, params)
     return (data-model)
+
+
+def _residual_rel(params, x, data, sigma, fit_func):
+    r'''Residual function to minimize'''
+
+    model = fit_func(x, params)
+    return (data-model)/sigma
+
+
+def _lids_likelihood(params, x, data, fit_func):
+    r'''LIDS likelihood function
+
+    Defined as the product of the probability mass functions, evaluated at each
+    data point, using the current fit value as the expected value.
+
+    NB: when the difference between the expected value and the observed one is
+    large, the probability drops to zero, due to finite floating precision.
+    A temporary solution consists in replacing all values below eps with eps.
+    '''
+
+    # Expected LIDS counts (i.e fitted values, 'mu_i')
+    expected_val = fit_func(x, params)
+
+    # Create empty array
+    lids_ll = np.empty_like(expected_val)
+
+    # Iterate over all the values of the currently fitted function
+    it = np.nditer(expected_val, flags=['c_index'])
+    while not it.finished:
+        # lids_ll[it.index] = np.sqrt(
+        #     -2*np.log(_lids_pmf(data[it.index], it[0]))
+        # )
+        lids_ll[it.index] = _lids_pmf(data[it.index], it[0])
+        it.iternext()
+
+    # Replace zeros with eps
+    eps = np.finfo(data.dtype).eps
+    np.place(lids_ll, lids_ll < eps, [eps])
+
+    return lids_ll
+
+
+def _nlog(x):
+    return -2*np.log(np.prod(x))
 
 
 class LIDS():
@@ -99,7 +160,13 @@ class LIDS():
     lids_func_list = ['lids']
     fit_func_list = ['cosine', 'chirp', 'modchirp']
 
-    def __init__(self, lids_func='lids', fit_func='cosine', fit_params=None):
+    def __init__(
+        self,
+        lids_func='lids',
+        fit_func='cosine',
+        fit_obj_func='residuals',
+        fit_params=None
+    ):
 
         # LIDS functions
         lids_funcs = {'lids': _lids_func}
@@ -117,9 +184,28 @@ class LIDS():
                 ('" or "'.join(list(fit_funcs.keys)), fit_func)
             )
 
+        # Fit objective functions (i.e. funcitons to be minimized)
+        fit_obj_funcs = {
+            'residuals': _residual,
+            'nll': _lids_likelihood
+        }
+        # and associated functions to convert the residuals to a scalar value
+        fit_reduc_funcs = {
+            'residuals': None,
+            'nll': _nlog
+        }
+
+        if fit_obj_func not in fit_obj_funcs.keys():
+            raise ValueError(
+                '`Fit objective function` must be "%s". You passed: "%s"' %
+                ('" or "'.join(list(fit_obj_funcs.keys)), fit_obj_func)
+            )
+
         self.__freq = None  # pd.Timedelta
         self.__lids_func = lids_funcs[lids_func]  # LIDS transformation fct
         self.__fit_func = fit_funcs[fit_func]  # Fit function to LIDS
+        self.__fit_obj_func = fit_obj_funcs[fit_obj_func]  # Fit obj function
+        self.__fit_reduc_func = fit_reduc_funcs[fit_obj_func]
 
         if fit_params is None:
             fit_params = Parameters()
@@ -127,7 +213,7 @@ class LIDS():
             fit_params.add('mod', value=0.0001, min=-10, max=10)
             fit_params.add('k', value=-.0001, min=-1, max=1)
             fit_params.add('offset', value=50, min=0, max=100)
-            fit_params.add('phase', value=0.0, min=-np.pi, max=np.pi)
+            fit_params.add('phase', value=0.0, min=-2*np.pi, max=2*np.pi)
             fit_params.add('period', value=9, min=0)  # Dummy value
             fit_params.add('slope', value=-0.5)
 
@@ -240,7 +326,7 @@ class LIDS():
 
         This transformation comprises:
         * resampling via summation (optional)
-        * non-linear LIDS trasformation
+        * non-linear LIDS transformation
         * smoothing with a centered moving average
 
         Parameters
@@ -286,6 +372,7 @@ class LIDS():
         scan_period=True,
         bounds=('30min', '180min'),
         step='5min',
+        nan_policy='raise',
         verbose=False
     ):
         r'''Fit oscillations of the LIDS data
@@ -313,6 +400,13 @@ class LIDS():
             Default is ('30min','180min').
         step: str, optional
             Time delta between the periods to be tested.
+        nan_policy: str, optional
+            Specifies action if the objective function returns NaN values.
+            One of:
+                'raise': a ValueError is raised
+                'propagate': the values returned from userfcn are un-altered
+                'omit': non-finite values are filtered
+            Default is 'raise'.
         verbose: bool, optional
             If set to True, display fit informations
 
@@ -357,7 +451,7 @@ class LIDS():
 
                 # Minimize residuals
                 fit_result_tmp = minimize(
-                    _residual,
+                    self.__fit_obj_func,
                     self.__fit_initial_params,
                     args=(x,  lids.values, self.lids_fit_func)
                 )
@@ -388,9 +482,11 @@ class LIDS():
 
             # Minimize residuals
             fit_result = minimize(
-                _residual,
+                self.__fit_obj_func,
                 self.__fit_initial_params,
-                args=(x,  lids.values, self.lids_fit_func)
+                args=(x,  lids.values, self.lids_fit_func),
+                nan_policy=nan_policy,
+                reduce_fcn=self.__fit_reduc_func
             )
             # Print fit parameters if verbose
             if verbose:
