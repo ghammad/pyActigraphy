@@ -67,7 +67,7 @@ def _cosine(x, params):
     T = params['period']
     offset = params['offset']
 
-    return A*np.sin(2*np.pi/T*x+phi) + offset
+    return A*np.cos(2*np.pi/T*x+phi) + offset
 
 
 def _lfm(x, params):
@@ -80,7 +80,7 @@ def _lfm(x, params):
     offset = params['offset']
     slope = params['slope']
 
-    return A*np.sin(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
+    return A*np.cos(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
 
 
 def _lfam(x, params):
@@ -94,7 +94,7 @@ def _lfam(x, params):
     offset = params['offset']
     slope = params['slope']
 
-    return (A + b*x)*np.sin(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
+    return (A + b*x)*np.cos(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
 
 
 def _residual(params, x, data, fit_func):
