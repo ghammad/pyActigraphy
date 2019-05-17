@@ -174,7 +174,7 @@ class LIDS():
         if lids_func not in lids_funcs.keys():
             raise ValueError(
                 '`LIDS function` must be "%s". You passed: "%s"' %
-                ('" or "'.join(list(lids_funcs.keys)), lids_func)
+                ('" or "'.join(list(lids_funcs.keys())), lids_func)
             )
 
         # Fit functions
@@ -182,7 +182,7 @@ class LIDS():
         if fit_func not in fit_funcs.keys():
             raise ValueError(
                 '`Fit function` must be "%s". You passed: "%s"' %
-                ('" or "'.join(list(fit_funcs.keys)), fit_func)
+                ('" or "'.join(list(fit_funcs.keys())), fit_func)
             )
 
         # Fit objective functions (i.e. funcitons to be minimized)
@@ -199,7 +199,7 @@ class LIDS():
         if fit_obj_func not in fit_obj_funcs.keys():
             raise ValueError(
                 '`Fit objective function` must be "%s". You passed: "%s"' %
-                ('" or "'.join(list(fit_obj_funcs.keys)), fit_obj_func)
+                ('" or "'.join(list(fit_obj_funcs.keys())), fit_obj_func)
             )
 
         self.__freq = None  # pd.Timedelta
@@ -216,7 +216,7 @@ class LIDS():
             # Introduce inequality amp+offset < 100
             fit_params.add('delta', value=60, max=100, vary=True)
             fit_params.add('offset', expr='delta-amp')
-            fit_params.add('phase', value=0.0, min=-2*np.pi, max=2*np.pi)
+            fit_params.add('phase', value=0.0, min=0, max=2*np.pi)
             fit_params.add('period', value=9, min=0)  # Dummy value
             fit_params.add('slope', value=-0.5)
 
@@ -496,7 +496,7 @@ class LIDS():
                     print('MRI: {}'.format(mri_tmp))
 
                 # If the newly calculated MRI is higher than the current MRI
-                if mri_tmp > mri:
+                if mri_tmp > mri and (test_period != period_end):
                     # Store MRI
                     mri = mri_tmp
                     # Store fit parameters
@@ -707,7 +707,8 @@ class LIDS():
         scaling_factor = pd.Timedelta(t_norm)/self.lids_period()
 
         # Internal timeline (aka: external timeline, rescaled to LIDS period)
-        t_int = scaling_factor*t_ext
+        # t_int = scaling_factor*t_ext
+        t_int = pd.TimedeltaIndex(scaling_factor*t_ext.values, freq='infer')
 
         # Construct a new Series with internal timeline as index
         lids_rescaled = pd.Series(lids.values, index=t_int)
