@@ -210,15 +210,22 @@ class LIDS():
 
         if fit_params is None:
             fit_params = Parameters()
+            # Default parameters for the cosine fit function
             fit_params.add('amp', value=50, min=0, max=100)
-            fit_params.add('mod', value=0.0001, min=-10, max=10)
-            fit_params.add('k', value=-.0001, min=-1, max=1)
+            fit_params.add('phase', value=0.0, min=-2*np.pi, max=2*np.pi)
+            fit_params.add('period', value=9, min=0)  # Dummy value
             # Introduce inequality amp+offset < 100
             fit_params.add('delta', value=60, max=100, vary=True)
             fit_params.add('offset', expr='delta-amp')
-            fit_params.add('phase', value=0.0, min=0, max=2*np.pi)
-            fit_params.add('period', value=9, min=0)  # Dummy value
-            fit_params.add('slope', value=-0.5)
+            # Additional parameters for the chirp fit function
+            if fit_func == 'chirp':
+                fit_params.add('k', value=-.0001, min=-1, max=1)
+                fit_params.add('slope', value=-0.5)
+            # Additional parameters for the modchirp fit function
+            if fit_func == 'modchirp':
+                fit_params.add('k', value=-.0001, min=-1, max=1)
+                fit_params.add('slope', value=-0.5)
+                fit_params.add('mod', value=0.0001, min=-10, max=10)
 
         self.__fit_initial_params = fit_params
         # self.__fit_params = None
@@ -255,16 +262,6 @@ class LIDS():
         r'''Initial parameters of the fit function to LIDS oscillations'''
         return self.__fit_initial_params
 
-    # @property
-    # def lids_fit_params(self):
-    #     r'''Parameters of the fit function to LIDS oscillations'''
-    #     return self.__fit_params
-    #
-    # @lids_fit_params.setter
-    # def lids_fit_params(self, params):
-    #     r'''Parameters of the fit function to LIDS oscillations'''
-    #     self.__fit_params = params
-
     @property
     def lids_fit_results(self):
         r'''Results of the LIDS fit'''
@@ -275,27 +272,6 @@ class LIDS():
                 UserWarning
             )
         return self.__fit_results
-
-    # @lids_fit_results.setter
-    # def lids_fit_results(self, results):
-    #     r'''Results of the LIDS fit'''
-    #     self.__fit_results = results
-    #
-    # @property
-    # def lids_fit_period(self):
-    #     r'''Period of the fit function to LIDS oscillations'''
-    #     if self.__fit_period is None:
-    #         warnings.warn(
-    #             'The period of the fit to the LIDS oscillations is not set.',
-    #             UserWarning
-    #         )
-    #         # TODO: evaluate if raise ValueError('') more appropriate
-    #     return self.__fit_period
-    #
-    # @lids_fit_period.setter
-    # def lids_fit_period(self, value):
-    #     r'''Period of the fit function to LIDS oscillations'''
-    #     self.__fit_period = value
 
     def filter(self, ts, duration_min='3H', duration_max='12H'):
         r'''Filter data according to their duration
@@ -337,7 +313,7 @@ class LIDS():
         elif method == 'kernel':
             smooth_lids = spm_smooth(lids.values, fwhm=win_size)
             return pd.Series(data=smooth_lids, index=lids.index)
-        else:
+        elif method == 'none':
             return lids
 
     def lids_transform(
@@ -359,6 +335,7 @@ class LIDS():
             Available options are:
                 'mva': moving average
                 'kernel': gaussian kernel
+                'none': no smoothing
             Default is 'mva'.
         win_td: str, optional
             Size of the moving average window.
@@ -732,7 +709,7 @@ class LIDS():
 
         Parameters
         ----------
-        lids: pandas.Series
+        lids: list of pandas.Series
             Output data from LIDS transformation.
         verbose: bool, optional
             If set to True, print summary statistics.
