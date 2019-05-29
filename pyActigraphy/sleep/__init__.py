@@ -8,5 +8,6 @@
 
 from .diary import SleepDiary
 from .scoring import ScoringMixin
+from .sleep import SleepBoutMixin
 
-__all__ = ["SleepDiary", "ScoringMixin"]
+__all__ = ["SleepDiary", "ScoringMixin", "SleepBoutMixin"]
