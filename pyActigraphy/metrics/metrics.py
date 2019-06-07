@@ -1751,6 +1751,18 @@ class ForwardMetricsMixin(object):
             ) for iread in self.readers
         }
 
+    def average_daily_activity(
+        self, freq, cyclic=False, binarize=True, threshold=4
+    ):
+        return {
+            iread.display_name: iread.average_daily_activity(
+                freq=freq,
+                cyclic=cyclic,
+                binarize=binarize,
+                threshold=threshold
+            ) for iread in self.readers
+        }
+
     def daily_light_average(self):
 
         return {
