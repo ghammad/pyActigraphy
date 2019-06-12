@@ -147,7 +147,7 @@ pip install -e .
 <p>The following example illustrates how to calculate the interdaily stability
 with the pyActigraphy package:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span> <span class="o">=</span> <span class="n">pyActigraphy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw_awd</span><span class="p">(</span><span class="n">fpath</span> <span class="o">+</span> <span class="s1">&#39;SUBJECT_01.AWD&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span> <span class="o">=</span> <span class="n">pyActigraphy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw_awd</span><span class="p">(</span><span class="s1">&#39;/path/to/your/favourite/file.AWD&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span><span class="o">.</span><span class="n">IS</span><span class="p">()</span>
 <span class="go">0.6900175913031027</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span><span class="o">.</span><span class="n">IS</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;30min&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
