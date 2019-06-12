@@ -69,7 +69,7 @@ with the pyActigraphy package:
 .. code-block:: python
 
   >>> import pyActigraphy
-  >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+  >>> rawAWD = pyActigraphy.io.read_raw_awd('/path/to/your/favourite/file.AWD')
   >>> rawAWD.IS()
   0.6900175913031027
   >>> rawAWD.IS(freq='30min', binarize=True, threshold=4)
