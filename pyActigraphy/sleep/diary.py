@@ -147,27 +147,30 @@ class SleepDiary():
         Parameters
         ----------
         state: str
-            State whose mean+std duration is calculated
+            State of interest
         Returns
         -------
         mean: pd.Timedelta
-            XXXX
+            Mean duration of the required state.
         std: pd.Timedelta
-            YYYY
+            Standard deviation of the durations of the required state.
         """
 
         # Re-use the summary function
         summary = self.summary()
 
         # Verify that the state is present in the summary object
-        present = state in self.summary().index
-        if present is False:
-            raise KeyError("{} has no value in summary".format(state))
+        if state not in summary.index:
+            raise KeyError(
+                "{} is not a valid state. Valid states are {}".format(
+                    state, '" or "'.join(summary.index)
+                )
+            )
 
         # Access the summary object to get the mean
-        mean = summary.loc[state,'mean']
+        mean = summary.loc[state, 'mean']
         # Access the summary object to get the std
-        std = summary.loc[state,'std']
+        std = summary.loc[state, 'std']
 
         return mean, std
 
@@ -177,20 +180,19 @@ class SleepDiary():
         Parameters
         ----------
         state : str, optional
-            State whose mean+std duration is calculated.
+            State of interest.
             Default is 'NIGHT'.
 
         Returns
         -------
         mean: pd.Timedelta
-            XXXX
+            Mean duration of the required state.
         std: pd.Timedelta
-            YYYY
+            Standard deviation of the durations of the required state.
 
         """
 
         return self.state_infos(state)
-
 
     def total_nap_time(self, state='NAP'):
         """ Returns the total nap time
@@ -198,35 +200,35 @@ class SleepDiary():
         Parameters
         ----------
         state : str, optional
-            State whose mean+std duration is calculated.
+            State of interest.
             Default is 'NAP'.
 
         Returns
         -------
         mean: pd.Timedelta
-            XXXX
+            Mean duration of the required state.
         std: pd.Timedelta
-            YYYY
+            Standard deviation of the durations of the required state.
 
         """
 
         return self.state_infos(state)
 
-    def TOffT(self, state='NOWEAR'):
+    def total_nowear_time(self, state='NOWEAR'):
         """ Returns the total 'no-wear' time
 
         Parameters
         ----------
         state : str, optional
-            State whose mean+std duration is calculated.
+            State of interest.
             Default is 'NOWEAR'.
 
         Returns
         -------
         mean: pd.Timedelta
-            XXXX
+            Mean duration of the required state.
         std: pd.Timedelta
-            YYYY
+            Standard deviation of the durations of the required state.
 
         """
 
