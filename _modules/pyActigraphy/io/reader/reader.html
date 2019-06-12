@@ -127,7 +127,8 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">readers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;The list of RawXXX readers.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__readers</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__readers</span>
+        <span class="c1"># return np.asarray(self.__readers)</span>
 
     <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_reader</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">raw_reader</span><span class="o">.</span><span class="n">format</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reader_type</span><span class="p">:</span>

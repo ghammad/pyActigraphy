@@ -93,10 +93,10 @@
 <span class="kn">from</span> <span class="nn">pandas.tseries.frequencies</span> <span class="k">import</span> <span class="n">to_offset</span>
 <span class="kn">from</span> <span class="nn">..filters</span> <span class="k">import</span> <span class="n">FiltersMixin</span>
 <span class="kn">from</span> <span class="nn">..metrics</span> <span class="k">import</span> <span class="n">MetricsMixin</span>
-<span class="kn">from</span> <span class="nn">..sleep</span> <span class="k">import</span> <span class="n">SleepDiary</span><span class="p">,</span> <span class="n">ScoringMixin</span>
+<span class="kn">from</span> <span class="nn">..sleep</span> <span class="k">import</span> <span class="n">SleepDiary</span><span class="p">,</span> <span class="n">ScoringMixin</span><span class="p">,</span> <span class="n">SleepBoutMixin</span>
 
 
-<div class="viewcode-block" id="BaseRaw"><a class="viewcode-back" href="../../../api.html#pyActigraphy.io.BaseRaw">[docs]</a><span class="k">class</span> <span class="nc">BaseRaw</span><span class="p">(</span><span class="n">ScoringMixin</span><span class="p">,</span> <span class="n">MetricsMixin</span><span class="p">,</span> <span class="n">FiltersMixin</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseRaw"><a class="viewcode-back" href="../../../api.html#pyActigraphy.io.BaseRaw">[docs]</a><span class="k">class</span> <span class="nc">BaseRaw</span><span class="p">(</span><span class="n">SleepBoutMixin</span><span class="p">,</span> <span class="n">ScoringMixin</span><span class="p">,</span> <span class="n">MetricsMixin</span><span class="p">,</span> <span class="n">FiltersMixin</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base class for raw data.&quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -384,7 +384,11 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sleep_diary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; :class:`SleepDiary` class instanciation.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_diary</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_diary</span>
+
+    <span class="nd">@sleep_diary</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">sleep_diary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_diary</span> <span class="o">=</span> <span class="n">value</span></div>
 </pre></div>
 
     </div>

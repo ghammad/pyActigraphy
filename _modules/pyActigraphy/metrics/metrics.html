@@ -1450,7 +1450,9 @@
 
         <span class="k">return</span> <span class="n">pAR</span><span class="p">,</span> <span class="n">pAR_weights</span>
 
-    <span class="k">def</span> <span class="nf">kRA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">kRA</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">logit</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability</span>
 
 <span class="sd">        Weighted average value of pRA(t) within the constant regions, defined</span>
@@ -1469,12 +1471,16 @@
 <span class="sd">        period: str, optional</span>
 <span class="sd">            Time period for the calculation of pRA.</span>
 <span class="sd">            Default is None.</span>
-<span class="sd">        frac: float</span>
+<span class="sd">        frac: float, optional</span>
 <span class="sd">            Fraction of the data used when estimating each value.</span>
 <span class="sd">            Default is 0.3.</span>
-<span class="sd">        it: int</span>
+<span class="sd">        it: int, optional</span>
 <span class="sd">            Number of residual-based reweightings to perform.</span>
 <span class="sd">            Default is 0.</span>
+<span class="sd">        logit: bool, optional</span>
+<span class="sd">            If True, the kRA value is logit-transformed (ln(p/1-p)). Useful</span>
+<span class="sd">            when kRA is used in a regression model.</span>
+<span class="sd">            Default is False.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1510,9 +1516,11 @@
             <span class="n">frac</span><span class="o">=</span><span class="n">frac</span><span class="p">,</span>
             <span class="n">it</span><span class="o">=</span><span class="n">it</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="n">kRA</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">kRA</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">kRA</span><span class="p">))</span> <span class="k">if</span> <span class="n">logit</span> <span class="k">else</span> <span class="n">kRA</span>
 
-    <span class="k">def</span> <span class="nf">kAR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">kAR</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">logit</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability</span>
 
 <span class="sd">        Weighted average value of pAR(t) within the constant regions, defined</span>
@@ -1537,6 +1545,10 @@
 <span class="sd">        it: int</span>
 <span class="sd">            Number of residual-based reweightings to perform.</span>
 <span class="sd">            Default is 0.</span>
+<span class="sd">        logit: bool, optional</span>
+<span class="sd">            If True, the kRA value is logit-transformed (ln(p/1-p)). Useful</span>
+<span class="sd">            when kRA is used in a regression model.</span>
+<span class="sd">            Default is False.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1572,7 +1584,7 @@
             <span class="n">frac</span><span class="o">=</span><span class="n">frac</span><span class="p">,</span>
             <span class="n">it</span><span class="o">=</span><span class="n">it</span>
             <span class="p">)</span>
-        <span class="k">return</span> <span class="n">kAR</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">kAR</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">kAR</span><span class="p">))</span> <span class="k">if</span> <span class="n">logit</span> <span class="k">else</span> <span class="n">kAR</span>
 
 
 <span class="k">class</span> <span class="nc">ForwardMetricsMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -1824,6 +1836,18 @@
                 <span class="n">whs</span><span class="o">=</span><span class="n">whs</span><span class="p">,</span>
                 <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
                 <span class="n">algo</span><span class="o">=</span><span class="n">algo</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+        <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">average_daily_activity</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">average_daily_activity</span><span class="p">(</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+                <span class="n">cyclic</span><span class="o">=</span><span class="n">cyclic</span><span class="p">,</span>
+                <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+                <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
             <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
         <span class="p">}</span>
 

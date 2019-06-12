@@ -93,7 +93,7 @@
 <h1>pyActigraphy.io.BaseRaw.kRA<a class="headerlink" href="#pyactigraphy-io-baseraw-kra" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="pyActigraphy.io.BaseRaw.kRA">
-<code class="descclassname">BaseRaw.</code><code class="descname">kRA</code><span class="sig-paren">(</span><em>threshold</em>, <em>start=None</em>, <em>period=None</em>, <em>frac=0.3</em>, <em>it=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.kRA" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">BaseRaw.</code><code class="descname">kRA</code><span class="sig-paren">(</span><em>threshold</em>, <em>start=None</em>, <em>period=None</em>, <em>frac=0.3</em>, <em>it=0</em>, <em>logit=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.kRA" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rest-&gt;Activity transition probability</p>
 <p>Weighted average value of pRA(t) within the constant regions, defined
 as the longest stretch within which the LOWESS curve varied by no more
@@ -110,10 +110,13 @@ and to 0 otherwise.</li>
 Default is None</li>
 <li><strong>period</strong> (<em>str</em><em>, </em><em>optional</em>) – Time period for the calculation of pRA.
 Default is None.</li>
-<li><strong>frac</strong> (<em>float</em>) – Fraction of the data used when estimating each value.
+<li><strong>frac</strong> (<em>float</em><em>, </em><em>optional</em>) – Fraction of the data used when estimating each value.
 Default is 0.3.</li>
-<li><strong>it</strong> (<em>int</em>) – Number of residual-based reweightings to perform.
+<li><strong>it</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of residual-based reweightings to perform.
 Default is 0.</li>
+<li><strong>logit</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the kRA value is logit-transformed (ln(p/1-p)). Useful
+when kRA is used in a regression model.
+Default is False.</li>
 </ul>
 </td>
 </tr>

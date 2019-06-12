@@ -93,7 +93,7 @@
 <h1>pyActigraphy.io.BaseRaw.kAR<a class="headerlink" href="#pyactigraphy-io-baseraw-kar" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="pyActigraphy.io.BaseRaw.kAR">
-<code class="descclassname">BaseRaw.</code><code class="descname">kAR</code><span class="sig-paren">(</span><em>threshold</em>, <em>start=None</em>, <em>period=None</em>, <em>frac=0.3</em>, <em>it=0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.kAR" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">BaseRaw.</code><code class="descname">kAR</code><span class="sig-paren">(</span><em>threshold</em>, <em>start=None</em>, <em>period=None</em>, <em>frac=0.3</em>, <em>it=0</em>, <em>logit=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.kAR" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rest-&gt;Activity transition probability</p>
 <p>Weighted average value of pAR(t) within the constant regions, defined
 as the longest stretch within which the LOWESS curve varied by no more
@@ -114,6 +114,9 @@ Default is None.</li>
 Default is 0.3.</li>
 <li><strong>it</strong> (<em>int</em>) – Number of residual-based reweightings to perform.
 Default is 0.</li>
+<li><strong>logit</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the kRA value is logit-transformed (ln(p/1-p)). Useful
+when kRA is used in a regression model.
+Default is False.</li>
 </ul>
 </td>
 </tr>
