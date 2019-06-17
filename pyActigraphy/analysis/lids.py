@@ -457,6 +457,7 @@ class LIDS():
                 fit_result_tmp = minimize(
                     self.__fit_obj_func,
                     self.__fit_initial_params,
+                    method=method,
                     args=(x,  lids.values, self.lids_fit_func),
                     nan_policy=nan_policy,
                     reduce_fcn=self.__fit_reduc_func
@@ -490,6 +491,7 @@ class LIDS():
             fit_result = minimize(
                 self.__fit_obj_func,
                 self.__fit_initial_params,
+                method=method,
                 args=(x,  lids.values, self.lids_fit_func),
                 nan_policy=nan_policy,
                 reduce_fcn=self.__fit_reduc_func
