@@ -29,12 +29,12 @@ before_script:
   - virtualenv venv
   - source venv/bin/activate
 
-run:
+install:
   stage: build
   script:
   - pip install -e .
 
-test:
+pytest:
   stage: test
   script:
   - pip install pytest
