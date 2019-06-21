@@ -212,7 +212,7 @@ class LIDS():
             fit_params = Parameters()
             # Default parameters for the cosine fit function
             fit_params.add('amp', value=50, min=0, max=100)
-            fit_params.add('phase', value=0.0, min=-2*np.pi, max=2*np.pi)
+            fit_params.add('phase', value=np.pi/2, min=0, max=2*np.pi)
             fit_params.add('period', value=9, min=0)  # Dummy value
             # Introduce inequality amp+offset < 100
             fit_params.add('delta', value=60, max=100, vary=True)
