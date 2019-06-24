@@ -362,7 +362,7 @@ class LIDS():
 
         # Series with a DateTimeIndex don't accept 'time-aware' centered window
         # Convert win_size (TimeDelta) into a number of time bins
-        win_size = int(pd.Timedelta(win_td)/self.__freq)
+        win_size = int(pd.Timedelta(win_td)/self.freq)
 
         # Smooth LIDS-transformed data
         smooth_lids = self.__smooth(lids, method=method, win_size=win_size)
@@ -433,10 +433,10 @@ class LIDS():
         if scan_period:
 
             # Define bounds for the period
-            period_start = pd.Timedelta(bounds[0])/self.__freq
-            period_end = pd.Timedelta(bounds[1])/self.__freq
+            period_start = pd.Timedelta(bounds[0])/self.freq
+            period_end = pd.Timedelta(bounds[1])/self.freq
             period_range = period_end-period_start
-            period_step = pd.Timedelta(step)/self.__freq
+            period_step = pd.Timedelta(step)/self.freq
 
             test_periods = np.linspace(
                 period_start,
@@ -620,10 +620,6 @@ class LIDS():
         -------
         onset_phase, offset_phase: numpy.float64
         '''
-
-        if self.lids_fit_results is None:
-            # TODO: evaluate if raise ValueError('') more appropriate
-            return None
 
         if self.lids_fit_results is None:
             # TODO: evaluate if raise ValueError('') more appropriate
