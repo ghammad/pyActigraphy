@@ -281,7 +281,7 @@ class LIDS():
         '''
 
         def duration(s):
-            return s.index[-1]-s.index[0]
+            return s.index[-1]-s.index[0] if len(s) > 0 else pd.Timedelta(0)
 
         td_min = pd.Timedelta(duration_min)
         td_max = pd.Timedelta(duration_max)
