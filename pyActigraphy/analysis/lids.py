@@ -478,7 +478,7 @@ class LIDS():
                     # Store MRI
                     mri = mri_tmp
                     # Store fit parameters
-                    fit_result = fit_result_tmp
+                    self.__fit_results = fit_result_tmp
 
             if verbose:
                 print('Highest MRI: {}'.format(mri))
@@ -488,7 +488,7 @@ class LIDS():
         else:
 
             # Minimize residuals
-            fit_result = minimize(
+            self.__fit_results = minimize(
                 self.__fit_obj_func,
                 self.__fit_initial_params,
                 method=method,
@@ -498,15 +498,16 @@ class LIDS():
             )
             # Print fit parameters if verbose
             if verbose:
-                print(fit_report(fit_result))
+                print(fit_report(self.lids_fit_results))
             if verbose:
                 # Calculate the MR index
-                pearson_r = self.lids_pearson_r(lids, fit_result.params)[0]
-                mri = self.lids_mri(lids, fit_result.params)
+                pearson_r = self.lids_pearson_r(
+                    lids, self.lids_fit_results.params)[0]
+                mri = self.lids_mri(lids, self.lids_fit_results.params)
                 print('Pearson r: {}'.format(pearson_r))
                 print('MRI: {}'.format(mri))
 
-        self.__fit_results = fit_result
+        # self.__fit_results = fit_result
         # self.lids_fit_params = fit_result.params
         # self.lids_fit_period = fit_result.params['period'].value
 
