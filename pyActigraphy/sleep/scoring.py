@@ -3,7 +3,8 @@ import pandas as pd
 import re
 from scipy.ndimage import binary_closing, binary_opening
 from ..filters import _create_inactivity_mask
-from ..metrics import _average_daily_activity
+from ..utils.utils import _average_daily_activity
+# from ..metrics import _average_daily_activity
 
 
 def _td_format(td):
