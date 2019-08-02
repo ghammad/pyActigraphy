@@ -1,6 +1,126 @@
 from datetime import datetime
 from struct import Struct
 
+"""
+general structure proposal
+
+class CWA(baseRaw)
+    def __init__(self, filename)
+    def IsValidFile(filename) # checks if file exists and of correct format
+    def readHeader(self, data) sets values
+    def readBlock(self, data) checks values, returns dataframe
+    def normalize(df) returns serie
+
+"""
+
+class CWA(object):
+    __slots__ = ["__endianess", "__stream", "__meta", 
+                 "_data", "_offset"]
+    __hardware = {0x00: "AX3",
+                  0xff: "AX3",
+                  0x17: "AX3",
+                  0x64: "AX6"}
+
+    @classmethod
+    def IsValidFile(filename):
+        """
+        Checks if given file is a valid cwa file.
+        Checks is performed by name (do it have .cwa)
+        and by leading bits, which must be 'MD'
+
+        Parameters
+        ----------
+        filename: str
+            path to an existing file
+
+        Returns
+        -------
+        bool
+            True if given file is valid cwa file
+            False otherwise
+
+        Raises
+        ------
+        TypeError
+            if passed parameters are of incompatible type
+        """
+
+        if not isinstance(filename, str):
+            raise TypeError("filename must be a string")
+        ext = os.path.splitext(filename)
+        if ext != ".cwa":
+            return False
+
+        f = open(filename, "rb")
+        tag = f.read(2).decode("ASCII")
+        if tag == "MD" or tag == "DM":
+            f.close()
+            return True
+        f.close()
+        return False
+
+    def __init__(self, filename):
+        if not isinstance(filename, str):
+            raise TypeError("filename must be a string")
+        self.__stream = open(filename, "rb")
+        self.__aux = dict()
+        self._ReadHeader()
+
+    def _ReadHeader(self, offset=None):
+        """
+        reads and parce the cwa header block
+
+        Parameters
+        ----------
+        offset: int, optional
+            if given, will read from given position
+            if ommited, will read from current position
+        """
+        self._data = self.__stream.read(1024)
+        tag = self._data[:2].decode("ASCII")
+        if tag == "MD":
+            self.__endianess = "<"
+        elif tag == "DM":
+            self.__endianess = ">"
+        else:
+            self.__stream.close()
+            raise ValueError("{} not a CWA file"
+                             .format(self.__stream.__name__))
+        self._offset = 2
+        lenght = self.__unpack("H")
+        if length != 1020:
+            raise ValueError("Packet length must be 1020, but {} is read"
+                             .format(length))
+        type = self.__unpack("B") 
+        if type not in self.__hardware:
+            raise ValueError("Unknown hardware tag: {:x}".format(type))
+        self.__meta["hardwareType"] = self.__hardware[type]
+        self.__meta["deviceId"] = self.__unpack("H")
+        self.__meta["sessionId"] = self.__unpack("L")
+        self.__meta["upperDeviceId"] = self.__unpack("H")
+        if self.__meta["upperDeviceId"] == 0xffff:
+            self.__meta["upperDeviceId"] = 0
+        self.__meta["loggingStartTime"] = self._conertTime(self.__unpack("L"))
+        self.__meta["loggingEndTime"] = self._conertTime(self.__unpack("L"))
+        self.__meta["loggingCapacity"] = self.__unpack("L")
+        self._offset += 1
+        self.__meta["flashLed"] = self.__unpack("B")
+        self._offset += 8
+        self.__meta["sensorConfig"] = self.__unpack("B")
+        self.__meta["samplingRate"] = self.__unpack("B")
+        self.__meta["lastChangeTime"] = self._conertTime(self.__unpack("L"))
+        self.__meta["firmwareRevision"] = self.__unpack("B")
+        self.__meta["timeZone"] = self.__unpack("b")
+        self._offset += 20
+        # self.__meta["annotation"] = 448 ASCII ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs
+        # self.__meta["reserved"] = +512 Reserved for device-specific meta-data (512 bytes, ASCII characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs, leading '&' if present?)
+
+    def __unpack(self, type):
+        res = struct.unpack_from(self.__endianess + type,
+                                 self._data, 
+                                 offset=self._offset)
+        self._offset += struct.calcsize(type)
+        return res
 
 class CwaMixin(object):
     """
