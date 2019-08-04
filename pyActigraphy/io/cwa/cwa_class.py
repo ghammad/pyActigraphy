@@ -1,28 +1,24 @@
+import os
 from datetime import datetime
 from struct import Struct
+from tools import DataReader
 
-"""
-general structure proposal
-
-class CWA(baseRaw)
-    def __init__(self, filename)
-    def IsValidFile(filename) # checks if file exists and of correct format
-    def readHeader(self, data) sets values
-    def readBlock(self, data) checks values, returns dataframe
-    def normalize(df) returns serie
-
-"""
 
 class CWA(object):
-    __slots__ = ["__endianess", "__stream", "__meta", 
-                 "_data", "_offset"]
+    __slots__ = ["__endianess", "__stream", "__meta",
+                 ]
     __hardware = {0x00: "AX3",
                   0xff: "AX3",
                   0x17: "AX3",
                   0x64: "AX6"}
+    __axes = {3: "Axyz",
+              6: "Gxyz/Axyz",
+              9: "Gxyz/Axyz/Mxyz"
+              }
+              
 
     @classmethod
-    def IsValidFile(filename):
+    def IsValidFile(cls, filename):
         """
         Checks if given file is a valid cwa file.
         Checks is performed by name (do it have .cwa)
@@ -48,7 +44,7 @@ class CWA(object):
         if not isinstance(filename, str):
             raise TypeError("filename must be a string")
         ext = os.path.splitext(filename)
-        if ext != ".cwa":
+        if ext[1] != ".cwa":
             return False
 
         f = open(filename, "rb")
@@ -59,12 +55,17 @@ class CWA(object):
         f.close()
         return False
 
-    def __init__(self, filename):
+    def __init__(self, filename, ):
         if not isinstance(filename, str):
             raise TypeError("filename must be a string")
         self.__stream = open(filename, "rb")
-        self.__aux = dict()
+        self.__endianess = "<"
+        self.__meta = dict()
         self._ReadHeader()
+        print(self.__meta)
+        self._ReadBlock()
+        self._ReadBlock()
+        self._ReadBlock()
 
     def _ReadHeader(self, offset=None):
         """
@@ -76,51 +77,227 @@ class CWA(object):
             if given, will read from given position
             if ommited, will read from current position
         """
-        self._data = self.__stream.read(1024)
-        tag = self._data[:2].decode("ASCII")
+        if offset is not None:
+            self.__stream.seek(offset)
+
+        dr = DataReader(self.__stream.read(1024), self.__endianess)
+        tag = dr.unpack("", 2).decode("ASCII")
         if tag == "MD":
-            self.__endianess = "<"
+            pass
         elif tag == "DM":
+            dr.endianess = ">"
             self.__endianess = ">"
         else:
             self.__stream.close()
             raise ValueError("{} not a CWA file"
                              .format(self.__stream.__name__))
-        self._offset = 2
-        lenght = self.__unpack("H")
+        length = dr.unpack("uint16")
         if length != 1020:
             raise ValueError("Packet length must be 1020, but {} is read"
                              .format(length))
-        type = self.__unpack("B") 
+        type = dr.unpack("uint8")
         if type not in self.__hardware:
             raise ValueError("Unknown hardware tag: {:x}".format(type))
         self.__meta["hardwareType"] = self.__hardware[type]
-        self.__meta["deviceId"] = self.__unpack("H")
-        self.__meta["sessionId"] = self.__unpack("L")
-        self.__meta["upperDeviceId"] = self.__unpack("H")
+        self.__meta["deviceId"] = dr.unpack("uint16")
+        self.__meta["sessionId"] = dr.unpack("uint32")
+        self.__meta["upperDeviceId"] = dr.unpack("uint16")
         if self.__meta["upperDeviceId"] == 0xffff:
             self.__meta["upperDeviceId"] = 0
-        self.__meta["loggingStartTime"] = self._conertTime(self.__unpack("L"))
-        self.__meta["loggingEndTime"] = self._conertTime(self.__unpack("L"))
-        self.__meta["loggingCapacity"] = self.__unpack("L")
-        self._offset += 1
-        self.__meta["flashLed"] = self.__unpack("B")
-        self._offset += 8
-        self.__meta["sensorConfig"] = self.__unpack("B")
-        self.__meta["samplingRate"] = self.__unpack("B")
-        self.__meta["lastChangeTime"] = self._conertTime(self.__unpack("L"))
-        self.__meta["firmwareRevision"] = self.__unpack("B")
-        self.__meta["timeZone"] = self.__unpack("b")
-        self._offset += 20
-        # self.__meta["annotation"] = 448 ASCII ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs
-        # self.__meta["reserved"] = +512 Reserved for device-specific meta-data (512 bytes, ASCII characters, ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs, leading '&' if present?)
+        self.__meta["loggingStartTime"] = self.DecodeTime(dr.unpack("uint32"))
+        self.__meta["loggingEndTime"] = self.DecodeTime(dr.unpack("uint32"))
+        self.__meta["loggingCapacity"] = dr.unpack("uint32")
+        dr >> 1
+        self.__meta["flashLed"] = dr.unpack("uint8")
+        dr >> 8
+        self.__meta["sensorConfig"] = dr.unpack("uint8")
+        self.__meta["samplingRate"] = self.DecodeRate(dr.unpack("uint8"))
+        self.__meta["lastChangeTime"] = self.DecodeTime(dr.unpack("uint32"))
+        self.__meta["firmwareRevision"] = dr.unpack("uint8")
+        self.__meta["timeZone"] = dr.unpack("int16")
+        dr >> 20
+        self.__meta["annotation"] = dr.unpack("", 448)\
+            .rstrip(b'\x20\x00\xff')
+        # 448 ASCII ignore trailing 0x20/0x00/0xff bytes,
+        # url-encoded UTF-8 name-value pairs
+        self.__meta["reserved"] = dr.unpack("", 512).rstrip(b'\x20\x00\xff')
+        # 512 Reserved for device-specific meta-data
+        # (512 bytes, ASCII characters,
+        # name-value pairs, leading '&' if present?)
 
-    def __unpack(self, type):
-        res = struct.unpack_from(self.__endianess + type,
-                                 self._data, 
-                                 offset=self._offset)
-        self._offset += struct.calcsize(type)
-        return res
+    def _ReadBlock(self, offset=None):
+        """
+        reads and parce the cwa data block
+
+        Parameters
+        ----------
+        offset: int, optional
+            if given, will read from given position
+            if ommited, will read from current position
+        """
+        if offset is not None:
+            self.__stream.seek(offset)
+        offset = self.__stream.tell()
+        dr = DataReader(self.__stream.read(512), self.__endianess)
+        tag = dr.unpack("", 2).decode("ASCII")
+        if tag != "AX":
+            raise ValueError("Corrupted block at {}"
+                             .format(offset))
+        lenght = dr.unpack("uint16")
+        if lenght != 508:
+            raise ValueError("Corrupted block at {}"
+                             .format(offset))
+
+        # Top bit set: 15-bit fraction of a second for the time stamp,
+        # the timestampOffset was already adjusted to minimize
+        # this assuming ideal sample rate;
+        # Top bit clear: 15-bit device identifier, 0 = unknown;
+        deviceFractional = dr.unpack("uint16")
+        microseconds = 0
+        deviceId = 0
+        if deviceFractional >> 15 :
+            microseconds = deviceFractional & 0x7fff 
+        else :
+            deviceId = deviceFractional
+
+        if dr.unpack("uint32") != self.__meta["sessionId"]:
+            raise Exception("Block at {}: mismach session id"
+                            .format(offset))
+        seqId = dr.unpack("uint32")
+        timestamp = self.DecodeTime(dr.unpack("uint32"))
+
+        # AAAGGGLLLLLLLLLL
+        # Bottom 10 bits is last recorded light sensor value in raw units,
+        # 0 = none;#
+        # top three bits are unpacked accel scale (1/2^(8+n) g);
+        # next three bits are gyro scale  (8000/2^n dps)
+        scales = dr.unpack("uint16")
+        accelScale, gyroScale, lightScale = self.DecodeScale(scales) 
+
+        temperature = dr.unpack("uint16")
+        # Event flags since last packet,
+        # b0 = resume logging,
+        # b1 = reserved for single-tap event,
+        # b2 = reserved for double-tap event,
+        # b3 = reserved,
+        # b4 = reserved for diagnostic hardware buffer,
+        # b5 = reserved for diagnostic software buffer,
+        # b6 = reserved for diagnostic internal flag,
+        # b7 = reserved)
+        events = dr.unpack("uint8")
+        battery = dr.unpack("uint8")
+        sampleRate = self.DecodeRate(dr.unpack("uint8"))
+
+        # 0x32
+        # top nibble: number of axes, 3=Axyz, 6=Gxyz/Axyz, 9=Gxyz/Axyz/Mxyz;
+        # bottom nibble: packing format -
+        #    2 = 3x 16-bit signed,
+        #    0 = 3x 10-bit signed + 2-bit exponent
+        numAxesBPS = dr.unpack("uint8")
+        numAxes = numAxesBPS >> 4
+        enc_style = numAxesBPS & 0xf
+        
+
+        # Relative sample index from the start of the buffer where
+        # the whole-second timestamp is valid
+        timestampOffset = dr.unpack("int16")
+
+        # Number of sensor samples (if this sector is full --
+        # Axyz: 80 or 120 samples, Gxyz/Axyz: 40 samples
+        sampleCount = dr.unpack("uint16")
+
+        # Raw sample data.
+        # Each sample is either 3x/6x/9x 16-bit signed values (x, y, z)
+        # or one 32-bit packed value (The bits in bytes [3][2][1][0]:
+        #   eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent,
+        #   lsb on right)
+        # data = dr.unpack("uint32", 120)
+        for i in range(0,sampleCount):
+            data = dr.unpack("", 4)
+            print (self.DecodeValue(data, enc_style, accelScale))
+
+
+        # Checksum of packet (16-bit word-wise sum of
+        # the whole packet should be zero
+        # checksum = dr.unpack("uint16")
+
+        print("Block ", seqId)
+        print("\tmicroseconds ", microseconds)
+        print("\tdeviceId ", deviceId)
+        print("\tTimestamp {}".format(timestamp))
+        print("\tScales: A:1/{}\tG:{}\tL:{}".format(accelScale,
+                                                  gyroScale,
+                                                  lightScale))
+        print("\tTemperature ", temperature)
+        print("\tEvent flags ", bin(events))
+        print("\tBattery ", battery)
+        print("\tSamplerate ", sampleRate)
+        print("\tAxes {} ({})".format(self.__axes[numAxes], enc_style))
+        print("\ttimestampOffset ", timestampOffset)
+        print("\tSamples ", sampleCount)
+        print("\n")
+
+    @staticmethod
+    def DecodeTime(time):
+        # bit pattern:  YYYYYYMM MMDDDDDh hhhhmmmm mmssssss
+        year = ((time >> 26) & 0x3f) + 2000
+        month = (time >> 22) & 0x0f
+        day = (time >> 17) & 0x1f
+        hour = (time >> 12) & 0x1f
+        minute = (time >> 6) & 0x3f
+        second = time & 0x3f
+        return datetime(year, month, day, hour, minute, second)
+
+    @staticmethod
+    def DecodeRate(rate):
+        "Sampling frequency in Hz"
+        return 3200 / (1 << (15 - rate & 15)), 16 >> (rate >> 6)
+
+    @staticmethod
+    def DecodeScale(data):
+        accel = data >> 13
+        gyro = (data >> 10) & 0b111  # 0x7
+        light = data & 0b1111111111   # 0x3ff
+        light = ((light + 512.0)*6000./1024)
+        light = pow(10.0, light/1000.0)
+        return 2**(8+accel), 4000/(2**gyro), light 
+
+    @staticmethod
+    def DecodeValue(data, style, scale):
+        """
+        decodes a 3x16 bit or 32 data bits into tuple of (x,y,z)
+        measurement. If data lenght is 3x16, then values are reocvered
+        as int16, if data is 32, the packed values are decoded
+        """
+        # print(data)
+        if style == 2:
+            if len(data) != 3:
+                raise ValueError("Expected 3 bytes, {} recieved"
+                                 .format(len(data)))
+            x,y,z =  struct.unpack("<hhh",data)
+        elif style == 0:
+            print(bin(data[0]))
+            if len(data) != 4:
+                raise ValueError("Expected 4 bytes, {} recieved"
+                                 .format(len(data)))
+            exp = data[0] >> 30
+            # x = ((data[0] << 6) & 0xffc0 ) >> (6 - exp)
+            # y = ((data[0] >> 4) & 0xffc0 ) >> (6 - exp)
+            # z = ((data[0] >> 14) & 0xffc0 ) >> (6 - exp)
+            # left most bit == sign : x & 0x8000
+            # everything elese value: x & 0x7fc0
+            # the 2 first bites exponents :  >> (6 - exp)
+            x = data[0] << 6
+            x = (1 - 2 * (x & 0x8000) )*((x & 0x7fc0 ) >> (6 - exp))
+            y = data[0] >> 4
+            y = (1 - 2 * (x & 0x8000) )*((y & 0x7fc0 ) >> (6 - exp))
+            z = data[0] >> 14
+            z = (1 - 2 * (x & 0x8000) )*((z & 0x7fc0 ) >> (6 - exp))
+            print ("\t\t", exp, bin(x), x)
+            
+        else:
+            raise ValueError("incorrect triplet lenght")
+        return x/scale, y/scale, z/scale
 
 class CwaMixin(object):
     """
