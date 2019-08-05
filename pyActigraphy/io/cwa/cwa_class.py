@@ -6,14 +6,14 @@ from tools import DataReader
 
 class CWA(object):
     __slots__ = ["__endianess", "__stream", "__meta",
-                 ]
+                 "__lastBlock", "__axesTag"]
     __hardware = {0x00: "AX3",
                   0xff: "AX3",
                   0x17: "AX3",
                   0x64: "AX6"}
-    __axes = {3: "Axyz",
-              6: "Gxyz/Axyz",
-              9: "Gxyz/Axyz/Mxyz"
+    __axes = {1: "Axyz",
+              2: "Gxyz/Axyz",
+              3: "Gxyz/Axyz/Mxyz"
               }
               
 
@@ -61,6 +61,7 @@ class CWA(object):
         self.__stream = open(filename, "rb")
         self.__endianess = "<"
         self.__meta = dict()
+        self.__lastBlock = -1
         self._ReadHeader()
         print(self.__meta)
         self._ReadBlock()
@@ -82,12 +83,7 @@ class CWA(object):
 
         dr = DataReader(self.__stream.read(1024), self.__endianess)
         tag = dr.unpack("", 2).decode("ASCII")
-        if tag == "MD":
-            pass
-        elif tag == "DM":
-            dr.endianess = ">"
-            self.__endianess = ">"
-        else:
+        if tag != "MD":
             self.__stream.close()
             raise ValueError("{} not a CWA file"
                              .format(self.__stream.__name__))
@@ -99,11 +95,12 @@ class CWA(object):
         if type not in self.__hardware:
             raise ValueError("Unknown hardware tag: {:x}".format(type))
         self.__meta["hardwareType"] = self.__hardware[type]
-        self.__meta["deviceId"] = dr.unpack("uint16")
+        self.__meta["deviceId"] = dr.unpack("uint16") 
         self.__meta["sessionId"] = dr.unpack("uint32")
-        self.__meta["upperDeviceId"] = dr.unpack("uint16")
-        if self.__meta["upperDeviceId"] == 0xffff:
-            self.__meta["upperDeviceId"] = 0
+        device = dr.unpack("uint16") 
+        if device == 0xffff:
+            device = 0
+        self.__meta["deviceId"] += device << 16
         self.__meta["loggingStartTime"] = self.DecodeTime(dr.unpack("uint32"))
         self.__meta["loggingEndTime"] = self.DecodeTime(dr.unpack("uint32"))
         self.__meta["loggingCapacity"] = dr.unpack("uint32")
@@ -172,7 +169,7 @@ class CWA(object):
         # top three bits are unpacked accel scale (1/2^(8+n) g);
         # next three bits are gyro scale  (8000/2^n dps)
         scales = dr.unpack("uint16")
-        accelScale, gyroScale, lightScale = self.DecodeScale(scales) 
+        accelScale, gyroScale, light = self.DecodeScale(scales) 
 
         temperature = dr.unpack("uint16")
         # Event flags since last packet,
@@ -195,6 +192,9 @@ class CWA(object):
         #    0 = 3x 10-bit signed + 2-bit exponent
         numAxesBPS = dr.unpack("uint8")
         numAxes = numAxesBPS >> 4
+        if numAxes % 3 != 0:
+            raise ValueError("Number of axes must be multiple of 3")
+        numAxes /= 3
         enc_style = numAxesBPS & 0xf
         
 
@@ -213,8 +213,18 @@ class CWA(object):
         #   lsb on right)
         # data = dr.unpack("uint32", 120)
         for i in range(0,sampleCount):
-            data = dr.unpack("", 4)
-            print (self.DecodeValue(data, enc_style, accelScale))
+            data = [b""] * numAxes
+            for i,d in enumerate(data):
+                if enc_style == 2:
+                    data[i] = dr.unpack("", 3)
+                else:
+                    data[i] = dr.unpack("", 4)
+            values = [None] * numAxes
+            if numAxes > 1:
+                Gxyz = self.DecodeValue(data enc_style, gyroScale)
+            Axyz = self.DecodeValue(data, enc_style, accelScale)
+            if numAxes == 9:
+                Mxyz = self.DecodeValue(data, enc_style, 1)
 
 
         # Checksum of packet (16-bit word-wise sum of
