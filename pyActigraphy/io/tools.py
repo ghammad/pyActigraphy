@@ -55,8 +55,8 @@ class DataReader(object):
         if not isinstance(offset, int):
             raise TypeError("offset must be int")
         if offset < 0:
-            offset = self.size() + offset
-        if offset >= self.size() or offset < 0:
+            offset = self.size + offset
+        if offset >= self.size or offset < 0:
             raise IndexError("offset out of range")
         self.__offset = offset
 
@@ -71,6 +71,10 @@ class DataReader(object):
         if len(endianess) != 1 or endianess not in "@=<>!":
             raise ValueError("endianess must be one of struct character")
         self.__endianess = endianess
+
+    @property
+    def size(self):
+        return len(self.__data)
 
     def __rshift__(self, increment):
         """
@@ -99,12 +103,6 @@ class DataReader(object):
         if not isinstance(data, bytes):
             raise TypeError("data must be bytes")
         self.__data += data
-
-    def size(self):
-        """
-        returns size of data
-        """
-        return len(self.__data)
 
     def unpack(self, type, size=1, offset=None):
         """
@@ -138,17 +136,17 @@ class DataReader(object):
             off = self.__offset
         else:
             if offset < 0:
-                off = self.size() + offset
-        if off < 0 or off >= self.size():
+                off = self.size + offset
+        if off < 0 or off >= self.size:
             raise IndexError("offset out of range")
 
         if len(type) > 1:
             type = self.__types__[type]
 
         if type == "":
-            res = self.__data[off:off+size]
+            res = self.__data[off:off + size]
         else:
-            type = self.endianess + type*size
+            type = self.endianess + type * size
             size = struct.calcsize(type)
             res = struct.unpack_from(type,
                                      self.__data,
@@ -162,3 +160,34 @@ class DataReader(object):
             self.__rshift__(size)
 
         return res
+
+    def checksum(self, type):
+        """
+        Calculates the checksum of data block, based on passed type
+
+        Parameters
+        ----------
+        type: str
+            type of data to unpack
+            if type is char, standard struct types used
+            if type is string, type is interpreted
+
+        Returns
+        -------
+        float, or int:
+            sum of all unpacked data
+        """
+        if not isinstance(type, str):
+            raise TypeError("type must be str")
+        if len(type) > 1:
+            type = self.__types__[type]
+        type = self.endianess + type
+        dsize = struct.calcsize(type)
+        if self.size % dsize != 0:
+            raise ValueError("Unable to split data to words of size {}"
+                             .format(dsize))
+        checksum = 0
+        for offset in range(0, self.size, dsize):
+            checksum += struct.unpack_from(type, self.__data, offset=offset)[0]
+
+        return checksum

@@ -1,12 +1,20 @@
 import os
 from datetime import datetime
-from struct import Struct
+from datetime import timedelta
 from tools import DataReader
 
+import pandas
+from numpy.linalg import norm
 
 class CWA(object):
     __slots__ = ["__endianess", "__stream", "__meta",
-                 "__lastBlock", "__axesTag"]
+                 "__blocks",
+                 "__device",
+                 "__name", "__uuid", "__startTime",
+                 "__duration", "__period",
+                 "__Accel", "__Gyro", "__Mag",
+                 "__Ascale", "__Gscale", "__Mscale",
+                 "__Others"]
     __hardware = {0x00: "AX3",
                   0xff: "AX3",
                   0x17: "AX3",
@@ -15,7 +23,6 @@ class CWA(object):
               2: "Gxyz/Axyz",
               3: "Gxyz/Axyz/Mxyz"
               }
-              
 
     @classmethod
     def IsValidFile(cls, filename):
@@ -49,7 +56,7 @@ class CWA(object):
 
         f = open(filename, "rb")
         tag = f.read(2).decode("ASCII")
-        if tag == "MD" or tag == "DM":
+        if tag == "MD":
             f.close()
             return True
         f.close()
@@ -61,12 +68,58 @@ class CWA(object):
         self.__stream = open(filename, "rb")
         self.__endianess = "<"
         self.__meta = dict()
-        self.__lastBlock = -1
+        self.__device = 0
+        self.__name = 0
+        self.__uuid = 0
+        self.__startTime = datetime.min
+        self.__duration = timedelta()
+        self.__period = 0
+        self.__Accel = pandas.DataFrame(columns=["x","y", "z","norm"])
+        self.__Gyro = pandas.DataFrame(columns=["x","y", "z","norm"])
+        self.__Mag = pandas.DataFrame(columns=["x","y", "z","norm"])
+        self.__Ascale = 0
+        self.__Gscale = 0
+        self.__Mscale = 0
+        self.__Others = None
+
+        self.__blocks = 0
+        self.__stream.seek(0,2)
+        self.__blocks = self.__stream.tell() - 1024
+        self.__stream.seek(0)
+        if self.__blocks%512 != 0:
+            raise ValueError("Data file corrupted")
+        self.__blocks = self.__blocks//512
+
         self._ReadHeader()
-        print(self.__meta)
-        self._ReadBlock()
-        self._ReadBlock()
-        self._ReadBlock()
+        self.printHeader()
+        
+        t = datetime.now()
+        for blk in range(0, self.__blocks):
+            rem = blk % 1000
+            if rem == 0:
+                print("Block {} of {} ({}%) {}"
+                      .format(blk,self.__blocks,
+                              100.*blk/self.__blocks,
+                              datetime.now() - t)
+                      )
+                t = datetime.now()
+                data = self.__stream.read(512*1000)
+            res = self._ReadBlock(data[512 * rem: 512 * rem + 512])
+            if res is None:
+                break
+            if res[4] is not None:
+                self.__Accel = self.__Accel.append(res[4], ignore_index=False)
+            if res[5] is not None:
+                self.__Gyro = self.__Gyro.append(res[5], ignore_index=False)
+            if res[6] is not None:
+                self.__Mag = self.__Mag.append(res[6], ignore_index=False)
+        print()
+        print("Accelerometer table:")
+        self.__Accel.info()
+        print("Gyrometer table:")
+        self.__Gyro.info()
+        print("Magnetometer table:")
+        self.__Mag.info()
 
     def _ReadHeader(self, offset=None):
         """
@@ -82,47 +135,89 @@ class CWA(object):
             self.__stream.seek(offset)
 
         dr = DataReader(self.__stream.read(1024), self.__endianess)
+
+        # @ 0  +2   ASCII "MD", little-endian (0x444D)
         tag = dr.unpack("", 2).decode("ASCII")
         if tag != "MD":
             self.__stream.close()
             raise ValueError("{} not a CWA file"
                              .format(self.__stream.__name__))
+
+        # @ 2  +2   Packet length (1020 bytes, 
+        # with header (4) = 1024 bytes total)
         length = dr.unpack("uint16")
         if length != 1020:
             raise ValueError("Packet length must be 1020, but {} is read"
                              .format(length))
+
+        # @ 4  +1 * Hardware type (0x00/0xff/0x17 = AX3, 0x64 = AX6)
         type = dr.unpack("uint8")
         if type not in self.__hardware:
             raise ValueError("Unknown hardware tag: {:x}".format(type))
-        self.__meta["hardwareType"] = self.__hardware[type]
-        self.__meta["deviceId"] = dr.unpack("uint16") 
-        self.__meta["sessionId"] = dr.unpack("uint32")
+        self.__device = self.__hardware[type]
+
+        # @ 5  +2   Device identifier (lower 16-bits)
+        self.__uuid = dr.unpack("uint16")
+        # @ 7  +4   Unique session identifier
+        self.__name = dr.unpack("uint32")
+        # @11  +2 * Upper word of device id
+        # (if 0xffff is read, treat as 0x0000)
         device = dr.unpack("uint16") 
         if device == 0xffff:
             device = 0
-        self.__meta["deviceId"] += device << 16
-        self.__meta["loggingStartTime"] = self.DecodeTime(dr.unpack("uint32"))
-        self.__meta["loggingEndTime"] = self.DecodeTime(dr.unpack("uint32"))
+        self.__uuid += (device << 16)
+
+        # @13  +4   Start time for delayed logging
+        self.__startTime = self.DecodeTime(dr.unpack("uint32"))
+        # @17  +4   Stop time for delayed logging
+        self.__duration = self.DecodeTime(dr.unpack("uint32"))\
+            - self.__startTime
+        # @21  +4   (Deprecated: preset maximum number of samples to collect,
+        # 0 = unlimited)
         self.__meta["loggingCapacity"] = dr.unpack("uint32")
+        # @25  +1   (1 byte reserved)
         dr >> 1
+        # @26  +1   Flash LED during recording
         self.__meta["flashLed"] = dr.unpack("uint8")
+        # @27  +8   (8 bytes reserved)
         dr >> 8
-        self.__meta["sensorConfig"] = dr.unpack("uint8")
-        self.__meta["samplingRate"] = self.DecodeRate(dr.unpack("uint8"))
+        # @35  +1 * Fixed rate sensor configuration,
+        # 0x00 or 0xff means accel only,
+        # otherwise bottom nibble is gyro range (8000/2^n dps): 
+        #   2=2000, 3=1000, 4=500, 5=250, 6=125, 
+        # top nibble non-zero is magnetometer enabled.
+        sensor = dr.unpack("uint8")
+        if sensor == 0 or sensor == 0xff:
+            self.__Gscale = 0
+            self.__Mscale = 0
+        else:
+            self.__Gscale = 1 << (sensor & 0x0f)
+            self.__Mscale = 1 if (sensor >> 4) > 0 else 0
+        # @36  +1   Sampling rate code, 
+        # frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, 
+        # range (+/-g) (16 >> (rate >> 6))
+        freq, scale = self.DecodeRate(dr.unpack("uint8"))
+        self.__period = 1. / freq
+        self.__Ascale = (1 << scale)
+        # @37  +4   Last change metadata time
         self.__meta["lastChangeTime"] = self.DecodeTime(dr.unpack("uint32"))
+        # @41  +1   Firmware revision number
         self.__meta["firmwareRevision"] = dr.unpack("uint8")
+        # @42  +2   (Unused: originally reserved for a "Time Zone offset from
+        # UTC in minutes", 0xffff = -1 = unknown)
         self.__meta["timeZone"] = dr.unpack("int16")
         dr >> 20
+        # @64  +448 Scratch buffer / meta-data (448 ASCII characters,
+        # ignore trailing 0x20/0x00/0xff bytes, 
+        # url-encoded UTF-8 name-value pairs)
         self.__meta["annotation"] = dr.unpack("", 448)\
             .rstrip(b'\x20\x00\xff')
-        # 448 ASCII ignore trailing 0x20/0x00/0xff bytes,
-        # url-encoded UTF-8 name-value pairs
-        self.__meta["reserved"] = dr.unpack("", 512).rstrip(b'\x20\x00\xff')
         # 512 Reserved for device-specific meta-data
         # (512 bytes, ASCII characters,
         # name-value pairs, leading '&' if present?)
+        self.__meta["reserved"] = dr.unpack("", 512).rstrip(b'\x20\x00\xff')
 
-    def _ReadBlock(self, offset=None):
+    def _ReadBlock(self, data):
         """
         reads and parce the cwa data block
 
@@ -132,17 +227,28 @@ class CWA(object):
             if given, will read from given position
             if ommited, will read from current position
         """
-        if offset is not None:
-            self.__stream.seek(offset)
-        offset = self.__stream.tell()
-        dr = DataReader(self.__stream.read(512), self.__endianess)
+        if len(data) == 0:
+            return None
+        if len(data) != 512:
+            raise ValueError("Corrupted block at {}: unexpected EOF"
+                             .format(offset))
+        dr = DataReader(data, self.__endianess)
+        # checksum
+        # ch = dr.checksum("uint16")
+        # if (ch & 0xffff) != 0:
+        #    raise ValueError("Corrupted block at {}: checksum failed"
+        #                     .format(offset))
+
+        # @ 0  +2   ASCII "AX", little-endian (0x5841)
         tag = dr.unpack("", 2).decode("ASCII")
         if tag != "AX":
-            raise ValueError("Corrupted block at {}"
+            raise ValueError("Corrupted block at {}: incorrect tag"
                              .format(offset))
+        # @ 2  +2   Packet length (508 bytes,
+        # with header (4) = 512 bytes total)
         lenght = dr.unpack("uint16")
         if lenght != 508:
-            raise ValueError("Corrupted block at {}"
+            raise ValueError("Corrupted block at {}: incorrect lenght"
                              .format(offset))
 
         # Top bit set: 15-bit fraction of a second for the time stamp,
@@ -156,23 +262,40 @@ class CWA(object):
             microseconds = deviceFractional & 0x7fff 
         else :
             deviceId = deviceFractional
-
-        if dr.unpack("uint32") != self.__meta["sessionId"]:
+        # @ 6  +4   Unique session identifier, 0 = unknown
+        sesId = dr.unpack("uint32")
+        if sesId != 0 and sesId != self.__name:
             raise Exception("Block at {}: mismach session id"
                             .format(offset))
+        # @10  +4   Sequence counter (0-indexed), 
+        # each packet has a new number (reset if restarted)
         seqId = dr.unpack("uint32")
+        # @14  +4   Last reported RTC value, 0 = unknown
         timestamp = self.DecodeTime(dr.unpack("uint32"))
 
-        # AAAGGGLLLLLLLLLL
+        # @18  +2   AAAGGGLLLLLLLLLL
         # Bottom 10 bits is last recorded light sensor value in raw units,
         # 0 = none;#
         # top three bits are unpacked accel scale (1/2^(8+n) g);
         # next three bits are gyro scale  (8000/2^n dps)
         scales = dr.unpack("uint16")
         accelScale, gyroScale, light = self.DecodeScale(scales) 
-
+        if accelScale != 0 and accelScale != self.__Ascale:
+            self.__Ascale = accelScale
+            print("Block at {}: new Accel scale - {}"
+                  .format(offset, self.__Ascale))
+        if gyroScale != 0 and gyroScale != self.__Gscale:
+            self.__Gscale = gyroScale
+            print("Block at {}: new Gyro scale - {}"
+                  .format(offset, self.__Gscale))
+        # @20  +2   Last recorded temperature sensor value
+        # in raw units, 0 = none
         temperature = dr.unpack("uint16")
-        # Event flags since last packet,
+        if temperature == 0:
+            temperature = float("NaN")
+        else:
+            temperature = (temperature * 150.0 - 20500) / 1000
+        # @22  +1   Event flags since last packet,
         # b0 = resume logging,
         # b1 = reserved for single-tap event,
         # b2 = reserved for double-tap event,
@@ -182,8 +305,24 @@ class CWA(object):
         # b6 = reserved for diagnostic internal flag,
         # b7 = reserved)
         events = dr.unpack("uint8")
+        # @23  +1   Last recorded battery level in scaled/cropped 
+        # raw units (double and add 512 for 10-bit ADC value),
+        # 0 = unknown
         battery = dr.unpack("uint8")
-        sampleRate = self.DecodeRate(dr.unpack("uint8"))
+        if battery == 0:
+            battery = float("NaN")
+        else:
+            battery = (battery + 512.0) * 6 / 1024
+        # @24  +1   Sample rate code, 
+        # frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, 
+        # range (+/-g) (16 >> (rate >> 6))
+        freq, scale = self.DecodeRate(dr.unpack("uint8"))
+        if self.__period != 1. / freq:
+            raise Exception("Block at {}: mismach frequency"
+                            .format(offset))
+        if self.__Ascale != (1 << scale):
+            raise Exception("Block at {}: mismach accelometer scale {}"
+                            .format(offset, 1 << scale))
 
         # 0x32
         # top nibble: number of axes, 3=Axyz, 6=Gxyz/Axyz, 9=Gxyz/Axyz/Mxyz;
@@ -194,9 +333,15 @@ class CWA(object):
         numAxes = numAxesBPS >> 4
         if numAxes % 3 != 0:
             raise ValueError("Number of axes must be multiple of 3")
-        numAxes /= 3
+        numAxes = numAxes//3
         enc_style = numAxesBPS & 0xf
-        
+
+        if numAxes < 1 and self.__Ascale != 0:
+            print("Block {}: missing accelometer data".format(offset))
+        if numAxes < 2 and self.__Gscale != 0:
+            print("Block {}: missing gyrometer data".format(offset))
+        if numAxes < 3 and self.__Mscale != 0:
+            print("Block {}: missing magnetometer data".format(offset))
 
         # Relative sample index from the start of the buffer where
         # the whole-second timestamp is valid
@@ -212,40 +357,102 @@ class CWA(object):
         #   eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent,
         #   lsb on right)
         # data = dr.unpack("uint32", 120)
-        for i in range(0,sampleCount):
-            data = [b""] * numAxes
-            for i,d in enumerate(data):
+        Axel = None
+        Gyro = None
+        Magn = None
+        index = pandas.date_range(timestamp,
+                                  periods=sampleCount, 
+                                  freq=str(self.__period) + "S")
+
+        if numAxes > 0:
+            Axel = pandas.DataFrame(columns=self.__Accel.columns, index=index)
+        if numAxes > 1:
+            Gyro = pandas.DataFrame(columns=self.__Gyro.columns, index=index)
+        if numAxes > 2:
+            Magn = pandas.DataFrame(columns=self.__Mag.columns, index=index)
+
+        for sample in range(0,sampleCount):
+            if numAxes == 0:
+                break
+            data = [None] * numAxes
+            for j in range(0, numAxes):
                 if enc_style == 2:
-                    data[i] = dr.unpack("", 3)
+                    data[j] = dr.unpack("int16", 3)
                 else:
-                    data[i] = dr.unpack("", 4)
-            values = [None] * numAxes
-            if numAxes > 1:
-                Gxyz = self.DecodeValue(data enc_style, gyroScale)
-            Axyz = self.DecodeValue(data, enc_style, accelScale)
-            if numAxes == 9:
-                Mxyz = self.DecodeValue(data, enc_style, 1)
+                    data[j] = self.DecodeValue(dr.unpack("uint32"))
 
+            if numAxes == 1:
+                Axel.loc[index[sample]] =\
+                        [ x / self.__Ascale for x in data[0]] + [norm(data[0])]
+            elif numAxes == 2:
+                Gyro.loc[index[sample]] =\
+                        [ x / self.__Gscale for x in data[0]] + [norm(data[0])]
+                Axel.loc[index[sample]] =\
+                        [ x / self.__Ascale for x in data[1]] + [norm(data[1])]
+            else:
+                Gyro.loc[index[sample]] =\
+                        [ x / self.__Gscale for x in data[0]] + [norm(data[0])]
+                Axel.loc[index[sample]] =\
+                        [ x / self.__Ascale for x in data[1]] + [norm(data[1])]
+                Magn.loc[index[sample]] =\
+                        [ x / self.__Mscale for x in data[2]] + [norm(data[2])]
 
-        # Checksum of packet (16-bit word-wise sum of
-        # the whole packet should be zero
-        # checksum = dr.unpack("uint16")
+        return seqId, timestamp, temperature, battery, Axel, Gyro, Magn
 
-        print("Block ", seqId)
-        print("\tmicroseconds ", microseconds)
-        print("\tdeviceId ", deviceId)
-        print("\tTimestamp {}".format(timestamp))
-        print("\tScales: A:1/{}\tG:{}\tL:{}".format(accelScale,
-                                                  gyroScale,
-                                                  lightScale))
-        print("\tTemperature ", temperature)
-        print("\tEvent flags ", bin(events))
-        print("\tBattery ", battery)
-        print("\tSamplerate ", sampleRate)
-        print("\tAxes {} ({})".format(self.__axes[numAxes], enc_style))
-        print("\ttimestampOffset ", timestampOffset)
-        print("\tSamples ", sampleCount)
-        print("\n")
+    def printHeader(self):
+        print("Header content:\n"
+              "- device id: {} ({})\n"
+              "- session: {}\n"
+              "- sampling period (s): {}\n"
+              "- sampling frequency (Hz): {}\n"
+              "- Accel scale: {}\n"
+              "- Gyro scale: {}\n"
+              "- Magneto scale: {}:\n"
+              "- StartTime: {}\n"
+              "- Duration: {}\n"
+              .format(
+                    self.__uuid, self.__device,
+                    self.__name,
+                    self.__period,
+                    1. / self.__period,
+                    self.AccelScale(),
+                    self.GyroScale(),
+                    self.MagnetoScale(),
+                    self.__startTime.isoformat(),
+                    self.__duration
+                     )
+              )
+
+        print("Metadata:")
+        for meta, data in self.__meta.items():
+            print("- {}: {}".format(meta, data))
+
+    def AccelRange(self):
+        if self.__Ascale > 0:
+            return 2 / self.__Ascale
+        else:
+            return None
+
+    def AccelScale(self):
+        return self.__Ascale
+
+    def GyroRange(self):
+        if self.__Gscale > 0:
+            return 4000 / self.__Gscale
+        else:
+            return None
+
+    def GyroScale(self):
+        return self.__Gscale
+
+    def MagnetoRange(self):
+        if self.__Mscale > 0:
+            return 1. / self.__Mscale
+        else:
+            return None
+
+    def MagnetoScale(self):
+        return self.__Mscale
 
     @staticmethod
     def DecodeTime(time):
@@ -266,279 +473,41 @@ class CWA(object):
     @staticmethod
     def DecodeScale(data):
         accel = data >> 13
+        if accel > 0:
+            accel = 1 << accel
         gyro = (data >> 10) & 0b111  # 0x7
+        if gyro != 0:
+            gyro = 1 << gyro
+
         light = data & 0b1111111111   # 0x3ff
-        light = ((light + 512.0)*6000./1024)
-        light = pow(10.0, light/1000.0)
-        return 2**(8+accel), 4000/(2**gyro), light 
+        light = ((light + 512.0) * 6000. / 1024)
+        light = pow(10.0, light / 1000.0)
+        return accel, gyro, light 
 
-    @staticmethod
-    def DecodeValue(data, style, scale):
+    @classmethod
+    def DecodeValue(cls, data):
         """
-        decodes a 3x16 bit or 32 data bits into tuple of (x,y,z)
-        measurement. If data lenght is 3x16, then values are reocvered
-        as int16, if data is 32, the packed values are decoded
+        decodes a uint32 packed data into tuple of (x,y,z)
+        measurement.
+        Unpacking follows:
+        [byte-3] [byte-2] [byte-1] [byte-0]
+        eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx
+        where x/y/z represents the 3 10-bits values.
+        The left most bit of each value is sign bit.
+        The e represents the binary exponent value (0-3)
+        number of bits to left-shift all axis values
         """
-        # print(data)
-        if style == 2:
-            if len(data) != 3:
-                raise ValueError("Expected 3 bytes, {} recieved"
-                                 .format(len(data)))
-            x,y,z =  struct.unpack("<hhh",data)
-        elif style == 0:
-            print(bin(data[0]))
-            if len(data) != 4:
-                raise ValueError("Expected 4 bytes, {} recieved"
-                                 .format(len(data)))
-            exp = data[0] >> 30
-            # x = ((data[0] << 6) & 0xffc0 ) >> (6 - exp)
-            # y = ((data[0] >> 4) & 0xffc0 ) >> (6 - exp)
-            # z = ((data[0] >> 14) & 0xffc0 ) >> (6 - exp)
-            # left most bit == sign : x & 0x8000
-            # everything elese value: x & 0x7fc0
-            # the 2 first bites exponents :  >> (6 - exp)
-            x = data[0] << 6
-            x = (1 - 2 * (x & 0x8000) )*((x & 0x7fc0 ) >> (6 - exp))
-            y = data[0] >> 4
-            y = (1 - 2 * (x & 0x8000) )*((y & 0x7fc0 ) >> (6 - exp))
-            z = data[0] >> 14
-            z = (1 - 2 * (x & 0x8000) )*((z & 0x7fc0 ) >> (6 - exp))
-            print ("\t\t", exp, bin(x), x)
-            
-        else:
-            raise ValueError("incorrect triplet lenght")
-        return x/scale, y/scale, z/scale
-
-class CwaMixin(object):
-    """
-    Mixin class for the description of the CWA binary file:
-    https://raw.githubusercontent.com/digitalinteraction/openmovement/master
-    /Docs/ax3/cwa.h
-    """
-    def _unpack(self, type, offset):
-        return Struct(self._endianness+type).unpack_from(
-            buffer=self.data,
-            offset=offset
-        )[0]
-
-    def _unpack_uchar(self, offset):
-        # return Struct('<B').unpack_from(buffer=self.data, offset=offset)[0]
-        return self._unpack('B', offset)
-
-    def _unpack_short(self, offset):
-        # return Struct('<h').unpack_from(buffer=self.data, offset=offset)[0]
-        return self._unpack('h', offset)
-
-    def _unpack_ushort(self, offset):
-        return Struct('<H').unpack_from(buffer=self.data, offset=offset)[0]
-
-    def _unpack_uint(self, offset):
-        return Struct('<I').unpack_from(buffer=self.data, offset=offset)[0]
-
-    def _unpack_ulong(self, offset):
-        return Struct('<L').unpack_from(buffer=self.data, offset=offset)[0]
-
-    def _unpack_timestamp(self, offset):
-
-        ts = Struct('<I').unpack_from(buffer=self.data, offset=offset)[0]
-        # bit pattern:  YYYYYYMM MMDDDDDh hhhhmmmm mmssssss
-        year = ((ts >> 26) & 0x3f) + 2000
-        month = (ts >> 22) & 0x0f
-        day = (ts >> 17) & 0x1f
-        hour = (ts >> 12) & 0x1f
-        minute = (ts >> 6) & 0x3f
-        second = ts & 0x3f
-
-        return datetime(year, month, day, hour, minute, second)
+        exp = data >> 30
+        x = cls.__decode(data) << exp
+        y = cls.__decode(data >> 10) << exp
+        z = cls.__decode(data >> 20) << exp
+        return x, y, z
 
     @staticmethod
-    def _sampling_frequency(rate):
-        "Sampling frequency in Hz"
-        return 3200 / (1 << (15 - rate & 15))
-
-    @staticmethod
-    def _sampling_range(rate):
-        "Sampling range (+/- g)"
-        return 16 >> (rate >> 6)
-
-    @staticmethod
-    def _num_axes_bps(byte):
-        high, low = byte >> 4, byte & 0x0F
-        return (high, low)
-
-
-class CwaHeader(CwaMixin):
-    """
-    Class for the description of the header of the CWA binary file:
-    https://raw.githubusercontent.com/digitalinteraction/openmovement/master
-    /Docs/ax3/cwa.h
-    """
-
-    hardware_dict = {0: 'AX3', 23: 'AX3', 255: 'AX3', 100: 'AX6'}
-
-    @property
-    def data(self):
-        return self._data
-
-    @property
-    def fname(self):
-        return self._fname
-
-    def __init__(self, fname, data, endianness='<'):
-
-        self._fname = fname
-        self._data = data
-
-        self._endianness = endianness
-
-        # Position the stream at the start of the file
-        # self._stream.seek(0)
-
-        self.header = self.data[:2].decode('ASCII')  # self._unpack_ushort(0)
-        self.length = self._unpack_ushort(2)
-        self.hardware_type = CwaHeader.hardware_dict[self._unpack_uchar(4)]
-        self.device_id = self._unpack_ushort(5)
-        self.session_id = self._unpack_ulong(7)
-        self.upper_device_id = self._unpack_ushort(11)
-        self.logging_start_time = self._unpack_timestamp(13)
-        self.logging_stop_time = self._unpack_timestamp(17)
-        self.logging_capacity = self._unpack_ulong(21)
-        # self.reserved1 = self._unpack_uchar(25)
-        self.flash_led = self._unpack_uchar(26)
-        # self.reserved2 = unpack('B', self._stream.read(8))[0]
-        self.sensor_config = self._unpack_uchar(35)
-        self.sampling_rate = self._unpack_uchar(36)
-        self.last_change_time = self._unpack_timestamp(37)
-        self.firmware_revision = self._unpack_uchar(41)
-        self.time_zone = self._unpack_short(42)
-        # uint8_t  reserved3[20];                     ///< @44  +20
-        # uint8_t  annotation[OM_METADATA_SIZE];      ///< @64  +448
-        # Scratch buffer / meta-data (448 ASCII characters, ignore trailing
-        # 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value pairs)
-        # uint8_t  reserved[512];                     ///< @512 +512
-        # Reserved for device-specific meta-data (512 bytes, ASCII characters,
-        # ignore trailing 0x20/0x00/0xff bytes, url-encoded UTF-8 name-value
-        # pairs, leading '&' if present?)
-
-        # Additional parameters
-        self.sampling_freq = CwaHeader._sampling_frequency(self.sampling_rate)
-        self.sampling_range = CwaHeader._sampling_range(self.sampling_rate)
-
-    def __str__(self):
-        return r"""
-        File name: {}
-        Header content:
-        - header: {}
-        - length: {}
-        - hardware type: {}
-        - device id: {}
-        - session id: {}
-        - upper device id: {}
-        - logging start time: {}
-        - logging stop time: {}
-        - logging capacity: {}
-        - flash LED: {}
-        - sensor config: {}
-        - sampling rate: {}
-        - sampling frequency (Hz): {}
-        - sampling range (+/- g): {}
-        - last change time: {}
-        - firmware revision: {}
-        - time zone: {}
-        """.format(
-            self.fname,
-            self.header,
-            self.length,
-            self.hardware_type,
-            self.device_id,
-            self.session_id,
-            self.upper_device_id,
-            self.logging_start_time,
-            self.logging_stop_time,
-            self.logging_capacity,
-            self.flash_led,
-            self.sensor_config,
-            self.sampling_rate,
-            self.sampling_freq,
-            self.sampling_range,
-            self.last_change_time,
-            self.firmware_revision,
-            self.time_zone
-        )
-
-
-class CwaBlock(CwaMixin):
-    """
-    Class for the description of the 512-byte long CWA data block:
-    https://raw.githubusercontent.com/digitalinteraction/openmovement/master
-    /Docs/ax3/cwa.h
-    """
-    @property
-    def data(self):
-        return self._data
-
-    def __init__(self, data, endianness='<'):
-
-        self._data = data
-
-        self._endianness = endianness
-        # Position the stream at the start of the file
-        # self._stream.seek(0)
-
-        self.header = self.data[:2].decode('ASCII')  # self._unpack_ushort(0)
-        self.length = self._unpack_ushort(2)
-
-        self.sampling_rate = self._unpack_uchar(24)
-        self.num_axes_bps = self._unpack_uchar(25)
-        self.sample_count = self._unpack_ushort(28)
-
-        # Additional parameters
-        self.sampling_freq = CwaBlock._sampling_frequency(self.sampling_rate)
-        self.sampling_range = CwaBlock._sampling_range(self.sampling_rate)
-        self.num_axes, self.bps = CwaBlock._num_axes_bps(self.num_axes_bps)
-
-    def __str__(self):
-        return r"""
-        Header content:
-        - header: {}
-        - length: {}
-        - sampling rate: {}
-        - sampling frequency (Hz): {}
-        - sampling range (+/- g): {}
-        - number of axes: {}
-        - bps: {}
-        - sample count: {}
-        """.format(
-            self.header,
-            self.length,
-            self.sampling_rate,
-            self.sampling_freq,
-            self.sampling_range,
-            self.num_axes,
-            self.bps,
-            self.sample_count
-        )
-
-
-def main(argv):
-
-    stream = open(argv, 'rb')
-    data = stream.read(1024)
-
-    import CWA
-    cwa = CWA.CwaHeader(argv, data)
-    print(cwa)
-
-    first_data_block = stream.read(512)
-    cwa_first_block = CWA.CwaBlock(first_data_block)
-    print(cwa_first_block)
-
-
-if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) < 2:
-        print('cwa.py <inputfile>')
-        sys.exit(2)
-
-    main(sys.argv[1])
+    def __decode(value):
+        # taking last 10 bits
+        value = value & 0x3ff
+        # left bit is sign
+        sign = (value & 0x200) >> 9 
+        value = (value & 0x1ff)
+        return (1 - 2 * sign) * value
