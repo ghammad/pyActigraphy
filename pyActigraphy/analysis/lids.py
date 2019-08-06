@@ -478,7 +478,7 @@ class LIDS():
 
             # Fit the highest MRI peak
             peaks, peak_properties = find_peaks(mri, height=0)
-            peak_index = np.argmax(peak_properties['peak_heights'])
+            peak_index = peaks[np.argmax(peak_properties['peak_heights'])]
 
             # Store fit parameters
             self.__fit_results = fit_results[peak_index]
