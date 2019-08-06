@@ -80,20 +80,12 @@ class DataReader(object):
         """
         increases offset by increment
         """
-        if not isinstance(increment, int):
-            raise TypeError("increment must be int")
-        if self.__offset + increment > len(self.__data):
-            raise IndexError("offset out of range")
         self.__offset += increment
 
     def __lshift__(self, increment):
         """
         decrease offset by increment
         """
-        if not isinstance(increment, int):
-            raise TypeError("increment must be int")
-        if self.__offset < increment:
-            raise IndexError("offset out of range")
         self.__offset -= increment
 
     def __iconcat__(self, data):
@@ -124,21 +116,13 @@ class DataReader(object):
             if precised, data readed at given offset, without
             advancing internal one
         """
-        if not isinstance(type, str):
-            raise TypeError("type must be str")
-        if not isinstance(size, int):
-            raise TypeError("size must be int")
-        if offset is not None and not isinstance(offset, int):
-            raise TypeError("offset must be int")
-        if size <= 0:
-            raise ValueError("invalid size to read")
+        off = 0
         if offset is None:
             off = self.__offset
         else:
+            off = offset
             if offset < 0:
-                off = self.size + offset
-        if off < 0 or off >= self.size:
-            raise IndexError("offset out of range")
+                off += self.size
 
         if len(type) > 1:
             type = self.__types__[type]
@@ -148,17 +132,16 @@ class DataReader(object):
         else:
             type = self.endianess + type * size
             size = struct.calcsize(type)
-            res = struct.unpack_from(type,
-                                     self.__data,
-                                     offset=off)
+
+            res = struct.unpack(type,
+                    self.__data[off:off+size],
+                                     )
             if len(res) == 1:
                 res = res[0]
             else:
                 res = list(res)
-
         if offset is None:
             self.__rshift__(size)
-
         return res
 
     def checksum(self, type):

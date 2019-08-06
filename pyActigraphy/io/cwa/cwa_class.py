@@ -2,17 +2,21 @@ import os
 from datetime import datetime
 from datetime import timedelta
 from tools import DataReader
-
 import pandas
-from numpy.linalg import norm
+import numpy
+import struct
+
 
 class CWA(object):
-    __slots__ = ["__endianess", "__stream", "__meta",
-                 "__blocks",
+    __slots__ = ["__endianess", "__data", "__meta",
+                 "__nblocks", "__nsamples",
                  "__device",
                  "__name", "__uuid", "__startTime",
                  "__duration", "__period",
                  "__Accel", "__Gyro", "__Mag",
+                 "__long_index_array", "__accel_array",
+                 "__gyro_array", "__mag_array",
+                 "__short_index_array", "__others_array",
                  "__Ascale", "__Gscale", "__Mscale",
                  "__Others"]
     __hardware = {0x00: "AX3",
@@ -65,7 +69,8 @@ class CWA(object):
     def __init__(self, filename, ):
         if not isinstance(filename, str):
             raise TypeError("filename must be a string")
-        self.__stream = open(filename, "rb")
+        with open(filename, "rb") as f:
+            self.__data = f.read()
         self.__endianess = "<"
         self.__meta = dict()
         self.__device = 0
@@ -74,54 +79,74 @@ class CWA(object):
         self.__startTime = datetime.min
         self.__duration = timedelta()
         self.__period = 0
-        self.__Accel = pandas.DataFrame(columns=["x","y", "z","norm"])
-        self.__Gyro = pandas.DataFrame(columns=["x","y", "z","norm"])
-        self.__Mag = pandas.DataFrame(columns=["x","y", "z","norm"])
+        self.__Accel = None  # pandas.DataFrame(columns=["x","y", "z","norm"])
+        self.__Gyro = None   # pandas.DataFrame(columns=["x","y", "z","norm"])
+        self.__Mag = None    # pandas.DataFrame(columns=["x","y", "z","norm"])
         self.__Ascale = 0
         self.__Gscale = 0
         self.__Mscale = 0
         self.__Others = None
 
-        self.__blocks = 0
-        self.__stream.seek(0,2)
-        self.__blocks = self.__stream.tell() - 1024
-        self.__stream.seek(0)
-        if self.__blocks%512 != 0:
+        self.__nblocks = len(self.__data) - 1024
+        if self.__nblocks % 512 != 0:
             raise ValueError("Data file corrupted")
-        self.__blocks = self.__blocks//512
+        self.__nblocks = self.__nblocks // 512
+
+        self.__nsamples = 0
+        for blk in range(0, self.__nblocks):
+            offset = 1024 + 512 * blk + 28
+            self.__nsamples += struct.unpack("<H", self.__data[offset:offset + 2])[0]
+
+        self.__long_index_array = numpy.zeros([self.__nsamples], dtype='datetime64[us]')
+        self.__accel_array = numpy.full([self.__nsamples,4], numpy.nan)
+        self.__gyro_array = numpy.full([self.__nsamples,4], numpy.nan)
+        self.__mag_array = numpy.full([self.__nsamples,4], numpy.nan)
+
+        self.__short_index_array = numpy.zeros([self.__nblocks], dtype='datetime64[us]')
+        self.__others_array = numpy.full([self.__nblocks, 3], numpy.nan)
 
         self._ReadHeader()
         self.printHeader()
-        
+
         t = datetime.now()
-        for blk in range(0, self.__blocks):
+        sample = 0
+        for blk in range(0, self.__nblocks):
             rem = blk % 1000
             if rem == 0:
                 print("Block {} of {} ({}%) {}"
-                      .format(blk,self.__blocks,
-                              100.*blk/self.__blocks,
+                      .format(blk,self.__nblocks,
+                              100. * blk / self.__nblocks,
                               datetime.now() - t)
                       )
                 t = datetime.now()
-                data = self.__stream.read(512*1000)
-            res = self._ReadBlock(data[512 * rem: 512 * rem + 512])
-            if res is None:
-                break
-            if res[4] is not None:
-                self.__Accel = self.__Accel.append(res[4], ignore_index=False)
-            if res[5] is not None:
-                self.__Gyro = self.__Gyro.append(res[5], ignore_index=False)
-            if res[6] is not None:
-                self.__Mag = self.__Mag.append(res[6], ignore_index=False)
-        print()
-        print("Accelerometer table:")
-        self.__Accel.info()
-        print("Gyrometer table:")
-        self.__Gyro.info()
-        print("Magnetometer table:")
-        self.__Mag.info()
+            sample += self._ReadBlock(blk, sample)
 
-    def _ReadHeader(self, offset=None):
+        self.__Accel = pandas.DataFrame(self.__accel_array,
+                                        index=self.__long_index_array,
+                                        columns=["x","y","z","norm"])
+        self.__Gyro = pandas.DataFrame(self.__gyro_array,
+                                       index=self.__long_index_array,
+                                       columns=["x","y","z","norm"])
+        self.__Mag = pandas.DataFrame(self.__mag_array,
+                                      index=self.__long_index_array,
+                                      columns=["x","y","z","norm"])
+        self.__Others = pandas.DataFrame(self.__others_array,
+                                         index=self.__short_index_array,
+                                         columns=["light","temperature", "battery"])
+        print("Accelorimeter:")
+        print(self.__Accel.head())
+        print(self.__Accel.memory_usage())
+        print("Gyroscope")
+        print(self.__Gyro.head())
+        print(self.__Gyro.memory_usage())
+        print("Magnetoscope")
+        print(self.__Mag.head())
+        print(self.__Mag.memory_usage())
+        print("Others")
+        print(self.__Others.head())
+        print(self.__Others.memory_usage())
+
+    def _ReadHeader(self):
         """
         reads and parce the cwa header block
 
@@ -131,17 +156,13 @@ class CWA(object):
             if given, will read from given position
             if ommited, will read from current position
         """
-        if offset is not None:
-            self.__stream.seek(offset)
-
-        dr = DataReader(self.__stream.read(1024), self.__endianess)
+        dr = DataReader(self.__data[0:1024], self.__endianess)
 
         # @ 0  +2   ASCII "MD", little-endian (0x444D)
         tag = dr.unpack("", 2).decode("ASCII")
         if tag != "MD":
             self.__stream.close()
-            raise ValueError("{} not a CWA file"
-                             .format(self.__stream.__name__))
+            raise ValueError("{} not a CWA file")
 
         # @ 2  +2   Packet length (1020 bytes, 
         # with header (4) = 1024 bytes total)
@@ -217,7 +238,7 @@ class CWA(object):
         # name-value pairs, leading '&' if present?)
         self.__meta["reserved"] = dr.unpack("", 512).rstrip(b'\x20\x00\xff')
 
-    def _ReadBlock(self, data):
+    def _ReadBlock(self, block, sample):
         """
         reads and parce the cwa data block
 
@@ -227,6 +248,8 @@ class CWA(object):
             if given, will read from given position
             if ommited, will read from current position
         """
+        offset = 1024 + 512 * block
+        data = self.__data[offset: offset + 512]
         if len(data) == 0:
             return None
         if len(data) != 512:
@@ -333,7 +356,7 @@ class CWA(object):
         numAxes = numAxesBPS >> 4
         if numAxes % 3 != 0:
             raise ValueError("Number of axes must be multiple of 3")
-        numAxes = numAxes//3
+        numAxes = numAxes // 3
         enc_style = numAxesBPS & 0xf
 
         if numAxes < 1 and self.__Ascale != 0:
@@ -357,47 +380,51 @@ class CWA(object):
         #   eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent,
         #   lsb on right)
         # data = dr.unpack("uint32", 120)
-        Axel = None
-        Gyro = None
-        Magn = None
-        index = pandas.date_range(timestamp,
-                                  periods=sampleCount, 
-                                  freq=str(self.__period) + "S")
 
-        if numAxes > 0:
-            Axel = pandas.DataFrame(columns=self.__Accel.columns, index=index)
-        if numAxes > 1:
-            Gyro = pandas.DataFrame(columns=self.__Gyro.columns, index=index)
-        if numAxes > 2:
-            Magn = pandas.DataFrame(columns=self.__Mag.columns, index=index)
+        self.__short_index_array[block] = numpy.datetime64(timestamp)
+        self.__others_array[block] = [light, temperature, battery]
 
-        for sample in range(0,sampleCount):
+        if enc_style == 2:
+            values = dr.unpack("int16", 3 * numAxes * sampleCount)
+        else:
+            values = [self.DecodeValue(v) 
+                      for v in dr.unpack("uint32", numAxes * sampleCount)]
+
+        for s in range(0, sampleCount):
+            self.__long_index_array[sample + s] \
+                    = numpy.datetime64(timestamp + 
+                                       timedelta(seconds=self.__period))
             if numAxes == 0:
                 break
-            data = [None] * numAxes
-            for j in range(0, numAxes):
-                if enc_style == 2:
-                    data[j] = dr.unpack("int16", 3)
-                else:
-                    data[j] = self.DecodeValue(dr.unpack("uint32"))
-
             if numAxes == 1:
-                Axel.loc[index[sample]] =\
-                        [ x / self.__Ascale for x in data[0]] + [norm(data[0])]
+                vector = [v / self.__Ascale 
+                          for v in values[s]]
+                self.__accel_array[sample + s] \
+                    = vector + [numpy.linalg.norm(vector)] 
             elif numAxes == 2:
-                Gyro.loc[index[sample]] =\
-                        [ x / self.__Gscale for x in data[0]] + [norm(data[0])]
-                Axel.loc[index[sample]] =\
-                        [ x / self.__Ascale for x in data[1]] + [norm(data[1])]
+                vector = [v / self.__Gscale 
+                          for v in values[s]]
+                self.__gyro_array[sample + s] \
+                    = vector + [numpy.linalg.norm(vector)] 
+                vector = [v / self.__Gscale 
+                          for v in values[s + 1]]
+                self.__accel_array[sample + s] \
+                    = vector + [numpy.linalg.norm(vector)] 
             else:
-                Gyro.loc[index[sample]] =\
-                        [ x / self.__Gscale for x in data[0]] + [norm(data[0])]
-                Axel.loc[index[sample]] =\
-                        [ x / self.__Ascale for x in data[1]] + [norm(data[1])]
-                Magn.loc[index[sample]] =\
-                        [ x / self.__Mscale for x in data[2]] + [norm(data[2])]
+                vector = [v / self.__Gscale 
+                          for v in values[s]]
+                self.__gyro_array[sample + s] \
+                    = vector + [numpy.linalg.norm(vector)] 
+                vector = [v / self.__Gscale 
+                          for v in values[s + 1]]
+                self.__accel_array[sample + s] \
+                    = vector + [numpy.linalg.norm(vector)] 
+                vector = [v / self.__Mscale 
+                          for v in values[s + 2]]
+                self.__mag_array[sample + s] \
+                    = vector + [numpy.linalg.norm(vector)] 
 
-        return seqId, timestamp, temperature, battery, Axel, Gyro, Magn
+        return sampleCount
 
     def printHeader(self):
         print("Header content:\n"
@@ -410,6 +437,8 @@ class CWA(object):
               "- Magneto scale: {}:\n"
               "- StartTime: {}\n"
               "- Duration: {}\n"
+              "- Nmb. blocks: {}\n"
+              "- Nmb. samples: {}\n"
               .format(
                     self.__uuid, self.__device,
                     self.__name,
@@ -419,7 +448,9 @@ class CWA(object):
                     self.GyroScale(),
                     self.MagnetoScale(),
                     self.__startTime.isoformat(),
-                    self.__duration
+                    self.__duration,
+                    self.__nblocks,
+                    self.__nsamples
                      )
               )
 
