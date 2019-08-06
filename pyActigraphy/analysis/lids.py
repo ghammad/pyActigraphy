@@ -4,6 +4,7 @@ import warnings
 
 from functools import reduce
 from lmfit import fit_report, minimize, Parameters
+from scipy.signal import find_peaks
 from scipy.stats import pearsonr, poisson
 from spm1d.util import smooth as spm_smooth
 
@@ -445,8 +446,8 @@ class LIDS():
             )
 
             # Fit data for each test period
-            mri = -np.inf
-            fit_result_tmp = None
+            mri = []
+            fit_results = []
             initial_period = self.__fit_initial_params['period'].value
             for test_period in test_periods:
                 # Fix test period
@@ -454,34 +455,43 @@ class LIDS():
                 self.__fit_initial_params['period'].vary = False
 
                 # Minimize residuals
-                fit_result_tmp = minimize(
-                    self.__fit_obj_func,
-                    self.__fit_initial_params,
-                    method=method,
-                    args=(x,  lids.values, self.lids_fit_func),
-                    nan_policy=nan_policy,
-                    reduce_fcn=self.__fit_reduc_func
+                fit_results.append(
+                    minimize(
+                        self.__fit_obj_func,
+                        self.__fit_initial_params,
+                        method=method,
+                        args=(x,  lids.values, self.lids_fit_func),
+                        nan_policy=nan_policy,
+                        reduce_fcn=self.__fit_reduc_func
+                    )
                 )
                 # Print fit parameters if verbose
                 if verbose:
-                    print(fit_report(fit_result_tmp))
+                    print(fit_report(fit_results[-1]))
                 # Calculate the MR index
-                mri_tmp = self.lids_mri(lids, fit_result_tmp.params)
+                mri.append(self.lids_mri(lids, fit_results[-1].params))
                 if verbose:
                     pearson_r = self.lids_pearson_r(
-                        lids, fit_result_tmp.params)[0]
+                        lids, fit_results[-1].params)[0]
                     print('Pearson r: {}'.format(pearson_r))
-                    print('MRI: {}'.format(mri_tmp))
+                    print('MRI: {}'.format(mri[-1]))
 
-                # If the newly calculated MRI is higher than the current MRI
-                if mri_tmp > mri and (test_period != period_end):
-                    # Store MRI
-                    mri = mri_tmp
-                    # Store fit parameters
-                    self.__fit_results = fit_result_tmp
+            # Fit the highest MRI peak
+            peaks, peak_properties = find_peaks(mri, height=0)
+            peak_index = np.argmax(peak_properties['peak_heights'])
 
+            # Store fit parameters
+            self.__fit_results = fit_results[peak_index]
             if verbose:
-                print('Highest MRI: {}'.format(mri))
+                print('Highest MRI: {}'.format(mri[peak_index]))
+
+            # # If the newly calculated MRI is higher than the current MRI
+            # if mri_tmp > mri and (test_period != period_end):
+            #     # Store MRI
+            #     mri = mri_tmp
+            #     # Store fit parameters
+            #     self.__fit_results = fit_results[-1]
+
             # Set back original value
             self.__fit_initial_params['period'].value = initial_period
             self.__fit_initial_params['period'].vary = True
