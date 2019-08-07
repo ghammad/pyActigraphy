@@ -96,7 +96,42 @@ class DataReader(object):
             raise TypeError("data must be bytes")
         self.__data += data
 
-    def unpack(self, type, size=1, offset=None):
+    def unpack_at(self, type, offset, size=1):
+        """
+        unpack data at offset, and returns corresponding 
+        value.
+        Do not advance internal data pointer
+        Parameters
+        ----------
+        type: str
+            type of data to unpack
+            if type is char, standard struct types used
+            if type is string, type is interpreted
+            if type is empty, raw data is returned
+        size: int
+            number of data to interpret
+            if equal to 1, returns one instance
+            if >1 returns list of instances
+        offset: int
+            place to read data from
+        """
+        if len(type) > 1:
+            type = self.__types__[type]
+        if type == "":
+            dsize = size
+            res = self.__data[offset:offset + dsize]
+        else:
+            type = self.endianess + type * size
+            dsize = struct.calcsize(type)
+            data = self.__data[offset:offset + dsize]
+            res = struct.unpack(type, data)
+        self.__rshift__(dsize)
+        if size == 1:
+            return res[0]
+        else:
+            return res
+
+    def unpack(self, type, size=1):
         """
         unpack and returns corresponding data, increasing
         the offset
@@ -112,37 +147,23 @@ class DataReader(object):
             number of data to interpret
             if equal to 1, returns one instance
             if >1 returns list of instances
-        offset: int, optional
-            if precised, data readed at given offset, without
-            advancing internal one
         """
-        off = 0
-        if offset is None:
-            off = self.__offset
-        else:
-            off = offset
-            if offset < 0:
-                off += self.size
-
         if len(type) > 1:
             type = self.__types__[type]
-
         if type == "":
-            res = self.__data[off:off + size]
+            dsize = size
+            res = self.__data[self.__offset:self.__offset + dsize]
         else:
             type = self.endianess + type * size
-            size = struct.calcsize(type)
+            dsize = struct.calcsize(type)
+            data = self.__data[self.__offset:self.__offset + dsize]
+            res = struct.unpack(type, data)
 
-            res = struct.unpack(type,
-                    self.__data[off:off+size],
-                                     )
-            if len(res) == 1:
-                res = res[0]
-            else:
-                res = list(res)
-        if offset is None:
-            self.__rshift__(size)
-        return res
+        self.__rshift__(dsize)
+        if size == 1:
+            return res[0]
+        else:
+            return res
 
     def checksum(self, type):
         """
@@ -164,13 +185,9 @@ class DataReader(object):
             raise TypeError("type must be str")
         if len(type) > 1:
             type = self.__types__[type]
-        type = self.endianess + type
         dsize = struct.calcsize(type)
         if self.size % dsize != 0:
             raise ValueError("Unable to split data to words of size {}"
                              .format(dsize))
-        checksum = 0
-        for offset in range(0, self.size, dsize):
-            checksum += struct.unpack_from(type, self.__data, offset=offset)[0]
-
-        return checksum
+        type = self.endianess + type * (self.size // dsize)
+        return sum(struct.unpack(type, self.__data))

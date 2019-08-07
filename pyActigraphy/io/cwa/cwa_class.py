@@ -5,28 +5,59 @@ from tools import DataReader
 import pandas
 import numpy
 import struct
+import math
 
 
 class CWA(object):
-    __slots__ = ["__endianess", "__data", "__meta",
-                 "__nblocks", "__nsamples",
-                 "__device",
-                 "__name", "__uuid", "__startTime",
-                 "__duration", "__period",
-                 "__Accel", "__Gyro", "__Mag",
-                 "__long_index_array", "__accel_array",
-                 "__gyro_array", "__mag_array",
-                 "__short_index_array", "__others_array",
-                 "__Ascale", "__Gscale", "__Mscale",
-                 "__Others"]
-    __hardware = {0x00: "AX3",
+    __slots__ = [
+                 "__filename", 
+                 "__endianess", 
+                 "__data", 
+
+                 "__device_type",  # type of devise (AX3, AX6)
+                 "__device_id",    # 16 bits unique device id
+                 "__session_id",   # id of session, 
+                                   # interpreted as __name for base class 
+                 "__start_time",   # logging start time, as in header
+                 "__duration",     # logging duration, as in header
+                 "__period",       # period between 2 succesive measurements
+
+                 "__nblocks",      # total number of blocks
+                 "__nsamples",     # total number of samples over blocks
+                 "__nevents",      # total number of events
+                 "__naxes",        # number of axes (accel, gyro, mag)
+                 "__encoding",     # type of data encoding 
+                                   #   0: uint32, x,y,z packed
+                                   #   2: 3x int16 for x,y,z
+
+                 "__accel_scale",  # scale for accelorimeter
+                 "__accel_df",     # dataframe for accelorimeter
+                 "__accel_np",     # np array for accelorimeter
+
+                 "__gyro_scale",   # scale for gyrometer
+                 "__gyro_df",      # dataframe for gyrometer
+                 "__gyro_np",      # np array for gyrometer
+
+                 "__mag_scale",    # scale for magnetometer     
+                 "__mag_df",       # dataframe for magnetometer
+                 "__mag_np",       # np array for magnetometer
+
+                 "__aux_df",       # dataframe for auxiliary data
+                 "__aux_np",       # np array for auxiliary data
+                 "__evt_df",       # dataframe for events
+                 "__evt_np",       # np array for events
+
+                 "__index",        # time index for measurements
+                 "__aux_index",    # time index for auxiliary data
+                 "__evt_index",    # time index for events
+
+                 "__meta"          # a dict containing non-standard info 
+                                   # about recording
+                 ]
+    __hardware = {0x00: "AX3", 
                   0xff: "AX3",
                   0x17: "AX3",
                   0x64: "AX6"}
-    __axes = {1: "Axyz",
-              2: "Gxyz/Axyz",
-              3: "Gxyz/Axyz/Mxyz"
-              }
 
     @classmethod
     def IsValidFile(cls, filename):
@@ -67,186 +98,255 @@ class CWA(object):
         return False
 
     def __init__(self, filename, ):
+        times = [datetime.now()]
         if not isinstance(filename, str):
             raise TypeError("filename must be a string")
         with open(filename, "rb") as f:
             self.__data = f.read()
+        if len(self.__data) < 1024:
+            raise ValueError("{}: file less than 1024 bytes"
+                             .format(filename))
+        self.__filename = filename
         self.__endianess = "<"
-        self.__meta = dict()
-        self.__device = 0
-        self.__name = 0
-        self.__uuid = 0
-        self.__startTime = datetime.min
+        self.__device_type = ""
+        self.__device_id = 0
+        self.__session_id = 0
+        self.__start_time = datetime.min
         self.__duration = timedelta()
         self.__period = 0
-        self.__Accel = None  # pandas.DataFrame(columns=["x","y", "z","norm"])
-        self.__Gyro = None   # pandas.DataFrame(columns=["x","y", "z","norm"])
-        self.__Mag = None    # pandas.DataFrame(columns=["x","y", "z","norm"])
-        self.__Ascale = 0
-        self.__Gscale = 0
-        self.__Mscale = 0
-        self.__Others = None
+        self.__nblocks = 0
+        self.__nsamples = 0
+        self.__nevents = 0
+        self.__naxes = 1
+        self.__encoding = None
+        self.__accel_scale = None
+        self.__accel_df = None
+        self.__accel_np = None
+        self.__gyro_scale = None
+        self.__gyro_df = None
+        self.__gyro_np = None
+        self.__mag_scale = None
+        self.__mag_df = None
+        self.__mag_np = None
+
+        self.__aux_df = None
+        self.__aux_np = None
+        self.__evt_df = None
+        self.__evt_np = None
+
+        self.__index = None
+        self.__aux_index = None
+        self.__evt_index = None
+
+        self.__meta = dict()
+
+        self.__read_header()
+        self.print_header()
+        times.append(datetime.now())
+        print("Header dtime:", times[-1] - times[-2])
 
         self.__nblocks = len(self.__data) - 1024
         if self.__nblocks % 512 != 0:
-            raise ValueError("Data file corrupted")
+            print("{}: data lenght not multiple of 512 bytes, "
+                  "last block might be corrupted"
+                  .format(self.__filename))
         self.__nblocks = self.__nblocks // 512
 
-        self.__nsamples = 0
         for blk in range(0, self.__nblocks):
-            offset = 1024 + 512 * blk + 28
-            self.__nsamples += struct.unpack("<H", self.__data[offset:offset + 2])[0]
+            if not self.__scan_block(blk):
+                self.__nblocks = blk + 1
+                break
 
-        self.__long_index_array = numpy.zeros([self.__nsamples], dtype='datetime64[us]')
-        self.__accel_array = numpy.full([self.__nsamples,4], numpy.nan)
-        self.__gyro_array = numpy.full([self.__nsamples,4], numpy.nan)
-        self.__mag_array = numpy.full([self.__nsamples,4], numpy.nan)
+        times.append(datetime.now())
+        print("Block scan dtime: {} ({} per block)"
+              .format(times[-1] - times[-2],
+                      (times[-1] - times[-2]) / self.__nblocks)
+              )
 
-        self.__short_index_array = numpy.zeros([self.__nblocks], dtype='datetime64[us]')
-        self.__others_array = numpy.full([self.__nblocks, 3], numpy.nan)
+        self.__index = numpy.zeros([self.__nsamples],
+                                   dtype='datetime64[ns]')
+        self.__aux_index = numpy.zeros([self.__nblocks],
+                                       dtype='datetime64[ns]')
+        self.__evt_index = numpy.zeros([self.__nevents],
+                                       dtype='datetime64[ns]')
+        self.__aux_np = numpy.full([self.__nblocks, 3], 
+                                   numpy.nan, dtype="float32")
+        self.__evt_np = numpy.full([self.__nevents, 1], 
+                                   numpy.nan, dtype="uint8")
 
-        self._ReadHeader()
-        self.printHeader()
+        if self.__naxes > 0:
+            if self.__accel_scale is None:
+                raise ValueError("Having accelorimeter "
+                                 "but scale is not defined")
+            self.__accel_np = numpy.full([self.__nsamples,4], 
+                                         numpy.nan, dtype="float32")
+        if self.__naxes > 1:
+            if self.__gyro_scale is None:
+                raise ValueError("Having gyrometer "
+                                 "but scale is not defined")
+            self.__gyro_np = numpy.full([self.__nsamples,4],
+                                           numpy.nan, dtype="float32")
+        if self.__naxes > 2:
+            if self.__mag_scale is None:
+                raise ValueError("Having magnetometer "
+                                 "but scale is not defined")
+            self.__mag_np = numpy.full([self.__nsamples,4],
+                                           numpy.nan, dtype="float32")
 
-        t = datetime.now()
+        times.append(datetime.now())
+        print("Array dtime:", times[-1] - times[-2])
+
         sample = 0
+        event = 0
+        times.append(datetime.now())
         for blk in range(0, self.__nblocks):
-            rem = blk % 1000
+            rem = blk % 10000
             if rem == 0:
                 print("Block {} of {} ({}%) {}"
                       .format(blk,self.__nblocks,
                               100. * blk / self.__nblocks,
-                              datetime.now() - t)
+                              datetime.now() - times[-1])
                       )
-                t = datetime.now()
-            sample += self._ReadBlock(blk, sample)
+                times[-1] = datetime.now()
+            s, e = self.__read_block(blk, sample, event)
+            sample += s
+            event += e
+            if blk > 100000:
+                break
 
-        self.__Accel = pandas.DataFrame(self.__accel_array,
-                                        index=self.__long_index_array,
-                                        columns=["x","y","z","norm"])
-        self.__Gyro = pandas.DataFrame(self.__gyro_array,
-                                       index=self.__long_index_array,
-                                       columns=["x","y","z","norm"])
-        self.__Mag = pandas.DataFrame(self.__mag_array,
-                                      index=self.__long_index_array,
-                                      columns=["x","y","z","norm"])
-        self.__Others = pandas.DataFrame(self.__others_array,
-                                         index=self.__short_index_array,
-                                         columns=["light","temperature", "battery"])
-        print("Accelorimeter:")
-        print(self.__Accel.head())
-        print(self.__Accel.memory_usage())
-        print("Gyroscope")
-        print(self.__Gyro.head())
-        print(self.__Gyro.memory_usage())
-        print("Magnetoscope")
-        print(self.__Mag.head())
-        print(self.__Mag.memory_usage())
-        print("Others")
-        print(self.__Others.head())
-        print(self.__Others.memory_usage())
+        if self.__accel_np is not None:
+            self.__accel_df = pandas.DataFrame(self.__accel_np,
+                                               index=self.__index,
+                                               columns=["x","y","z","norm"])
+            print("Accelorimeter:")
+            print(self.__accel_df.head())
+            print(self.__accel_df.memory_usage())
+        if self.__gyro_np is not None:
+            self.__gyro_df = pandas.DataFrame(self.__gyro_np,
+                                               index=self.__index,
+                                               columns=["x","y","z","norm"])
+            print("Gyroscope")
+            print(self.__gyro_df.head())
+            print(self.__gyro_df.memory_usage())
+        if self.__mag_np is not None:
+            self.__mag_df = pandas.DataFrame(self.__mag_np,
+                                               index=self.__index,
+                                               columns=["x","y","z","norm"])
+            print("Magnetoscope")
+            print(self.__mag_df.head())
+            print(self.__mag_df.memory_usage())
+            
+        self.__aux_df = pandas.DataFrame(self.__aux_np,
+                                         index=self.__aux_index,
+                                         columns=["light",
+                                                  "temperature",
+                                                  "battery"])
+        print("Auxiliary")
+        print(self.__aux_df.head())
+        print(self.__aux_df.memory_usage())
+        self.__evt_df = pandas.DataFrame(self.__evt_np,
+                                         index=self.__evt_index,
+                                         columns=["events"])
+        print("Events")
+        print(self.__evt_df.head())
+        print(self.__evt_df.memory_usage())
 
-    def _ReadHeader(self):
+        times.append(datetime.now())
+        print("DataFrame creation dtime: {}"
+              .format(times[-1] - times[-2]))
+        print("Total user time: ", times[-1] - times[0])
+
+    def __read_header(self):
         """
         reads and parce the cwa header block
-
-        Parameters
-        ----------
-        offset: int, optional
-            if given, will read from given position
-            if ommited, will read from current position
         """
         dr = DataReader(self.__data[0:1024], self.__endianess)
 
-        # @ 0  +2   ASCII "MD", little-endian (0x444D)
         tag = dr.unpack("", 2).decode("ASCII")
         if tag != "MD":
             self.__stream.close()
             raise ValueError("{} not a CWA file")
 
-        # @ 2  +2   Packet length (1020 bytes, 
-        # with header (4) = 1024 bytes total)
         length = dr.unpack("uint16")
         if length != 1020:
             raise ValueError("Packet length must be 1020, but {} is read"
                              .format(length))
 
-        # @ 4  +1 * Hardware type (0x00/0xff/0x17 = AX3, 0x64 = AX6)
         type = dr.unpack("uint8")
         if type not in self.__hardware:
             raise ValueError("Unknown hardware tag: {:x}".format(type))
-        self.__device = self.__hardware[type]
+        self.__device_type = self.__hardware[type]
 
-        # @ 5  +2   Device identifier (lower 16-bits)
-        self.__uuid = dr.unpack("uint16")
-        # @ 7  +4   Unique session identifier
-        self.__name = dr.unpack("uint32")
-        # @11  +2 * Upper word of device id
-        # (if 0xffff is read, treat as 0x0000)
+        self.__device_id = dr.unpack("uint16")
+        self.__session_id = dr.unpack("uint32")
         device = dr.unpack("uint16") 
         if device == 0xffff:
             device = 0
-        self.__uuid += (device << 16)
+        self.__device_id += (device << 16)
 
-        # @13  +4   Start time for delayed logging
-        self.__startTime = self.DecodeTime(dr.unpack("uint32"))
-        # @17  +4   Stop time for delayed logging
+        self.__start_time = self.DecodeTime(dr.unpack("uint32"))
         self.__duration = self.DecodeTime(dr.unpack("uint32"))\
-            - self.__startTime
-        # @21  +4   (Deprecated: preset maximum number of samples to collect,
-        # 0 = unlimited)
-        self.__meta["loggingCapacity"] = dr.unpack("uint32")
-        # @25  +1   (1 byte reserved)
+            - self.__start_time
+        dr >> 4
         dr >> 1
-        # @26  +1   Flash LED during recording
         self.__meta["flashLed"] = dr.unpack("uint8")
-        # @27  +8   (8 bytes reserved)
         dr >> 8
-        # @35  +1 * Fixed rate sensor configuration,
-        # 0x00 or 0xff means accel only,
-        # otherwise bottom nibble is gyro range (8000/2^n dps): 
-        #   2=2000, 3=1000, 4=500, 5=250, 6=125, 
-        # top nibble non-zero is magnetometer enabled.
         sensor = dr.unpack("uint8")
-        if sensor == 0 or sensor == 0xff:
-            self.__Gscale = 0
-            self.__Mscale = 0
-        else:
-            self.__Gscale = 1 << (sensor & 0x0f)
-            self.__Mscale = 1 if (sensor >> 4) > 0 else 0
-        # @36  +1   Sampling rate code, 
-        # frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, 
-        # range (+/-g) (16 >> (rate >> 6))
+        if sensor != 0 and sensor != 0xff:
+            self.__naxes = 2
+            self.__gyro_scale = 8000/(1 << (sensor & 0x0f))
+            if (sensor >> 4) > 0:
+                self.__naxes = 3
+                self.__mag_scale = 1
         freq, scale = self.DecodeRate(dr.unpack("uint8"))
         self.__period = 1. / freq
-        self.__Ascale = (1 << scale)
-        # @37  +4   Last change metadata time
+        self.__accel_scale = (1 << scale)
         self.__meta["lastChangeTime"] = self.DecodeTime(dr.unpack("uint32"))
-        # @41  +1   Firmware revision number
         self.__meta["firmwareRevision"] = dr.unpack("uint8")
-        # @42  +2   (Unused: originally reserved for a "Time Zone offset from
-        # UTC in minutes", 0xffff = -1 = unknown)
         self.__meta["timeZone"] = dr.unpack("int16")
         dr >> 20
-        # @64  +448 Scratch buffer / meta-data (448 ASCII characters,
-        # ignore trailing 0x20/0x00/0xff bytes, 
-        # url-encoded UTF-8 name-value pairs)
         self.__meta["annotation"] = dr.unpack("", 448)\
             .rstrip(b'\x20\x00\xff')
-        # 512 Reserved for device-specific meta-data
-        # (512 bytes, ASCII characters,
-        # name-value pairs, leading '&' if present?)
         self.__meta["reserved"] = dr.unpack("", 512).rstrip(b'\x20\x00\xff')
 
-    def _ReadBlock(self, block, sample):
+    def __scan_block(self, block):
+        offset = 1024 + 512 * block
+        dr = DataReader(self.__data[offset:offset + 512], "<")
+        if dr.unpack("",2) != b'AX':
+            print("Block at {}: header is not 'AX'".format(offset))
+            return False
+        if dr.unpack("uint16") != 508:
+            print("Block at {}: block size is not 508".format(offset))
+            return False
+        if dr.unpack_at("uint8",22) > 0:
+            self.__nevents += 1
+        numAxes = dr.unpack_at("uint8", 25)
+        if numAxes >> 4 != 3*self.__naxes:
+            print("Block at {}: mismatch number of axis".format(offset))
+            return False
+        if self.__encoding is None:
+            self.__encoding = numAxes & 0x0f
+        elif self.__encoding != numAxes & 0x0f:
+            print("Block at {}: mismatch data format".format(offset))
+            return False
+
+        if (dr.checksum("uint16") & 0xffff) != 0:
+            print("Block at {}: checksum failed".format(offset))
+            return False
+        self.__nsamples += dr.unpack_at("uint16", 28)
+        return True
+
+    def __read_block(self, block, sample, event):
         """
         reads and parce the cwa data block
 
         Parameters
         ----------
-        offset: int, optional
-            if given, will read from given position
-            if ommited, will read from current position
+        block: int
+            index to block to read
+        sample: int
+            index to sample in arrays corresponding
+            to first entry of block
         """
         offset = 1024 + 512 * block
         data = self.__data[offset: offset + 512]
@@ -256,234 +356,144 @@ class CWA(object):
             raise ValueError("Corrupted block at {}: unexpected EOF"
                              .format(offset))
         dr = DataReader(data, self.__endianess)
-        # checksum
-        # ch = dr.checksum("uint16")
-        # if (ch & 0xffff) != 0:
-        #    raise ValueError("Corrupted block at {}: checksum failed"
-        #                     .format(offset))
-
-        # @ 0  +2   ASCII "AX", little-endian (0x5841)
-        tag = dr.unpack("", 2).decode("ASCII")
-        if tag != "AX":
-            raise ValueError("Corrupted block at {}: incorrect tag"
-                             .format(offset))
-        # @ 2  +2   Packet length (508 bytes,
-        # with header (4) = 512 bytes total)
-        lenght = dr.unpack("uint16")
-        if lenght != 508:
-            raise ValueError("Corrupted block at {}: incorrect lenght"
-                             .format(offset))
+        deviceFractional = dr.unpack_at("uint16",4)
 
         # Top bit set: 15-bit fraction of a second for the time stamp,
         # the timestampOffset was already adjusted to minimize
         # this assuming ideal sample rate;
         # Top bit clear: 15-bit device identifier, 0 = unknown;
-        deviceFractional = dr.unpack("uint16")
         microseconds = 0
-        deviceId = 0
         if deviceFractional >> 15 :
             microseconds = deviceFractional & 0x7fff 
-        else :
-            deviceId = deviceFractional
-        # @ 6  +4   Unique session identifier, 0 = unknown
-        sesId = dr.unpack("uint32")
-        if sesId != 0 and sesId != self.__name:
-            raise Exception("Block at {}: mismach session id"
-                            .format(offset))
-        # @10  +4   Sequence counter (0-indexed), 
-        # each packet has a new number (reset if restarted)
-        seqId = dr.unpack("uint32")
-        # @14  +4   Last reported RTC value, 0 = unknown
-        timestamp = self.DecodeTime(dr.unpack("uint32"))
+        timestamp = self.DecodeTime(dr.unpack_at("uint32", 14))
 
         # @18  +2   AAAGGGLLLLLLLLLL
         # Bottom 10 bits is last recorded light sensor value in raw units,
         # 0 = none;#
         # top three bits are unpacked accel scale (1/2^(8+n) g);
         # next three bits are gyro scale  (8000/2^n dps)
-        scales = dr.unpack("uint16")
+        scales, temp = dr.unpack_at("uint16", 18, 2)
         accelScale, gyroScale, light = self.DecodeScale(scales) 
-        if accelScale != 0 and accelScale != self.__Ascale:
-            self.__Ascale = accelScale
-            print("Block at {}: new Accel scale - {}"
-                  .format(offset, self.__Ascale))
-        if gyroScale != 0 and gyroScale != self.__Gscale:
-            self.__Gscale = gyroScale
-            print("Block at {}: new Gyro scale - {}"
-                  .format(offset, self.__Gscale))
-        # @20  +2   Last recorded temperature sensor value
-        # in raw units, 0 = none
-        temperature = dr.unpack("uint16")
-        if temperature == 0:
-            temperature = float("NaN")
-        else:
-            temperature = (temperature * 150.0 - 20500) / 1000
-        # @22  +1   Event flags since last packet,
-        # b0 = resume logging,
-        # b1 = reserved for single-tap event,
-        # b2 = reserved for double-tap event,
-        # b3 = reserved,
-        # b4 = reserved for diagnostic hardware buffer,
-        # b5 = reserved for diagnostic software buffer,
-        # b6 = reserved for diagnostic internal flag,
-        # b7 = reserved)
-        events = dr.unpack("uint8")
-        # @23  +1   Last recorded battery level in scaled/cropped 
-        # raw units (double and add 512 for 10-bit ADC value),
-        # 0 = unknown
-        battery = dr.unpack("uint8")
-        if battery == 0:
-            battery = float("NaN")
-        else:
-            battery = (battery + 512.0) * 6 / 1024
-        # @24  +1   Sample rate code, 
-        # frequency (3200/(1<<(15-(rate & 0x0f)))) Hz, 
-        # range (+/-g) (16 >> (rate >> 6))
-        freq, scale = self.DecodeRate(dr.unpack("uint8"))
+        if accelScale != 0 and accelScale != self.__accel_scale:
+            self.__accel_scale = accelScale
+            print("Block at {}: new accelorimeter scale - {}"
+                  .format(offset, self.__accel_scale))
+        if gyroScale != 0 and gyroScale != self.__gyro_scale:
+            self.__gyro_scale = gyroScale
+            print("Block at {}: new gyrometer scale - {}"
+                  .format(offset, self.__gyro_scale))
+        light = self.scale_light(light)
+        temp = self.scale_temp(temp)
+        evt, battery, rate = dr.unpack_at("uint8", 22, 3)
+        battery = self.scale_battery(battery)
+        freq, scale = self.DecodeRate(rate)
         if self.__period != 1. / freq:
-            raise Exception("Block at {}: mismach frequency"
-                            .format(offset))
-        if self.__Ascale != (1 << scale):
+            self.__period = 1. / freq
+            print("Block at {}: new sampling period - {}"
+                  .format(offset, self.__period))
+        if self.__accel_scale != (1 << scale):
             raise Exception("Block at {}: mismach accelometer scale {}"
                             .format(offset, 1 << scale))
 
-        # 0x32
-        # top nibble: number of axes, 3=Axyz, 6=Gxyz/Axyz, 9=Gxyz/Axyz/Mxyz;
-        # bottom nibble: packing format -
-        #    2 = 3x 16-bit signed,
-        #    0 = 3x 10-bit signed + 2-bit exponent
-        numAxesBPS = dr.unpack("uint8")
-        numAxes = numAxesBPS >> 4
-        if numAxes % 3 != 0:
-            raise ValueError("Number of axes must be multiple of 3")
-        numAxes = numAxes // 3
-        enc_style = numAxesBPS & 0xf
+        timestampOffset, sampleCount = dr.unpack_at("int16", 26, 2)
 
-        if numAxes < 1 and self.__Ascale != 0:
-            print("Block {}: missing accelometer data".format(offset))
-        if numAxes < 2 and self.__Gscale != 0:
-            print("Block {}: missing gyrometer data".format(offset))
-        if numAxes < 3 and self.__Mscale != 0:
-            print("Block {}: missing magnetometer data".format(offset))
+        self.__aux_index[block] = numpy.datetime64(timestamp)
+        self.__aux_np[block] = [light, temp, battery]
 
-        # Relative sample index from the start of the buffer where
-        # the whole-second timestamp is valid
-        timestampOffset = dr.unpack("int16")
+        if evt > 0:
+            self.__evt_index[block] = numpy.datetime64(timestamp)
+            self.__evt_np[block] = [evt]
+            event += 1
 
-        # Number of sensor samples (if this sector is full --
-        # Axyz: 80 or 120 samples, Gxyz/Axyz: 40 samples
-        sampleCount = dr.unpack("uint16")
-
-        # Raw sample data.
-        # Each sample is either 3x/6x/9x 16-bit signed values (x, y, z)
-        # or one 32-bit packed value (The bits in bytes [3][2][1][0]:
-        #   eezzzzzz zzzzyyyy yyyyyyxx xxxxxxxx, e = binary exponent,
-        #   lsb on right)
-        # data = dr.unpack("uint32", 120)
-
-        self.__short_index_array[block] = numpy.datetime64(timestamp)
-        self.__others_array[block] = [light, temperature, battery]
-
-        if enc_style == 2:
-            values = dr.unpack("int16", 3 * numAxes * sampleCount)
-        else:
+        if self.__encoding == 2:
+            values = dr.unpack_at("int16", 30, 3 * self.__naxes * sampleCount)
+        elif  self.__encoding == 0:
             values = [self.DecodeValue(v) 
-                      for v in dr.unpack("uint32", numAxes * sampleCount)]
+                      for v in dr.unpack_at("uint32", 30, self.__naxes * sampleCount)]
+            values = [val for sublist in values for val in sublist]
+        else:
+            raise Exception("Invalid encoding")
 
         for s in range(0, sampleCount):
-            self.__long_index_array[sample + s] \
+            self.__index[sample + s] \
                     = numpy.datetime64(timestamp + 
                                        timedelta(seconds=self.__period))
-            if numAxes == 0:
+            if self.__naxes == 0:
                 break
-            if numAxes == 1:
-                vector = [v / self.__Ascale 
-                          for v in values[s]]
-                self.__accel_array[sample + s] \
-                    = vector + [numpy.linalg.norm(vector)] 
+            if self.__naxes == 1:
+                self.__accel_np[sample + s] = \
+                    self.__create_vector(values[s:s+3], self.__accel_scale)
             elif numAxes == 2:
-                vector = [v / self.__Gscale 
-                          for v in values[s]]
-                self.__gyro_array[sample + s] \
-                    = vector + [numpy.linalg.norm(vector)] 
-                vector = [v / self.__Gscale 
-                          for v in values[s + 1]]
-                self.__accel_array[sample + s] \
-                    = vector + [numpy.linalg.norm(vector)] 
+                self.__gyro_np[sample + s] = \
+                    self.__create_vector(values[s:s+3], self.__gyro_scale)
+                self.__accel_np[sample + s] = \
+                    self.__create_vector(values[s+3:s+6], self.__accel_scale)
             else:
-                vector = [v / self.__Gscale 
-                          for v in values[s]]
-                self.__gyro_array[sample + s] \
-                    = vector + [numpy.linalg.norm(vector)] 
-                vector = [v / self.__Gscale 
-                          for v in values[s + 1]]
-                self.__accel_array[sample + s] \
-                    = vector + [numpy.linalg.norm(vector)] 
-                vector = [v / self.__Mscale 
-                          for v in values[s + 2]]
-                self.__mag_array[sample + s] \
-                    = vector + [numpy.linalg.norm(vector)] 
+                self.__gyro_np[sample + s] = \
+                    self.__create_vector(values[s:s+3], self.__gyro_scale)
+                self.__accel_np[sample + s] = \
+                    self.__create_vector(values[s+3:s+6], self.__accel_scale)
+                self.__mag_np[sample + s] = \
+                    self.__create_vector(values[s+6:s+9], self.__mag_scale)
 
-        return sampleCount
+        return sampleCount, event
 
-    def printHeader(self):
+    def print_header(self, meta=True):
+        """
+        printout the information retrieved from header
+        
+        Parameters
+        ----------
+        meta: bool
+            printout additional metadata
+        """
         print("Header content:\n"
+              "- file: {}\n"
               "- device id: {} ({})\n"
               "- session: {}\n"
-              "- sampling period (s): {}\n"
-              "- sampling frequency (Hz): {}\n"
-              "- Accel scale: {}\n"
-              "- Gyro scale: {}\n"
-              "- Magneto scale: {}:\n"
+              "- sampling period: {}s ({}Hz)\n"
+              "- Accelometer scale: {}\n"
+              "- Gyrometer scale: {}\n"
+              "- Magnetometer scale: {}:\n"
               "- StartTime: {}\n"
               "- Duration: {}\n"
-              "- Nmb. blocks: {}\n"
-              "- Nmb. samples: {}\n"
               .format(
-                    self.__uuid, self.__device,
-                    self.__name,
-                    self.__period,
-                    1. / self.__period,
-                    self.AccelScale(),
-                    self.GyroScale(),
-                    self.MagnetoScale(),
-                    self.__startTime.isoformat(),
+                    self.__filename,
+                    self.__device_id, self.__device_type,
+                    self.__session_id,
+                    self.__period, 1. / self.__period,
+                    self.__accel_scale,
+                    self.__gyro_scale,
+                    self.__mag_scale,
+                    self.__start_time.isoformat(),
                     self.__duration,
-                    self.__nblocks,
-                    self.__nsamples
                      )
               )
-
-        print("Metadata:")
-        for meta, data in self.__meta.items():
-            print("- {}: {}".format(meta, data))
+        if meta:
+            print("Metadata:")
+            for meta, data in self.__meta.items():
+                print("- {}: {}".format(meta, data))
 
     def AccelRange(self):
-        if self.__Ascale > 0:
-            return 2 / self.__Ascale
+        if self.__accel_scale > 0:
+            return 512 * self.__accel_scale
         else:
             return None
-
-    def AccelScale(self):
-        return self.__Ascale
 
     def GyroRange(self):
-        if self.__Gscale > 0:
-            return 4000 / self.__Gscale
+        if self.__gyro_scale is not None:
+            return 512 * self.__gyro_scale
         else:
             return None
 
-    def GyroScale(self):
-        return self.__Gscale
-
     def MagnetoRange(self):
-        if self.__Mscale > 0:
-            return 1. / self.__Mscale
+        if self.__mag_scale is not None:
+            return 512 * self.__mag_scale
         else:
             return None
 
     def MagnetoScale(self):
-        return self.__Mscale
+        return self.__mag_scale
 
     @staticmethod
     def DecodeTime(time):
@@ -511,8 +521,6 @@ class CWA(object):
             gyro = 1 << gyro
 
         light = data & 0b1111111111   # 0x3ff
-        light = ((light + 512.0) * 6000. / 1024)
-        light = pow(10.0, light / 1000.0)
         return accel, gyro, light 
 
     @classmethod
@@ -541,4 +549,34 @@ class CWA(object):
         # left bit is sign
         sign = (value & 0x200) >> 9 
         value = (value & 0x1ff)
-        return (1 - 2 * sign) * value
+        if sign == 1:
+            return -value
+        else:
+            return value
+
+    @staticmethod
+    def scale_light(value):
+        if value == 0:
+            return numpy.nan
+        log10LuxTimes10Power3 = ((value + 512.0) * 6 / 1024)
+        return pow(10.0, log10LuxTimes10Power3)
+
+    @staticmethod
+    def scale_temp(value):
+        if value == 0:
+            return numpy.nan
+        return (value *150.0 - 20500) / 1000
+
+    @staticmethod
+    def scale_battery(value):
+        if value == 0:
+            return numpy.nan
+        return (value + 512.0) * 6 / 1024
+
+    @staticmethod
+    def __create_vector(vec, scale):
+        norm = math.sqrt(vec[0] * vec[0]
+                         + vec[1] * vec[1]
+                         + vec[2] * vec[2]
+                         ) / scale
+        return [v / scale for v in vec] + [norm]
