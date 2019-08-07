@@ -4,7 +4,6 @@ from datetime import timedelta
 from tools import DataReader
 import pandas
 import numpy
-import struct
 import math
 
 
@@ -185,13 +184,13 @@ class CWA(object):
                 raise ValueError("Having gyrometer "
                                  "but scale is not defined")
             self.__gyro_np = numpy.full([self.__nsamples,4],
-                                           numpy.nan, dtype="float32")
+                                        numpy.nan, dtype="float32")
         if self.__naxes > 2:
             if self.__mag_scale is None:
                 raise ValueError("Having magnetometer "
                                  "but scale is not defined")
             self.__mag_np = numpy.full([self.__nsamples,4],
-                                           numpy.nan, dtype="float32")
+                                       numpy.nan, dtype="float32")
 
         times.append(datetime.now())
         print("Array dtime:", times[-1] - times[-2])
@@ -223,19 +222,19 @@ class CWA(object):
             print(self.__accel_df.memory_usage())
         if self.__gyro_np is not None:
             self.__gyro_df = pandas.DataFrame(self.__gyro_np,
-                                               index=self.__index,
-                                               columns=["x","y","z","norm"])
+                                              index=self.__index,
+                                              columns=["x","y","z","norm"])
             print("Gyroscope")
             print(self.__gyro_df.head())
             print(self.__gyro_df.memory_usage())
         if self.__mag_np is not None:
             self.__mag_df = pandas.DataFrame(self.__mag_np,
-                                               index=self.__index,
-                                               columns=["x","y","z","norm"])
+                                             index=self.__index,
+                                             columns=["x","y","z","norm"])
             print("Magnetoscope")
             print(self.__mag_df.head())
             print(self.__mag_df.memory_usage())
-            
+
         self.__aux_df = pandas.DataFrame(self.__aux_np,
                                          index=self.__aux_index,
                                          columns=["light",
@@ -294,7 +293,7 @@ class CWA(object):
         sensor = dr.unpack("uint8")
         if sensor != 0 and sensor != 0xff:
             self.__naxes = 2
-            self.__gyro_scale = 8000/(1 << (sensor & 0x0f))
+            self.__gyro_scale = 8000 / (1 << (sensor & 0x0f))
             if (sensor >> 4) > 0:
                 self.__naxes = 3
                 self.__mag_scale = 1
@@ -321,7 +320,7 @@ class CWA(object):
         if dr.unpack_at("uint8",22) > 0:
             self.__nevents += 1
         numAxes = dr.unpack_at("uint8", 25)
-        if numAxes >> 4 != 3*self.__naxes:
+        if numAxes >> 4 != 3 * self.__naxes:
             print("Block at {}: mismatch number of axis".format(offset))
             return False
         if self.__encoding is None:
@@ -396,6 +395,8 @@ class CWA(object):
                             .format(offset, 1 << scale))
 
         timestampOffset, sampleCount = dr.unpack_at("int16", 26, 2)
+        timestamp = timestamp \
+                + timedelta(seconds=-timestampOffset * self.__period)
 
         self.__aux_index[block] = numpy.datetime64(timestamp)
         self.__aux_np[block] = [light, temp, battery]
@@ -407,9 +408,10 @@ class CWA(object):
 
         if self.__encoding == 2:
             values = dr.unpack_at("int16", 30, 3 * self.__naxes * sampleCount)
-        elif  self.__encoding == 0:
+        elif self.__encoding == 0:
             values = [self.DecodeValue(v) 
-                      for v in dr.unpack_at("uint32", 30, self.__naxes * sampleCount)]
+                      for v in dr.unpack_at("uint32", 30, 
+                                            self.__naxes * sampleCount)]
             values = [val for sublist in values for val in sublist]
         else:
             raise Exception("Invalid encoding")
@@ -417,31 +419,33 @@ class CWA(object):
         for s in range(0, sampleCount):
             self.__index[sample + s] \
                     = numpy.datetime64(timestamp + 
-                                       timedelta(seconds=self.__period))
+                                       s * timedelta(seconds=self.__period))
             if self.__naxes == 0:
                 break
             if self.__naxes == 1:
                 self.__accel_np[sample + s] = \
-                    self.__create_vector(values[s:s+3], self.__accel_scale)
-            elif numAxes == 2:
+                    self.__create_vector(values[s:s + 3], self.__accel_scale)
+            elif self.__naxes == 2:
                 self.__gyro_np[sample + s] = \
-                    self.__create_vector(values[s:s+3], self.__gyro_scale)
+                    self.__create_vector(values[s:s + 3], self.__gyro_scale)
                 self.__accel_np[sample + s] = \
-                    self.__create_vector(values[s+3:s+6], self.__accel_scale)
+                    self.__create_vector(values[s + 3:s + 6],
+                                         self.__accel_scale)
             else:
                 self.__gyro_np[sample + s] = \
-                    self.__create_vector(values[s:s+3], self.__gyro_scale)
+                    self.__create_vector(values[s:s + 3], self.__gyro_scale)
                 self.__accel_np[sample + s] = \
-                    self.__create_vector(values[s+3:s+6], self.__accel_scale)
+                    self.__create_vector(values[s + 3:s + 6],
+                                         self.__accel_scale)
                 self.__mag_np[sample + s] = \
-                    self.__create_vector(values[s+6:s+9], self.__mag_scale)
+                    self.__create_vector(values[s + 6:s + 9], self.__mag_scale)
 
         return sampleCount, event
 
     def print_header(self, meta=True):
         """
         printout the information retrieved from header
-        
+
         Parameters
         ----------
         meta: bool
@@ -494,6 +498,122 @@ class CWA(object):
 
     def MagnetoScale(self):
         return self.__mag_scale
+
+    @property
+    def accelometry(self):
+        return self.__accel_df
+
+    @property
+    def accelometry_norm(self):
+        if self.__accel_df is not None:
+            return self.__accel_df.loc["norm"]
+        else:
+            return None
+
+    @property
+    def accelometry_x(self):
+        if self.__accel_df is not None:
+            return self.__accel_df.loc["x"]
+        else:
+            return None
+
+    @property
+    def accelometry_y(self):
+        if self.__accel_df is not None:
+            return self.__accel_df.loc["y"]
+        else:
+            return None
+
+    @property
+    def accelometry_z(self):
+        if self.__accel_df is not None:
+            return self.__accel_df.loc["z"]
+        else:
+            return None
+
+    @property
+    def gyrometry(self):
+        return self.__accel_df
+
+    @property
+    def gyrometry_norm(self):
+        if self.__accel_df is not None:
+            return self.__accel_df.loc["norm"]
+        else:
+            return None
+
+    @property
+    def gyrometry_x(self):
+        if self.__accel_df is not None:
+            return self.__accel_df.loc["x"]
+        else:
+            return None
+
+    @property
+    def gyrometry_y(self):
+        if self.__accel_df is not None:
+            return self.__accel_df.loc["y"]
+        else:
+            return None
+
+    @property
+    def gyrometry_z(self):
+        if self.__accel_df is not None:
+            return self.__accel_df.loc["z"]
+        else:
+            return None
+
+    @property
+    def magnetometry(self):
+        return self.__accel_df
+
+    @property
+    def magnetometry_norm(self):
+        if self.__accel_df is not None:
+            return self.__accel_df.loc["norm"]
+        else:
+            return None
+
+    @property
+    def magnetometry_x(self):
+        if self.__accel_df is not None:
+            return self.__accel_df.loc["x"]
+        else:
+            return None
+
+    @property
+    def magnetometry_y(self):
+        if self.__accel_df is not None:
+            return self.__accel_df.loc["y"]
+        else:
+            return None
+
+    @property
+    def magnetometry_z(self):
+        if self.__accel_df is not None:
+            return self.__accel_df.loc["z"]
+        else:
+            return None
+
+    @property
+    def auxiliary(self):
+        return self.__aux_df
+
+    @property
+    def auxiliary_light(self):
+        return self.__aux_df.loc["light"]
+
+    @property
+    def auxiliary_temperature(self):
+        return self.__aux_df.loc["temperature"]
+
+    @property
+    def auxiliary_battery(self):
+        return self.__aux_df.loc["battery"]
+
+    @property
+    def events(self):
+        return self.__evt_df
 
     @staticmethod
     def DecodeTime(time):
@@ -565,7 +685,7 @@ class CWA(object):
     def scale_temp(value):
         if value == 0:
             return numpy.nan
-        return (value *150.0 - 20500) / 1000
+        return (value * 150.0 - 20500) / 1000
 
     @staticmethod
     def scale_battery(value):
