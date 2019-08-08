@@ -396,7 +396,8 @@ class CWA(object):
 
         timestampOffset, sampleCount = dr.unpack_at("int16", 26, 2)
         timestamp = timestamp \
-                + timedelta(seconds=-timestampOffset * self.__period)
+                + timedelta(seconds=-timestampOffset * self.__period,
+                            microseconds=microseconds)
 
         self.__aux_index[block] = numpy.datetime64(timestamp)
         self.__aux_np[block] = [light, temp, battery]
@@ -629,7 +630,10 @@ class CWA(object):
     @staticmethod
     def DecodeRate(rate):
         "Sampling frequency in Hz"
-        return 3200 / (1 << (15 - rate & 15)), 16 >> (rate >> 6)
+        freq = 3200. / (1 << (15 - rate & 15))
+        if freq <= 0:
+            freq = 1
+        return freq, 16 >> (rate >> 6)
 
     @staticmethod
     def DecodeScale(data):
@@ -668,9 +672,8 @@ class CWA(object):
         value = value & 0x3ff
         # left bit is sign
         sign = (value & 0x200) >> 9 
-        value = (value & 0x1ff)
         if sign == 1:
-            return -value
+            return -((~(value - 1)) & 0x3ff)
         else:
             return value
 
