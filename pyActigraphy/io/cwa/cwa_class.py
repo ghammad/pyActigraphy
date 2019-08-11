@@ -30,14 +30,17 @@ class CWA(object):
                                    #   2: 3x int16 for x,y,z
 
                  "__accel_scale",  # scale for accelorimeter
+                 "__accel_scale_def",  # default scale for accelorimeter
                  "__accel_df",     # dataframe for accelorimeter
                  "__accel_np",     # np array for accelorimeter
 
                  "__gyro_scale",   # scale for gyrometer
+                 "__gyro_scale_def",   # default scale for gyrometer
                  "__gyro_df",      # dataframe for gyrometer
                  "__gyro_np",      # np array for gyrometer
 
                  "__mag_scale",    # scale for magnetometer     
+                 "__mag_scale_def",  # default scale for magnetometer
                  "__mag_df",       # dataframe for magnetometer
                  "__mag_np",       # np array for magnetometer
 
@@ -119,12 +122,15 @@ class CWA(object):
         self.__naxes = 1
         self.__encoding = None
         self.__accel_scale = None
+        self.__accel_scale_def = 256  # 32768 = 2000dps
         self.__accel_df = None
         self.__accel_np = None
         self.__gyro_scale = None
+        self.__gyro_scale_def = 2000  # 32768 = 2000dps
         self.__gyro_df = None
         self.__gyro_np = None
         self.__mag_scale = None
+        self.__mag_scale_def = 16  # 1uT = 16
         self.__mag_df = None
         self.__mag_np = None
 
@@ -296,7 +302,7 @@ class CWA(object):
             self.__gyro_scale = 8000 / (1 << (sensor & 0x0f))
             if (sensor >> 4) > 0:
                 self.__naxes = 3
-                self.__mag_scale = 1
+                self.__mag_scale = self.__mag_scale_def
         freq, scale = self.DecodeRate(dr.unpack("uint8"))
         self.__period = 1. / freq
         self.__accel_scale = (1 << scale)
@@ -361,9 +367,11 @@ class CWA(object):
         # the timestampOffset was already adjusted to minimize
         # this assuming ideal sample rate;
         # Top bit clear: 15-bit device identifier, 0 = unknown;
-        microseconds = 0
+        fractional = 0
         if deviceFractional >> 15 :
-            microseconds = deviceFractional & 0x7fff 
+            # use 15 bits number as 16 bits
+            # represents 1/65536 fraction of second
+            fractional = (deviceFractional & 0x7fff) * 2 / 65536
         timestamp = self.DecodeTime(dr.unpack_at("uint32", 14))
 
         # @18  +2   AAAGGGLLLLLLLLLL
@@ -395,9 +403,10 @@ class CWA(object):
                             .format(offset, 1 << scale))
 
         timestampOffset, sampleCount = dr.unpack_at("int16", 26, 2)
-        timestamp = timestamp \
-                + timedelta(seconds=-timestampOffset * self.__period,
-                            microseconds=microseconds)
+        if fractional > 0:
+            timestampOffset += int(fractional / self.__period) 
+        timeoffset = fractional - timestampOffset * self.__period
+        timestamp = timestamp + timedelta(seconds=timeoffset)
 
         self.__aux_index[block] = numpy.datetime64(timestamp)
         self.__aux_np[block] = [light, temp, battery]
