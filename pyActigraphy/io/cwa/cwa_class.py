@@ -53,8 +53,13 @@ class CWA(object):
                  "__aux_index",    # time index for auxiliary data
                  "__evt_index",    # time index for events
 
-                 "__meta"          # a dict containing non-standard info 
+                 "__meta",         # a dict containing non-standard info 
                                    # about recording
+                 "__time_correction",  # type of correction for timestamps
+                                       # 0 -- no correction
+                                       # 1 -- timestamps corrected
+                                       # 2 -- frequency corrcted
+                 "__time_fractional"  # to use or not fractional time
                  ]
     __hardware = {0x00: "AX3", 
                   0xff: "AX3",
@@ -99,7 +104,7 @@ class CWA(object):
         f.close()
         return False
 
-    def __init__(self, filename, ):
+    def __init__(self, filename, time_correction="", time_fractional=True):
         times = [datetime.now()]
         if not isinstance(filename, str):
             raise TypeError("filename must be a string")
@@ -144,6 +149,17 @@ class CWA(object):
         self.__evt_index = None
 
         self.__meta = dict()
+
+        if time_correction == "":
+            self.__time_correction = 0
+        elif time_correction == "time":
+            self.__time_correction = 1
+        elif time_correction == "freq":
+            self.__time_correction = 2
+        else:
+            raise ValueError("Unknown methode for time correction")
+        self.__time_fractional = time_fractional
+
 
         self.__read_header()
         self.print_header()
@@ -368,7 +384,7 @@ class CWA(object):
         # this assuming ideal sample rate;
         # Top bit clear: 15-bit device identifier, 0 = unknown;
         fractional = 0
-        if deviceFractional >> 15 :
+        if self.__time_fractional and deviceFractional >> 15 :
             # use 15 bits number as 16 bits
             # represents 1/65536 fraction of second
             fractional = (deviceFractional & 0x7fff) * 2 / 65536
@@ -404,7 +420,9 @@ class CWA(object):
 
         timestampOffset, sampleCount = dr.unpack_at("int16", 26, 2)
         if fractional > 0:
-            timestampOffset += int(fractional / self.__period) 
+            # removing part accounted in time offset
+            fractional = fractional % self.__period 
+
         timeoffset = fractional - timestampOffset * self.__period
         timestamp = timestamp + timedelta(seconds=timeoffset)
 
