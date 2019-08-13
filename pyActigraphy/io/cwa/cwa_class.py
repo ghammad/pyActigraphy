@@ -320,9 +320,9 @@ class CWA(BaseRaw):
                 uuid=self.__device_id,
                 format="CWA",
                 axial_mode='tri-axial',
-                start_time=pandas.datetime64(self.__start_time),
-                period=pandas.timedelta64(self.__duration),
-                frequency=pandas.timedelta64(self.__period),
+                start_time=numpy.datetime64(self.__start_time),
+                period=numpy.timedelta64(self.__duration),
+                frequency=numpy.timedelta64(timedelta(seconds=self.__period)),
                 data=self.accelometry_norm,
                 light=self.auxiliary_light
                 )
@@ -625,28 +625,28 @@ class CWA(BaseRaw):
     @property
     def accelometry_norm(self):
         if self.__accel_df is not None:
-            return self.__accel_df.loc["norm"]
+            return self.__accel_df.loc[:,"norm"]
         else:
             return None
 
     @property
     def accelometry_x(self):
         if self.__accel_df is not None:
-            return self.__accel_df.loc["x"]
+            return self.__accel_df.loc[:,"x"]
         else:
             return None
 
     @property
     def accelometry_y(self):
         if self.__accel_df is not None:
-            return self.__accel_df.loc["y"]
+            return self.__accel_df.loc[:,"y"]
         else:
             return None
 
     @property
     def accelometry_z(self):
         if self.__accel_df is not None:
-            return self.__accel_df.loc["z"]
+            return self.__accel_df.loc[:,"z"]
         else:
             return None
 
@@ -657,28 +657,28 @@ class CWA(BaseRaw):
     @property
     def gyrometry_norm(self):
         if self.__accel_df is not None:
-            return self.__accel_df.loc["norm"]
+            return self.__accel_df.loc[:,"norm"]
         else:
             return None
 
     @property
     def gyrometry_x(self):
         if self.__accel_df is not None:
-            return self.__accel_df.loc["x"]
+            return self.__accel_df.loc[:,"x"]
         else:
             return None
 
     @property
     def gyrometry_y(self):
         if self.__accel_df is not None:
-            return self.__accel_df.loc["y"]
+            return self.__accel_df.loc[:,"y"]
         else:
             return None
 
     @property
     def gyrometry_z(self):
         if self.__accel_df is not None:
-            return self.__accel_df.loc["z"]
+            return self.__accel_df.loc[:,"z"]
         else:
             return None
 
@@ -689,28 +689,28 @@ class CWA(BaseRaw):
     @property
     def magnetometry_norm(self):
         if self.__accel_df is not None:
-            return self.__accel_df.loc["norm"]
+            return self.__accel_df.loc[:,"norm"]
         else:
             return None
 
     @property
     def magnetometry_x(self):
         if self.__accel_df is not None:
-            return self.__accel_df.loc["x"]
+            return self.__accel_df.loc[:,"x"]
         else:
             return None
 
     @property
     def magnetometry_y(self):
         if self.__accel_df is not None:
-            return self.__accel_df.loc["y"]
+            return self.__accel_df.loc[:,"y"]
         else:
             return None
 
     @property
     def magnetometry_z(self):
         if self.__accel_df is not None:
-            return self.__accel_df.loc["z"]
+            return self.__accel_df.loc[:,"z"]
         else:
             return None
 
@@ -720,15 +720,15 @@ class CWA(BaseRaw):
 
     @property
     def auxiliary_light(self):
-        return self.__aux_df.loc["light"]
+        return self.__aux_df.loc[:,"light"]
 
     @property
     def auxiliary_temperature(self):
-        return self.__aux_df.loc["temperature"]
+        return self.__aux_df.loc[:,"temperature"]
 
     @property
     def auxiliary_battery(self):
-        return self.__aux_df.loc["battery"]
+        return self.__aux_df.loc[:,"battery"]
 
     @property
     def events(self):
@@ -827,3 +827,9 @@ class CWA(BaseRaw):
                          + vec[2] * vec[2]
                          ) / scale
         return [v / scale for v in vec] + [norm]
+
+def read_raw_cwa(input_fname,
+                 period=None,
+                 dtype="float32"
+                 ):
+    return CWA(input_fname=input_fname) 
