@@ -59,7 +59,11 @@ class CWA(object):
                                        # 0 -- no correction
                                        # 1 -- timestamps corrected
                                        # 2 -- frequency corrcted
-                 "__time_fractional"  # to use or not fractional time
+                 "__time_fractional",  # to use or not fractional time
+
+                 "__last_start_time",  # Starting time of previous block
+                 "__last_perod",       # Period of previous block
+                 "__sample_count"      # Sample count of previous block 
                  ]
     __hardware = {0x00: "AX3", 
                   0xff: "AX3",
@@ -150,6 +154,11 @@ class CWA(object):
 
         self.__meta = dict()
 
+        self.__last_start_time = None
+        self.__last_perod = None
+        self.__sample_count = None
+
+
         if time_correction == "":
             self.__time_correction = 0
         elif time_correction == "time":
@@ -232,8 +241,6 @@ class CWA(object):
             s, e = self.__read_block(blk, sample, event)
             sample += s
             event += e
-            if blk > 100000:
-                break
 
         if self.__accel_np is not None:
             self.__accel_df = pandas.DataFrame(self.__accel_np,
@@ -425,6 +432,22 @@ class CWA(object):
 
         timeoffset = fractional - timestampOffset * self.__period
         timestamp = timestamp + timedelta(seconds=timeoffset)
+        if self.__time_correction == 0:
+            pass
+        elif self.__time_correction == 1:
+            if self.__last_start_time is not None:
+                t0 = self.__last_perod
+                self.__last_perod = timestamp + timedelta(seconds=self.__period * sampleCount)
+                if (timestamp - t0).total_seconds() < 1:
+                    timestamp = t0
+            else:
+                self.__last_start_time = timestamp
+                self.__last_perod = timestamp + timedelta(seconds=self.__period * sampleCount)
+                self.__sample_count = sampleCount
+        elif self.__time_correction == 2:
+            raise NotImplementedError("Correction by frequency not implemented")
+        else:
+            raise ValueError("Unknown type of correction")
 
         self.__aux_index[block] = numpy.datetime64(timestamp)
         self.__aux_np[block] = [light, temp, battery]
@@ -447,26 +470,26 @@ class CWA(object):
         for s in range(0, sampleCount):
             self.__index[sample + s] \
                     = numpy.datetime64(timestamp + 
-                                       s * timedelta(seconds=self.__period))
+                                       (s) * timedelta(seconds=self.__period))
             if self.__naxes == 0:
                 break
             if self.__naxes == 1:
                 self.__accel_np[sample + s] = \
-                    self.__create_vector(values[s:s + 3], self.__accel_scale)
+                        self.__create_vector(values[3 * s: 3 * s + 3], self.__accel_scale)
             elif self.__naxes == 2:
                 self.__gyro_np[sample + s] = \
-                    self.__create_vector(values[s:s + 3], self.__gyro_scale)
+                        self.__create_vector(values[3 * s: 3 * s + 3], self.__gyro_scale)
                 self.__accel_np[sample + s] = \
-                    self.__create_vector(values[s + 3:s + 6],
+                        self.__create_vector(values[3 * (s + 1): 3 * (s + 2)],
                                          self.__accel_scale)
             else:
                 self.__gyro_np[sample + s] = \
-                    self.__create_vector(values[s:s + 3], self.__gyro_scale)
+                        self.__create_vector(values[3 * s: 3 * s + 3], self.__gyro_scale)
                 self.__accel_np[sample + s] = \
-                    self.__create_vector(values[s + 3:s + 6],
+                        self.__create_vector(values[3 * (s + 1): 3 * (s + 2)],
                                          self.__accel_scale)
                 self.__mag_np[sample + s] = \
-                    self.__create_vector(values[s + 6:s + 9], self.__mag_scale)
+                        self.__create_vector(values[3 * (s + 2): 3 * (s + 3)], self.__mag_scale)
 
         return sampleCount, event
 
