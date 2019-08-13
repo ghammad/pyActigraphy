@@ -1,13 +1,35 @@
 import os
 from datetime import datetime
 from datetime import timedelta
-from tools import DataReader
+from ..tools import DataReader
 import pandas
 import numpy
 import math
 
+from ..base import BaseRaw
 
-class CWA(object):
+
+class CWA(BaseRaw):
+    r"""
+    Raw object from .CWA file (recorded by AX3, AX6 actiwatches)
+
+    Parameters
+    ----------
+    input_fname: str
+        Path to CWA file
+    time_correction: str
+        type of timestamps correction:
+        "" : no correction, times as in file
+        "time" : start time of each block is corrected, 
+        but frequency remain as in file
+        "freq" : both start times and frequency are affected
+    time_fractional : bool
+        to use or not fractional time
+    raw : bool
+        retrieved values are raw (unscaled)
+    dtype: str
+        numpy data tipe to store values actimetry values in dataframe
+    """
     __slots__ = [
                  "__filename", 
                  "__endianess", 
@@ -62,7 +84,7 @@ class CWA(object):
                  "__time_fractional",  # to use or not fractional time
 
                  "__last_start_time",  # Starting time of previous block
-                 "__last_perod",       # Period of previous block
+                 "__last_end_time",    # End time of previous block
                  "__sample_count"      # Sample count of previous block 
                  ]
     __hardware = {0x00: "AX3", 
@@ -108,16 +130,22 @@ class CWA(object):
         f.close()
         return False
 
-    def __init__(self, filename, time_correction="", time_fractional=True):
+    def __init__(self, 
+                 input_fname, 
+                 time_correction="", 
+                 time_fractional=True, 
+                 raw=False, 
+                 dtype="float32"
+                 ):
         times = [datetime.now()]
-        if not isinstance(filename, str):
-            raise TypeError("filename must be a string")
-        with open(filename, "rb") as f:
+        if not isinstance(input_fname, str):
+            raise TypeError("input_fname must be a string")
+        with open(input_fname, "rb") as f:
             self.__data = f.read()
         if len(self.__data) < 1024:
             raise ValueError("{}: file less than 1024 bytes"
-                             .format(filename))
-        self.__filename = filename
+                             .format(input_fname))
+        self.__filename = input_fname
         self.__endianess = "<"
         self.__device_type = ""
         self.__device_id = 0
@@ -155,9 +183,8 @@ class CWA(object):
         self.__meta = dict()
 
         self.__last_start_time = None
-        self.__last_perod = None
+        self.__last_end_time = None
         self.__sample_count = None
-
 
         if time_correction == "":
             self.__time_correction = 0
@@ -168,7 +195,6 @@ class CWA(object):
         else:
             raise ValueError("Unknown methode for time correction")
         self.__time_fractional = time_fractional
-
 
         self.__read_header()
         self.print_header()
@@ -193,36 +219,41 @@ class CWA(object):
                       (times[-1] - times[-2]) / self.__nblocks)
               )
 
-        self.__index = numpy.zeros([self.__nsamples],
+        self.__index = numpy.empty([self.__nsamples],
                                    dtype='datetime64[ns]')
-        self.__aux_index = numpy.zeros([self.__nblocks],
+        self.__aux_index = numpy.empty([self.__nblocks],
                                        dtype='datetime64[ns]')
-        self.__evt_index = numpy.zeros([self.__nevents],
+        self.__evt_index = numpy.empty([self.__nevents],
                                        dtype='datetime64[ns]')
-        self.__aux_np = numpy.full([self.__nblocks, 3], 
-                                   numpy.nan, dtype="float32")
-        self.__evt_np = numpy.full([self.__nevents, 1], 
-                                   numpy.nan, dtype="uint8")
+        self.__aux_np = numpy.empty([self.__nblocks, 3], 
+                                    dtype="float32")
+        self.__evt_np = numpy.empty([self.__nevents, 1], 
+                                    dtype="uint8")
+
+        if raw:
+            self.__accel_scale = 1.
+            self.__gyro_scale = 1.
+            self.__mag_scale = 1.
+            dtype = "int16"
 
         if self.__naxes > 0:
             if self.__accel_scale is None:
                 raise ValueError("Having accelorimeter "
                                  "but scale is not defined")
-            self.__accel_np = numpy.full([self.__nsamples,4], 
-                                         numpy.nan, dtype="float32")
+            self.__accel_np = numpy.empty([self.__nsamples,4], 
+                                          dtype=dtype)
         if self.__naxes > 1:
             if self.__gyro_scale is None:
                 raise ValueError("Having gyrometer "
                                  "but scale is not defined")
-            self.__gyro_np = numpy.full([self.__nsamples,4],
-                                        numpy.nan, dtype="float32")
+            self.__gyro_np = numpy.empty([self.__nsamples,4],
+                                         dtype=dtype)
         if self.__naxes > 2:
             if self.__mag_scale is None:
                 raise ValueError("Having magnetometer "
                                  "but scale is not defined")
-            self.__mag_np = numpy.full([self.__nsamples,4],
-                                       numpy.nan, dtype="float32")
-
+            self.__mag_np = numpy.empty([self.__nsamples,4],
+                                        dtype=dtype)
         times.append(datetime.now())
         print("Array dtime:", times[-1] - times[-2])
 
@@ -238,7 +269,7 @@ class CWA(object):
                               datetime.now() - times[-1])
                       )
                 times[-1] = datetime.now()
-            s, e = self.__read_block(blk, sample, event)
+            s, e = self.__read_block(blk, sample, event, raw)
             sample += s
             event += e
 
@@ -283,6 +314,18 @@ class CWA(object):
         print("DataFrame creation dtime: {}"
               .format(times[-1] - times[-2]))
         print("Total user time: ", times[-1] - times[0])
+
+        super().__init__(
+                name=self.__session_id,
+                uuid=self.__device_id,
+                format="CWA",
+                axial_mode='tri-axial',
+                start_time=pandas.datetime64(self.__start_time),
+                period=pandas.timedelta64(self.__duration),
+                frequency=pandas.timedelta64(self.__period),
+                data=self.accelometry_norm,
+                light=self.auxiliary_light
+                )
 
     def __read_header(self):
         """
@@ -364,7 +407,7 @@ class CWA(object):
         self.__nsamples += dr.unpack_at("uint16", 28)
         return True
 
-    def __read_block(self, block, sample, event):
+    def __read_block(self, block, sample, event, raw=False):
         """
         reads and parce the cwa data block
 
@@ -385,6 +428,7 @@ class CWA(object):
                              .format(offset))
         dr = DataReader(data, self.__endianess)
         deviceFractional = dr.unpack_at("uint16",4)
+        seqId = dr.unpack_at("uint32",10)
 
         # Top bit set: 15-bit fraction of a second for the time stamp,
         # the timestampOffset was already adjusted to minimize
@@ -404,11 +448,11 @@ class CWA(object):
         # next three bits are gyro scale  (8000/2^n dps)
         scales, temp = dr.unpack_at("uint16", 18, 2)
         accelScale, gyroScale, light = self.DecodeScale(scales) 
-        if accelScale != 0 and accelScale != self.__accel_scale:
+        if not raw and accelScale != 0 and accelScale != self.__accel_scale:
             self.__accel_scale = accelScale
             print("Block at {}: new accelorimeter scale - {}"
                   .format(offset, self.__accel_scale))
-        if gyroScale != 0 and gyroScale != self.__gyro_scale:
+        if not raw and gyroScale != 0 and gyroScale != self.__gyro_scale:
             self.__gyro_scale = gyroScale
             print("Block at {}: new gyrometer scale - {}"
                   .format(offset, self.__gyro_scale))
@@ -421,31 +465,51 @@ class CWA(object):
             self.__period = 1. / freq
             print("Block at {}: new sampling period - {}"
                   .format(offset, self.__period))
-        if self.__accel_scale != (1 << scale):
+        if not raw and self.__accel_scale != (1 << scale):
             raise Exception("Block at {}: mismach accelometer scale {}"
                             .format(offset, 1 << scale))
 
         timestampOffset, sampleCount = dr.unpack_at("int16", 26, 2)
-        if fractional > 0:
-            # removing part accounted in time offset
-            fractional = fractional % self.__period 
 
-        timeoffset = fractional - timestampOffset * self.__period
-        timestamp = timestamp + timedelta(seconds=timeoffset)
         if self.__time_correction == 0:
-            pass
+            fractional = fractional % self.__period 
+            timeoffset = fractional - timestampOffset * self.__period
+            timestamp = timestamp + timedelta(seconds=timeoffset)
+            period = timedelta(seconds=self.__period)
         elif self.__time_correction == 1:
-            if self.__last_start_time is not None:
-                t0 = self.__last_perod
-                self.__last_perod = timestamp + timedelta(seconds=self.__period * sampleCount)
+            fractional = fractional % self.__period 
+            timeoffset = fractional - timestampOffset * self.__period
+            timestamp = timestamp + timedelta(seconds=timeoffset)
+            period = timedelta(seconds=self.__period)
+            if self.__last_start_time is None or seqId == 0:
+                self.__last_start_time = timestamp
+                self.__last_end_time = timestamp\
+                    + timedelta(seconds=self.__period * sampleCount)
+                self.__sample_count = sampleCount
+            else:
+                t0 = self.__last_end_time
+                self.__last_start_time = timestamp
+                self.__last_end_time = timestamp\
+                    + timedelta(seconds=self.__period * sampleCount)
                 if (timestamp - t0).total_seconds() < 1:
                     timestamp = t0
-            else:
-                self.__last_start_time = timestamp
-                self.__last_perod = timestamp + timedelta(seconds=self.__period * sampleCount)
-                self.__sample_count = sampleCount
         elif self.__time_correction == 2:
-            raise NotImplementedError("Correction by frequency not implemented")
+            timeoffset = fractional 
+            timestampOffset += int(fractional // self.__period)
+            timestamp = timestamp + timedelta(seconds=timeoffset)
+
+            if self.__last_start_time is None or seqId == 0:
+                self.__last_start_time = timestamp
+                self.__sample_count = sampleCount
+                self.__last_end_time = timestampOffset - sampleCount
+                period = timedelta(seconds=self.__period)
+            else:
+                period = (timestamp - self.__last_start_time)\
+                        / (timestampOffset - self.__last_end_time)
+                self.__last_start_time = timestamp
+                self.__sample_count = sampleCount
+                self.__last_end_time = timestampOffset - sampleCount
+            timestamp -= timestampOffset * period
         else:
             raise ValueError("Unknown type of correction")
 
@@ -469,27 +533,31 @@ class CWA(object):
 
         for s in range(0, sampleCount):
             self.__index[sample + s] \
-                    = numpy.datetime64(timestamp + 
-                                       (s) * timedelta(seconds=self.__period))
+                    = numpy.datetime64(timestamp)
+            timestamp += period
             if self.__naxes == 0:
                 break
             if self.__naxes == 1:
                 self.__accel_np[sample + s] = \
-                        self.__create_vector(values[3 * s: 3 * s + 3], self.__accel_scale)
+                        self.__create_vector(values[3 * s: 3 * s + 3], 
+                                             self.__accel_scale, raw)
             elif self.__naxes == 2:
                 self.__gyro_np[sample + s] = \
-                        self.__create_vector(values[3 * s: 3 * s + 3], self.__gyro_scale)
+                        self.__create_vector(values[3 * s: 3 * s + 3],
+                                             self.__gyro_scale, raw)
                 self.__accel_np[sample + s] = \
-                        self.__create_vector(values[3 * (s + 1): 3 * (s + 2)],
-                                         self.__accel_scale)
+                    self.__create_vector(values[3 * (s + 1): 3 * (s + 2)],
+                                         self.__accel_scale, raw)
             else:
                 self.__gyro_np[sample + s] = \
-                        self.__create_vector(values[3 * s: 3 * s + 3], self.__gyro_scale)
+                    self.__create_vector(values[3 * s: 3 * s + 3], 
+                                         self.__gyro_scale, raw)
                 self.__accel_np[sample + s] = \
-                        self.__create_vector(values[3 * (s + 1): 3 * (s + 2)],
-                                         self.__accel_scale)
+                    self.__create_vector(values[3 * (s + 1): 3 * (s + 2)],
+                                         self.__accel_scale, raw)
                 self.__mag_np[sample + s] = \
-                        self.__create_vector(values[3 * (s + 2): 3 * (s + 3)], self.__mag_scale)
+                    self.__create_vector(values[3 * (s + 2): 3 * (s + 3)],
+                                         self.__mag_scale, raw)
 
         return sampleCount, event
 
@@ -718,14 +786,13 @@ class CWA(object):
 
     @staticmethod
     def __decode(value):
-        # taking last 10 bits
-        value = value & 0x3ff
-        # left bit is sign
-        sign = (value & 0x200) >> 9 
-        if sign == 1:
-            return -((~(value - 1)) & 0x3ff)
-        else:
-            return value
+        # initial formula: (value + 2 ** 15) % 2 ** 16 - 2 ** 15
+        # 2**15 = 0x8000
+        # 2**16 = 0x10000
+        # 10 bits adapted: (value + 2 ** 9) % 2 ** 10 - 2 ** 9
+        # 2**9 = 0x200
+        # 2**10 = 0x400
+        return (value + 0x200) % 0x400 - 0x200
 
     @staticmethod
     def scale_light(value):
@@ -747,7 +814,14 @@ class CWA(object):
         return (value + 512.0) * 6 / 1024
 
     @staticmethod
-    def __create_vector(vec, scale):
+    def __create_vector(vec, scale, raw=False):
+        if raw:
+            norm = math.sqrt(vec[0] * vec[0]
+                             + vec[1] * vec[1]
+                             + vec[2] * vec[2]
+                             )
+            return vec + [norm]
+
         norm = math.sqrt(vec[0] * vec[0]
                          + vec[1] * vec[1]
                          + vec[2] * vec[2]
