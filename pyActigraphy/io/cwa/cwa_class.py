@@ -830,6 +830,10 @@ class CWA(BaseRaw):
 
 def read_raw_cwa(input_fname,
                  period=None,
+                 time_correction="time",
+                 time_fractional=False,
+                 raw=False,
                  dtype="float32"
                  ):
-    return CWA(input_fname=input_fname) 
+    return CWA(input_fname=input_fname, time_correction=time_correction,
+               time_fractional=time_fractional, raw=raw, dtype=dtype) 
