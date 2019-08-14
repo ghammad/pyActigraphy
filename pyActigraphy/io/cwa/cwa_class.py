@@ -517,8 +517,8 @@ class CWA(BaseRaw):
         self.__aux_np[block] = [light, temp, battery]
 
         if evt > 0:
-            self.__evt_index[block] = numpy.datetime64(timestamp)
-            self.__evt_np[block] = [evt]
+            self.__evt_index[event] = numpy.datetime64(timestamp)
+            self.__evt_np[event] = [evt]
             event += 1
 
         if self.__encoding == 2:
