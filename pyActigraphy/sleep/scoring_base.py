@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import re
+from .scoring import chronosapiens
 from scipy.ndimage import binary_closing, binary_opening
 from ..filters import _create_inactivity_mask
 from ..metrics import _average_daily_activity
@@ -1124,3 +1125,67 @@ class ScoringMixin(object):
         AoffT = crespo[crespo.diff(1) == -1].index
 
         return (AonT, AoffT)
+
+    def Chronosapiens(
+        self,
+        trend_period='24h',
+        min_trend_period='12h',
+        threshold=0.15,
+        min_seed_period='30Min',
+        min_corr_period='12h',
+        n_succ=3
+    ):
+        """Automatic sleep dectection.
+
+        Identification of consolidated sleep episodes using the
+        algorithm developped by Roenneberg et al. [1]_.
+
+        Parameters
+        ----------
+        trend_period: str, optional
+            Time period of the rolling window used to extract the data trend.
+            Default is '24h'.
+        min_trend_period: str, optional
+            Minimum time period required for the rolling window to produce a
+            value. Values default to NaN otherwise.
+            Default is '12h'.
+        threshold: float, optional
+            Fraction of the trend to use as a threshold for sleep/wake
+            categorization.
+            Default is '0.15'
+        min_seed_period: str, optional
+            Minimum time period required to identify a potential sleep onset.
+            Default is '30Min'.
+        n_succ : int, optional
+            Number of successive elements to consider when searching for the
+            maximum correlation peak.
+
+        Returns
+        -------
+        sot : (N, ) array_like
+            Array with tuples containing the estimated sleep onset and offset
+            times, respectively.
+
+        References
+        ----------
+
+        .. [1] Roenneberg, T., Keller, L. K., Fischer, D., Matera, J. L.,
+        Vetter, C., & Winnebeck, E. C. (2015). Human Activity and Rest In Situ.
+        In Methods in Enzymology (Vol. 552, pp. 257–283).
+        http://doi.org/10.1016/bs.mie.2014.11.028
+
+        Examples
+        --------
+
+        """
+
+        sot = chronosapiens(
+            self.data,
+            trend_period='24h',
+            min_trend_period='12h',
+            threshold=0.15,
+            min_seed_period='30Min',
+            min_corr_period='12h',
+            n_succ=3
+        )
+        return sot
