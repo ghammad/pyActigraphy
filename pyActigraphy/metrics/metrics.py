@@ -1,14 +1,16 @@
 import pandas as pd
 import numpy as np
+import re
 # from functools import lru_cache
-# from ..sleep import _td_format
+from ..utils.utils import _average_daily_activity
+# from ..sleep.scoring import AonT, AoffT
 from statistics import mean
 import statsmodels.api as sm
 
 __all__ = [
     'MetricsMixin',
     'ForwardMetricsMixin',
-    '_average_daily_activity',
+    # '_average_daily_activity',
     '_average_daily_total_activity',
     '_interdaily_stability',
     '_intradaily_variability',
@@ -18,36 +20,6 @@ __all__ = [
     '_transition_prob',
     '_transition_prob_sustain_region',
     '_td_format']
-
-
-def _average_daily_activity(data, cyclic=False):
-    """Calculate the average daily activity distribution"""
-
-    avgdaily = data.groupby([
-        data.index.hour,
-        data.index.minute,
-        data.index.second
-    ]).mean()
-
-    if cyclic:
-        avgdaily = pd.concat([avgdaily, avgdaily])
-        index = pd.timedelta_range(
-            start='0 day',
-            end='2 days',
-            freq=data.index.freq,
-            closed='left'
-        )
-    else:
-        index = pd.timedelta_range(
-            start='0 day',
-            end='1 day',
-            freq=data.index.freq,
-            closed='left'
-        )
-
-    avgdaily.index = index
-
-    return avgdaily
 
 
 def _average_daily_total_activity(data):
@@ -1363,7 +1335,8 @@ class MetricsMixin(object):
         return pAR, pAR_weights
 
     def kRA(
-        self, threshold, start=None, period=None, frac=.3, it=0, logit=False
+        self, threshold, start=None, period=None, frac=.3, it=0, logit=False,
+        freq=None, offset='15min'
     ):
         r"""Rest->Activity transition probability
 
@@ -1418,8 +1391,26 @@ class MetricsMixin(object):
             0.13195826220778709
         """
 
+        if start is not None and re.match(r'AonT|AoffT', start):
+            aont = self.AonT(freq=freq, binarize=True, threshold=threshold)
+            aofft = self.AoffT(freq=freq, binarize=True, threshold=threshold)
+            offset = pd.Timedelta(offset)
+            if start == 'AonT':
+                start_time = str(aont+offset).split(' ')[-1]
+                period = str(
+                    pd.Timedelta('24H') - ((aont+offset) - (aofft-offset))
+                ).split(' ')[-1]
+            elif start == 'AoffT':
+                start_time = str(aofft+offset).split(' ')[-1]
+                period = str(
+                    pd.Timedelta('24H') - ((aofft+offset) - (aont-offset))
+                ).split(' ')[-1]
+        else:
+            start_time = start
+
+        print(start_time, period)
         # Calculate the pRA probabilities and their weights.
-        pRA, pRA_weights = self.pRA(threshold, start=start, period=period)
+        pRA, pRA_weights = self.pRA(threshold, start=start_time, period=period)
         # Fit the pRA distribution with a LOWESS and return mean value for
         # the constant region (i.e. the region where |pRA-lowess|<1SD)
         kRA = _transition_prob_sustain_region(
