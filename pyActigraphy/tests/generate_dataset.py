@@ -78,7 +78,13 @@ def generate_series(data, start='01/01/2018', sampling_period=60):
 # Periodic datasets
 
 def generate_sinewave(
-    N=10080, T=86400, Ts=60, A=100, add_noise=False, noise_power=100
+    N=10080,
+    T=86400,
+    Ts=60,
+    A=100,
+    add_noise=False,
+    noise_power=100,
+    offset=False
 ):
     """Generates a synthetic sine wave, corrupted by a white noise.
 
@@ -103,10 +109,17 @@ def generate_sinewave(
     noise_power: float, optional
         Amplitude of the white Gaussian noise.
         Default is 100.
+    offset: bool, optional
+        If set to True, an offset is applied to the signal so that
+        it is comprised between (0, 2A), instead of (-A, +A).
     """
 
     time = np.arange(N) * Ts
     signal = A*np.sin((2*np.pi/T)*time)
+
+    if offset:
+        signal += A
+
     if add_noise:
         signal += np.random.normal(scale=np.sqrt(noise_power), size=time.shape)
 
