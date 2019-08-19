@@ -95,14 +95,14 @@ def _test_sleep_bout(uncleaned_binary_data, period='12h'):
     '''
     win_size = int(pd.Timedelta(period)/uncleaned_binary_data.index.freq)
 
+    # creation of the data to test
+    test_data = uncleaned_binary_data.iloc[:win_size].values
+
     # creation of the test series (i.e triangular upper matrix with only ones)
-    test_series = np.tril(np.ones(win_size))
+    test_series = np.tril(np.ones(min(win_size, len(test_data))))
 
     # calculate the list of Pearson's correlations with the test series
-    corr = correlation_series(
-        uncleaned_binary_data.iloc[:win_size].values,
-        test_series
-    )
+    corr = correlation_series(test_data, test_series)
 
     return corr
 
