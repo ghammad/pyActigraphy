@@ -2,9 +2,10 @@ from generate_dataset import generate_series
 from generate_dataset import generate_sinewave
 from generate_dataset import generate_squarewave
 
+import numpy as np
 import pandas as pd
 import pyActigraphy
-from pytest import approx
+# from pytest import approx
 
 sampling_period = 60
 frequency = pd.Timedelta(sampling_period, unit='s')
@@ -28,17 +29,21 @@ sine_wave = generate_series(
 # - sleep onset: 22h01
 # - periode awake: 14h
 # - sleep offset: 6h
-# - periode asleep:7h58
-
-n_epochs_awake_prior_sleep = int(pd.Timedelta('14h')/frequency)+1
-n_epochs_awake_after_sleep = int(pd.Timedelta('2h')/frequency)+1
-n_epochs_asleep = int(pd.Timedelta('7h58min')/frequency)
+# - periode asleep:7h59min
+n_epochs_nan_trend = int(pd.Timedelta('12h')/frequency)
+n_epochs_awake_prior_sleep = int(pd.Timedelta('2h01min')/frequency)
+n_epochs_awake_after_sleep = int(pd.Timedelta('14h')/frequency)
+n_epochs_asleep = int(pd.Timedelta('7h59min')/frequency)
 n_days = int(period/pd.Timedelta('1D'))-1
 
 # Create associated sleep signal (awake:0, sleep:1)
 sleep_wave = generate_series(
     # generate_squarewave(N=N-1, A=1, offset=False),
-    (n_epochs_awake_prior_sleep*[0]+n_epochs_asleep*[1]+n_epochs_awake_after_sleep*[0])*n_days,
+    n_epochs_nan_trend*[np.nan] +
+    (n_epochs_awake_prior_sleep*[0] +
+     n_epochs_asleep*[1] +
+     n_epochs_awake_after_sleep*[0])*n_days +
+    n_epochs_nan_trend*[np.nan],
     start=start_time,
     sampling_period=sampling_period
 )
