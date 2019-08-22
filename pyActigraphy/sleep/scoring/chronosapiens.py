@@ -176,23 +176,27 @@ def chronosapiens(
     # Categorize as sleep or wake
     sw = _sleep_wake_categorization(data, trend, threshold=threshold)
 
-    # Find start time of binary sleep series of length 'min_seed_period' (a.k.a. seeds):
-    seed_ts = _find_sleep_bout_seeds(sw, min_period=min_seed_period)
+    # Find start time of binary sleep series of length 'min_seed_period'
+    seeds = _find_sleep_bout_seeds(sw, min_period=min_seed_period)
 
-    # Score all potential sleep epochs (i.e. 1) before the first seed as wake (i.e. 0)
-    sw.iloc[:sw.index.get_loc(seed_ts[0])].replace(1,0, inplace=True)
-    
+    # Score all potential sleep epochs (1) before the first seed as wake (0)
+    sw.iloc[:sw.index.get_loc(seeds[0])].replace(1, 0, inplace=True)
+
     # Loop over the seeds
-    sot = [] # list of sleep onset and offset times
-    for seed in seed_ts:
+    sot = []  # list of sleep onset and offset times
+    for seed in seeds:
         # if the seed is anterior the last sleep offset, discard it.
         if(len(sot) > 0 and seed < sot[-1][1]):
             continue
         # print("Processing seed : {}".format(seed))
-        
-        # Score all potential sleep epochs (i.e. 1) before the current seed as wake (i.e. 0)
-        sw.iloc[sw.index.get_loc(sot[-1][1])+1:sw.index.get_loc(seed)].replace(1,0, inplace=True)
-        
+
+        # Score all potential sleep epochs (1) before current seed as wake (0)
+        if(len(sot) > 0):
+            # print("Last sot : {}".format(sot[-1]))
+            sw.iloc[
+                sw.index.get_loc(sot[-1][1])+1:sw.index.get_loc(seed)
+            ].replace(1, 0, inplace=True)
+
         # Find sleep offset
         sleep_onset = seed
         sleep_offset = _clean_sleep_bout(
@@ -204,5 +208,7 @@ def chronosapiens(
             sw.loc[sleep_onset:sleep_offset] = 1
             sot.append((sleep_onset, sleep_offset))
 
+    # Score all potential sleep epochs (1) after last sleep offset as wake (0)
+    sw.iloc[sw.index.get_loc(sot[-1][1])+1:].replace(1, 0, inplace=True)
     # return sot
-    return sw 
+    return sw
