@@ -1181,11 +1181,11 @@ class ScoringMixin(object):
 
         sot = chronosapiens(
             self.data,
-            trend_period='24h',
-            min_trend_period='12h',
-            threshold=0.15,
-            min_seed_period='30Min',
-            min_corr_period='12h',
-            n_succ=3
+            trend_period=trend_period,
+            min_trend_period=min_trend_period,
+            threshold=threshold,
+            min_seed_period=min_seed_period,
+            min_corr_period=min_corr_period,
+            n_succ=n_succ
         )
         return sot
