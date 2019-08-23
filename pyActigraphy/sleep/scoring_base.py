@@ -382,7 +382,7 @@ class ScoringMixin(object):
 
         .. math::
 
-            PS = 7.601 - 0.065·mean_W5 - 1.08·NAT - 0.056·sd_Last6 - 0.703·logAct
+            PS = 7.601-0.065·mean_W5-1.08·NAT-0.056·sd_Last6-0.703·logAct
 
         with:
 
@@ -1059,7 +1059,7 @@ class ScoringMixin(object):
         """Automatic identification of activity onset/offset times, based on
         the Crespo algorithm.
 
-        Identification of the activity onset and offset time using the
+        Identification of the activity onset and offset times using the
         algorithm for automatic identification of activity-rest periods based
         on actigraphy, developped by Crespo et al. [1]_.
 
@@ -1121,8 +1121,10 @@ class ScoringMixin(object):
             verbose=verbose
         )
 
-        AonT = crespo[crespo.diff(1) == 1].index
-        AoffT = crespo[crespo.diff(1) == -1].index
+        diff = crespo.diff(1)
+
+        AonT = crespo[diff == 1].index
+        AoffT = crespo[diff == -1].index
 
         return (AonT, AoffT)
 
@@ -1132,10 +1134,10 @@ class ScoringMixin(object):
         min_trend_period='12h',
         threshold=0.15,
         min_seed_period='30Min',
-        min_corr_period='12h',
+        max_test_period='12h',
         n_succ=3
     ):
-        """Automatic sleep dectection.
+        """Automatic sleep detection.
 
         Identification of consolidated sleep episodes using the
         algorithm developped by Roenneberg et al. [1]_.
@@ -1156,15 +1158,18 @@ class ScoringMixin(object):
         min_seed_period: str, optional
             Minimum time period required to identify a potential sleep onset.
             Default is '30Min'.
+        max_test_period : str, optional
+            Maximal period of the test series.
+            Default is '12h'
         n_succ : int, optional
             Number of successive elements to consider when searching for the
             maximum correlation peak.
 
         Returns
         -------
-        sot : (N, ) array_like
-            Array with tuples containing the estimated sleep onset and offset
-            times, respectively.
+        chrono : pandas.core.Series
+            Time series containing the estimated periods of rest (1) and
+            activity (0).
 
         References
         ----------
@@ -1179,13 +1184,88 @@ class ScoringMixin(object):
 
         """
 
-        sot = chronosapiens(
+        chrono = chronosapiens(
             self.data,
             trend_period=trend_period,
             min_trend_period=min_trend_period,
             threshold=threshold,
             min_seed_period=min_seed_period,
-            min_corr_period=min_corr_period,
+            max_test_period=max_test_period,
             n_succ=n_succ
         )
-        return sot
+        return chrono
+
+    def Chronosapiens_AoT(
+        self,
+        trend_period='24h',
+        min_trend_period='12h',
+        threshold=0.15,
+        min_seed_period='30Min',
+        max_test_period='12h',
+        n_succ=3
+    ):
+        """Automatic identification of activity onset/offset times, based on
+        the Chronosapiens algorithm.
+
+        Identification of the activity onset and offset times using the
+        algorithm for automatic identification of consolidated sleep episodes
+        developped by Roenneberg et al. [1]_.
+
+        Parameters
+        ----------
+        trend_period: str, optional
+            Time period of the rolling window used to extract the data trend.
+            Default is '24h'.
+        min_trend_period: str, optional
+            Minimum time period required for the rolling window to produce a
+            value. Values default to NaN otherwise.
+            Default is '12h'.
+        threshold: float, optional
+            Fraction of the trend to use as a threshold for sleep/wake
+            categorization.
+            Default is '0.15'
+        min_seed_period: str, optional
+            Minimum time period required to identify a potential sleep onset.
+            Default is '30Min'.
+        max_test_period : str, optional
+            Maximal period of the test series.
+            Default is '12h'
+        n_succ : int, optional
+            Number of successive elements to consider when searching for the
+            maximum correlation peak.
+
+        Returns
+        -------
+        chrono : pandas.core.Series
+            Time series containing the estimated periods of rest (1) and
+            activity (0).
+
+        References
+        ----------
+
+        .. [1] Roenneberg, T., Keller, L. K., Fischer, D., Matera, J. L.,
+        Vetter, C., & Winnebeck, E. C. (2015). Human Activity and Rest In Situ.
+        In Methods in Enzymology (Vol. 552, pp. 257–283).
+        http://doi.org/10.1016/bs.mie.2014.11.028
+
+        Examples
+        --------
+
+        """
+
+        chrono = chronosapiens(
+            self.data,
+            trend_period=trend_period,
+            min_trend_period=min_trend_period,
+            threshold=threshold,
+            min_seed_period=min_seed_period,
+            max_test_period=max_test_period,
+            n_succ=n_succ
+        )
+
+        diff = chrono.diff(1)
+
+        AonT = chrono[diff == -1].index
+        AoffT = chrono[diff == 1].index
+
+        return (AonT, AoffT)
