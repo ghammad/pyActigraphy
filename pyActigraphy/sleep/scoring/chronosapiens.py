@@ -4,7 +4,7 @@ from .utils import consecutive_values, correlation_series
 from .utils import find_highest_peak_idx
 
 
-def _extract_trend(data, period='24h', min_period='12h'):
+def _extract_trend(data, period='24h', min_period='12h', closed='right'):
     r''' Calculate the trend of the time series using a centered 24 hours window
 
     Parameters
@@ -21,6 +21,10 @@ def _extract_trend(data, period='24h', min_period='12h'):
         value. Values default to NaN otherwise.
         Default is '12h'.
 
+    closed: str, optional
+        Make the interval closed on the 'right', 'left', 'both' or 'neither'
+        endpoints.
+        Default is 'right'.
     Returns
     -------
     trend : pandas.Series
@@ -30,7 +34,11 @@ def _extract_trend(data, period='24h', min_period='12h'):
     win_size = int(pd.Timedelta(period)/data.index.freq)
     min_win_size = int(pd.Timedelta(min_period)/data.index.freq)
 
-    return data.rolling(win_size, center=True, min_periods=min_win_size).mean()
+    return data.rolling(
+        win_size,
+        center=True,
+        min_periods=min_win_size,
+        closed=closed).mean()
 
 
 def _sleep_wake_categorization(data, trend, threshold=0.15):
@@ -188,11 +196,9 @@ def chronosapiens(
         # if the seed is anterior the last sleep offset, discard it.
         if(len(sot) > 0 and seed < sot[-1][1]):
             continue
-        # print("Processing seed : {}".format(seed))
 
         # Score all potential sleep epochs (1) before current seed as wake (0)
         if(len(sot) > 0):
-            # print("Last sot : {}".format(sot[-1]))
             sw.iloc[
                 sw.index.get_loc(sot[-1][1])+1:sw.index.get_loc(seed)
             ].replace(1, 0, inplace=True)
