@@ -66,12 +66,6 @@ def _sleep_wake_categorization(data, trend, threshold=0.15):
 
     '''
 
-    # restrict data to time periods where a trend value is available
-    # restricted_data = data.loc[trend.index[0]:trend.index[-1]]
-    # return pd.Series(
-    #     np.where(restricted_data > threshold*trend, 0, 1),
-    #     index=restricted_data.index
-    # )
     # Binarize data according to specified trend and threshold.
     # True evaluates to 1
     sw = (data <= threshold*trend).astype(int)
@@ -82,6 +76,23 @@ def _sleep_wake_categorization(data, trend, threshold=0.15):
 
 
 def _find_sleep_bout_seeds(data, min_period='30Min'):
+    r'''Find indices of the start of all series of consecutive values of 1.
+
+    Parameters
+    ----------
+    data : pandas.Series
+        Binarized data
+
+    min_period : str, optional
+        Minimum time period required for the series of consecutive values.
+        Default is '30Min'.
+
+    Return
+    ----------
+    seeds : (N,) array_like
+        Array with the start indices.
+
+    '''
 
     win_size = int(pd.Timedelta(min_period)/data.index.freq)
 
@@ -113,13 +124,13 @@ def _test_sleep_bout(uncleaned_binary_data, period='12h'):
     '''
     win_size = int(pd.Timedelta(period)/uncleaned_binary_data.index.freq)
 
-    # creation of the data to test
+    # Creation of the data to test
     test_data = uncleaned_binary_data.iloc[:win_size].values
 
-    # creation of the test series (i.e triangular upper matrix with only ones)
+    # Creation of the test series (i.e triangular upper matrix with only ones)
     test_series = np.tril(np.ones(min(win_size, len(test_data))))
 
-    # calculate the list of Pearson's correlations with the test series
+    # Calculate the list of Pearson's correlations with the test series
     corr = correlation_series(test_data, test_series)
 
     return corr
@@ -152,10 +163,10 @@ def _clean_sleep_bout(uncleaned_binary_data, period='12h', n_succ=3):
         Time index of the sleep offset. None if none is found.
 
     '''
-    # calculate the list of Pearson's correlations with the test series
+    # Calculate the list of Pearson's correlations with the test series
     corr = _test_sleep_bout(uncleaned_binary_data, period=period)
 
-    # find the date_time index corresponding to the highest correlation peak
+    # Find the date_time index corresponding to the highest correlation peak
     sleep_offset_idx = find_highest_peak_idx(corr, n_succ=n_succ)
 
     if sleep_offset_idx is not None:
@@ -170,9 +181,49 @@ def chronosapiens(
     min_trend_period='12h',
     threshold=0.15,
     min_seed_period='30Min',
-    min_corr_period='12h',
+    max_test_period='12h',
     n_succ=3
 ):
+    r'''Automatic sleep detection.
+
+    Identification of consolidated sleep episodes using the
+    algorithm developped by Roenneberg et al. [1]_.
+
+    Parameters
+    ----------
+    trend_period: str, optional
+        Time period for the rolling window.
+        Default is '24h'.
+
+    min_trend_period: str, optional
+        Minimum time period required for the rolling window to produce a
+        value. Values default to NaN otherwise.
+        Default is '12h'.
+
+    threshold : int, optional
+        Fraction of the trend to use as a threshold for categorization.
+        Default is '0.15'.
+
+    min_seed_period: str, optional
+        Minimum time period required to identify a potential sleep onset.
+        Default is '30Min'.
+
+    max_test_period : str, optional
+        Maximal period of the test series.
+        Default is '12h'
+
+    n_succ : int, optional
+        Number of successive elements to consider when searching for the
+        maximum correlation peak.
+        Default is 3.
+
+    Return
+    ----------
+    sw : pandas.core.Series
+        Time series containing the estimated periods of rest (1) and
+        activity (0).
+
+    '''
 
     # Extract trend
     trend = _extract_trend(
@@ -206,8 +257,8 @@ def chronosapiens(
         # Find sleep offset
         sleep_onset = seed
         sleep_offset = _clean_sleep_bout(
-            sw.loc[sleep_onset:sleep_onset+pd.Timedelta(min_corr_period)],
-            period=min_corr_period,
+            sw.loc[sleep_onset:sleep_onset+pd.Timedelta(max_test_period)],
+            period=max_test_period,
             n_succ=n_succ
         )
         if sleep_offset is not None:
