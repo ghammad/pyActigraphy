@@ -19,6 +19,14 @@ class RawAWD(BaseRaw):
         Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
         Default is '1T'.
+    start_time: datetime-like, optional
+        Read data from this time.
+        Default is None.
+    period: str, optional
+        Length of the read data.
+        Cf. #timeseries-offset-aliases in
+        <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+        Default is None (i.e all the data).
     dtype: dtype
         The dtype of the raw data. Default is np.int.
     """
@@ -116,10 +124,14 @@ def read_raw_awd(
         Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
         Default is '1T'.
-    start_time: str
+    start_time: datetime-like, optional
+        Read data from this time.
         Default is None.
-    period: str
-        Default is None.
+    period: str, optional
+        Length of the read data.
+        Cf. #timeseries-offset-aliases in
+        <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+        Default is None (i.e all the data).
     dtype: dtype
         The dtype of the raw data. Default is np.int.
 

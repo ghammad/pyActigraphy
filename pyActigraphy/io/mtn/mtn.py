@@ -14,25 +14,25 @@ class RawMTN(BaseRaw):
     ----------
     input_fname: str
         Path to the MTN file.
-    header_size: int
-        Header size (i.e. number of lines) of the raw data file. Default is 16.
-    frequency: str
-        Data acquisition frequency.
+    start_time: datetime-like, optional
+        Read data from this time.
+        Default is None.
+    period: str, optional
+        Length of the read data.
         Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
-        Default is '1T'.
-    data_dtype: dtype
-        The dtype of the raw data. Default is np.int.
-    light_dtype: dtype
-        The dtype of the raw light data. Default is np.float.
+        Default is None (i.e all the data).
+    data_dtype: dtype, optional
+        The dtype of the raw data.
+        Default is np.int.
+    light_dtype: dtype, optional
+        The dtype of the raw light data.
+        Default is np.float.
     """
-
-    """-----------------------------Constructeur----------------------------"""
 
     def __init__(
         self,
         input_fname,
-        # header_size=16,
         start_time=None,
         period=None,
         data_dtype=np.int,
@@ -224,7 +224,6 @@ class RawMTN(BaseRaw):
 
 def read_raw_mtn(
     input_fname,
-    # header_size=16,
     start_time=None,
     period=None,
     data_dtype=np.int,
@@ -236,8 +235,6 @@ def read_raw_mtn(
     ----------
     input_fname: str
         Path to the MTN file.
-    header_size: int
-        Header size (i.e. number of lines) of the raw data file. Default is 16.
     start_time: datetime-like str
         If not None, the start_time will be used to slice the data.
         Default is None.
@@ -256,7 +253,6 @@ def read_raw_mtn(
 
     return RawMTN(
         input_fname=input_fname,
-        # header_size=header_size,
         start_time=start_time,
         period=period,
         data_dtype=data_dtype,
