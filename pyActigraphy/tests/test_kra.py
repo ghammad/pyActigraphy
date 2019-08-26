@@ -1,6 +1,7 @@
 from generate_dataset import generate_sequences
 from generate_dataset import generate_series
 
+import numpy as np
 import pandas as pd
 import pyActigraphy
 import pytest
@@ -49,3 +50,8 @@ def test_kra_logit():
 def test_kar_sequences():
 
     assert seq.kAR(0) == pytest.approx(0, abs=0.02)
+
+
+def test_kar_logit():
+
+    assert seq.kAR(0, logit=True) == pytest.approx(np.log(0.01), rel=0.1)
