@@ -4,6 +4,8 @@
   :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
 .. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/coverage.svg
   :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
+.. image:: https://img.shields.io/pypi/v/pyActigraphy.svg
+  :target: https://pypi.org/project/pyActigraphy
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2537921.svg
   :target: https://doi.org/10.5281/zenodo.2537921
 
@@ -67,7 +69,7 @@ with the pyActigraphy package:
 .. code-block:: python
 
   >>> import pyActigraphy
-  >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+  >>> rawAWD = pyActigraphy.io.read_raw_awd('/path/to/your/favourite/file.AWD')
   >>> rawAWD.IS()
   0.6900175913031027
   >>> rawAWD.IS(freq='30min', binarize=True, threshold=4)

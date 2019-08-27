@@ -39,7 +39,8 @@ class RawReader(ForwardMetricsMixin):
     @property
     def readers(self):
         r"""The list of RawXXX readers."""
-        return np.asarray(self.__readers)
+        return self.__readers
+        # return np.asarray(self.__readers)
 
     def append(self, raw_reader):
         if raw_reader.format != self.__reader_type:

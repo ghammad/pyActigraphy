@@ -5,6 +5,38 @@ import pandas as pd
 from scipy import linalg
 
 
+@jit(nopython=True)
+def _weights(L, K):
+
+    N = L + K
+    # weights = np.empty(N-1, dtype=np.float32)
+    weights = np.empty(N-1, dtype=np.int32)
+    for k in prange(1, L):
+        weights[k-1] = k
+
+    # for k in range(L,K+1):
+    weights[L-1:K] = L
+
+    for k in prange(K+1, N):
+        weights[k-1] = N-k
+
+    return weights
+
+
+def _weighted_scalar_product(X, Y, w):
+    return np.dot(X, np.multiply(Y, w).T)
+
+
+def _weighted_correlation(X, Y, w):
+
+    w_norm_X = np.sqrt(_weighted_scalar_product(X, X, w))
+    w_norm_Y = np.sqrt(_weighted_scalar_product(Y, Y, w))
+
+    w_rho = _weighted_scalar_product(X, Y, w) / (w_norm_X*w_norm_Y)
+
+    return w_rho
+
+
 @jit(nopython=True, parallel=True)
 def _x_elementary(U, s, Vh, L, K, i):
 
@@ -23,25 +55,26 @@ def _diagonal_averaging(X):
 
     L, K = X.shape
     L_star, K_star = min(L, K), max(L, K)
-    N_star = L_star + K_star
+    # N_star = L_star + K_star
     if not L < K:
         X = X.T
 
-    sum_antidiags = np.empty(N_star-1, dtype=np.float32)
+    sum_antidiags = np.empty(L_star + K_star - 1, dtype=np.float32)
     for k in prange(1-L_star, K_star):
         # Avoid using np.flipud as it does not compile with numba.
         # Besides, it seems slower than [::-1,...]
         sum_antidiags[k+L_star-1] = np.trace(X[::-1, ...], offset=k)
 
-    scale_factors = np.empty(N_star-1, dtype=np.float32)
-    for k in prange(1, L_star):
-        scale_factors[k-1] = k
-
-    # for k in range(L_star,K_star+1):
-    scale_factors[L_star-1:K_star] = L_star
-
-    for k in prange(K_star+1, N_star):
-        scale_factors[k-1] = N_star-k
+    scale_factors = _weights(L_star, K_star)
+    # scale_factors = np.empty(N_star-1, dtype=np.float32)
+    # for k in prange(1, L_star):
+    #     scale_factors[k-1] = k
+    #
+    # # for k in range(L_star,K_star+1):
+    # scale_factors[L_star-1:K_star] = L_star
+    #
+    # for k in prange(K_star+1, N_star):
+    #     scale_factors[k-1] = N_star-k
 
     sum_antidiags /= scale_factors
 
@@ -145,10 +178,13 @@ class SSA():
 
         A = self.trajectory_matrix()
         U, s, Vh = linalg.svd(
-            A, check_finite=check_finite, overwrite_a=overwrite_a
+            A,
+            full_matrices=False,
+            check_finite=check_finite,
+            overwrite_a=overwrite_a
         )
         self.__U = U
-        self.__sigma = linalg.diagsvd(s, self.__L, self.__K)
+        self.__sigma = np.diag(s)
         self.__Vh = Vh
         self.__lambda_s = np.square(s)/np.sum(np.square(s))
 
@@ -323,3 +359,38 @@ class SSA():
         )
 
         return reco_signal
+
+    def w_correlation_matrix(self, k):
+        r'''W-correlation matrix.
+
+        Parameters
+        ----------
+        n: int
+            Maximal index of the diagonal-averaged matrices to use.
+            Must be lower than or equal to the embedding dimension, L.
+
+        Returns
+        -------
+        wmat: numpy.ndarray
+
+        '''
+
+        n = range(k)
+
+        w_corr_mat = np.empty((k, k))
+
+        w = _weights(self.__L, self.__K)
+
+        X_tildes = [self.X_tilde(i) for i in n]
+
+        for i in n:
+            for j in n[i:]:
+                w_corr = _weighted_correlation(
+                    X_tildes[i],
+                    X_tildes[j],
+                    w
+                )
+                w_corr_mat[i][j] = w_corr
+                w_corr_mat[j][i] = w_corr
+
+        return w_corr_mat

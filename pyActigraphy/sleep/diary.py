@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import pyexcel as pxl
+import numpy as np
 
 
 class SleepDiary():
@@ -139,3 +140,96 @@ class SleepDiary():
             self.__diary['DURATION'] = self.__diary['END']\
                 - self.__diary['START']
         return self.__diary.groupby(['TYPE'])['DURATION'].describe()
+
+    def state_infos(self, state):
+        """ Returns summary statistics for a given state
+
+        Parameters
+        ----------
+        state: str
+            State of interest
+        Returns
+        -------
+        mean: pd.Timedelta
+            Mean duration of the required state.
+        std: pd.Timedelta
+            Standard deviation of the durations of the required state.
+        """
+
+        # Re-use the summary function
+        summary = self.summary()
+
+        # Verify that the state is present in the summary object
+        if state not in summary.index:
+            raise KeyError(
+                "{} is not a valid state. Valid states are {}".format(
+                    state, '" or "'.join(summary.index)
+                )
+            )
+
+        # Access the summary object to get the mean
+        mean = summary.loc[state, 'mean']
+        # Access the summary object to get the std
+        std = summary.loc[state, 'std']
+
+        return mean, std
+
+    def total_bed_time(self, state='NIGHT'):
+        """ Returns the total in-bed time
+
+        Parameters
+        ----------
+        state : str, optional
+            State of interest.
+            Default is 'NIGHT'.
+
+        Returns
+        -------
+        mean: pd.Timedelta
+            Mean duration of the required state.
+        std: pd.Timedelta
+            Standard deviation of the durations of the required state.
+
+        """
+
+        return self.state_infos(state)
+
+    def total_nap_time(self, state='NAP'):
+        """ Returns the total nap time
+
+        Parameters
+        ----------
+        state : str, optional
+            State of interest.
+            Default is 'NAP'.
+
+        Returns
+        -------
+        mean: pd.Timedelta
+            Mean duration of the required state.
+        std: pd.Timedelta
+            Standard deviation of the durations of the required state.
+
+        """
+
+        return self.state_infos(state)
+
+    def total_nowear_time(self, state='NOWEAR'):
+        """ Returns the total 'no-wear' time
+
+        Parameters
+        ----------
+        state : str, optional
+            State of interest.
+            Default is 'NOWEAR'.
+
+        Returns
+        -------
+        mean: pd.Timedelta
+            Mean duration of the required state.
+        std: pd.Timedelta
+            Standard deviation of the durations of the required state.
+
+        """
+
+        return self.state_infos(state)

@@ -1,6 +1,7 @@
 from generate_dataset import generate_sequences
 from generate_dataset import generate_series
 
+import numpy as np
 import pandas as pd
 import pyActigraphy
 import pytest
@@ -10,7 +11,7 @@ frequency = pd.Timedelta(sampling_period, unit='s')
 start_time = '01/01/2018 00:00:00'
 N = 30240*sampling_period
 period = pd.Timedelta(N, unit='s')
-seq_prob = 0.7
+seq_prob = 0.7311  # ~ e/e+1
 seq_max_length = 50
 
 sequences = generate_series(
@@ -41,6 +42,16 @@ def test_kra_sequences():
     assert seq.kRA(0) == pytest.approx(seq_prob, rel=0.01)
 
 
+def test_kra_logit():
+
+    assert seq.kRA(0, logit=True) == pytest.approx(1.0, rel=0.04)
+
+
 def test_kar_sequences():
 
     assert seq.kAR(0) == pytest.approx(0, abs=0.02)
+
+
+def test_kar_logit():
+
+    assert seq.kAR(0, logit=True) == pytest.approx(np.log(0.01), rel=0.1)

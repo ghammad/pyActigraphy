@@ -1,14 +1,16 @@
 import pandas as pd
 import numpy as np
+import re
 # from functools import lru_cache
-# from ..sleep import _td_format
+from ..utils.utils import _average_daily_activity
+# from ..sleep.scoring import AonT, AoffT
 from statistics import mean
 import statsmodels.api as sm
 
 __all__ = [
     'MetricsMixin',
     'ForwardMetricsMixin',
-    '_average_daily_activity',
+    # '_average_daily_activity',
     '_average_daily_total_activity',
     '_interdaily_stability',
     '_intradaily_variability',
@@ -18,36 +20,6 @@ __all__ = [
     '_transition_prob',
     '_transition_prob_sustain_region',
     '_td_format']
-
-
-def _average_daily_activity(data, cyclic=False):
-    """Calculate the average daily activity distribution"""
-
-    avgdaily = data.groupby([
-        data.index.hour,
-        data.index.minute,
-        data.index.second
-    ]).mean()
-
-    if cyclic:
-        avgdaily = pd.concat([avgdaily, avgdaily])
-        index = pd.timedelta_range(
-            start='0 day',
-            end='2 days',
-            freq=data.index.freq,
-            closed='left'
-        )
-    else:
-        index = pd.timedelta_range(
-            start='0 day',
-            end='1 day',
-            freq=data.index.freq,
-            closed='left'
-        )
-
-    avgdaily.index = index
-
-    return avgdaily
 
 
 def _average_daily_total_activity(data):
@@ -227,7 +199,7 @@ class MetricsMixin(object):
     """ Mixin Class """
 
     def average_daily_activity(
-        self, freq, cyclic=False, binarize=True, threshold=4
+        self, freq='5min', cyclic=False, binarize=True, threshold=4
     ):
         r"""Average daily activity distribution
 
@@ -262,7 +234,7 @@ class MetricsMixin(object):
 
         return avgdaily
 
-    def average_daily_light(self, freq, cyclic=False):
+    def average_daily_light(self, freq='5min', cyclic=False):
         r"""Average daily light distribution
 
         Calculate the daily profile of light exposure (in lux). Data are
@@ -1362,7 +1334,10 @@ class MetricsMixin(object):
 
         return pAR, pAR_weights
 
-    def kRA(self, threshold, start=None, period=None, frac=.3, it=0):
+    def kRA(
+        self, threshold, start=None, period=None, frac=.3, it=0, logit=False,
+        freq=None, offset='15min'
+    ):
         r"""Rest->Activity transition probability
 
         Weighted average value of pRA(t) within the constant regions, defined
@@ -1372,21 +1347,38 @@ class MetricsMixin(object):
         Parameters
         ----------
         threshold: int
-            If binarize is set to True, data above this threshold are set to 1
-            and to 0 otherwise.
+            Above this threshold, data are classified as active (1) and as
+            rest (0) otherwise.
         start: str, optional
             If not None, the actigraphy recording is truncated to
             'start:start+period', each day. Start string format: 'HH:MM:SS'.
+            Special keywords ('AonT' or 'AoffT') are allowed. In this case, the
+            start is set to the activity onset ('AonT') or offset ('AoffT')
+            time derived from the daily profile. Cf sleep.AonT/AoffT functions
+            for more informations.
             Default is None
         period: str, optional
             Time period for the calculation of pRA.
             Default is None.
-        frac: float
+        frac: float, optional
             Fraction of the data used when estimating each value.
             Default is 0.3.
-        it: int
+        it: int, optional
             Number of residual-based reweightings to perform.
             Default is 0.
+        logit: bool, optional
+            If True, the kRA value is logit-transformed (ln(p/1-p)). Useful
+            when kRA is used in a regression model.
+            Default is False.
+        freq: str, optional
+            Data resampling `frequency string
+            <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_
+            applied to the daily profile if start='AonT' or 'AoffT'.
+            Default is None.
+        offset: str, optional
+            Time offset with respect to the activity onset and offset times
+            used as start times.
+            Default is '15min'.
 
         Returns
         -------
@@ -1412,8 +1404,25 @@ class MetricsMixin(object):
             0.13195826220778709
         """
 
+        if start is not None and re.match(r'AonT|AoffT', start):
+            aont = self.AonT(freq=freq, binarize=True, threshold=threshold)
+            aofft = self.AoffT(freq=freq, binarize=True, threshold=threshold)
+            offset = pd.Timedelta(offset)
+            if start == 'AonT':
+                start_time = str(aont+offset).split(' ')[-1]
+                period = str(
+                    pd.Timedelta('24H') - ((aont+offset) - (aofft-offset))
+                ).split(' ')[-1]
+            elif start == 'AoffT':
+                start_time = str(aofft+offset).split(' ')[-1]
+                period = str(
+                    pd.Timedelta('24H') - ((aofft+offset) - (aont-offset))
+                ).split(' ')[-1]
+        else:
+            start_time = start
+
         # Calculate the pRA probabilities and their weights.
-        pRA, pRA_weights = self.pRA(threshold, start=start, period=period)
+        pRA, pRA_weights = self.pRA(threshold, start=start_time, period=period)
         # Fit the pRA distribution with a LOWESS and return mean value for
         # the constant region (i.e. the region where |pRA-lowess|<1SD)
         kRA = _transition_prob_sustain_region(
@@ -1422,9 +1431,12 @@ class MetricsMixin(object):
             frac=frac,
             it=it
             )
-        return kRA
+        return np.log(kRA/(1-kRA)) if logit else kRA
 
-    def kAR(self, threshold, start=None, period=None, frac=.3, it=0):
+    def kAR(
+        self, threshold, start=None, period=None, frac=.3, it=0, logit=False,
+        freq=None, offset='15min'
+    ):
         r"""Rest->Activity transition probability
 
         Weighted average value of pAR(t) within the constant regions, defined
@@ -1434,11 +1446,15 @@ class MetricsMixin(object):
         Parameters
         ----------
         threshold: int
-            If binarize is set to True, data above this threshold are set to 1
-            and to 0 otherwise.
+            Above this threshold, data are classified as active (1) and as
+            rest (0) otherwise.
         start: str, optional
             If not None, the actigraphy recording is truncated to
             'start:start+period', each day. Start string format: 'HH:MM:SS'.
+            Special keywords ('AonT' or 'AoffT') are allowed. In this case, the
+            start is set to the activity onset ('AonT') or offset ('AoffT')
+            time derived from the daily profile. Cf sleep.AonT/AoffT functions
+            for more informations.
             Default is None
         period: str, optional
             Time period for the calculation of pRA.
@@ -1449,6 +1465,19 @@ class MetricsMixin(object):
         it: int
             Number of residual-based reweightings to perform.
             Default is 0.
+        logit: bool, optional
+            If True, the kRA value is logit-transformed (ln(p/1-p)). Useful
+            when kRA is used in a regression model.
+            Default is False.
+        freq: str, optional
+            Data resampling `frequency string
+            <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_
+            applied to the daily profile if start='AonT' or 'AoffT'.
+            Default is None.
+        offset: str, optional
+            Time offset with respect to the activity onset and offset times
+            used as start times.
+            Default is '15min'.
 
         Returns
         -------
@@ -1474,8 +1503,25 @@ class MetricsMixin(object):
             0.04372712642257519
         """
 
+        if start is not None and re.match(r'AonT|AoffT', start):
+            aont = self.AonT(freq=freq, binarize=True, threshold=threshold)
+            aofft = self.AoffT(freq=freq, binarize=True, threshold=threshold)
+            offset = pd.Timedelta(offset)
+            if start == 'AonT':
+                start_time = str(aont+offset).split(' ')[-1]
+                period = str(
+                    pd.Timedelta('24H') - ((aont+offset) - (aofft-offset))
+                ).split(' ')[-1]
+            elif start == 'AoffT':
+                start_time = str(aofft+offset).split(' ')[-1]
+                period = str(
+                    pd.Timedelta('24H') - ((aofft+offset) - (aont-offset))
+                ).split(' ')[-1]
+        else:
+            start_time = start
+
         # Calculate the pAR probabilities and their weights.
-        pAR, pAR_weights = self.pAR(threshold, start=start, period=period)
+        pAR, pAR_weights = self.pAR(threshold, start=start_time, period=period)
         # Fit the pAR distribution with a LOWESS and return mean value for
         # the constant region (i.e. the region where |pAR-lowess|<1SD)
         kAR = _transition_prob_sustain_region(
@@ -1484,7 +1530,7 @@ class MetricsMixin(object):
             frac=frac,
             it=it
             )
-        return kAR
+        return np.log(kAR/(1-kAR)) if logit else kAR
 
 
 class ForwardMetricsMixin(object):
@@ -1675,7 +1721,8 @@ class ForwardMetricsMixin(object):
             ) for iread in self.readers
         }
 
-    def kRA(self, threshold=4, start=None, period=None, frac=.3, it=0):
+    def kRA(self, threshold=4, start=None, period=None, frac=.3, it=0,
+            logit=False, freq=None, offset='15min'):
 
         return {
             iread.display_name: iread.kRA(
@@ -1683,11 +1730,15 @@ class ForwardMetricsMixin(object):
                 start=start,
                 period=period,
                 frac=frac,
-                it=it
+                it=it,
+                logit=logit,
+                freq=freq,
+                offset=offset
             ) for iread in self.readers
         }
 
-    def kAR(self, threshold=4, start=None, period=None, frac=.3, it=0):
+    def kAR(self, threshold=4, start=None, period=None, frac=.3, it=0,
+            logit=False, freq=None, offset='15min'):
 
         return {
             iread.display_name: iread.kAR(
@@ -1695,7 +1746,10 @@ class ForwardMetricsMixin(object):
                 start=start,
                 period=period,
                 frac=frac,
-                it=it
+                it=it,
+                logit=logit,
+                freq=freq,
+                offset=offset
             ) for iread in self.readers
         }
 
@@ -1739,11 +1793,23 @@ class ForwardMetricsMixin(object):
             ) for iread in self.readers
         }
 
-    def daily_light_average(self):
+    def average_daily_activity(
+        self, freq, cyclic=False, binarize=True, threshold=4
+    ):
+        return {
+            iread.display_name: iread.average_daily_activity(
+                freq=freq,
+                cyclic=cyclic,
+                binarize=binarize,
+                threshold=threshold
+            ) for iread in self.readers
+        }
+
+    def average_daily_light(self):
 
         return {
             iread.display_name:
-            iread.daily_light_average() for iread in self.readers
+            iread.average_daily_light() for iread in self.readers
         }
 
     def Summary(self, mask_inactivity=True):
@@ -1771,13 +1837,13 @@ class ForwardMetricsMixin(object):
         ldic['IVm'] = self.IVm()
         ldic['ISp'] = self.ISp()
         ldic['IVp'] = self.IVp()
-        ldic['kRA(night)'] = self.kRA(start='00:00:00', period='5h')
-        ldic['kAR(Mid-day)'] = self.kAR(start='12:00:00', period='5h')
+        ldic['kRA(Midnight-5H)'] = self.kRA(start='00:00:00', period='5h')
+        ldic['kAR(Noon-5H)'] = self.kAR(start='12:00:00', period='5h')
         ldic['AonT'] = self.AonT()
         ldic['AoffT'] = self.AoffT()
-        ldic['fSoD(Mid-day)'] = self.fSoD()
+        ldic['fSoD(Noon-5H)'] = self.fSoD()
         if self.reader_type == 'RPX':
-            ldic['daily_light_average'] = self.daily_light_average()
+            ldic['average_daily_light'] = self.average_daily_light()
 
         # list keys of dictionnaries whose number of columns is variable:
         var_dic = ['ADATp', 'L5p', 'M10p', 'RAp', 'ISp', 'IVp']

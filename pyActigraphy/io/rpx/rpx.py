@@ -5,6 +5,7 @@ import os
 import re
 import warnings
 
+from .multilang import fields, columns, day_first
 from ..base import BaseRaw
 
 
@@ -15,19 +16,37 @@ class RawRPX(BaseRaw):
     ----------
     input_fname: str
         Path to the rpx file.
-    header_offset: int
-        Offset (i.e. number of lines) between the end of the header and
-        the data. Default is 15.
-    delimiter: str
+    language: str, optional
+        Language of the input csv file.
+        Available options are: 'US', 'FR'.
+        Default is 'US'.
+    start_time: datetime-like, optional
+        Read data from this time.
+        Default is None.
+    period: str, optional
+        Length of the read data.
+        Cf. #timeseries-offset-aliases in
+        <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+        Default is None (i.e all the data).
+    data_dtype: dtype, optional
+        The dtype of the raw data.
+        Default is 'Int64'.
+    light_dtype: dtype, optional
+        The dtype of the raw light data.
+        Default is 'np.float16'.
+    delimiter: str, optional
         Delimiter to use when reading the input file.
+        Default is '.'
     """
 
     def __init__(
         self,
         input_fname,
-        header_offset=15,
+        language='US',
         start_time=None,
         period=None,
+        data_dtype='Int64',
+        light_dtype=np.float16,
         delimiter=','
     ):
 
@@ -36,39 +55,78 @@ class RawRPX(BaseRaw):
         # [TO-DO] check if file exists
         # [TO-DO] check it is has the right file extension .rpx
 
-        # extract header and size
+        self.__language = language
+        # [TO-DO] check language is supported
+
+        # extract file header and data header
         header = []
+        data_available_cols = []
         with open(input_fname, encoding='utf-8') as file:
-            for num, line in enumerate(file, 1):
-                if "Données période par période" in line:
+            for header_offset, line in enumerate(file, 1):
+                if fields[self.language]['Data'] in line:
                     break
                 else:
                     header.append(line)
+            # Read file until the next blank line
+            # First, skip blank line after section title
+            next(file)
+            for data_offset, line in enumerate(file):
+                if line == '\n':
+                    break
+                else:
+                    data_available_cols.append(
+                        line.split(',')[0].strip('"').rstrip(':')
+                    )
+
+        # Verify that the input file contains the needed informations
+        try:
+            assert (
+                set(columns[self.language].values()) <=
+                set(data_available_cols[2:])
+            )
+        except AssertionError:
+            print(
+                'The data section of the input file {}'.format(input_fname) +
+                'does not contain the required columns.\n' +
+                'Required columns: {}'.format('" or "'.join(
+                    columns[self.language].values())
+                ) +
+                'Available columns: {}'.format('" or "'.join(
+                    data_available_cols[2:])
+                )
+            )
 
         # extract informations from the header
         name = self.__extract_rpx_name(header, delimiter)
         uuid = self.__extract_rpx_uuid(header, delimiter)
         start = self.__extract_rpx_start_time(header, delimiter)
         frequency = self.__extract_rpx_frequency(header, delimiter)
-        axial_mode = 'DUMMY [TODO]: extract from header if possible'
+        axial_mode = 'Unknown'
 
-        # read data file
+        # read actigraphy data
         index_data = pd.read_csv(
             input_fname,
             encoding='utf-8',
-            skiprows=num+header_offset,
+            skiprows=header_offset+data_offset+1,
             header=0,
             delimiter=delimiter,
             # infer_datetime_format=True,
             index_col=0,
-            parse_dates=[[0, 1]],
-            dayfirst=True,
-            usecols=[
-                'Date', 'Heure', 'Activité', 'Marqueur', 'Lumière blanche'
-            ],
+            parse_dates={
+                'Date_Time': [
+                    columns[self.language]['Date'],
+                    columns[self.language]['Time']
+                ]
+            },
+            dayfirst=(self.language in day_first),
+            usecols=list(columns[self.language].values()),
             na_values='NAN',
-            dtype={'Activité': np.float32, 'Marqueur': np.float32}
-        ).dropna(subset=['Activité'])
+            dtype={
+                columns[self.language]['Activity']: data_dtype,
+                columns[self.language]['White_light']: light_dtype
+                # columns[self.language]['Marker']: light_dtype
+            }
+        ).dropna(subset=[columns[self.language]['Activity']])
 
         # verify that the start time and the first date index matches
         self.__check_rpx_start_time(index_data, start)
@@ -96,13 +154,21 @@ class RawRPX(BaseRaw):
             start_time=start_time,
             period=period,
             frequency=pd.Timedelta(frequency),
-            data=index_data['Activité'],
-            light=index_data['Lumière blanche']
+            data=index_data[columns[self.language]['Activity']].asfreq(
+                freq=pd.Timedelta(frequency)
+            ),
+            light=index_data[columns[self.language]['White_light']].asfreq(
+                freq=pd.Timedelta(frequency)
+            )
         )
+
+    @property
+    def language(self):
+        return self.__language
 
     def __extract_rpx_name(self, header, delimiter):
         for line in header:
-            if 'Identité' in line:
+            if fields[self.language]['Name'] in line:
                 name = re.sub(
                     r'[^\w\s]', '', line.split(delimiter)[1]
                 ).strip()
@@ -111,7 +177,7 @@ class RawRPX(BaseRaw):
 
     def __extract_rpx_uuid(self, header, delimiter):
         for line in header:
-            if 'Numéro de série de l\'Actiwatch' in line:
+            if fields[self.language]['Device_id'] in line:
                 uuid = re.sub(r'[\W_]+', '', line.split(delimiter)[1])
                 break
         return uuid
@@ -119,22 +185,26 @@ class RawRPX(BaseRaw):
     def __extract_rpx_start_time(self, header, delimiter):
         start_time = []
         for line in header:
-            if 'Date de début de la collecte des données' in line:
+            if fields[self.language]['Start_date'] in line:
                 start_time.append(
                     re.sub(r'[^\d./]+', '', line.split(delimiter)[1])
                 )
-            elif 'Heure de début de la collecte des données' in line:
+            elif fields[self.language]['Start_time'] in line:
                 start_time.append(
                     re.sub(r'[^\d.:]+', '', line.split(delimiter)[1])
                 )
-        return pd.to_datetime(' '.join(start_time), dayfirst=True)
+        return pd.to_datetime(
+            ' '.join(start_time),
+            dayfirst=(self.language in day_first)
+        )
 
     def __extract_rpx_frequency(self, header, delimiter):
         for line in header:
-            if 'Longueur de la période' in line:
+            if fields[self.language]['Period'] in line:
                 frequency = pd.Timedelta(
-                    re.sub(r'([^\s\w])+', '', line.split(delimiter)[3])
-                    .replace('\xa0', ' ').strip()
+                    int(re.sub(r'([^\s\w])+', '', line.split(delimiter)[1])
+                        .replace('\xa0', ' ').strip()),
+                    unit='second'
                 )
                 break
         return frequency
@@ -154,18 +224,42 @@ Please verify your input file.
             )
 
 
-def read_raw_rpx(input_fname, header_offset=15, delimiter=','):
+def read_raw_rpx(
+    input_fname,
+    language='US',
+    start_time=None,
+    period=None,
+    data_dtype='Int64',
+    light_dtype=np.float16,
+    delimiter=','
+):
     """Reader function for raw Respironics file.
 
     Parameters
     ----------
     input_fname: str
-        Path to the Respironics file.
-    header_offset: int
-        Offset (i.e. number of lines) between the end of the header and
-        the data. Default is 15.
-    delimiter: str
+        Path to the rpx file.
+    language: str, optional
+        Language of the input csv file.
+        Available options are: 'US', 'FR'.
+        Default is 'US'.
+    start_time: datetime-like, optional
+        Read data from this time.
+        Default is None.
+    period: str, optional
+        Length of the read data.
+        Cf. #timeseries-offset-aliases in
+        <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+        Default is None (i.e all the data).
+    data_dtype: dtype, optional
+        The dtype of the raw data.
+        Default is 'Int64'.
+    light_dtype: dtype, optional
+        The dtype of the raw light data.
+        Default is 'np.float16'.
+    delimiter: str, optional
         Delimiter to use when reading the input file.
+        Default is '.'
 
     Returns
     -------
@@ -175,6 +269,10 @@ def read_raw_rpx(input_fname, header_offset=15, delimiter=','):
 
     return RawRPX(
         input_fname=input_fname,
-        header_offset=header_offset,
+        language=language,
+        start_time=start_time,
+        period=period,
+        data_dtype=data_dtype,
+        light_dtype=light_dtype,
         delimiter=delimiter
     )

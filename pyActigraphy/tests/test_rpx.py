@@ -10,7 +10,7 @@ data_dir = op.join(op.dirname(op.abspath(FILE)), 'data')
 rpx_path = op.join(data_dir, 'test_sample.csv')
 
 # read RPX with default parameters
-rawRPX = pyActigraphy.io.read_raw_rpx(rpx_path)
+rawRPX = pyActigraphy.io.read_raw_rpx(rpx_path, language='FR')
 
 
 def test_instance_rpx():
