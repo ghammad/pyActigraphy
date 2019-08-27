@@ -199,7 +199,7 @@ class MetricsMixin(object):
     """ Mixin Class """
 
     def average_daily_activity(
-        self, freq, cyclic=False, binarize=True, threshold=4
+        self, freq='5min', cyclic=False, binarize=True, threshold=4
     ):
         r"""Average daily activity distribution
 
@@ -234,7 +234,7 @@ class MetricsMixin(object):
 
         return avgdaily
 
-    def average_daily_light(self, freq, cyclic=False):
+    def average_daily_light(self, freq='5min', cyclic=False):
         r"""Average daily light distribution
 
         Calculate the daily profile of light exposure (in lux). Data are
@@ -1805,11 +1805,11 @@ class ForwardMetricsMixin(object):
             ) for iread in self.readers
         }
 
-    def daily_light_average(self):
+    def average_daily_light(self):
 
         return {
             iread.display_name:
-            iread.daily_light_average() for iread in self.readers
+            iread.average_daily_light() for iread in self.readers
         }
 
     def Summary(self, mask_inactivity=True):
@@ -1843,7 +1843,7 @@ class ForwardMetricsMixin(object):
         ldic['AoffT'] = self.AoffT()
         ldic['fSoD(Noon-5H)'] = self.fSoD()
         if self.reader_type == 'RPX':
-            ldic['daily_light_average'] = self.daily_light_average()
+            ldic['average_daily_light'] = self.average_daily_light()
 
         # list keys of dictionnaries whose number of columns is variable:
         var_dic = ['ADATp', 'L5p', 'M10p', 'RAp', 'ISp', 'IVp']
