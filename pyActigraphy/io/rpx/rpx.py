@@ -154,8 +154,12 @@ class RawRPX(BaseRaw):
             start_time=start_time,
             period=period,
             frequency=pd.Timedelta(frequency),
-            data=index_data[columns[self.language]['Activity']],
-            light=index_data[columns[self.language]['White_light']]
+            data=index_data[columns[self.language]['Activity']].asfreq(
+                freq=pd.Timedelta(frequency)
+            ),
+            light=index_data[columns[self.language]['White_light']].asfreq(
+                freq=pd.Timedelta(frequency)
+            )
         )
 
     @property
@@ -198,8 +202,9 @@ class RawRPX(BaseRaw):
         for line in header:
             if fields[self.language]['Period'] in line:
                 frequency = pd.Timedelta(
-                    re.sub(r'([^\s\w])+', '', line.split(delimiter)[3])
-                    .replace('\xa0', ' ').strip()
+                    int(re.sub(r'([^\s\w])+', '', line.split(delimiter)[1])
+                        .replace('\xa0', ' ').strip()),
+                    unit='second'
                 )
                 break
         return frequency
