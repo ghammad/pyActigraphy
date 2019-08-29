@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pyActigraphy.io.read_raw_rpx &#8212; pyActigraphy 0.1 documentation</title>
+    <title>pyActigraphy.io.read_raw_rpx &#8212; pyActigraphy 0.2 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../index.html"><span><img src="../_static/pyActigraphy_logo.png"></span>
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -93,17 +93,29 @@
 <h1>pyActigraphy.io.read_raw_rpx<a class="headerlink" href="#pyactigraphy-io-read-raw-rpx" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="pyActigraphy.io.read_raw_rpx">
-<code class="descclassname">pyActigraphy.io.</code><code class="descname">read_raw_rpx</code><span class="sig-paren">(</span><em>input_fname</em>, <em>header_offset=15</em>, <em>delimiter='</em>, <em>'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/io/rpx/rpx.html#read_raw_rpx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyActigraphy.io.read_raw_rpx" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pyActigraphy.io.</code><code class="descname">read_raw_rpx</code><span class="sig-paren">(</span><em>input_fname</em>, <em>language='US'</em>, <em>start_time=None</em>, <em>period=None</em>, <em>data_dtype='Int64'</em>, <em>light_dtype=&lt;class 'numpy.float16'&gt;</em>, <em>delimiter='</em>, <em>'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/io/rpx/rpx.html#read_raw_rpx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyActigraphy.io.read_raw_rpx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reader function for raw Respironics file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>input_fname</strong> (<em>str</em>) – Path to the Respironics file.</li>
-<li><strong>header_offset</strong> (<em>int</em>) – Offset (i.e. number of lines) between the end of the header and
-the data. Default is 15.</li>
-<li><strong>delimiter</strong> (<em>str</em>) – Delimiter to use when reading the input file.</li>
+<li><strong>input_fname</strong> (<em>str</em>) – Path to the rpx file.</li>
+<li><strong>language</strong> (<em>str</em><em>, </em><em>optional</em>) – Language of the input csv file.
+Available options are: ‘US’, ‘FR’.
+Default is ‘US’.</li>
+<li><strong>start_time</strong> (<em>datetime-like</em><em>, </em><em>optional</em>) – Read data from this time.
+Default is None.</li>
+<li><strong>period</strong> (<em>str</em><em>, </em><em>optional</em>) – Length of the read data.
+Cf. #timeseries-offset-aliases in
+&lt;<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/timeseries.html">https://pandas.pydata.org/pandas-docs/stable/timeseries.html</a>&gt;.
+Default is None (i.e all the data).</li>
+<li><strong>data_dtype</strong> (<em>dtype</em><em>, </em><em>optional</em>) – The dtype of the raw data.
+Default is ‘Int64’.</li>
+<li><strong>light_dtype</strong> (<em>dtype</em><em>, </em><em>optional</em>) – The dtype of the raw light data.
+Default is ‘np.float16’.</li>
+<li><strong>delimiter</strong> (<em>str</em><em>, </em><em>optional</em>) – Delimiter to use when reading the input file.
+Default is ‘.’</li>
 </ul>
 </td>
 </tr>

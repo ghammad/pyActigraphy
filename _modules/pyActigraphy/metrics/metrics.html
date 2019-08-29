@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pyActigraphy.metrics.metrics &#8212; pyActigraphy 0.1 documentation</title>
+    <title>pyActigraphy.metrics.metrics &#8212; pyActigraphy 0.2 documentation</title>
     <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../../../index.html"><span><img src="../../../_static/pyActigraphy_logo.png"></span>
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -88,15 +88,17 @@
   <h1>Source code for pyActigraphy.metrics.metrics</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="c1"># from functools import lru_cache</span>
-<span class="c1"># from ..sleep import _td_format</span>
+<span class="kn">from</span> <span class="nn">..utils.utils</span> <span class="k">import</span> <span class="n">_average_daily_activity</span>
+<span class="c1"># from ..sleep.scoring import AonT, AoffT</span>
 <span class="kn">from</span> <span class="nn">statistics</span> <span class="k">import</span> <span class="n">mean</span>
 <span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;MetricsMixin&#39;</span><span class="p">,</span>
     <span class="s1">&#39;ForwardMetricsMixin&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;_average_daily_activity&#39;</span><span class="p">,</span>
+    <span class="c1"># &#39;_average_daily_activity&#39;,</span>
     <span class="s1">&#39;_average_daily_total_activity&#39;</span><span class="p">,</span>
     <span class="s1">&#39;_interdaily_stability&#39;</span><span class="p">,</span>
     <span class="s1">&#39;_intradaily_variability&#39;</span><span class="p">,</span>
@@ -106,36 +108,6 @@
     <span class="s1">&#39;_transition_prob&#39;</span><span class="p">,</span>
     <span class="s1">&#39;_transition_prob_sustain_region&#39;</span><span class="p">,</span>
     <span class="s1">&#39;_td_format&#39;</span><span class="p">]</span>
-
-
-<span class="k">def</span> <span class="nf">_average_daily_activity</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the average daily activity distribution&quot;&quot;&quot;</span>
-
-    <span class="n">avgdaily</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span>
-        <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">second</span>
-    <span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">cyclic</span><span class="p">:</span>
-        <span class="n">avgdaily</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">avgdaily</span><span class="p">,</span> <span class="n">avgdaily</span><span class="p">])</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">timedelta_range</span><span class="p">(</span>
-            <span class="n">start</span><span class="o">=</span><span class="s1">&#39;0 day&#39;</span><span class="p">,</span>
-            <span class="n">end</span><span class="o">=</span><span class="s1">&#39;2 days&#39;</span><span class="p">,</span>
-            <span class="n">freq</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span>
-            <span class="n">closed</span><span class="o">=</span><span class="s1">&#39;left&#39;</span>
-        <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">timedelta_range</span><span class="p">(</span>
-            <span class="n">start</span><span class="o">=</span><span class="s1">&#39;0 day&#39;</span><span class="p">,</span>
-            <span class="n">end</span><span class="o">=</span><span class="s1">&#39;1 day&#39;</span><span class="p">,</span>
-            <span class="n">freq</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span>
-            <span class="n">closed</span><span class="o">=</span><span class="s1">&#39;left&#39;</span>
-        <span class="p">)</span>
-
-    <span class="n">avgdaily</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
-
-    <span class="k">return</span> <span class="n">avgdaily</span>
 
 
 <span class="k">def</span> <span class="nf">_average_daily_total_activity</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
@@ -315,7 +287,7 @@
     <span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">average_daily_activity</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span>
     <span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average daily activity distribution</span>
 
@@ -350,7 +322,7 @@
 
         <span class="k">return</span> <span class="n">avgdaily</span>
 
-    <span class="k">def</span> <span class="nf">average_daily_light</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">average_daily_light</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average daily light distribution</span>
 
 <span class="sd">        Calculate the daily profile of light exposure (in lux). Data are</span>
@@ -1451,7 +1423,8 @@
         <span class="k">return</span> <span class="n">pAR</span><span class="p">,</span> <span class="n">pAR_weights</span>
 
     <span class="k">def</span> <span class="nf">kRA</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">logit</span><span class="o">=</span><span class="kc">False</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">logit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;15min&#39;</span>
     <span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability</span>
 
@@ -1462,11 +1435,15 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        threshold: int</span>
-<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
-<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Above this threshold, data are classified as active (1) and as</span>
+<span class="sd">            rest (0) otherwise.</span>
 <span class="sd">        start: str, optional</span>
 <span class="sd">            If not None, the actigraphy recording is truncated to</span>
 <span class="sd">            &#39;start:start+period&#39;, each day. Start string format: &#39;HH:MM:SS&#39;.</span>
+<span class="sd">            Special keywords (&#39;AonT&#39; or &#39;AoffT&#39;) are allowed. In this case, the</span>
+<span class="sd">            start is set to the activity onset (&#39;AonT&#39;) or offset (&#39;AoffT&#39;)</span>
+<span class="sd">            time derived from the daily profile. Cf sleep.AonT/AoffT functions</span>
+<span class="sd">            for more informations.</span>
 <span class="sd">            Default is None</span>
 <span class="sd">        period: str, optional</span>
 <span class="sd">            Time period for the calculation of pRA.</span>
@@ -1481,6 +1458,15 @@
 <span class="sd">            If True, the kRA value is logit-transformed (ln(p/1-p)). Useful</span>
 <span class="sd">            when kRA is used in a regression model.</span>
 <span class="sd">            Default is False.</span>
+<span class="sd">        freq: str, optional</span>
+<span class="sd">            Data resampling `frequency string</span>
+<span class="sd">            &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;`_</span>
+<span class="sd">            applied to the daily profile if start=&#39;AonT&#39; or &#39;AoffT&#39;.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        offset: str, optional</span>
+<span class="sd">            Time offset with respect to the activity onset and offset times</span>
+<span class="sd">            used as start times.</span>
+<span class="sd">            Default is &#39;15min&#39;.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1506,8 +1492,25 @@
 <span class="sd">            0.13195826220778709</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;AonT|AoffT&#39;</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
+            <span class="n">aont</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AonT</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">)</span>
+            <span class="n">aofft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AoffT</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">)</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="o">==</span> <span class="s1">&#39;AonT&#39;</span><span class="p">:</span>
+                <span class="n">start_time</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">aont</span><span class="o">+</span><span class="n">offset</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">period</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;24H&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="p">((</span><span class="n">aont</span><span class="o">+</span><span class="n">offset</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">aofft</span><span class="o">-</span><span class="n">offset</span><span class="p">))</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">start</span> <span class="o">==</span> <span class="s1">&#39;AoffT&#39;</span><span class="p">:</span>
+                <span class="n">start_time</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">aofft</span><span class="o">+</span><span class="n">offset</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">period</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;24H&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="p">((</span><span class="n">aofft</span><span class="o">+</span><span class="n">offset</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">aont</span><span class="o">-</span><span class="n">offset</span><span class="p">))</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">start</span>
+
         <span class="c1"># Calculate the pRA probabilities and their weights.</span>
-        <span class="n">pRA</span><span class="p">,</span> <span class="n">pRA_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pRA</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+        <span class="n">pRA</span><span class="p">,</span> <span class="n">pRA_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pRA</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
         <span class="c1"># Fit the pRA distribution with a LOWESS and return mean value for</span>
         <span class="c1"># the constant region (i.e. the region where |pRA-lowess|&lt;1SD)</span>
         <span class="n">kRA</span> <span class="o">=</span> <span class="n">_transition_prob_sustain_region</span><span class="p">(</span>
@@ -1519,7 +1522,8 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">kRA</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">kRA</span><span class="p">))</span> <span class="k">if</span> <span class="n">logit</span> <span class="k">else</span> <span class="n">kRA</span>
 
     <span class="k">def</span> <span class="nf">kAR</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">logit</span><span class="o">=</span><span class="kc">False</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">logit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;15min&#39;</span>
     <span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability</span>
 
@@ -1530,11 +1534,15 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        threshold: int</span>
-<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
-<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Above this threshold, data are classified as active (1) and as</span>
+<span class="sd">            rest (0) otherwise.</span>
 <span class="sd">        start: str, optional</span>
 <span class="sd">            If not None, the actigraphy recording is truncated to</span>
 <span class="sd">            &#39;start:start+period&#39;, each day. Start string format: &#39;HH:MM:SS&#39;.</span>
+<span class="sd">            Special keywords (&#39;AonT&#39; or &#39;AoffT&#39;) are allowed. In this case, the</span>
+<span class="sd">            start is set to the activity onset (&#39;AonT&#39;) or offset (&#39;AoffT&#39;)</span>
+<span class="sd">            time derived from the daily profile. Cf sleep.AonT/AoffT functions</span>
+<span class="sd">            for more informations.</span>
 <span class="sd">            Default is None</span>
 <span class="sd">        period: str, optional</span>
 <span class="sd">            Time period for the calculation of pRA.</span>
@@ -1549,6 +1557,15 @@
 <span class="sd">            If True, the kRA value is logit-transformed (ln(p/1-p)). Useful</span>
 <span class="sd">            when kRA is used in a regression model.</span>
 <span class="sd">            Default is False.</span>
+<span class="sd">        freq: str, optional</span>
+<span class="sd">            Data resampling `frequency string</span>
+<span class="sd">            &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;`_</span>
+<span class="sd">            applied to the daily profile if start=&#39;AonT&#39; or &#39;AoffT&#39;.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        offset: str, optional</span>
+<span class="sd">            Time offset with respect to the activity onset and offset times</span>
+<span class="sd">            used as start times.</span>
+<span class="sd">            Default is &#39;15min&#39;.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -1574,8 +1591,25 @@
 <span class="sd">            0.04372712642257519</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;AonT|AoffT&#39;</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
+            <span class="n">aont</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AonT</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">)</span>
+            <span class="n">aofft</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AoffT</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">)</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="o">==</span> <span class="s1">&#39;AonT&#39;</span><span class="p">:</span>
+                <span class="n">start_time</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">aont</span><span class="o">+</span><span class="n">offset</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">period</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;24H&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="p">((</span><span class="n">aont</span><span class="o">+</span><span class="n">offset</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">aofft</span><span class="o">-</span><span class="n">offset</span><span class="p">))</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">start</span> <span class="o">==</span> <span class="s1">&#39;AoffT&#39;</span><span class="p">:</span>
+                <span class="n">start_time</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">aofft</span><span class="o">+</span><span class="n">offset</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">period</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;24H&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="p">((</span><span class="n">aofft</span><span class="o">+</span><span class="n">offset</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">aont</span><span class="o">-</span><span class="n">offset</span><span class="p">))</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">start</span>
+
         <span class="c1"># Calculate the pAR probabilities and their weights.</span>
-        <span class="n">pAR</span><span class="p">,</span> <span class="n">pAR_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pAR</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
+        <span class="n">pAR</span><span class="p">,</span> <span class="n">pAR_weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pAR</span><span class="p">(</span><span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">)</span>
         <span class="c1"># Fit the pAR distribution with a LOWESS and return mean value for</span>
         <span class="c1"># the constant region (i.e. the region where |pAR-lowess|&lt;1SD)</span>
         <span class="n">kAR</span> <span class="o">=</span> <span class="n">_transition_prob_sustain_region</span><span class="p">(</span>
@@ -1775,7 +1809,8 @@
             <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
         <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">kRA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">kRA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">logit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;15min&#39;</span><span class="p">):</span>
 
         <span class="k">return</span> <span class="p">{</span>
             <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">kRA</span><span class="p">(</span>
@@ -1783,11 +1818,15 @@
                 <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
                 <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
                 <span class="n">frac</span><span class="o">=</span><span class="n">frac</span><span class="p">,</span>
-                <span class="n">it</span><span class="o">=</span><span class="n">it</span>
+                <span class="n">it</span><span class="o">=</span><span class="n">it</span><span class="p">,</span>
+                <span class="n">logit</span><span class="o">=</span><span class="n">logit</span><span class="p">,</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+                <span class="n">offset</span><span class="o">=</span><span class="n">offset</span>
             <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
         <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">kAR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">kAR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=.</span><span class="mi">3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">logit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;15min&#39;</span><span class="p">):</span>
 
         <span class="k">return</span> <span class="p">{</span>
             <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span> <span class="n">iread</span><span class="o">.</span><span class="n">kAR</span><span class="p">(</span>
@@ -1795,7 +1834,10 @@
                 <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
                 <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
                 <span class="n">frac</span><span class="o">=</span><span class="n">frac</span><span class="p">,</span>
-                <span class="n">it</span><span class="o">=</span><span class="n">it</span>
+                <span class="n">it</span><span class="o">=</span><span class="n">it</span><span class="p">,</span>
+                <span class="n">logit</span><span class="o">=</span><span class="n">logit</span><span class="p">,</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+                <span class="n">offset</span><span class="o">=</span><span class="n">offset</span>
             <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
         <span class="p">}</span>
 
@@ -1851,11 +1893,11 @@
             <span class="p">)</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
         <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">daily_light_average</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">average_daily_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
         <span class="k">return</span> <span class="p">{</span>
             <span class="n">iread</span><span class="o">.</span><span class="n">display_name</span><span class="p">:</span>
-            <span class="n">iread</span><span class="o">.</span><span class="n">daily_light_average</span><span class="p">()</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
+            <span class="n">iread</span><span class="o">.</span><span class="n">average_daily_light</span><span class="p">()</span> <span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
         <span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">Summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask_inactivity</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -1883,13 +1925,13 @@
         <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;IVm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">IVm</span><span class="p">()</span>
         <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;ISp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ISp</span><span class="p">()</span>
         <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;IVp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">IVp</span><span class="p">()</span>
-        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;kRA(night)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kRA</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s1">&#39;00:00:00&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;5h&#39;</span><span class="p">)</span>
-        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;kAR(Mid-day)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kAR</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s1">&#39;12:00:00&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;5h&#39;</span><span class="p">)</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;kRA(Midnight-5H)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kRA</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s1">&#39;00:00:00&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;5h&#39;</span><span class="p">)</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;kAR(Noon-5H)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kAR</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s1">&#39;12:00:00&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;5h&#39;</span><span class="p">)</span>
         <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;AonT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AonT</span><span class="p">()</span>
         <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;AoffT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AoffT</span><span class="p">()</span>
-        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;fSoD(Mid-day)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fSoD</span><span class="p">()</span>
+        <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;fSoD(Noon-5H)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fSoD</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader_type</span> <span class="o">==</span> <span class="s1">&#39;RPX&#39;</span><span class="p">:</span>
-            <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;daily_light_average&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">daily_light_average</span><span class="p">()</span>
+            <span class="n">ldic</span><span class="p">[</span><span class="s1">&#39;average_daily_light&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_daily_light</span><span class="p">()</span>
 
         <span class="c1"># list keys of dictionnaries whose number of columns is variable:</span>
         <span class="n">var_dic</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ADATp&#39;</span><span class="p">,</span> <span class="s1">&#39;L5p&#39;</span><span class="p">,</span> <span class="s1">&#39;M10p&#39;</span><span class="p">,</span> <span class="s1">&#39;RAp&#39;</span><span class="p">,</span> <span class="s1">&#39;ISp&#39;</span><span class="p">,</span> <span class="s1">&#39;IVp&#39;</span><span class="p">]</span>

@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pyActigraphy.io.BaseRaw.kRA &#8212; pyActigraphy 0.1 documentation</title>
+    <title>pyActigraphy.io.BaseRaw.kRA &#8212; pyActigraphy 0.2 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -37,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../index.html"><span><img src="../_static/pyActigraphy_logo.png"></span>
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -93,7 +93,7 @@
 <h1>pyActigraphy.io.BaseRaw.kRA<a class="headerlink" href="#pyactigraphy-io-baseraw-kra" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="pyActigraphy.io.BaseRaw.kRA">
-<code class="descclassname">BaseRaw.</code><code class="descname">kRA</code><span class="sig-paren">(</span><em>threshold</em>, <em>start=None</em>, <em>period=None</em>, <em>frac=0.3</em>, <em>it=0</em>, <em>logit=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.kRA" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">BaseRaw.</code><code class="descname">kRA</code><span class="sig-paren">(</span><em>threshold</em>, <em>start=None</em>, <em>period=None</em>, <em>frac=0.3</em>, <em>it=0</em>, <em>logit=False</em>, <em>freq=None</em>, <em>offset='15min'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.kRA" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rest-&gt;Activity transition probability</p>
 <p>Weighted average value of pRA(t) within the constant regions, defined
 as the longest stretch within which the LOWESS curve varied by no more
@@ -103,10 +103,14 @@ than 1 standard deviation of the pRA(t) curve <a class="reference internal" href
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>threshold</strong> (<em>int</em>) – If binarize is set to True, data above this threshold are set to 1
-and to 0 otherwise.</li>
+<li><strong>threshold</strong> (<em>int</em>) – Above this threshold, data are classified as active (1) and as
+rest (0) otherwise.</li>
 <li><strong>start</strong> (<em>str</em><em>, </em><em>optional</em>) – If not None, the actigraphy recording is truncated to
 ‘start:start+period’, each day. Start string format: ‘HH:MM:SS’.
+Special keywords (‘AonT’ or ‘AoffT’) are allowed. In this case, the
+start is set to the activity onset (‘AonT’) or offset (‘AoffT’)
+time derived from the daily profile. Cf sleep.AonT/AoffT functions
+for more informations.
 Default is None</li>
 <li><strong>period</strong> (<em>str</em><em>, </em><em>optional</em>) – Time period for the calculation of pRA.
 Default is None.</li>
@@ -117,6 +121,12 @@ Default is 0.</li>
 <li><strong>logit</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, the kRA value is logit-transformed (ln(p/1-p)). Useful
 when kRA is used in a regression model.
 Default is False.</li>
+<li><strong>freq</strong> (<em>str</em><em>, </em><em>optional</em>) – Data resampling <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/timeseries.html">frequency string</a>
+applied to the daily profile if start=’AonT’ or ‘AoffT’.
+Default is None.</li>
+<li><strong>offset</strong> (<em>str</em><em>, </em><em>optional</em>) – Time offset with respect to the activity onset and offset times
+used as start times.
+Default is ‘15min’.</li>
 </ul>
 </td>
 </tr>
