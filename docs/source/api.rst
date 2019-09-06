@@ -110,6 +110,7 @@ Reader classes
         Chronosapiens
         Crespo
         CK
+        Oakley
         Sadeh
         Scripps
         SoD
