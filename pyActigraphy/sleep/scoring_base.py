@@ -1176,9 +1176,9 @@ class ScoringMixin(object):
         ----------
 
         .. [1] Roenneberg, T., Keller, L. K., Fischer, D., Matera, J. L.,
-        Vetter, C., & Winnebeck, E. C. (2015). Human Activity and Rest In Situ.
-        In Methods in Enzymology (Vol. 552, pp. 257–283).
-        http://doi.org/10.1016/bs.mie.2014.11.028
+               Vetter, C., & Winnebeck, E. C. (2015). Human Activity and Rest
+               In Situ. In Methods in Enzymology (Vol. 552, pp. 257-283).
+               http://doi.org/10.1016/bs.mie.2014.11.028
 
         Examples
         --------
@@ -1230,7 +1230,7 @@ class ScoringMixin(object):
             Default is '30Min'.
         max_test_period : str, optional
             Maximal period of the test series.
-            Default is '12h'
+            Default is '12h'.
         n_succ : int, optional
             Number of successive elements to consider when searching for the
             maximum correlation peak.
@@ -1245,9 +1245,9 @@ class ScoringMixin(object):
         ----------
 
         .. [1] Roenneberg, T., Keller, L. K., Fischer, D., Matera, J. L.,
-        Vetter, C., & Winnebeck, E. C. (2015). Human Activity and Rest In Situ.
-        In Methods in Enzymology (Vol. 552, pp. 257–283).
-        http://doi.org/10.1016/bs.mie.2014.11.028
+               Vetter, C., & Winnebeck, E. C. (2015). Human Activity and Rest
+               In Situ. In Methods in Enzymology (Vol. 552, pp. 257-283).
+               http://doi.org/10.1016/bs.mie.2014.11.028
 
         Examples
         --------

@@ -107,6 +107,7 @@ Reader classes
     .. autosummary::
         :toctree: _autosummary/
 
+        Chronosapiens
         Crespo
         CK
         Sadeh
@@ -120,6 +121,7 @@ Reader classes
 
         AoffT
         AonT
+        Chronosapiens_AoT
         Crespo_AoT
 
 
