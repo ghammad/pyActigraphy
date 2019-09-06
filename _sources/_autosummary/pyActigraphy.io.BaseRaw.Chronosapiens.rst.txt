@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.Chronosapiens
+=====================================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.Chronosapiens
