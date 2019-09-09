@@ -643,18 +643,18 @@ class ScoringMixin(object):
                 W_{0} &= 1/2
 
 
-        *The Automatic Wake Threshold Value* calculation is this:
+        The *Automatic Wake Threshold Value* calculation is this [2]_:
 
         1. Sum the activity counts for all epochs of the data set.
         2. Count the number of epochs scored as MOBILE for the data set
-        (the definition of MOBILE follows).
+           (the definition of MOBILE follows).
         3. Compute the MOBILE TIME (number of epochs scored as MOBILE from
-        step 2 multiplied by the Epoch Length) in minutes.
+           step 2 multiplied by the Epoch Length) in minutes.
         4. Compute the Auto Wake Threshold = ((sum of activity counts from
-        step 1) divided by (MOBILE TIME from step 3) ) multiplied by 0.88888.
+           step 1) divided by (MOBILE TIME from step 3)) multiplied by 0.88888.
 
 
-        *Definition of Mobile*:
+        *Definition of Mobile* [2]_:
 
         An epoch is scored as MOBILE if the number of activity counts recorded
         in that epoch is greater than or equal to the epoch length in 15-second
@@ -670,7 +670,9 @@ class ScoringMixin(object):
                Sleep/Wake Scoring Algorithm Used by the Actiwatch Activity
                Monitoring System; Technical Report; Mini-Mitter: Bend, OR, USA,
                1997
-        .. [2] https://fccid.io/JIAAWR1/Users-Manual/USERS-MANUAL-1-920937
+        .. [2] Instruction manual, Actiwatch Communication and Sleep Analysis
+               Software
+               (https://fccid.io/JIAAWR1/Users-Manual/USERS-MANUAL-1-920937)
 
         """
 
