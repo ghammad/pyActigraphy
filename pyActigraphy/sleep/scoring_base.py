@@ -44,6 +44,43 @@ def _activity_offset_time(data, whs=4):
     return aot
 
 
+def _actiware_automatic_threshold(data, scale_factor=0.88888):
+    r'''Automatic Wake Threshold Value calculation
+
+
+    1. Sum the activity counts for all epochs of the data set.
+    2. Count the number of epochs scored as MOBILE for the data set
+    (the definition of MOBILE follows).
+    3. Compute the MOBILE TIME (number of epochs scored as MOBILE from step 2
+    multiplied by the Epoch Length) in minutes.
+    4. Compute the Auto Wake Threshold = ((sum of activity counts from step 1)
+    divided by (MOBILE TIME from step 3) ) multiplied by 0.88888.
+
+    Definition of Mobile:
+    An epoch is scored as MOBILE if the number of activity counts recorded in
+    that epoch is greater than or equal to the epoch length in 15-second
+    intervals. For example,there are four 15-second intervals for a 1-minute
+    epoch length; hence, the activity value in an epoch must be greater than,
+    or equal to, four, to be scored as MOBILE.'''
+
+    # Sum of activity counts
+    counts_sum = data.values.sum()
+
+    # Definition of the "mobile" threshold
+    mobile_thr = int(data.index.freq/pd.Timedelta('15sec'))
+
+    # Counts the number of epochs scored as "mobile"
+    counts_mobile = (data.values >= mobile_thr).sum()
+
+    # Mobile time
+    mobile_time = counts_mobile*(data.index.freq/pd.Timedelta('1min'))
+
+    # Automatic wake threshold
+    automatic_thr = (counts_sum/mobile_time)*scale_factor
+
+    return automatic_thr
+
+
 def _padded_data(data, value, periods, frequency):
 
     date_offset = pd.DateOffset(seconds=frequency.total_seconds())
@@ -156,6 +193,11 @@ def _scripps(data, scale, window, threshold):
 def _oakley(data, window, threshold):
 
     """Oakley's algorithm for sleep-wake scoring."""
+    if threshold == 'automatic':
+        threshold = _actiware_automatic_threshold(data)
+    elif not np.isscalar(threshold):
+        msg = "`threshold` should be a scalar or 'automatic'."
+        raise ValueError(msg)
 
     scale = 1.
     oakley = data.rolling(
@@ -535,8 +577,9 @@ class ScoringMixin(object):
 
         Parameters
         ----------
-        threshold: float, optional
-            Threshold value for scoring sleep/wake.
+        threshold: float or str, optional
+            Threshold value for scoring sleep/wake. Can be set to "automatic"
+            (cf. Notes).
             Default is 40.
 
         Returns
@@ -599,6 +642,25 @@ class ScoringMixin(object):
                 W_{-1} &= W_{+1} = 1/8 \\
                 W_{0} &= 1/2
 
+
+        *The Automatic Wake Threshold Value* calculation is this:
+
+        1. Sum the activity counts for all epochs of the data set.
+        2. Count the number of epochs scored as MOBILE for the data set
+        (the definition of MOBILE follows).
+        3. Compute the MOBILE TIME (number of epochs scored as MOBILE from
+        step 2 multiplied by the Epoch Length) in minutes.
+        4. Compute the Auto Wake Threshold = ((sum of activity counts from
+        step 1) divided by (MOBILE TIME from step 3) ) multiplied by 0.88888.
+
+
+        *Definition of Mobile*:
+
+        An epoch is scored as MOBILE if the number of activity counts recorded
+        in that epoch is greater than or equal to the epoch length in 15-second
+        intervals. For example,there are four 15-second intervals for a
+        1-minute epoch length; hence, the activity value in an epoch must be
+        greater than, or equal to, four, to be scored as MOBILE.
 
 
         References
