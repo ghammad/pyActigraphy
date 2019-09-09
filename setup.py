@@ -107,7 +107,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         'joblib', 'lmfit', 'pandas', 'numba', 'numpy', 'pyexcel',
-        'pyexcel-ods3', 'scipy', 'spm1d', 'statsmodels'
+        'pyexcel-ods3', 'scipy', 'spm1d', 'statsmodels>=0.10'
     ],  # Optional
 
     # Data files included in your packages that need to be installed.
