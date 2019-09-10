@@ -1,4 +1,5 @@
 import datetime
+import io
 import pandas as pd
 import numpy as np
 import os
@@ -61,23 +62,26 @@ class RawRPX(BaseRaw):
         # extract file header and data header
         header = []
         data_available_cols = []
-        with open(input_fname, encoding='utf-8') as file:
-            for header_offset, line in enumerate(file, 1):
-                if fields[self.language]['Data'] in line:
-                    break
-                else:
-                    header.append(line)
-            # Read file until the next blank line
-            # First, skip blank line after section title
-            next(file)
-            for data_offset, line in enumerate(file):
-                if line == '\n':
-                    break
-                else:
-                    data_available_cols.append(
-                        line.split(',')[0].strip('"').rstrip(':')
-                    )
-
+        with open(input_fname, mode='rb') as file:
+            data = file.readlines()
+        for header_offset, line in enumerate(data, 1):
+            if fields[self.language]['Data'] in line.decode('utf-8'):
+                break
+            else:
+                header.append(line.decode('utf-8'))
+        # Read file until the next blank line
+        # First, skip blank line after section title
+        # next(file)
+        for data_offset, line in enumerate(data[header_offset+1:]):
+            line_clean = line.replace(b'\r\r\n', b'\r\n')
+            if line_clean == b'\r\n':
+                break
+            else:
+                data_available_cols.append(
+                    line_clean.decode(
+                        'utf-8'
+                    ).split(',')[0].strip('"').rstrip(':')
+                )
         # Verify that the input file contains the needed informations
         try:
             assert (
@@ -104,8 +108,13 @@ class RawRPX(BaseRaw):
         axial_mode = 'Unknown'
 
         # read actigraphy data
+        with open(input_fname, mode='rb') as file:
+            data = file.read()
+        data = data.replace(b'\r\r\n', b'\r\n')
+
         index_data = pd.read_csv(
-            input_fname,
+            # input_fname,
+            io.StringIO(data.decode('utf-8')),
             encoding='utf-8',
             skiprows=header_offset+data_offset+1,
             header=0,
@@ -191,7 +200,7 @@ class RawRPX(BaseRaw):
                 )
             elif fields[self.language]['Start_time'] in line:
                 start_time.append(
-                    re.sub(r'[^\d.:]+', '', line.split(delimiter)[1])
+                    re.sub(r'[^\d.:AMP]+', '', line.split(delimiter)[1])
                 )
         return pd.to_datetime(
             ' '.join(start_time),
