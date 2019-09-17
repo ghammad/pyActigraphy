@@ -616,16 +616,21 @@ class LIDS():
             lids_period = self.lids_fit_results.params['period']*self.freq
             return lids_period.astype('timedelta64[{}]'.format(freq))
 
-    def lids_phases(self, lids, step=.1):
-        r'''LIDS onset and offset phases in degrees
+    def lids_phases(self, lids, params=None, radians=False):
+        r'''LIDS onset and offset phases
 
         Parameters
         ----------
         lids: pandas.Series
             Output data from LIDS transformation.
-        step: float, optional
-            Step between points at which the LIDS fit is evaluated.
-            Default is '0.1'.
+        params: lmfit.Parameters, optional
+            Parameters for the fit function.
+            If None, self.lids_fit_params is used instead.
+            Default is None.
+        radians: bool, optional
+            If set to True, the phases are calculated in radians instead of
+            degrees.
+            Default is False.
 
         Returns
         -------
@@ -633,33 +638,32 @@ class LIDS():
         '''
 
         if self.lids_fit_results is None:
+            warnings.warn(
+                'The LIDS fit results are not available.\n'
+                'Run lids_fit() before accessing this method.\n'
+                'Returning None.',
+                UserWarning
+            )
             # TODO: evaluate if raise ValueError('') more appropriate
             return None
 
         # Access fit parameters
-        params = self.lids_fit_results.params
+        if params is None:
+            params = self.lids_fit_results.params
 
-        # Fit support range
-        x = np.arange(lids.index.size, step=step)
+        # Phase at sleep onset
+        onset_phase = params['phase'].value  # derived from the fit parameters
 
-        # LIDS fit derivatives (1st and 2nd)
-        df_dx = np.gradient(self.lids_fit_func(x, params), step)
-        d2f_dx2 = np.gradient(df_dx, step)
+        # Phase at sleep offset
+        # Defined as the value of the inverse fit function at sleep offset t_1,
+        # modulo 2*Pi: Phi@Offset = 2*pi*t_1/T + phi [2*pi]
+        t_1 = lids.index.values.ptp()
+        T = params['period'].value
+        phi = params['phase'].value
+        offset_phase = (2*np.pi*t_1/T + phi) % (2*np.pi)
 
-        # Index of the 1st maxima (i.e 1st maximum of the LIDS oscillations)
-        first_max_idx = np.argmax(_extrema_points(df_dx, d2f_dx2))
-        # Convert the index into a phase using the fitted period
-        onset_phase = (first_max_idx*step)/params['period']*360
-
-        # Index of the last 'increasing' inflexion points in LIDS oscillations
-        # before sleep offset
-        last_inflex_idx = -1 * (
-            # reverse order to find last
-            np.argmax(_inflexion_points(df_dx, d2f_dx2)[::-1]) +
-            1  # to account for index shifting during reverse (-1: 0th elem)
-        )
-        # Convert the index into a phase using the fitted period
-        offset_phase = np.abs(last_inflex_idx*step/params['period']*360)
+        if not radians:
+            offset_phase *= 360/(2*np.pi)
 
         return onset_phase, offset_phase
 
