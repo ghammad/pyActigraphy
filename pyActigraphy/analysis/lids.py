@@ -370,6 +370,53 @@ class LIDS():
 
         return smooth_lids
 
+    def lids_concat(self, lids, time_delta='15min'):
+        r'''Concatenate LIDS data
+
+        Parameters
+        ----------
+        lids: list of pandas.Series
+            Data to concatenate.
+        time_delta: str, optional
+            Maximal time delta between LIDS series to concatenate.
+            Default is '15min'.
+
+        Returns
+        -------
+        concat_lids: list of pandas.Series
+        '''
+        td = pd.Timedelta(time_delta)
+
+        # Check if two consecutive series are separated by 'time_delta'
+        intervals = [
+            (lids[idx+1].index[0]-lids[idx].index[-1]) < td
+            for idx in range(len(lids)-1)
+        ]
+
+        concat_indices = []
+        to_concat = []
+
+        for idx, interval in enumerate(intervals):
+            to_concat.append(idx)
+            if not interval:
+                concat_indices.append(to_concat)
+                to_concat = []
+        if len(to_concat) > 0:
+            concat_indices.append(to_concat)
+        if intervals[-1]:
+            concat_indices[-1].append(len(intervals))
+        else:
+            concat_indices.append([len(intervals)])
+
+        concat_lids = []
+        for idx in concat_indices:
+            if len(idx) == 1:
+                concat_lids.append(lids[idx[0]])
+            else:
+                concat_lids.append(pd.concat([lids[i] for i in idx]))
+
+        return concat_lids
+
     def lids_fit(
         self,
         lids,
