@@ -477,7 +477,7 @@ class LIDS():
 
         # Define the x range by converting timestamps to indices, in order to
         # deal with time series with irregular index.
-        x = (lids.index - lids.index[0])/self.freq
+        x = ((lids.index - lids.index[0])/self.freq).values
 
         if scan_period:
 
