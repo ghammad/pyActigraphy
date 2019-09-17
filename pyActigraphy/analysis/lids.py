@@ -428,8 +428,9 @@ class LIDS():
         #     model = self.lids_fit_func(x, params)
         #     return (data-model)
 
-        # Define the x range
-        x = np.arange(lids.index.size)
+        # Define the x range by converting timestamps to indices, in order to
+        # deal with time series with irregular index.
+        x = (lids.index - lids.index[0])/self.freq
 
         if scan_period:
 
