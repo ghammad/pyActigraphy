@@ -383,7 +383,9 @@ class LIDS():
 
         Returns
         -------
+        concat_indices: list of lists of the indices of the series to merge
         concat_lids: list of pandas.Series
+
         '''
         td = pd.Timedelta(time_delta)
 
@@ -415,7 +417,7 @@ class LIDS():
             else:
                 concat_lids.append(pd.concat([lids[i] for i in idx]))
 
-        return concat_lids
+        return concat_indices, concat_lids
 
     def lids_fit(
         self,
