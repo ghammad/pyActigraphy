@@ -669,6 +669,9 @@ class LIDS():
     def lids_phases(self, lids, params=None, radians=False):
         r'''LIDS onset and offset phases
 
+        These phases are defined as the minimal distance to the first/last peak
+        from sleep onset/offset, respectively.
+
         Parameters
         ----------
         lids: pandas.Series
@@ -687,33 +690,35 @@ class LIDS():
         onset_phase, offset_phase: numpy.float64
         '''
 
-        if self.lids_fit_results is None:
-            warnings.warn(
-                'The LIDS fit results are not available.\n'
-                'Run lids_fit() before accessing this method.\n'
-                'Returning None.',
-                UserWarning
-            )
-            # TODO: evaluate if raise ValueError('') more appropriate
-            return None
-
         # Access fit parameters
         if params is None:
-            params = self.lids_fit_results.params
+            if self.lids_fit_results is None:
+                warnings.warn(
+                    'The LIDS fit results are not available.\n'
+                    'Run lids_fit() before accessing this method.\n'
+                    'Returning None.',
+                    UserWarning
+                )
+                # TODO: evaluate if raise ValueError('') more appropriate
+                return None
+            else:
+                params = self.lids_fit_results.params
 
         # Phase at sleep onset
-        onset_phase = params['phase'].value  # derived from the fit parameters
+        onset_phase = 2*np.pi - params['phase'].value
 
         # Phase at sleep offset
-        # Defined as the value of the inverse fit function at sleep offset t_1,
+        # Defined as the value of an inverse cosine fit function at sleep
+        # offset t_1,
         # modulo 2*Pi: Phi@Offset = 2*pi*t_1/T + phi [2*pi]
-        t_1 = lids.index.values.ptp()
+        t_1 = lids.index.values.ptp()/lids.index.freq
         T = params['period'].value
         phi = params['phase'].value
         offset_phase = (2*np.pi*t_1/T + phi) % (2*np.pi)
 
         if not radians:
-            offset_phase *= 360/(2*np.pi)
+            onset_phase *= 180/np.pi
+            offset_phase *= 180/np.pi
 
         return onset_phase, offset_phase
 
