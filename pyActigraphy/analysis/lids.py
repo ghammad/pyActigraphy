@@ -275,7 +275,68 @@ class LIDS():
             )
         return self.__fit_results
 
-    def filter(self, ts, duration_min='3H', duration_max='12H'):
+    @classmethod
+    def concat(cls, ts, time_delta='15min'):
+        r'''Concatenate time series
+
+        Parameters
+        ----------
+        ts: list of pandas.Series
+            Data to concatenate.
+        time_delta: str, optional
+            Maximal time delta between LIDS series to concatenate.
+            Default is '15min'.
+
+        Returns
+        -------
+        concat_indices: list of lists of the indices of the series to merge
+        concat_ts: list of pandas.Series
+
+        '''
+        if len(ts) < 2:
+            warnings.warn(
+                'The number of time series to concatenate must be greater' +
+                ' than 2.\n' +
+                'Actual number of time series: {}.\n'.format(len(ts)) +
+                'Returning empty lists.',
+                UserWarning
+            )
+            return [], []
+
+        td = pd.Timedelta(time_delta)
+
+        # Check if two consecutive series are separated by 'time_delta'
+        intervals = [
+            (ts[idx+1].index[0]-ts[idx].index[-1]) < td
+            for idx in range(len(ts)-1)
+        ]
+
+        concat_indices = []
+        to_concat = []
+
+        for idx, interval in enumerate(intervals):
+            to_concat.append(idx)
+            if not interval:
+                concat_indices.append(to_concat)
+                to_concat = []
+        if len(to_concat) > 0:
+            concat_indices.append(to_concat)
+        if intervals[-1]:
+            concat_indices[-1].append(len(intervals))
+        else:
+            concat_indices.append([len(intervals)])
+
+        concat_ts = []
+        for idx in concat_indices:
+            if len(idx) == 1:
+                concat_ts.append(ts[idx[0]])
+            else:
+                concat_ts.append(pd.concat([ts[i] for i in idx]))
+
+        return concat_indices, concat_ts
+
+    @classmethod
+    def filter(cls, ts, duration_min='3H', duration_max='12H'):
         r'''Filter data according to their duration
 
         Before performing a LIDS analysis, it is necessary to drop sleep bouts
@@ -296,27 +357,33 @@ class LIDS():
         )
         return filtered
 
-    def __smooth(self, lids, method, win_size):
-        r'''Smooth LIDS data
+    @classmethod
+    def smooth(cls, ts, method, win_size):
+        r'''Smooth data
 
         By default, smooth with a centered moving average using a `win_size`
         window'''
 
         # Smooth functions
-        lids_smooth_funcs = ['mva', 'kernel', 'none']
-        if method not in lids_smooth_funcs:
+        smooth_funcs = ['mva', 'gaussian', 'none']
+        if method not in smooth_funcs:
             raise ValueError(
-                '`LIDS smooth function` must be "%s". You passed: "%s"' %
-                ('" or "'.join(list(lids_smooth_funcs)), method)
+                '`Smooth function` must be "%s". You passed: "%s"' %
+                ('" or "'.join(list(smooth_funcs)), method)
             )
 
         if method == 'mva':
-            return lids.rolling(win_size, center=True, min_periods=1).mean()
-        elif method == 'kernel':
-            smooth_lids = spm_smooth(lids.values, fwhm=win_size)
-            return pd.Series(data=smooth_lids, index=lids.index)
+            return ts.rolling(win_size, center=True, min_periods=1).mean()
+        elif method == 'gaussian':
+            return ts.rolling(
+                3*win_size,
+                win_type=method,
+                center=True,
+                min_periods=1).mean(std=win_size/2)
+            # smooth_ts = spm_smooth(ts.values, fwhm=win_size)
+            # return pd.Series(data=smooth_ts, index=ts.index)
         elif method == 'none':
-            return lids
+            return ts
 
     def lids_transform(
         self, ts, method='mva', win_td='30min', resampling_freq=None
@@ -367,58 +434,9 @@ class LIDS():
         win_size = int(pd.Timedelta(win_td)/self.freq)
 
         # Smooth LIDS-transformed data
-        smooth_lids = self.__smooth(lids, method=method, win_size=win_size)
+        smooth_lids = self.smooth(lids, method=method, win_size=win_size)
 
         return smooth_lids
-
-    def lids_concat(self, lids, time_delta='15min'):
-        r'''Concatenate LIDS data
-
-        Parameters
-        ----------
-        lids: list of pandas.Series
-            Data to concatenate.
-        time_delta: str, optional
-            Maximal time delta between LIDS series to concatenate.
-            Default is '15min'.
-
-        Returns
-        -------
-        concat_indices: list of lists of the indices of the series to merge
-        concat_lids: list of pandas.Series
-
-        '''
-        td = pd.Timedelta(time_delta)
-
-        # Check if two consecutive series are separated by 'time_delta'
-        intervals = [
-            (lids[idx+1].index[0]-lids[idx].index[-1]) < td
-            for idx in range(len(lids)-1)
-        ]
-
-        concat_indices = []
-        to_concat = []
-
-        for idx, interval in enumerate(intervals):
-            to_concat.append(idx)
-            if not interval:
-                concat_indices.append(to_concat)
-                to_concat = []
-        if len(to_concat) > 0:
-            concat_indices.append(to_concat)
-        if intervals[-1]:
-            concat_indices[-1].append(len(intervals))
-        else:
-            concat_indices.append([len(intervals)])
-
-        concat_lids = []
-        for idx in concat_indices:
-            if len(idx) == 1:
-                concat_lids.append(lids[idx[0]])
-            else:
-                concat_lids.append(pd.concat([lids[i] for i in idx]))
-
-        return concat_indices, concat_lids
 
     def lids_fit(
         self,
