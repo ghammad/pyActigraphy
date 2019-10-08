@@ -231,6 +231,7 @@ class LIDS():
         self.__fit_initial_params = fit_params
         # self.__fit_params = None
         self.__fit_results = None
+        self.__fit_mri_profile = None
         # self.__fit_period = None
 
     @property
@@ -426,6 +427,7 @@ class LIDS():
         scan_period=True,
         bounds=('30min', '180min'),
         step='5min',
+        mri_profile=False,
         nan_policy='raise',
         verbose=False
     ):
@@ -454,6 +456,10 @@ class LIDS():
             Default is ('30min','180min').
         step: str, optional
             Time delta between the periods to be tested.
+        mri_profile: bool, optional
+            If set to True, the function returns a list with the MRI calculated
+            for each test period.
+            Default is False.
         nan_policy: str, optional
             Specifies action if the objective function returns NaN values.
             One of:
@@ -480,6 +486,7 @@ class LIDS():
         # Define the x range by converting timestamps to indices, in order to
         # deal with time series with irregular index.
         x = ((lids.index - lids.index[0])/self.freq).values
+        mri = []
 
         if scan_period:
 
@@ -496,7 +503,6 @@ class LIDS():
             )
 
             # Fit data for each test period
-            mri = []
             fit_results = []
             initial_period = self.__fit_initial_params['period'].value
             for test_period in test_periods:
@@ -545,6 +551,7 @@ class LIDS():
             # Set back original value
             self.__fit_initial_params['period'].value = initial_period
             self.__fit_initial_params['period'].vary = True
+
         else:
 
             # Minimize residuals
@@ -563,13 +570,20 @@ class LIDS():
                 # Calculate the MR index
                 pearson_r = self.lids_pearson_r(
                     lids, self.lids_fit_results.params)[0]
-                mri = self.lids_mri(lids, self.lids_fit_results.params)
+                mri.append(self.lids_mri(lids, self.lids_fit_results.params))
                 print('Pearson r: {}'.format(pearson_r))
-                print('MRI: {}'.format(mri))
+                print('MRI: {}'.format(mri[-1]))
 
-        # self.__fit_results = fit_result
-        # self.lids_fit_params = fit_result.params
-        # self.lids_fit_period = fit_result.params['period'].value
+        if mri_profile:
+            if scan_period:
+                return pd.Series(index=test_periods*self.freq, data=mri)
+            else:
+                return pd.Series(
+                    index=self.lids_fit_results.params[
+                        'period'
+                    ].value*self.freq,
+                    data=mri
+                )
 
     def lids_pearson_r(self, lids, params=None):
         r'''Pearson correlation factor
