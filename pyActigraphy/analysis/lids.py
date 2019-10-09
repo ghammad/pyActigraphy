@@ -552,19 +552,21 @@ class LIDS():
 
             # Fit the highest MRI peak
             peaks, peak_properties = find_peaks(mri, height=0)
-            peak_index = peaks[np.argmax(peak_properties['peak_heights'])]
+            if len(peak_properties['peak_heights']) > 0:
+                peak_index = peaks[np.argmax(peak_properties['peak_heights'])]
 
-            # Store fit parameters
-            self.__fit_results = fit_results[peak_index]
-            if verbose:
-                print('Highest MRI: {}'.format(mri[peak_index]))
-
-            # # If the newly calculated MRI is higher than the current MRI
-            # if mri_tmp > mri and (test_period != period_end):
-            #     # Store MRI
-            #     mri = mri_tmp
-            #     # Store fit parameters
-            #     self.__fit_results = fit_results[-1]
+                # Store fit parameters
+                self.__fit_results = fit_results[peak_index]
+                if verbose:
+                    print('Highest MRI: {}'.format(mri[peak_index]))
+            else:
+                # Store fit parameters
+                self.__fit_results = None
+                if verbose:
+                    print(
+                        'No highest MRI could be found. '
+                        'No peak was found in the MRI profile'
+                    )
 
             # Set back original value
             self.__fit_initial_params['period'].value = initial_period
