@@ -272,9 +272,12 @@ class SSA():
 
         Parameters
         ----------
-        r: int
+        r: int or list of int
             Index of the elementary matrix to be diagonal-averaged.
             Must be lower than or equal to the embedding dimension, L.
+            If a list of indices is given instead, the corresponding elementary
+            matrices are grouped (ie. reduced to a single matrix by summation)
+            before diagonal-averaging.
 
         Returns
         -------
@@ -327,8 +330,14 @@ class SSA():
         Analysis for Time Series. Springer Berlin Heidelberg
         http://doi.org/10.1007/978-3-642-34913-3
         '''
+        if isinstance(r, list):
+            X_elementaries = [self.X_elementary(i) for i in r]
+            from functools import reduce
+            X_elementary = reduce((lambda x, y: np.add(x, y)), X_elementaries)
+        else:
+            X_elementary = self.X_elementary(r)
 
-        X_tilde = _diagonal_averaging(self.X_elementary(r))
+        X_tilde = _diagonal_averaging(X_elementary)
 
         return X_tilde
 
