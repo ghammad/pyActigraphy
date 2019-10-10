@@ -586,11 +586,11 @@ class LIDS():
             # Print fit parameters if verbose
             if verbose:
                 print(fit_report(self.lids_fit_results))
+            # Calculate the MR index
+            mri.append(self.lids_mri(lids, self.lids_fit_results.params))
             if verbose:
-                # Calculate the MR index
                 pearson_r = self.lids_pearson_r(
                     lids, self.lids_fit_results.params)[0]
-                mri.append(self.lids_mri(lids, self.lids_fit_results.params))
                 print('Pearson r: {}'.format(pearson_r))
                 print('MRI: {}'.format(mri[-1]))
 
@@ -599,9 +599,11 @@ class LIDS():
                 return pd.Series(index=test_periods*self.freq, data=mri)
             else:
                 return pd.Series(
-                    index=self.lids_fit_results.params[
-                        'period'
-                    ].value*self.freq,
+                    index=[
+                        self.lids_fit_results.params[
+                            'period'
+                        ].value*self.freq
+                    ],
                     data=mri
                 )
 
