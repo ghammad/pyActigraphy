@@ -98,6 +98,24 @@ def _lfam(x, params):
     return (A + b*x)*np.cos(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
 
 
+def _lfamd(x, params):
+    r'''Linear frequency and amplitude modulated cosine function, associated
+    with an exponential decay'''
+
+    A = params['amp']
+    b = params['mod']
+    k = params['k']
+    phi = params['phase']
+    T = params['period']
+    offset = params['offset']
+    amp_exp = params['amp_exp']
+    tau = params['tau']
+
+    return (A + b*x)*np.cos(
+            2*np.pi*(x/T+k*x*x)+phi
+        ) + offset + amp_exp*np.exp(-x/tau)
+
+
 def _residual(params, x, data, fit_func):
     r'''Residual function to minimize'''
 
@@ -160,7 +178,7 @@ class LIDS():
     """
 
     lids_func_list = ['lids']
-    fit_func_list = ['cosine', 'chirp', 'modchirp']
+    fit_func_list = ['cosine', 'chirp', 'modchirp', 'modchirp_exp']
 
     def __init__(
         self,
@@ -179,14 +197,19 @@ class LIDS():
             )
 
         # Fit functions
-        fit_funcs = {'cosine': _cosine, 'chirp': _lfm, 'modchirp': _lfam}
+        fit_funcs = {
+            'cosine': _cosine,
+            'chirp': _lfm,
+            'modchirp': _lfam,
+            'modchirp_exp': _lfamd
+        }
         if fit_func not in fit_funcs.keys():
             raise ValueError(
                 '`Fit function` must be "%s". You passed: "%s"' %
                 ('" or "'.join(list(fit_funcs.keys())), fit_func)
             )
 
-        # Fit objective functions (i.e. funcitons to be minimized)
+        # Fit objective functions (i.e. functions to be minimized)
         fit_obj_funcs = {
             'residuals': _residual,
             'nll': _lids_likelihood
@@ -216,7 +239,7 @@ class LIDS():
             fit_params.add('phase', value=np.pi/2, min=0, max=2*np.pi)
             fit_params.add('period', value=9, min=0)  # Dummy value
             # Introduce inequality amp+offset < 100
-            fit_params.add('delta', value=60, max=100, vary=True)
+            fit_params.add('delta', value=60, min=0, max=100, vary=True)
             fit_params.add('offset', expr='delta-amp')
             # Additional parameters for the chirp fit function
             if fit_func == 'chirp':
@@ -227,6 +250,12 @@ class LIDS():
                 fit_params.add('k', value=-.0001, min=-1, max=1)
                 fit_params.add('slope', value=-0.5)
                 fit_params.add('mod', value=0.0001, min=-10, max=10)
+            # Additional parameters for the modchirp_exp fit function
+            if fit_func == 'modchirp_exp':
+                fit_params.add('k', value=-.0001, min=-1, max=1)
+                fit_params.add('mod', value=0.0001, min=-10, max=10)
+                fit_params.add('tau', value=0.5)
+                fit_params.add('amp_exp', value=10, min=0, max=100)
 
         self.__fit_initial_params = fit_params
         # self.__fit_params = None
