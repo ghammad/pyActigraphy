@@ -5,7 +5,6 @@ import warnings
 from lmfit import fit_report, minimize, Parameters
 from scipy.signal import find_peaks
 from scipy.stats import pearsonr, poisson
-from spm1d.util import smooth as spm_smooth
 
 
 def _zero_crossing_points(x):
@@ -402,8 +401,25 @@ class LIDS():
     def smooth(cls, ts, method, win_size):
         r'''Smooth data using a rolling window
 
-        By default, smooth with a centered moving average using a `win_size`
-        window'''
+        Parameters
+        ----------
+        ts: pandas.Series
+            Time series to smooth.
+        method: str, optional
+            Method to smooth the data.
+            Available options are:
+                'mva': moving average
+                'kernel': gaussian kernel
+                'none': no smoothing
+        win_size: int
+            If method='mva': Size of the rolling window.
+            If method='gaussian': Standard deviation of the gaussian kernel.
+            The window size is then set to :math:`[-3*\sigma,3*\sigma]`.
+
+        Returns
+        -------
+        smooth_lids: pandas.Series
+        '''
 
         # Smooth functions
         smooth_funcs = ['mva', 'gaussian', 'none']
@@ -417,10 +433,10 @@ class LIDS():
             return ts.rolling(win_size, center=True, min_periods=1).mean()
         elif method == 'gaussian':
             return ts.rolling(
-                3*win_size,
+                3*2*win_size,
                 win_type=method,
                 center=True,
-                min_periods=1).mean(std=win_size/2)
+                min_periods=1).mean(std=win_size)
             # smooth_ts = spm_smooth(ts.values, fwhm=win_size)
             # return pd.Series(data=smooth_ts, index=ts.index)
         elif method == 'none':
