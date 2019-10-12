@@ -398,7 +398,7 @@ class LIDS():
         return filtered
 
     @classmethod
-    def smooth(cls, ts, method, win_size):
+    def smooth(cls, ts, method, resolution):
         r'''Smooth data using a rolling window
 
         Parameters
@@ -411,7 +411,7 @@ class LIDS():
                 'mva': moving average
                 'kernel': gaussian kernel
                 'none': no smoothing
-        win_size: int
+        resolution: float
             If method='mva': Size of the rolling window.
             If method='gaussian': Standard deviation of the gaussian kernel.
             The window size is then set to :math:`[-3*\sigma,3*\sigma]`.
@@ -430,13 +430,15 @@ class LIDS():
             )
 
         if method == 'mva':
+            win_size = int(resolution)
             return ts.rolling(win_size, center=True, min_periods=1).mean()
         elif method == 'gaussian':
+            win_size = int(3*2*resolution)
             return ts.rolling(
-                3*2*win_size,
+                win_size,
                 win_type=method,
                 center=True,
-                min_periods=1).mean(std=win_size)
+                min_periods=1).mean(std=resolution)
             # smooth_ts = spm_smooth(ts.values, fwhm=win_size)
             # return pd.Series(data=smooth_ts, index=ts.index)
         elif method == 'none':
@@ -484,15 +486,16 @@ class LIDS():
         # Apply LIDS transformation x: 100/(x+1)
         lids = rs.apply(self.lids_func)
 
-        # Store actual sampling frequency
-        self.__freq = pd.Timedelta(lids.index.freq)
-
         # Series with a DateTimeIndex don't accept 'time-aware' centered window
         # Convert win_size (TimeDelta) into a number of time bins
-        win_size = int(pd.Timedelta(resolution)/self.freq)
+        resolution_norm = pd.Timedelta(resolution)/lids.index.freq
 
         # Smooth LIDS-transformed data
-        smooth_lids = self.smooth(lids, method=method, win_size=win_size)
+        smooth_lids = self.smooth(
+            lids,
+            method=method,
+            resolution=resolution_norm
+        )
 
         return smooth_lids
 
@@ -555,10 +558,8 @@ class LIDS():
                https://lmfit.github.io/lmfit-py/index.html
         '''
 
-        # # Define residual function to minimize
-        # def residual(params, x, data):
-        #     model = self.lids_fit_func(x, params)
-        #     return (data-model)
+        # Store actual sampling frequency
+        self.__freq = pd.Timedelta(lids.index.freq)
 
         # Define the x range by converting timestamps to indices, in order to
         # deal with time series with irregular index.
@@ -868,9 +869,9 @@ class LIDS():
         sleep_bouts,
         duration_min='3H',
         duration_max='12H',
+        resampling_freq='10min',
         smooth_method='mva',
-        smooth_resolution='30Min',
-        resampling_freq='10min'
+        smooth_resolution='30Min'
     ):
         r'''Filter data according to their time duration and smooth them.
 
@@ -917,10 +918,10 @@ class LIDS():
         smooth_lids = [
             self.lids_transform(
                 ts,
+                resampling_freq=resampling_freq,
                 method=smooth_method,
-                win_td=smooth_resolution,
-                resampling_freq=resampling_freq
-                ) for ts in filtered_sleep_bouts
+                resolution=smooth_resolution
+            ) for ts in filtered_sleep_bouts
         ]
 
         return smooth_lids
