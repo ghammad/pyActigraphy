@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import warnings
 
-from functools import reduce
 from lmfit import fit_report, minimize, Parameters
 from scipy.signal import find_peaks
 from scipy.stats import pearsonr, poisson
@@ -305,12 +304,12 @@ class LIDS():
         return self.__fit_results
 
     @classmethod
-    def concat(cls, ts, time_delta='15min'):
+    def concat(cls, ts_list, time_delta='15min'):
         r'''Concatenate time series
 
         Parameters
         ----------
-        ts: list of pandas.Series
+        ts_list: list of pandas.Series
             Data to concatenate.
         time_delta: str, optional
             Maximal time delta between LIDS series to concatenate.
@@ -318,15 +317,15 @@ class LIDS():
 
         Returns
         -------
-        concat_indices: list of lists of the indices of the series to merge
+        concat_indices: list of lists of the indices of the series to be merged
         concat_ts: list of pandas.Series
 
         '''
-        if len(ts) < 2:
+        if len(ts_list) < 2:
             warnings.warn(
                 'The number of time series to concatenate must be greater' +
                 ' than 2.\n' +
-                'Actual number of time series: {}.\n'.format(len(ts)) +
+                'Actual number of time series: {}.\n'.format(len(ts_list)) +
                 'Returning empty lists.',
                 UserWarning
             )
@@ -336,8 +335,8 @@ class LIDS():
 
         # Check if two consecutive series are separated by 'time_delta'
         intervals = [
-            (ts[idx+1].index[0]-ts[idx].index[-1]) < td
-            for idx in range(len(ts)-1)
+            (ts_list[idx+1].index[0]-ts_list[idx].index[-1]) < td
+            for idx in range(len(ts_list)-1)
         ]
 
         concat_indices = []
@@ -358,18 +357,31 @@ class LIDS():
         concat_ts = []
         for idx in concat_indices:
             if len(idx) == 1:
-                concat_ts.append(ts[idx[0]])
+                concat_ts.append(ts_list[idx[0]])
             else:
-                concat_ts.append(pd.concat([ts[i] for i in idx]))
+                concat_ts.append(pd.concat([ts_list[i] for i in idx]))
 
         return concat_indices, concat_ts
 
     @classmethod
-    def filter(cls, ts, duration_min='3H', duration_max='12H'):
-        r'''Filter data according to their duration
+    def filter(cls, ts_list, duration_min='3H', duration_max='12H'):
+        r'''Filter data according to their time duration.
 
-        Before performing a LIDS analysis, it is necessary to drop sleep bouts
-        that too short or too long.
+        Parameters
+        ----------
+        ts_list: list of pandas.Series
+            Data to filter.
+        duration_min: str, optional
+            Minimal time duration for a time series to be kept.
+            Default is '30min'.
+        duration_max: str, optional
+            Maximal time duration for a time series to be kept.
+            Default is '12h'.
+
+        Returns
+        -------
+        filtered: list of pandas.Series
+            List of filtered time series.
         '''
 
         def duration(s):
@@ -382,13 +394,13 @@ class LIDS():
         filtered = []
         filtered[:] = filterfalse(
             lambda x: duration(x) < td_min or duration(x) > td_max,
-            ts
+            ts_list
         )
         return filtered
 
     @classmethod
     def smooth(cls, ts, method, win_size):
-        r'''Smooth data
+        r'''Smooth data using a rolling window
 
         By default, smooth with a centered moving average using a `win_size`
         window'''
@@ -503,6 +515,7 @@ class LIDS():
             Default is ('30min','180min').
         step: str, optional
             Time delta between the periods to be tested.
+            Default is '5min'
         mri_profile: bool, optional
             If set to True, the function returns a list with the MRI calculated
             for each test period.
@@ -833,81 +846,114 @@ class LIDS():
 
         return lids_resampled.interpolate(method='linear')
 
-    def lids_summary(self, lids, verbose=False):
-        r'''Calculate summary statistics for LIDS
+    def lids_summary(
+        self,
+        index,
+        lids,
+        method='leastsq',
+        scan_period=True,
+        bounds=('30min', '180min'),
+        step='5min',
+        mri_profile=False,
+        nan_policy='raise',
+        verbose_fit=False,
+        verbose=False
+    ):
+        r'''Estimated parameters and goodness-of-fit statistics for LIDS
 
-        Fit all LIDS-transformed bouts and calculate the mean period, the mean
-        mri, the mean number of LIDS cycles and the dampening factor of the
-        mean LIDS profile.
+        Fit the input LIDS-transformed bout and create a DataFrame containing
+        the estimated values of the LIDS fit parameters as well as
+        goodness-of-fit statistics such as AIC, BIC, etc.
 
         Parameters
         ----------
-        lids: list of pandas.Series
+        index: scalar or str
+            Index to give to the returned pandas.DataFrame.
+        lids: pandas.Series
             Output data from LIDS transformation.
+        method: str, optional
+            Name of the fitting method to use [1]_.
+            Default is 'leastsq'.
+        scan_period: bool, optional
+            If set to True, the period of the LIDS fit function is fixed and
+            varied between the specified bounds.
+            The selected period corresponds to the highest MRI value.
+            Otherwise, the period is a free parameter of the fit.
+            Default is True.
+        bounds: 2-tuple of str, optional
+            Lower and upper bounds for the periods to be tested.
+            If scan_period is set to False, the bounds are ignored.
+            Default is ('30min','180min').
+        step: str, optional
+            Time delta between the periods to be tested.
+            Default is '5min'
+        mri_profile: bool, optional
+            If set to True, the function returns a list with the MRI calculated
+            for each test period.
+            Default is False.
+        nan_policy: str, optional
+            Specifies action if the objective function returns NaN values.
+            One of:
+                'raise': a ValueError is raised
+                'propagate': the values returned from userfcn are un-altered
+                'omit': non-finite values are filtered
+            Default is 'raise'.
+        verbose_fit: bool, optional
+            If set to True, display fit informations
         verbose: bool, optional
             If set to True, print summary statistics.
             Default is False.
 
         Returns
         -------
-        summary: dict
-            Dictionary with the summary statistics.
+        df_params: pandas.DataFrame
+            DataFrame with the estimated parameters and goodness-of-fit
+            statistics.
         '''
 
-        ilids = []  # LIDS profiles
-        periods = []  # List of LIDS periods
-        mris = []  # MRI indices
-        ncycles = []  # Number of LIDS cycles/sleep bout
-
-        for idx, s in enumerate(lids):
-            # Fit LIDS data
-            self.lids_fit(s, verbose=False)
-
-            # Verify LIDS period
-            period = self.lids_period(freq='s')
-
-            # Calculate MRI
-            mri = self.lids_mri(s)
-
-            # Calculate the number of LIDS cycle (as sleep bout length/period):
-            ncycle = s.index.values.ptp()/np.timedelta64(1, 's')
-            ncycle /= period.astype(float)
-
-            if verbose:
-                print('-'*20)
-                print('Sleep bout nr {}'.format(idx))
-                print('- Period: {!s}'.format(period))
-                print('- MRI: {}'.format(mri))
-                print('- Number of cycles: {}'.format(ncycle))
-
-            # Rescale LIDS timeline to LIDS period
-            rescaled_lids = self.lids_convert_to_internal_time(s)
-
-            periods.append(period)
-            mris.append(mri)
-            ncycles.append(ncycle)
-            ilids.append(rescaled_lids)
-
-        # Create the mean LIDS profile
-        lids_profile = reduce(
-            (lambda x, y: x.add(y, fill_value=0)),
-            ilids
-        )/len(ilids)
-
-        # Fit mean LIDS profile with a pol0
-        fit_params = np.polyfit(
-            x=range(len(lids_profile.index)),
-            y=lids_profile.values,
-            deg=1
+        # Fit LIDS data
+        self.lids_fit(
+            lids,
+            method=method,
+            scan_period=scan_period,
+            bounds=bounds,
+            step=step,
+            mri_profile=mri_profile,
+            nan_policy=nan_policy,
+            verbose=verbose_fit
         )
 
-        # LIDS summary
-        summary = {}
-        summary['Mean number of LIDS cycles'] = np.mean(ncycles)
-        summary['Mean LIDS period (s)'] = np.mean(periods).astype(float)
-        summary['Mean MRI'] = np.mean(mris)
-        summary[
-            'LIDS dampening factor (counts/{})'.format(self.freq)
-        ] = fit_params[0]
+        if self.lids_fit_results.params is None:
+            return None
 
-        return summary
+        # Extract fit parameters
+        fit_params = self.lids_fit_results.params.valuesdict()
+
+        # Add pearson correlation factor to fit parameters
+        fit_params['pearson_r'] = self.lids_pearson_r(lids)[0]
+        # Add MRI to fit parameters
+        fit_params['mri'] = self.lids_mri(lids)
+
+        # Add fit results to fit parameters
+        fit_params['status'] = int(self.lids_fit_results.success)
+        fit_params['aic'] = self.lids_fit_results.aic
+        fit_params['bic'] = self.lids_fit_results.bic
+        fit_params['redchisq'] = self.lids_fit_results.redchi
+
+        # Calculate phase at sleep onset and offset
+        lids_onset_phase, lids_offset_phase = self.lids_phases(lids)
+
+        # Add phases to fit parameters
+        fit_params['phase_onset'] = lids_onset_phase
+        fit_params['phase_offset'] = lids_offset_phase
+
+        # Add sleep bout duration
+        fit_params['duration'] = lids.index[-1]-lids.index[0]
+
+        # Create a DF with the fit parameters
+        df_params = pd.DataFrame(fit_params, index=[index])
+
+        if verbose:
+            print(df_params)
+
+        return df_params
