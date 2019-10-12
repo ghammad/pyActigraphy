@@ -427,7 +427,7 @@ class LIDS():
             return ts
 
     def lids_transform(
-        self, ts, method='mva', win_td='30min', resampling_freq=None
+        self, ts, resampling_freq=None, method='mva', resolution='30min'
     ):
         r'''Apply LIDS transformation to activity data
 
@@ -440,6 +440,9 @@ class LIDS():
         ----------
         ts: pandas.Series
             Data identified as locomotor activity during sleep.
+        resampling_freq: str, optional
+            Frequency of the resampling applied prior to LIDS transformation.
+            Default is None.
         method: str, optional
             Method to smooth the data.
             Available options are:
@@ -447,12 +450,10 @@ class LIDS():
                 'kernel': gaussian kernel
                 'none': no smoothing
             Default is 'mva'.
-        win_td: str, optional
-            Size of the moving average window.
+        resolution: str, optional
+            If method='mva': Size of the rolling window.
+            If method='gaussian': Standard deviation of the gaussian kernel.
             Default is '30min'.
-        resampling_freq: str, optional
-            Frequency of the resampling applied prior to LIDS transformation.
-            Default is None.
 
         Returns
         -------
@@ -472,7 +473,7 @@ class LIDS():
 
         # Series with a DateTimeIndex don't accept 'time-aware' centered window
         # Convert win_size (TimeDelta) into a number of time bins
-        win_size = int(pd.Timedelta(win_td)/self.freq)
+        win_size = int(pd.Timedelta(resolution)/self.freq)
 
         # Smooth LIDS-transformed data
         smooth_lids = self.smooth(lids, method=method, win_size=win_size)
@@ -846,10 +847,72 @@ class LIDS():
 
         return lids_resampled.interpolate(method='linear')
 
+    def lids_preprocessing(
+        self,
+        sleep_bouts,
+        duration_min='3H',
+        duration_max='12H',
+        smooth_method='mva',
+        smooth_resolution='30Min',
+        resampling_freq='10min'
+    ):
+        r'''Filter data according to their time duration and smooth them.
+
+        Parameters
+        ----------
+        sleep_bouts: list of pandas.Series
+            Data to filter and smooth.
+        duration_min: str, optional
+            Minimal time duration for a time series to be kept.
+            Default is '30min'.
+        duration_max: str, optional
+            Maximal time duration for a time series to be kept.
+            Default is '12h'.
+        resampling_freq: str, optional
+            Frequency of the resampling applied prior to LIDS transformation.
+            Default is None.
+        smooth_method: str, optional
+            Method used to smooth the data.
+            Available options are:
+                'mva': moving average
+                'gaussian': gaussian kernel
+                'none': no smoothing
+            Default is 'mva'.
+        smooth_resolution: str, optional
+            If method='mva': Size of the rolling window.
+            If method='gaussian': Standard deviation of the gaussian kernel.
+            Default is '30min'.
+
+        Returns
+        -------
+        smooth_lids: pandas.Series
+        '''
+
+        # Filtering
+        # Sleep bouts shorted than 3h and longer than 12h are discarded
+        filtered_sleep_bouts = self.filter(
+            sleep_bouts,
+            duration_min=duration_min,
+            duration_max=duration_max
+        )
+
+        # LIDS conversion
+        # Resample activity counts and apply LIDS transformation
+        smooth_lids = [
+            self.lids_transform(
+                ts,
+                method=smooth_method,
+                win_td=smooth_resolution,
+                resampling_freq=resampling_freq
+                ) for ts in filtered_sleep_bouts
+        ]
+
+        return smooth_lids
+
     def lids_summary(
         self,
-        index,
-        lids,
+        subject_id,
+        lids_bouts,
         method='leastsq',
         scan_period=True,
         bounds=('30min', '180min'),
@@ -867,9 +930,9 @@ class LIDS():
 
         Parameters
         ----------
-        index: scalar or str
-            Index to give to the returned pandas.DataFrame.
-        lids: pandas.Series
+        subject_id: scalar or str
+            Subject ID to insert into the returned pandas.DataFrame.
+        lids_bouts: list of pandas.Series
             Output data from LIDS transformation.
         method: str, optional
             Name of the fitting method to use [1]_.
@@ -911,49 +974,56 @@ class LIDS():
             statistics.
         '''
 
-        # Fit LIDS data
-        self.lids_fit(
-            lids,
-            method=method,
-            scan_period=scan_period,
-            bounds=bounds,
-            step=step,
-            mri_profile=mri_profile,
-            nan_policy=nan_policy,
-            verbose=verbose_fit
-        )
+        ldf = []
+        for idx, lids in enumerate(lids_bouts):
+            # Fit LIDS data
+            self.lids_fit(
+                lids,
+                method=method,
+                scan_period=scan_period,
+                bounds=bounds,
+                step=step,
+                mri_profile=mri_profile,
+                nan_policy=nan_policy,
+                verbose=verbose_fit
+            )
 
-        if self.lids_fit_results.params is None:
-            return None
+            if self.lids_fit_results.params is None:
+                return None
 
-        # Extract fit parameters
-        fit_params = self.lids_fit_results.params.valuesdict()
+            # Extract fit parameters
+            fit_params = self.lids_fit_results.params.valuesdict()
 
-        # Add pearson correlation factor to fit parameters
-        fit_params['pearson_r'] = self.lids_pearson_r(lids)[0]
-        # Add MRI to fit parameters
-        fit_params['mri'] = self.lids_mri(lids)
+            # Add subject ID
+            fit_params['subject_id'] = subject_id
 
-        # Add fit results to fit parameters
-        fit_params['status'] = int(self.lids_fit_results.success)
-        fit_params['aic'] = self.lids_fit_results.aic
-        fit_params['bic'] = self.lids_fit_results.bic
-        fit_params['redchisq'] = self.lids_fit_results.redchi
+            # Add pearson correlation factor to fit parameters
+            fit_params['pearson_r'] = self.lids_pearson_r(lids)[0]
+            # Add MRI to fit parameters
+            fit_params['mri'] = self.lids_mri(lids)
 
-        # Calculate phase at sleep onset and offset
-        lids_onset_phase, lids_offset_phase = self.lids_phases(lids)
+            # Add fit results to fit parameters
+            fit_params['status'] = int(self.lids_fit_results.success)
+            fit_params['aic'] = self.lids_fit_results.aic
+            fit_params['bic'] = self.lids_fit_results.bic
+            fit_params['redchisq'] = self.lids_fit_results.redchi
 
-        # Add phases to fit parameters
-        fit_params['phase_onset'] = lids_onset_phase
-        fit_params['phase_offset'] = lids_offset_phase
+            # Calculate phase at sleep onset and offset
+            lids_onset_phase, lids_offset_phase = self.lids_phases(lids)
 
-        # Add sleep bout duration
-        fit_params['duration'] = lids.index[-1]-lids.index[0]
+            # Add phases to fit parameters
+            fit_params['phase_onset'] = lids_onset_phase
+            fit_params['phase_offset'] = lids_offset_phase
 
-        # Create a DF with the fit parameters
-        df_params = pd.DataFrame(fit_params, index=[index])
+            # Add sleep bout duration
+            fit_params['duration'] = lids.index[-1]-lids.index[0]
 
-        if verbose:
-            print(df_params)
+            # Create a DF with the fit parameters
+            df_params = pd.DataFrame(fit_params, index=[idx])
 
-        return df_params
+            if verbose:
+                print(df_params)
+
+            ldf.append(df_params)
+
+        return pd.concat(ldf) if len(ldf) > 0 else None
