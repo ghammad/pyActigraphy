@@ -50,9 +50,9 @@ class RawAWD(BaseRaw):
             data = [int(line.split(' ')[0]) for line in f]
 
         # extract informations from the header
-        name = self.__extract_awd_name(header)
-        uuid = self.__extract_awd_uuid(header)
-        start = self.__extract_awd_start_time(header)
+        name = RawAWD.__extract_awd_name(header)
+        uuid = RawAWD.__extract_awd_uuid(header)
+        start = RawAWD.__extract_awd_start_time(header)
 
         index_data = pd.Series(
             data=data,
