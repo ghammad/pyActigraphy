@@ -513,6 +513,8 @@ class ScoringMixin(object):
     def SoD(
         self,
         freq='5min',
+        binarize=True,
+        threshold=4,
         whs=4,
         start='12:00:00',
         period='5h',
@@ -529,8 +531,17 @@ class ScoringMixin(object):
         freq: str, optional
             Resampling frequency.
             Default is '5min'
+        binarize: bool, optional
+            If set to True, the data are binarized when determining the
+            activity onset and offset times. Only valid if start='AonT' or
+            'AoffT'.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
         whs: int, optional
-            Window half size.
+            Window half size. Only valid if start='AonT' or 'AoffT'.
             Default is 4
         start: str, optional
             Start time of the period of interest.
@@ -538,7 +549,7 @@ class ScoringMixin(object):
             Supported times: 'AonT', 'AoffT', any 'HH:MM:SS'
         period: str, optional
             Period length.
-            Default is '10h'
+            Default is '5h'
         algo: str, optional
             Sleep scoring algorithm to use.
             Default is 'unanimous'.
@@ -569,16 +580,19 @@ class ScoringMixin(object):
 
         """
 
+        data = self.resampled_data(freq, binarize, threshold)
+
         # Regex pattern for HH:MM:SS time string
         pattern = re.compile(r"^([0-1]\d|2[0-3])(?::([0-5]\d))(?::([0-5]\d))$")
         if start == 'AonT':
-            td = _activity_onset_time(self.data, freq=freq, whs=whs)
+            td = _activity_onset_time(data, whs=whs)
         elif start == 'AoffT':
-            td = _activity_offset_time(self.data, freq=freq, whs=whs)
+            td = _activity_offset_time(data, whs=whs)
         elif pattern.match(start):
             td = pd.Timedelta(start)
         else:
             print('Input string for start ({}) not supported.'.format(start))
+            return None
 
         start_time = _td_format(td)
         end_time = _td_format(td+pd.Timedelta(period))
@@ -735,6 +749,8 @@ class ScoringMixin(object):
     def fSoD(
         self,
         freq='5min',
+        binarize=True,
+        threshold=4,
         whs=12,
         start='12:00:00',
         period='5h',
@@ -751,6 +767,15 @@ class ScoringMixin(object):
         freq: str, optional
             Resampling frequency.
             Default is '5min'
+        binarize: bool, optional
+            If set to True, the data are binarized when determining the
+            activity onset and offset times. Only valid if start='AonT' or
+            'AoffT'.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
         whs: int, optional
             Window half size.
             Default is 4
