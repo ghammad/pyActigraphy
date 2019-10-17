@@ -44,6 +44,43 @@ def _activity_offset_time(data, whs=4):
     return aot
 
 
+def _actiware_automatic_threshold(data, scale_factor=0.88888):
+    r'''Automatic Wake Threshold Value calculation
+
+
+    1. Sum the activity counts for all epochs of the data set.
+    2. Count the number of epochs scored as MOBILE for the data set
+    (the definition of MOBILE follows).
+    3. Compute the MOBILE TIME (number of epochs scored as MOBILE from step 2
+    multiplied by the Epoch Length) in minutes.
+    4. Compute the Auto Wake Threshold = ((sum of activity counts from step 1)
+    divided by (MOBILE TIME from step 3) ) multiplied by 0.88888.
+
+    Definition of Mobile:
+    An epoch is scored as MOBILE if the number of activity counts recorded in
+    that epoch is greater than or equal to the epoch length in 15-second
+    intervals. For example,there are four 15-second intervals for a 1-minute
+    epoch length; hence, the activity value in an epoch must be greater than,
+    or equal to, four, to be scored as MOBILE.'''
+
+    # Sum of activity counts
+    counts_sum = data.values.sum()
+
+    # Definition of the "mobile" threshold
+    mobile_thr = int(data.index.freq/pd.Timedelta('15sec'))
+
+    # Counts the number of epochs scored as "mobile"
+    counts_mobile = (data.values >= mobile_thr).sum()
+
+    # Mobile time
+    mobile_time = counts_mobile*(data.index.freq/pd.Timedelta('1min'))
+
+    # Automatic wake threshold
+    automatic_thr = (counts_sum/mobile_time)*scale_factor
+
+    return automatic_thr
+
+
 def _padded_data(data, value, periods, frequency):
 
     date_offset = pd.DateOffset(seconds=frequency.total_seconds())
@@ -110,20 +147,20 @@ def _cole_kripke(data, scale, window, threshold):
 
     ck = data.rolling(
         window.size, center=True
-    ).apply(_window_convolution, args=(scale, window), raw=False)
+    ).apply(_window_convolution, args=(scale, window), raw=True)
 
     return (ck < threshold).astype(int)
 
 
 def _sadeh(data, offset, weights, threshold):
 
-    """ Activity-Based Sleep-Wake Identification"""
+    """Activity-Based Sleep-Wake Identification"""
 
     r = data.rolling(11, center=True)
 
     mean_W5 = r.mean()
 
-    NAT = r.apply(lambda x: np.size(np.where((x > 50) & (x < 100))), raw=False)
+    NAT = r.apply(lambda x: np.size(np.where((x > 50) & (x < 100))), raw=True)
 
     sd_Last6 = data.rolling(6).std()
 
@@ -136,7 +173,7 @@ def _sadeh(data, offset, weights, threshold):
     )
 
     sadeh['PS'] = sadeh.apply(
-        _window_convolution, axis=1, args=(1.0, weights, offset)
+        _window_convolution, axis=1, args=(1.0, weights, offset), raw=True
     )
 
     return (sadeh['PS'] > threshold).astype(int)
@@ -148,9 +185,26 @@ def _scripps(data, scale, window, threshold):
 
     scripps = data.rolling(
         window.size, center=True
-    ).apply(_window_convolution, args=(scale, window), raw=False)
+    ).apply(_window_convolution, args=(scale, window), raw=True)
 
     return (scripps < threshold).astype(int)
+
+
+def _oakley(data, window, threshold):
+
+    """Oakley's algorithm for sleep-wake scoring."""
+    if threshold == 'automatic':
+        threshold = _actiware_automatic_threshold(data)
+    elif not np.isscalar(threshold):
+        msg = "`threshold` should be a scalar or 'automatic'."
+        raise ValueError(msg)
+
+    scale = 1.
+    oakley = data.rolling(
+        window.size, center=True
+    ).apply(_window_convolution, args=(scale, window), raw=True)
+
+    return (oakley < threshold).astype(int)
 
 
 class ScoringMixin(object):
@@ -509,6 +563,178 @@ class ScoringMixin(object):
         """
 
         return _scripps(self.data, scale, window, threshold)
+
+    def Oakley(
+        self,
+        threshold=40
+    ):
+
+        r"""Oakley's algorithm for sleep/wake scoring.
+
+        Algorithm for automatic sleep/wake scoring based on wrist activity,
+        developed by Oakley [1]_.
+
+
+        Parameters
+        ----------
+        threshold: float or str, optional
+            Threshold value for scoring sleep/wake. Can be set to "automatic"
+            (cf. Notes).
+            Default is 40.
+
+        Returns
+        -------
+
+        oakley: pandas.core.Series
+            Time series containing scores (1: sleep, 0: wake) for each
+            epoch.
+
+
+        Notes
+        -----
+
+        The output variable O of Oakley's algorithm is defined as:
+
+        .. math::
+
+            O = (
+                [W_{-2},W_{-1},W_{0},W_{+1},W_{+2}]
+                \cdot
+                [A_{-2},A_{-1},A_{0},A_{+1},A_{+2}])
+
+        with:
+
+        * O <= threshold == sleep, 0 > threshold == wake;
+        * :math:`W_{0},W_{-1},W_{+1},\dots`, weighting factors for the present
+          epoch, the previous epoch, the following epoch, etc.;
+        * :math:`A_{0},A_{-1},A_{+1},\dots`, activity scores for the present
+          epoch, the previous epoch, the following epoch, etc.
+
+
+        The current implementation of this algorithm follows the description
+        provided in the instruction manual of the Actiwatch Communication and
+        Sleep Analysis Software (Respironics, Inc.) [2]_ :
+
+        * 15-second sampling frequency:
+            .. math::
+
+                W_{-8} &= \ldots = W_{-5} = W_{+5} = \ldots = W_{+8} = 1/25 \\
+                W_{-4} &= \ldots = W_{-1} = W_{+1} = \ldots = W_{+4} = 1/5 \\
+                W_{0} &= 4
+
+        * 30-second sampling frequency:
+            .. math::
+
+                W_{-4} &= W_{-3} = W_{+3} = W_{+4} = 1/25 \\
+                W_{-2} &= W_{-1} = W_{+1} = W_{+2} = 1/5 \\
+                W_{0} &= 2
+
+        * 60-second sampling frequency:
+            .. math::
+
+                W_{-2} &= W_{+2} = 1/25 \\
+                W_{-1} &= W_{+1} = 1/5 \\
+                W_{0} &= 1
+
+        * 120-second sampling frequency:
+            .. math::
+
+                W_{-1} &= W_{+1} = 1/8 \\
+                W_{0} &= 1/2
+
+
+        The *Automatic Wake Threshold Value* calculation is this [2]_:
+
+        1. Sum the activity counts for all epochs of the data set.
+        2. Count the number of epochs scored as MOBILE for the data set
+           (the definition of MOBILE follows).
+        3. Compute the MOBILE TIME (number of epochs scored as MOBILE from
+           step 2 multiplied by the Epoch Length) in minutes.
+        4. Compute the Auto Wake Threshold = ((sum of activity counts from
+           step 1) divided by (MOBILE TIME from step 3)) multiplied by 0.88888.
+
+
+        *Definition of Mobile* [2]_:
+
+        An epoch is scored as MOBILE if the number of activity counts recorded
+        in that epoch is greater than or equal to the epoch length in 15-second
+        intervals. For example,there are four 15-second intervals for a
+        1-minute epoch length; hence, the activity value in an epoch must be
+        greater than, or equal to, four, to be scored as MOBILE.
+
+
+        References
+        ----------
+
+        .. [1] Oakley, N.R. Validation with Polysomnography of the Sleepwatch
+               Sleep/Wake Scoring Algorithm Used by the Actiwatch Activity
+               Monitoring System; Technical Report; Mini-Mitter: Bend, OR, USA,
+               1997
+        .. [2] Instruction manual, Actiwatch Communication and Sleep Analysis
+               Software
+               (https://fccid.io/JIAAWR1/Users-Manual/USERS-MANUAL-1-920937)
+
+        """
+
+        # Sampling frequency
+        freq = self.data.index.freq.delta
+
+        if freq == pd.Timedelta('15S'):
+            window = np.array([
+                0.04,  # W_{-8}
+                0.04,  # W_{-7}
+                0.04,  # W_{-6}
+                0.04,  # W_{-5}
+                0.20,  # W_{-4}
+                0.20,  # W_{-3}
+                0.20,  # W_{-2}
+                0.20,  # W_{-1}
+                4.00,  # W_{+0}
+                0.20,  # W_{+1}
+                0.20,  # W_{+2}
+                0.20,  # W_{+3}
+                0.20,  # W_{+4}
+                0.04,  # W_{+5}
+                0.04,  # W_{+6}
+                0.04,  # W_{+7}
+                0.04   # W_{+8}
+            ], np.float)
+        elif freq == pd.Timedelta('30S'):
+            window = np.array([
+                0.04,  # W_{-4}
+                0.04,  # W_{-3}
+                0.20,  # W_{-2}
+                0.20,  # W_{-1}
+                2.00,  # W_{+0}
+                0.20,  # W_{+1}
+                0.20,  # W_{+2}
+                0.04,  # W_{+3}
+                0.04   # W_{+4}
+            ], np.float)
+        elif freq == pd.Timedelta('60S'):
+            window = np.array([
+                0.04,  # W_{-2}
+                0.20,  # W_{-1}
+                1.00,  # W_{+0}
+                0.20,  # W_{+1}
+                0.04   # W_{+2}
+            ], np.float)
+        elif freq == pd.Timedelta('120S'):
+            window = np.array([
+                0.12,  # W_{-1}
+                0.50,  # W_{+0}
+                0.12,  # W_{+1}
+            ], np.float)
+        else:
+            raise ValueError(
+                'Oakley\'s algorithm is not defined for data' +
+                'acquired with a sampling frequency of {}.'.format(freq) +
+                'Accepted frequencies are: {}'.format(
+                    ', '.join(['15sec', '30sec', '60sec', '120sec'])
+                )
+            )
+
+        return _oakley(self.data, window, threshold)
 
     def SoD(
         self,
