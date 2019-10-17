@@ -90,13 +90,16 @@ class RawAWD(BaseRaw):
             light=None
         )
 
-    def __extract_awd_name(self, header):
+    @staticmethod
+    def __extract_awd_name(header):
         return header[0].replace('\n', '')
 
-    def __extract_awd_uuid(self, header):
+    @staticmethod
+    def __extract_awd_uuid(header):
         return header[5].replace('\n', '')
 
-    def __extract_awd_start_time(self, header):
+    @staticmethod
+    def __extract_awd_start_time(header):
         return pd.to_datetime(header[1] + ' ' + header[2])
 
 
