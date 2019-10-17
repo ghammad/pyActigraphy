@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import os
 
 from ..base import BaseRaw
@@ -37,8 +36,7 @@ class RawAWD(BaseRaw):
         header_size=7,
         frequency='1min',
         start_time=None,
-        period=None,
-        dtype=np.int
+        period=None
     ):
 
         # get absolute file path
@@ -49,12 +47,12 @@ class RawAWD(BaseRaw):
         # extract header and data size
         with open(input_fname) as f:
             header = [next(f) for x in range(header_size)]
-            data = [line.split(' ')[0] for line in f]
+            data = [int(line.split(' ')[0]) for line in f]
 
         # extract informations from the header
-        name = self.__extract_awd_name(header)
-        uuid = self.__extract_awd_uuid(header)
-        start = self.__extract_awd_start_time(header)
+        name = RawAWD.__extract_awd_name(header)
+        uuid = RawAWD.__extract_awd_uuid(header)
+        start = RawAWD.__extract_awd_start_time(header)
 
         index_data = pd.Series(
             data=data,
@@ -62,8 +60,7 @@ class RawAWD(BaseRaw):
                 start=start,
                 periods=len(data),
                 freq='1min'
-            ),
-            dtype=np.int
+            )
         )
 
         if start_time is not None:
@@ -78,7 +75,7 @@ class RawAWD(BaseRaw):
             stop_time = index_data.index[-1]
             period = stop_time - start_time
 
-        index_data = index_data[start_time:stop_time]
+        index_data = index_data.loc[start_time:stop_time]
 
         # call __init__ function of the base class
         super().__init__(
@@ -93,13 +90,16 @@ class RawAWD(BaseRaw):
             light=None
         )
 
-    def __extract_awd_name(self, header):
+    @staticmethod
+    def __extract_awd_name(header):
         return header[0].replace('\n', '')
 
-    def __extract_awd_uuid(self, header):
+    @staticmethod
+    def __extract_awd_uuid(header):
         return header[5].replace('\n', '')
 
-    def __extract_awd_start_time(self, header):
+    @staticmethod
+    def __extract_awd_start_time(header):
         return pd.to_datetime(header[1] + ' ' + header[2])
 
 
@@ -108,8 +108,7 @@ def read_raw_awd(
     header_size=7,
     frequency='1min',
     start_time=None,
-    period=None,
-    dtype=np.int
+    period=None
 ):
     r"""Reader function for raw AWD file.
 
@@ -132,8 +131,6 @@ def read_raw_awd(
         Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
         Default is None (i.e all the data).
-    dtype: dtype
-        The dtype of the raw data. Default is np.int.
 
     Returns
     -------
@@ -146,6 +143,5 @@ def read_raw_awd(
         header_size=header_size,
         frequency=frequency,
         start_time=start_time,
-        period=period,
-        dtype=dtype
+        period=period
     )
