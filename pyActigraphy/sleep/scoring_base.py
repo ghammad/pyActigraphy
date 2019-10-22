@@ -63,7 +63,7 @@ def _actiware_automatic_threshold(data, scale_factor=0.88888):
     or equal to, four, to be scored as MOBILE.'''
 
     # Sum of activity counts
-    counts_sum = data.values.sum()
+    counts_sum = data.sum()
 
     # Definition of the "mobile" threshold
     mobile_thr = int(data.index.freq/pd.Timedelta('15sec'))
