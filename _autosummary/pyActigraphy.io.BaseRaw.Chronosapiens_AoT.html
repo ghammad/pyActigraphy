@@ -91,58 +91,6 @@
       
   <div class="section" id="pyactigraphy-io-baseraw-chronosapiens-aot">
 <h1>pyActigraphy.io.BaseRaw.Chronosapiens_AoT<a class="headerlink" href="#pyactigraphy-io-baseraw-chronosapiens-aot" title="Permalink to this headline">¶</a></h1>
-<dl class="method">
-<dt id="pyActigraphy.io.BaseRaw.Chronosapiens_AoT">
-<code class="descclassname">BaseRaw.</code><code class="descname">Chronosapiens_AoT</code><span class="sig-paren">(</span><em>trend_period='24h'</em>, <em>min_trend_period='12h'</em>, <em>threshold=0.15</em>, <em>min_seed_period='30Min'</em>, <em>max_test_period='12h'</em>, <em>n_succ=3</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.Chronosapiens_AoT" title="Permalink to this definition">¶</a></dt>
-<dd><p>Automatic identification of activity onset/offset times, based on
-the Chronosapiens algorithm.</p>
-<p>Identification of the activity onset and offset times using the
-algorithm for automatic identification of consolidated sleep episodes
-developped by Roenneberg et al. <a class="reference internal" href="#rfdb9c78d36a9-1" id="id1">[1]</a>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>trend_period</strong> (<em>str</em><em>, </em><em>optional</em>) – Time period of the rolling window used to extract the data trend.
-Default is ‘24h’.</li>
-<li><strong>min_trend_period</strong> (<em>str</em><em>, </em><em>optional</em>) – Minimum time period required for the rolling window to produce a
-value. Values default to NaN otherwise.
-Default is ‘12h’.</li>
-<li><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Fraction of the trend to use as a threshold for sleep/wake
-categorization.
-Default is ‘0.15’</li>
-<li><strong>min_seed_period</strong> (<em>str</em><em>, </em><em>optional</em>) – Minimum time period required to identify a potential sleep onset.
-Default is ‘30Min’.</li>
-<li><strong>max_test_period</strong> (<em>str</em><em>, </em><em>optional</em>) – Maximal period of the test series.
-Default is ‘12h’.</li>
-<li><strong>n_succ</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of successive elements to consider when searching for the
-maximum correlation peak.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>chrono</strong> – Time series containing the estimated periods of rest (1) and
-activity (0).</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.core.Series</p>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="rfdb9c78d36a9-1" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Roenneberg, T., Keller, L. K., Fischer, D., Matera, J. L.,
-Vetter, C., &amp; Winnebeck, E. C. (2015). Human Activity and Rest
-In Situ. In Methods in Enzymology (Vol. 552, pp. 257-283).
-<a class="reference external" href="http://doi.org/10.1016/bs.mie.2014.11.028">http://doi.org/10.1016/bs.mie.2014.11.028</a></td></tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-</dd></dl>
-
 </div>
 
 

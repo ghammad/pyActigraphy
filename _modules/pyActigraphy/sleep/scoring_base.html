@@ -89,11 +89,10 @@
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">.scoring</span> <span class="k">import</span> <span class="n">chronosapiens</span>
+<span class="kn">from</span> <span class="nn">.scoring</span> <span class="k">import</span> <span class="n">roenneberg</span>
 <span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="k">import</span> <span class="n">binary_closing</span><span class="p">,</span> <span class="n">binary_opening</span>
 <span class="kn">from</span> <span class="nn">..filters</span> <span class="k">import</span> <span class="n">_create_inactivity_mask</span>
 <span class="kn">from</span> <span class="nn">..utils.utils</span> <span class="k">import</span> <span class="n">_average_daily_activity</span>
-<span class="c1"># from ..metrics import _average_daily_activity</span>
 
 
 <span class="k">def</span> <span class="nf">_td_format</span><span class="p">(</span><span class="n">td</span><span class="p">):</span>
@@ -130,6 +129,43 @@
     <span class="p">)</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">aot</span>
+
+
+<span class="k">def</span> <span class="nf">_actiware_automatic_threshold</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">scale_factor</span><span class="o">=</span><span class="mf">0.88888</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Automatic Wake Threshold Value calculation</span>
+
+
+<span class="sd">    1. Sum the activity counts for all epochs of the data set.</span>
+<span class="sd">    2. Count the number of epochs scored as MOBILE for the data set</span>
+<span class="sd">    (the definition of MOBILE follows).</span>
+<span class="sd">    3. Compute the MOBILE TIME (number of epochs scored as MOBILE from step 2</span>
+<span class="sd">    multiplied by the Epoch Length) in minutes.</span>
+<span class="sd">    4. Compute the Auto Wake Threshold = ((sum of activity counts from step 1)</span>
+<span class="sd">    divided by (MOBILE TIME from step 3) ) multiplied by 0.88888.</span>
+
+<span class="sd">    Definition of Mobile:</span>
+<span class="sd">    An epoch is scored as MOBILE if the number of activity counts recorded in</span>
+<span class="sd">    that epoch is greater than or equal to the epoch length in 15-second</span>
+<span class="sd">    intervals. For example,there are four 15-second intervals for a 1-minute</span>
+<span class="sd">    epoch length; hence, the activity value in an epoch must be greater than,</span>
+<span class="sd">    or equal to, four, to be scored as MOBILE.&#39;&#39;&#39;</span>
+
+    <span class="c1"># Sum of activity counts</span>
+    <span class="n">counts_sum</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c1"># Definition of the &quot;mobile&quot; threshold</span>
+    <span class="n">mobile_thr</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="o">/</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;15sec&#39;</span><span class="p">))</span>
+
+    <span class="c1"># Counts the number of epochs scored as &quot;mobile&quot;</span>
+    <span class="n">counts_mobile</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span> <span class="o">&gt;=</span> <span class="n">mobile_thr</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c1"># Mobile time</span>
+    <span class="n">mobile_time</span> <span class="o">=</span> <span class="n">counts_mobile</span><span class="o">*</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="o">/</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;1min&#39;</span><span class="p">))</span>
+
+    <span class="c1"># Automatic wake threshold</span>
+    <span class="n">automatic_thr</span> <span class="o">=</span> <span class="p">(</span><span class="n">counts_sum</span><span class="o">/</span><span class="n">mobile_time</span><span class="p">)</span><span class="o">*</span><span class="n">scale_factor</span>
+
+    <span class="k">return</span> <span class="n">automatic_thr</span>
 
 
 <span class="k">def</span> <span class="nf">_padded_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">periods</span><span class="p">,</span> <span class="n">frequency</span><span class="p">):</span>
@@ -198,20 +234,20 @@
 
     <span class="n">ck</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span>
         <span class="n">window</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_window_convolution</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">),</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_window_convolution</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">),</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">ck</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_sadeh</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot; Activity-Based Sleep-Wake Identification&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Activity-Based Sleep-Wake Identification&quot;&quot;&quot;</span>
 
     <span class="n">r</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">mean_W5</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 
-    <span class="n">NAT</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">))),</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">NAT</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">x</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">))),</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">sd_Last6</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
 
@@ -224,7 +260,7 @@
     <span class="p">)</span>
 
     <span class="n">sadeh</span><span class="p">[</span><span class="s1">&#39;PS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sadeh</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
-        <span class="n">_window_convolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+        <span class="n">_window_convolution</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">offset</span><span class="p">),</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">sadeh</span><span class="p">[</span><span class="s1">&#39;PS&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
@@ -236,9 +272,26 @@
 
     <span class="n">scripps</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span>
         <span class="n">window</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_window_convolution</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">),</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_window_convolution</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">),</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">scripps</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_oakley</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;Oakley&#39;s algorithm for sleep-wake scoring.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">threshold</span> <span class="o">==</span> <span class="s1">&#39;automatic&#39;</span><span class="p">:</span>
+        <span class="n">threshold</span> <span class="o">=</span> <span class="n">_actiware_automatic_threshold</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">threshold</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;`threshold` should be a scalar or &#39;automatic&#39;.&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">scale</span> <span class="o">=</span> <span class="mf">1.</span>
+    <span class="n">oakley</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span>
+        <span class="n">window</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_window_convolution</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">),</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">oakley</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">ScoringMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -598,9 +651,183 @@
 
         <span class="k">return</span> <span class="n">_scripps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">Oakley</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mi">40</span>
+    <span class="p">):</span>
+
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Oakley&#39;s algorithm for sleep/wake scoring.</span>
+
+<span class="sd">        Algorithm for automatic sleep/wake scoring based on wrist activity,</span>
+<span class="sd">        developed by Oakley [1]_.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold: float or str, optional</span>
+<span class="sd">            Threshold value for scoring sleep/wake. Can be set to &quot;automatic&quot;</span>
+<span class="sd">            (cf. Notes).</span>
+<span class="sd">            Default is 40.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        oakley: pandas.core.Series</span>
+<span class="sd">            Time series containing scores (1: sleep, 0: wake) for each</span>
+<span class="sd">            epoch.</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        The output variable O of Oakley&#39;s algorithm is defined as:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            O = (</span>
+<span class="sd">                [W_{-2},W_{-1},W_{0},W_{+1},W_{+2}]</span>
+<span class="sd">                \cdot</span>
+<span class="sd">                [A_{-2},A_{-1},A_{0},A_{+1},A_{+2}])</span>
+
+<span class="sd">        with:</span>
+
+<span class="sd">        * O &lt;= threshold == sleep, 0 &gt; threshold == wake;</span>
+<span class="sd">        * :math:`W_{0},W_{-1},W_{+1},\dots`, weighting factors for the present</span>
+<span class="sd">          epoch, the previous epoch, the following epoch, etc.;</span>
+<span class="sd">        * :math:`A_{0},A_{-1},A_{+1},\dots`, activity scores for the present</span>
+<span class="sd">          epoch, the previous epoch, the following epoch, etc.</span>
+
+
+<span class="sd">        The current implementation of this algorithm follows the description</span>
+<span class="sd">        provided in the instruction manual of the Actiwatch Communication and</span>
+<span class="sd">        Sleep Analysis Software (Respironics, Inc.) [2]_ :</span>
+
+<span class="sd">        * 15-second sampling frequency:</span>
+<span class="sd">            .. math::</span>
+
+<span class="sd">                W_{-8} &amp;= \ldots = W_{-5} = W_{+5} = \ldots = W_{+8} = 1/25 \\</span>
+<span class="sd">                W_{-4} &amp;= \ldots = W_{-1} = W_{+1} = \ldots = W_{+4} = 1/5 \\</span>
+<span class="sd">                W_{0} &amp;= 4</span>
+
+<span class="sd">        * 30-second sampling frequency:</span>
+<span class="sd">            .. math::</span>
+
+<span class="sd">                W_{-4} &amp;= W_{-3} = W_{+3} = W_{+4} = 1/25 \\</span>
+<span class="sd">                W_{-2} &amp;= W_{-1} = W_{+1} = W_{+2} = 1/5 \\</span>
+<span class="sd">                W_{0} &amp;= 2</span>
+
+<span class="sd">        * 60-second sampling frequency:</span>
+<span class="sd">            .. math::</span>
+
+<span class="sd">                W_{-2} &amp;= W_{+2} = 1/25 \\</span>
+<span class="sd">                W_{-1} &amp;= W_{+1} = 1/5 \\</span>
+<span class="sd">                W_{0} &amp;= 1</span>
+
+<span class="sd">        * 120-second sampling frequency:</span>
+<span class="sd">            .. math::</span>
+
+<span class="sd">                W_{-1} &amp;= W_{+1} = 1/8 \\</span>
+<span class="sd">                W_{0} &amp;= 1/2</span>
+
+
+<span class="sd">        The *Automatic Wake Threshold Value* calculation is this [2]_:</span>
+
+<span class="sd">        1. Sum the activity counts for all epochs of the data set.</span>
+<span class="sd">        2. Count the number of epochs scored as MOBILE for the data set</span>
+<span class="sd">           (the definition of MOBILE follows).</span>
+<span class="sd">        3. Compute the MOBILE TIME (number of epochs scored as MOBILE from</span>
+<span class="sd">           step 2 multiplied by the Epoch Length) in minutes.</span>
+<span class="sd">        4. Compute the Auto Wake Threshold = ((sum of activity counts from</span>
+<span class="sd">           step 1) divided by (MOBILE TIME from step 3)) multiplied by 0.88888.</span>
+
+
+<span class="sd">        *Definition of Mobile* [2]_:</span>
+
+<span class="sd">        An epoch is scored as MOBILE if the number of activity counts recorded</span>
+<span class="sd">        in that epoch is greater than or equal to the epoch length in 15-second</span>
+<span class="sd">        intervals. For example,there are four 15-second intervals for a</span>
+<span class="sd">        1-minute epoch length; hence, the activity value in an epoch must be</span>
+<span class="sd">        greater than, or equal to, four, to be scored as MOBILE.</span>
+
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Oakley, N.R. Validation with Polysomnography of the Sleepwatch</span>
+<span class="sd">               Sleep/Wake Scoring Algorithm Used by the Actiwatch Activity</span>
+<span class="sd">               Monitoring System; Technical Report; Mini-Mitter: Bend, OR, USA,</span>
+<span class="sd">               1997</span>
+<span class="sd">        .. [2] Instruction manual, Actiwatch Communication and Sleep Analysis</span>
+<span class="sd">               Software</span>
+<span class="sd">               (https://fccid.io/JIAAWR1/Users-Manual/USERS-MANUAL-1-920937)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Sampling frequency</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">delta</span>
+
+        <span class="k">if</span> <span class="n">freq</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;15S&#39;</span><span class="p">):</span>
+            <span class="n">window</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                <span class="mf">0.04</span><span class="p">,</span>  <span class="c1"># W_{-8}</span>
+                <span class="mf">0.04</span><span class="p">,</span>  <span class="c1"># W_{-7}</span>
+                <span class="mf">0.04</span><span class="p">,</span>  <span class="c1"># W_{-6}</span>
+                <span class="mf">0.04</span><span class="p">,</span>  <span class="c1"># W_{-5}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{-4}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{-3}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{-2}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{-1}</span>
+                <span class="mf">4.00</span><span class="p">,</span>  <span class="c1"># W_{+0}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{+1}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{+2}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{+3}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{+4}</span>
+                <span class="mf">0.04</span><span class="p">,</span>  <span class="c1"># W_{+5}</span>
+                <span class="mf">0.04</span><span class="p">,</span>  <span class="c1"># W_{+6}</span>
+                <span class="mf">0.04</span><span class="p">,</span>  <span class="c1"># W_{+7}</span>
+                <span class="mf">0.04</span>   <span class="c1"># W_{+8}</span>
+            <span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">freq</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;30S&#39;</span><span class="p">):</span>
+            <span class="n">window</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                <span class="mf">0.04</span><span class="p">,</span>  <span class="c1"># W_{-4}</span>
+                <span class="mf">0.04</span><span class="p">,</span>  <span class="c1"># W_{-3}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{-2}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{-1}</span>
+                <span class="mf">2.00</span><span class="p">,</span>  <span class="c1"># W_{+0}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{+1}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{+2}</span>
+                <span class="mf">0.04</span><span class="p">,</span>  <span class="c1"># W_{+3}</span>
+                <span class="mf">0.04</span>   <span class="c1"># W_{+4}</span>
+            <span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">freq</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;60S&#39;</span><span class="p">):</span>
+            <span class="n">window</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                <span class="mf">0.04</span><span class="p">,</span>  <span class="c1"># W_{-2}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{-1}</span>
+                <span class="mf">1.00</span><span class="p">,</span>  <span class="c1"># W_{+0}</span>
+                <span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># W_{+1}</span>
+                <span class="mf">0.04</span>   <span class="c1"># W_{+2}</span>
+            <span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">freq</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;120S&#39;</span><span class="p">):</span>
+            <span class="n">window</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                <span class="mf">0.12</span><span class="p">,</span>  <span class="c1"># W_{-1}</span>
+                <span class="mf">0.50</span><span class="p">,</span>  <span class="c1"># W_{+0}</span>
+                <span class="mf">0.12</span><span class="p">,</span>  <span class="c1"># W_{+1}</span>
+            <span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Oakley</span><span class="se">\&#39;</span><span class="s1">s algorithm is not defined for data&#39;</span> <span class="o">+</span>
+                <span class="s1">&#39;acquired with a sampling frequency of </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span> <span class="o">+</span>
+                <span class="s1">&#39;Accepted frequencies are: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;15sec&#39;</span><span class="p">,</span> <span class="s1">&#39;30sec&#39;</span><span class="p">,</span> <span class="s1">&#39;60sec&#39;</span><span class="p">,</span> <span class="s1">&#39;120sec&#39;</span><span class="p">])</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_oakley</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">SoD</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span>
+        <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
         <span class="n">whs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
         <span class="n">start</span><span class="o">=</span><span class="s1">&#39;12:00:00&#39;</span><span class="p">,</span>
         <span class="n">period</span><span class="o">=</span><span class="s1">&#39;5h&#39;</span><span class="p">,</span>
@@ -617,8 +844,17 @@
 <span class="sd">        freq: str, optional</span>
 <span class="sd">            Resampling frequency.</span>
 <span class="sd">            Default is &#39;5min&#39;</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized when determining the</span>
+<span class="sd">            activity onset and offset times. Only valid if start=&#39;AonT&#39; or</span>
+<span class="sd">            &#39;AoffT&#39;.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
 <span class="sd">        whs: int, optional</span>
-<span class="sd">            Window half size.</span>
+<span class="sd">            Window half size. Only valid if start=&#39;AonT&#39; or &#39;AoffT&#39;.</span>
 <span class="sd">            Default is 4</span>
 <span class="sd">        start: str, optional</span>
 <span class="sd">            Start time of the period of interest.</span>
@@ -626,7 +862,7 @@
 <span class="sd">            Supported times: &#39;AonT&#39;, &#39;AoffT&#39;, any &#39;HH:MM:SS&#39;</span>
 <span class="sd">        period: str, optional</span>
 <span class="sd">            Period length.</span>
-<span class="sd">            Default is &#39;10h&#39;</span>
+<span class="sd">            Default is &#39;5h&#39;</span>
 <span class="sd">        algo: str, optional</span>
 <span class="sd">            Sleep scoring algorithm to use.</span>
 <span class="sd">            Default is &#39;unanimous&#39;.</span>
@@ -657,16 +893,19 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resampled_data</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
         <span class="c1"># Regex pattern for HH:MM:SS time string</span>
         <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^([0-1]\d|2[0-3])(?::([0-5]\d))(?::([0-5]\d))$&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">start</span> <span class="o">==</span> <span class="s1">&#39;AonT&#39;</span><span class="p">:</span>
-            <span class="n">td</span> <span class="o">=</span> <span class="n">_activity_onset_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span> <span class="n">whs</span><span class="o">=</span><span class="n">whs</span><span class="p">)</span>
+            <span class="n">td</span> <span class="o">=</span> <span class="n">_activity_onset_time</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">whs</span><span class="o">=</span><span class="n">whs</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">start</span> <span class="o">==</span> <span class="s1">&#39;AoffT&#39;</span><span class="p">:</span>
-            <span class="n">td</span> <span class="o">=</span> <span class="n">_activity_offset_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span> <span class="n">whs</span><span class="o">=</span><span class="n">whs</span><span class="p">)</span>
+            <span class="n">td</span> <span class="o">=</span> <span class="n">_activity_offset_time</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">whs</span><span class="o">=</span><span class="n">whs</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">start</span><span class="p">):</span>
             <span class="n">td</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Input string for start (</span><span class="si">{}</span><span class="s1">) not supported.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">start</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">start_time</span> <span class="o">=</span> <span class="n">_td_format</span><span class="p">(</span><span class="n">td</span><span class="p">)</span>
         <span class="n">end_time</span> <span class="o">=</span> <span class="n">_td_format</span><span class="p">(</span><span class="n">td</span><span class="o">+</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">period</span><span class="p">))</span>
@@ -823,6 +1062,8 @@
     <span class="k">def</span> <span class="nf">fSoD</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span>
+        <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
         <span class="n">whs</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
         <span class="n">start</span><span class="o">=</span><span class="s1">&#39;12:00:00&#39;</span><span class="p">,</span>
         <span class="n">period</span><span class="o">=</span><span class="s1">&#39;5h&#39;</span><span class="p">,</span>
@@ -839,6 +1080,15 @@
 <span class="sd">        freq: str, optional</span>
 <span class="sd">            Resampling frequency.</span>
 <span class="sd">            Default is &#39;5min&#39;</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized when determining the</span>
+<span class="sd">            activity onset and offset times. Only valid if start=&#39;AonT&#39; or</span>
+<span class="sd">            &#39;AoffT&#39;.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
 <span class="sd">        whs: int, optional</span>
 <span class="sd">            Window half size.</span>
 <span class="sd">            Default is 4</span>
@@ -1217,7 +1467,7 @@
 
         <span class="k">return</span> <span class="p">(</span><span class="n">AonT</span><span class="p">,</span> <span class="n">AoffT</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">Chronosapiens</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">Roenneberg</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">trend_period</span><span class="o">=</span><span class="s1">&#39;24h&#39;</span><span class="p">,</span>
         <span class="n">min_trend_period</span><span class="o">=</span><span class="s1">&#39;12h&#39;</span><span class="p">,</span>
@@ -1256,7 +1506,7 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        chrono : pandas.core.Series</span>
+<span class="sd">        rbg : pandas.core.Series</span>
 <span class="sd">            Time series containing the estimated periods of rest (1) and</span>
 <span class="sd">            activity (0).</span>
 
@@ -1273,7 +1523,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">chrono</span> <span class="o">=</span> <span class="n">chronosapiens</span><span class="p">(</span>
+        <span class="n">rbg</span> <span class="o">=</span> <span class="n">roenneberg</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
             <span class="n">trend_period</span><span class="o">=</span><span class="n">trend_period</span><span class="p">,</span>
             <span class="n">min_trend_period</span><span class="o">=</span><span class="n">min_trend_period</span><span class="p">,</span>
@@ -1282,9 +1532,9 @@
             <span class="n">max_test_period</span><span class="o">=</span><span class="n">max_test_period</span><span class="p">,</span>
             <span class="n">n_succ</span><span class="o">=</span><span class="n">n_succ</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">chrono</span>
+        <span class="k">return</span> <span class="n">rbg</span>
 
-    <span class="k">def</span> <span class="nf">Chronosapiens_AoT</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">Roenneberg_AoT</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">trend_period</span><span class="o">=</span><span class="s1">&#39;24h&#39;</span><span class="p">,</span>
         <span class="n">min_trend_period</span><span class="o">=</span><span class="s1">&#39;12h&#39;</span><span class="p">,</span>
@@ -1325,9 +1575,9 @@
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        chrono : pandas.core.Series</span>
-<span class="sd">            Time series containing the estimated periods of rest (1) and</span>
-<span class="sd">            activity (0).</span>
+<span class="sd">        aot : (ndarray, ndarray)</span>
+<span class="sd">            Arrays containing the estimated activity onset and offset times,</span>
+<span class="sd">            respectively.</span>
 
 <span class="sd">        References</span>
 <span class="sd">        ----------</span>
@@ -1342,7 +1592,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">chrono</span> <span class="o">=</span> <span class="n">chronosapiens</span><span class="p">(</span>
+        <span class="n">rbg</span> <span class="o">=</span> <span class="n">roenneberg</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
             <span class="n">trend_period</span><span class="o">=</span><span class="n">trend_period</span><span class="p">,</span>
             <span class="n">min_trend_period</span><span class="o">=</span><span class="n">min_trend_period</span><span class="p">,</span>
@@ -1352,10 +1602,10 @@
             <span class="n">n_succ</span><span class="o">=</span><span class="n">n_succ</span>
         <span class="p">)</span>
 
-        <span class="n">diff</span> <span class="o">=</span> <span class="n">chrono</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">rbg</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="n">AonT</span> <span class="o">=</span> <span class="n">chrono</span><span class="p">[</span><span class="n">diff</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
-        <span class="n">AoffT</span> <span class="o">=</span> <span class="n">chrono</span><span class="p">[</span><span class="n">diff</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">AonT</span> <span class="o">=</span> <span class="n">rbg</span><span class="p">[</span><span class="n">diff</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">AoffT</span> <span class="o">=</span> <span class="n">rbg</span><span class="p">[</span><span class="n">diff</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
 
         <span class="k">return</span> <span class="p">(</span><span class="n">AonT</span><span class="p">,</span> <span class="n">AoffT</span><span class="p">)</span>
 </pre></div>

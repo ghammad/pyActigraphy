@@ -87,7 +87,6 @@
       
   <h1>Source code for pyActigraphy.io.awd.awd</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">BaseRaw</span>
@@ -125,8 +124,7 @@
         <span class="n">header_size</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
         <span class="n">frequency</span><span class="o">=</span><span class="s1">&#39;1min&#39;</span><span class="p">,</span>
         <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span>
+        <span class="n">period</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 
         <span class="c1"># get absolute file path</span>
@@ -137,12 +135,12 @@
         <span class="c1"># extract header and data size</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">header_size</span><span class="p">)]</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span>
 
         <span class="c1"># extract informations from the header</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_awd_name</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
-        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_awd_uuid</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
-        <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_awd_start_time</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">__extract_awd_name</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">__extract_awd_uuid</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">__extract_awd_start_time</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
 
         <span class="n">index_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
@@ -150,8 +148,7 @@
                 <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
                 <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
                 <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1min&#39;</span>
-            <span class="p">),</span>
-            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span>
+            <span class="p">)</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -166,7 +163,7 @@
             <span class="n">stop_time</span> <span class="o">=</span> <span class="n">index_data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">period</span> <span class="o">=</span> <span class="n">stop_time</span> <span class="o">-</span> <span class="n">start_time</span>
 
-        <span class="n">index_data</span> <span class="o">=</span> <span class="n">index_data</span><span class="p">[</span><span class="n">start_time</span><span class="p">:</span><span class="n">stop_time</span><span class="p">]</span>
+        <span class="n">index_data</span> <span class="o">=</span> <span class="n">index_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_time</span><span class="p">:</span><span class="n">stop_time</span><span class="p">]</span>
 
         <span class="c1"># call __init__ function of the base class</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -181,13 +178,16 @@
             <span class="n">light</span><span class="o">=</span><span class="kc">None</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__extract_awd_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__extract_awd_name</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__extract_awd_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__extract_awd_uuid</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">header</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__extract_awd_start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__extract_awd_start_time</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">header</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
 
@@ -196,8 +196,7 @@
     <span class="n">header_size</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
     <span class="n">frequency</span><span class="o">=</span><span class="s1">&#39;1min&#39;</span><span class="p">,</span>
     <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span>
+    <span class="n">period</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for raw AWD file.</span>
 
@@ -220,8 +219,6 @@
 <span class="sd">        Cf. #timeseries-offset-aliases in</span>
 <span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
 <span class="sd">        Default is None (i.e all the data).</span>
-<span class="sd">    dtype: dtype</span>
-<span class="sd">        The dtype of the raw data. Default is np.int.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -234,8 +231,7 @@
         <span class="n">header_size</span><span class="o">=</span><span class="n">header_size</span><span class="p">,</span>
         <span class="n">frequency</span><span class="o">=</span><span class="n">frequency</span><span class="p">,</span>
         <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
-        <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
-        <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span>
+        <span class="n">period</span><span class="o">=</span><span class="n">period</span>
     <span class="p">)</span></div>
 </pre></div>
 

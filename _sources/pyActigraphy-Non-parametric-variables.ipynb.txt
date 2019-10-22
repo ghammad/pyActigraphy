@@ -39,13 +39,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 1,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.421848Z",
-     "start_time": "2019-06-12T14:06:42.061860Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "import pyActigraphy"
@@ -53,17 +48,22 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 2,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.441250Z",
-     "start_time": "2019-06-12T14:06:44.424068Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os\n",
+    "fpath = os.path.join(os.path.dirname(pyActigraphy.__file__),'tests/data/')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "# Read test file\n",
-    "raw = pyActigraphy.io.read_raw_awd('../../pyActigraphy/tests/data/test_sample.AWD')"
+    "raw = pyActigraphy.io.read_raw_awd(fpath+'example_01.AWD')"
    ]
   },
   {
@@ -86,50 +86,18 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.475123Z",
-     "start_time": "2019-06-12T14:06:44.443533Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.6863558416293868"
-      ]
-     },
-     "execution_count": 3,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.IS()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.489889Z",
-     "start_time": "2019-06-12T14:06:44.477435Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.4479249905324644"
-      ]
-     },
-     "execution_count": 4,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.IV()"
    ]
@@ -157,50 +125,18 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.504738Z",
-     "start_time": "2019-06-12T14:06:44.492206Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.6444097187215905"
-      ]
-     },
-     "execution_count": 5,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.IS(freq='30min')"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.518625Z",
-     "start_time": "2019-06-12T14:06:44.507036Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.3524709429601284"
-      ]
-     },
-     "execution_count": 6,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.IV(freq='30min')"
    ]
@@ -221,50 +157,18 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.539686Z",
-     "start_time": "2019-06-12T14:06:44.521892Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.6699168184920068"
-      ]
-     },
-     "execution_count": 7,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.IS(threshold=10)"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 8,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.556106Z",
-     "start_time": "2019-06-12T14:06:44.542564Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.47423882234616427"
-      ]
-     },
-     "execution_count": 8,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.IV(threshold=10)"
    ]
@@ -285,50 +189,18 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 9,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.581486Z",
-     "start_time": "2019-06-12T14:06:44.560229Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.4815388342166626"
-      ]
-     },
-     "execution_count": 9,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.IS(binarize=False)"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 10,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.596972Z",
-     "start_time": "2019-06-12T14:06:44.585740Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.719559543155139"
-      ]
-     },
-     "execution_count": 10,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.IV(binarize=False)"
    ]
@@ -354,51 +226,20 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 11,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.643553Z",
-     "start_time": "2019-06-12T14:06:44.600106Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.7219666970017463"
-      ]
-     },
-     "execution_count": 11,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.RA()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 12,
+   "execution_count": null,
    "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.684482Z",
-     "start_time": "2019-06-12T14:06:44.646185Z"
-    },
     "scrolled": true
    },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.9024231377348686"
-      ]
-     },
-     "execution_count": 12,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "outputs": [],
    "source": [
     "raw.RA(binarize=False)"
    ]
@@ -414,14 +255,14 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "In `Nonparametric methods in actigraphy: An update`, Gonçalves et al. introduced two new variables, ISm and IVm, as the mean of the IS and IV (respectively) values calculated as different resampling frequencies."
+    "In _Nonparametric methods in actigraphy: An update_, Gonçalves et al. introduced two new variables, ISm and IVm, as the mean of the IS and IV (respectively) values calculated as different resampling frequencies."
    ]
   },
   {
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "These two additional variables are also available in the pyActigraphy package.\n",
+    "These two additional variables are also available in the **_pyActigraphy_** package.\n",
     "For both variables, the default parameters are:\n",
     "\n",
     "* resampling frequencies = [1,2,3,4,5,6,8,9,10,12,15,16,18,20,24,30,32,36,40,45,48,60] (min)\n",
@@ -431,50 +272,18 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 13,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.887391Z",
-     "start_time": "2019-06-12T14:06:44.687345Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.5906849087111824"
-      ]
-     },
-     "execution_count": 13,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.ISm()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 14,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.982946Z",
-     "start_time": "2019-06-12T14:06:44.889489Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.3658423669948913"
-      ]
-     },
-     "execution_count": 14,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.IVm()"
    ]
@@ -488,13 +297,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 15,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:44.988375Z",
-     "start_time": "2019-06-12T14:06:44.985375Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "new_resampling_frequencies = ['5min','30min','1H']"
@@ -502,25 +306,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 16,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:45.021245Z",
-     "start_time": "2019-06-12T14:06:44.990503Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "0.6231808262585031"
-      ]
-     },
-     "execution_count": 16,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.ISm(freqs=new_resampling_frequencies)"
    ]
@@ -536,7 +324,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "pyActigraphy introduces a new concept concerning the calculation of the non-parametric variables: it is now possible to calculate them per period."
+    "**_pyActigraphy_** introduces a new concept concerning the calculation of the non-parametric variables: it is now possible to calculate them per period."
    ]
   },
   {
@@ -548,25 +336,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 17,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:45.043357Z",
-     "start_time": "2019-06-12T14:06:45.024251Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "[0.8192642661619101]"
-      ]
-     },
-     "execution_count": 17,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.ISp()"
    ]
@@ -580,25 +352,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 18,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:45.073949Z",
-     "start_time": "2019-06-12T14:06:45.046327Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "[0.8254509380330284, 0.7057092290806617]"
-      ]
-     },
-     "execution_count": 18,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "# Period of 4 days for example\n",
     "raw.ISp(period='4D')"
@@ -613,33 +369,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 19,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2019-06-12T14:06:45.107748Z",
-     "start_time": "2019-06-12T14:06:45.077100Z"
-    }
-   },
-   "outputs": [
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      "Number of periods: 2\n",
-      " Time unaccounted for: 0 days, 3h, 0m, 0s\n"
-     ]
-    },
-    {
-     "data": {
-      "text/plain": [
-       "[0.8254509380330284, 0.7057092290806617]"
-      ]
-     },
-     "execution_count": 19,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.ISp(period='4D', verbose=True)"
    ]

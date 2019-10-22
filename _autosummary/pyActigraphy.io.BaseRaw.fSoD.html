@@ -93,7 +93,7 @@
 <h1>pyActigraphy.io.BaseRaw.fSoD<a class="headerlink" href="#pyactigraphy-io-baseraw-fsod" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="pyActigraphy.io.BaseRaw.fSoD">
-<code class="descclassname">BaseRaw.</code><code class="descname">fSoD</code><span class="sig-paren">(</span><em>freq='5min'</em>, <em>whs=12</em>, <em>start='12:00:00'</em>, <em>period='5h'</em>, <em>algo='unanimous'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.fSoD" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">BaseRaw.</code><code class="descname">fSoD</code><span class="sig-paren">(</span><em>freq='5min'</em>, <em>binarize=True</em>, <em>threshold=4</em>, <em>whs=12</em>, <em>start='12:00:00'</em>, <em>period='5h'</em>, <em>algo='unanimous'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.fSoD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fraction of Sleep over Daytime</p>
 <p>Fractional volume of epochs identified as sleep over daytime (SoD),
 using sleep-wake scoring algorithms.</p>
@@ -104,6 +104,13 @@ using sleep-wake scoring algorithms.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>freq</strong> (<em>str</em><em>, </em><em>optional</em>) – Resampling frequency.
 Default is ‘5min’</li>
+<li><strong>binarize</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, the data are binarized when determining the
+activity onset and offset times. Only valid if start=’AonT’ or
+‘AoffT’.
+Default is True.</li>
+<li><strong>threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – If binarize is set to True, data above this threshold are set to 1
+and to 0 otherwise.
+Default is 4.</li>
 <li><strong>whs</strong> (<em>int</em><em>, </em><em>optional</em>) – Window half size.
 Default is 4</li>
 <li><strong>start</strong> (<em>str</em><em>, </em><em>optional</em>) – Start time of the period of interest.
