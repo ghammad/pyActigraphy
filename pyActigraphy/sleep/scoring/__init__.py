@@ -5,7 +5,7 @@
 # License: BSD (3-clause)
 
 # import utils
-from .chronosapiens import chronosapiens
+from .roenneberg import roenneberg
 
 # __all__ = ["utils", "chronosapiens"]
-__all__ = ["chronosapiens"]
+__all__ = ["roenneberg"]

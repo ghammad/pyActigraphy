@@ -5,7 +5,7 @@
 class SleepBoutMixin(object):
     """ Mixin Class for identifying sleep bouts"""
 
-    def sleep_bouts(raw, method='crespo'):
+    def sleep_bouts(self, method='crespo'):
         r"""Sleep bouts.
 
         Activity periods identified as sleep.
@@ -13,13 +13,13 @@ class SleepBoutMixin(object):
         Parameters
         ----------
         method: str
-            Method used to identify contiuous sleep bouts.
-            Available methods are: 'crespo', 'chrono'
+            Method used to identify continuous sleep bouts.
+            Available methods are: 'crespo', 'roenneberg'
             Default is 'crespo'.
 
         Returns
         -------
-        sbs: a list of pandas.Series
+        sleep_bouts: a list of pandas.Series
 
 
         Examples
@@ -27,50 +27,34 @@ class SleepBoutMixin(object):
 
             >>> import pyActigraphy
             >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
-            >>> raw.sleepbouts()
+            >>> raw.sleep_bouts()
             XXX
 
         """
 
-        methods = ('crespo', 'chrono')
+        methods = ('crespo', 'roenneberg')
         if method not in methods:
             raise ValueError(
                 '`method` must be "%s". You passed: "%s"' %
                 ('" or "'.join(methods), method)
             )
 
-        # identify reader type
-        # reader_type = raw.format
-
-        # create a RawReader instance
+        # Create a RawReader instance
         sleep_bouts = []  # RawReader(reader_type)
 
-        # identify sleep bouts
+        # Identify sleep bouts
         if method == 'crespo':
             # retrieve activity onset and offset times
-            onsets, offsets = raw.Crespo_AoT()
+            onsets, offsets = self.Crespo_AoT()
+        elif method == 'roenneberg':
+            # retrieve activity onset and offset times
+            onsets, offsets = self.Roenneberg_AoT()
 
-            # for each inactivity period (from offset to onset times)
-            # create a BaseRaw object
-            for onset, offset in zip(onsets, offsets):
-                sleep_bout = raw.data[offset:onset]
-                # BaseRaw(
-                #     name='{} (night: {})'.format(raw.name, 0),
-                #     uuid=raw.uuid,
-                #     format=raw.format,
-                #     axial_mode=raw.axial_mode,
-                #     start_time=offset,
-                #     period=onset - offset,
-                #     frequency=raw.frequency,
-                #     data=raw.data[offset:onset],
-                #     light=(raw.light[offset:onset] if raw.light is not None
-                #            else None)
-                # )
-                # sleep_bout.mask_inactivity = raw.mask_inactivity
-                # sleep_bout.inactivity_length = raw.inactivity_length
-                # sleep_bout.exclude_if_mask = raw.exclude_if_mask
-                # sleep_bout.sleep_diary = raw.sleep_diary
+        # For each inactivity period (from offset to onset times)
+        # create a BaseRaw object
+        for onset, offset in zip(onsets, offsets):
+            sleep_bout = self.data[offset:onset]
 
-                sleep_bouts.append(sleep_bout)
+            sleep_bouts.append(sleep_bout)
 
         return sleep_bouts
