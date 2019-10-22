@@ -1,11 +1,10 @@
 import numpy as np
 import pandas as pd
 import re
-from .scoring import chronosapiens
+from .scoring import roenneberg
 from scipy.ndimage import binary_closing, binary_opening
 from ..filters import _create_inactivity_mask
 from ..utils.utils import _average_daily_activity
-# from ..metrics import _average_daily_activity
 
 
 def _td_format(td):
@@ -1380,7 +1379,7 @@ class ScoringMixin(object):
 
         return (AonT, AoffT)
 
-    def Chronosapiens(
+    def Roenneberg(
         self,
         trend_period='24h',
         min_trend_period='12h',
@@ -1419,7 +1418,7 @@ class ScoringMixin(object):
 
         Returns
         -------
-        chrono : pandas.core.Series
+        rbg : pandas.core.Series
             Time series containing the estimated periods of rest (1) and
             activity (0).
 
@@ -1436,7 +1435,7 @@ class ScoringMixin(object):
 
         """
 
-        chrono = chronosapiens(
+        rbg = roenneberg(
             self.data,
             trend_period=trend_period,
             min_trend_period=min_trend_period,
@@ -1445,9 +1444,9 @@ class ScoringMixin(object):
             max_test_period=max_test_period,
             n_succ=n_succ
         )
-        return chrono
+        return rbg
 
-    def Chronosapiens_AoT(
+    def Roenneberg_AoT(
         self,
         trend_period='24h',
         min_trend_period='12h',
@@ -1488,9 +1487,9 @@ class ScoringMixin(object):
 
         Returns
         -------
-        chrono : pandas.core.Series
-            Time series containing the estimated periods of rest (1) and
-            activity (0).
+        aot : (ndarray, ndarray)
+            Arrays containing the estimated activity onset and offset times,
+            respectively.
 
         References
         ----------
@@ -1505,7 +1504,7 @@ class ScoringMixin(object):
 
         """
 
-        chrono = chronosapiens(
+        rbg = roenneberg(
             self.data,
             trend_period=trend_period,
             min_trend_period=min_trend_period,
@@ -1515,9 +1514,9 @@ class ScoringMixin(object):
             n_succ=n_succ
         )
 
-        diff = chrono.diff(1)
+        diff = rbg.diff(1)
 
-        AonT = chrono[diff == -1].index
-        AoffT = chrono[diff == 1].index
+        AonT = rbg[diff == -1].index
+        AoffT = rbg[diff == 1].index
 
         return (AonT, AoffT)
