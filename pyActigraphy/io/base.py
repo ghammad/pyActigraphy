@@ -155,6 +155,8 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
     @inactivity_length.setter
     def inactivity_length(self, value):
         self.__inactivity_length = value
+        # Discard current mask (will be recreated upon access if needed)
+        self.mask = None
 
     @property
     def mask(self):
