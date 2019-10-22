@@ -175,7 +175,7 @@ def _clean_sleep_bout(uncleaned_binary_data, period='12h', n_succ=3):
         return sleep_offset_idx
 
 
-def chronosapiens(
+def roenneberg(
     data,
     trend_period='24h',
     min_trend_period='12h',
