@@ -10,6 +10,7 @@ This series of notebooks are meant to illustrate the different features of the
 * `how to calculate the usual rest-activity rhythm variables`_
 * `how to visualise sleep diaries and compute summary statistics`_
 * `how to detect rest periods automatically`_
+* `how to quantify sleep fragmentation using state transition probabilities`_
 
 .. _a gentle introduction to the basic functionalities: pyActigraphy-Intro.ipynb
 .. _Invalid sequences during the recordings: pyActigraphy-Masking.ipynb
@@ -17,6 +18,7 @@ This series of notebooks are meant to illustrate the different features of the
 .. _how to calculate the usual rest-activity rhythm variables: pyActigraphy-Non-parametric-variables.ipynb
 .. _how to visualise sleep diaries and compute summary statistics: pyActigraphy-Sleep-Diary.ipynb
 .. _how to detect rest periods automatically: pyActigraphy-Sleep-Algorithms.ipynb
+.. _how to quantify sleep fragmentation using state transition probabilities: pyActigraphy-StateTransitionProb.ipynb
 
 If a feature of the *pyActigraphy* package is not illustrated here, do not
 hesitate to suggest it by fill an issue.
