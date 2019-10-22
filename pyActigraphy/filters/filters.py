@@ -1,8 +1,12 @@
 import numpy as np
 import pandas as pd
+import warnings
 
 
 def _create_inactivity_mask(data, duration, threshold):
+
+    if duration is None:
+        return None
 
     # Binary data
     binary_data = np.where(data >= threshold, 1, 0)
@@ -70,7 +74,25 @@ class FiltersMixin(object):
 
         Parameters
         ----------
-        duration: int
-            Minimal number of consecutive zeroes for an inactive period
+        duration: int or str
+            Minimal number of consecutive zeroes for an inactive period.
+            Time offset strings (ex: '90min') can also be used.
         """
-        self.mask = _create_inactivity_mask(self.raw_data, duration, 1)
+
+        if isinstance(duration, int):
+            nepochs = duration
+        elif isinstance(duration, str):
+            nepochs = int(pd.Timedelta(duration)/self.frequency)
+        else:
+            nepochs = None
+            warnings.warn(
+                'Inactivity length must be a int and time offset string (ex: '
+                '\'90min\'). Could not create a mask.',
+                UserWarning
+            )
+
+        # Store requested mask duration (and discard current mask)
+        self.inactivity_length = duration
+
+        # Create actual mask
+        self.mask = _create_inactivity_mask(self.raw_data, nepochs, 1)
