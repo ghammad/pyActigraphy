@@ -1778,6 +1778,8 @@ class ForwardMetricsMixin(object):
     def fSoD(
         self,
         freq='5min',
+        binarize=True,
+        threshold=4,
         whs=12,
         start='12:00:00',
         period='5h',
@@ -1787,7 +1789,10 @@ class ForwardMetricsMixin(object):
         return {
             iread.display_name: iread.fSoD(
                 freq=freq,
+                binarize=binarize,
+                threshold=threshold,
                 whs=whs,
+                start=start,
                 period=period,
                 algo=algo
             ) for iread in self.readers
