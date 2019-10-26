@@ -140,6 +140,7 @@ class RawDQT(BaseRaw):
 
 def read_raw_dqt(
     input_fname,
+    name=None,
     header_size=15,
     start_time=None,
     period=None
@@ -150,6 +151,9 @@ def read_raw_dqt(
     ----------
     input_fname: str
         Path to the DQT file.
+    name: str, optional
+        Name of the recording. If None, the device UUID is used instead.
+        Default is None.
     header_size: int
         Header size (i.e. number of lines) of the raw data file. Default is 15.
     start_time: datetime-like, optional
@@ -169,6 +173,7 @@ def read_raw_dqt(
 
     return RawDQT(
         input_fname=input_fname,
+        name=name,
         header_size=header_size,
         start_time=start_time,
         period=period
