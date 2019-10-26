@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import os
+import warnings
 
 from ..base import BaseRaw
 
@@ -11,9 +12,10 @@ class RawDQT(BaseRaw):
     Parameters
     ----------
     input_fname: str
-        Path to the AWD file.
+        Path to the Daqtometer file.
     header_size: int
-        Header size (i.e. number of lines) of the raw data file. Default is 7.
+        Header size (i.e. number of lines) of the raw data file.
+        Default is 15.
     start_time: datetime-like, optional
         Read data from this time.
         Default is None.
@@ -45,6 +47,16 @@ class RawDQT(BaseRaw):
         name = self.__extract_dqt_name(header)
         uuid = self.__extract_dqt_uuid(header)
         freq = self.__extract_dqt_freq(header)
+
+        if freq > self.__extract_dqt_sample_freq(header):
+            warnings.warn(
+                "The store rate of the DQT data is greater than the sampling "
+                "rate.\nData are thus aggregated with the following settigs:\n"
+                " - Binning mode: {}".format(
+                    self.__extract_dqt_bin_mode(header)
+                ),
+                UserWarning
+            )
 
         index_data = pd.read_csv(
             input_fname,
@@ -80,8 +92,8 @@ class RawDQT(BaseRaw):
         super().__init__(
             name=name,
             uuid=uuid,
-            format='AWD',
-            axial_mode='mono-axial',
+            format='DQT',
+            axial_mode='bi-axial',
             start_time=start_time,
             period=period,
             frequency=freq,
@@ -114,6 +126,16 @@ class RawDQT(BaseRaw):
         freqstr = cls.__match_string(header=header, match='Store rate')
         return pd.Timedelta(int(freqstr.split(',')[1]), unit='s')
 
+    @classmethod
+    def __extract_dqt_sample_freq(cls, header):
+        freqstr = cls.__match_string(header=header, match='Sample rate')
+        return pd.Timedelta(int(freqstr.split(',')[1])/0.1, unit='s')
+
+    @classmethod
+    def __extract_dqt_bin_mode(cls, header):
+        modestr = cls.__match_string(header=header, match='Binning mode')
+        return modestr.split(',')[1]
+
 
 def read_raw_dqt(
     input_fname,
@@ -126,7 +148,7 @@ def read_raw_dqt(
     Parameters
     ----------
     input_fname: str
-        Path to the AWD file.
+        Path to the DQT file.
     header_size: int
         Header size (i.e. number of lines) of the raw data file. Default is 15.
     start_time: datetime-like, optional
