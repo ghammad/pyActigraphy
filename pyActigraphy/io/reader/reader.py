@@ -6,7 +6,7 @@ from pandas.tseries.frequencies import to_offset
 from pyActigraphy.metrics import ForwardMetricsMixin
 from joblib import Parallel, delayed
 from ..awd import read_raw_awd
-from ..awd import read_raw_dqt
+from ..dqt import read_raw_dqt
 from ..mtn import read_raw_mtn
 from ..rpx import read_raw_rpx
 from pyActigraphy.filters import SSTLog
