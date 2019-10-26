@@ -13,7 +13,10 @@ class RawDQT(BaseRaw):
     ----------
     input_fname: str
         Path to the Daqtometer file.
-    header_size: int
+    name: str, optional
+        Name of the recording. If None, the device UUID is used instead.
+        Default is None.
+    header_size: int, optional
         Header size (i.e. number of lines) of the raw data file.
         Default is 15.
     start_time: datetime-like, optional
@@ -29,6 +32,7 @@ class RawDQT(BaseRaw):
     def __init__(
         self,
         input_fname,
+        name=None,
         header_size=15,
         start_time=None,
         period=None
@@ -44,8 +48,9 @@ class RawDQT(BaseRaw):
             header = [next(f) for x in range(header_size)]
 
         # extract informations from the header
-        name = self.__extract_dqt_name(header)
         uuid = self.__extract_dqt_uuid(header)
+        if name is None:
+            name = uuid
         freq = self.__extract_dqt_freq(header)
 
         if freq > self.__extract_dqt_sample_freq(header):
@@ -111,10 +116,6 @@ class RawDQT(BaseRaw):
             print('Found multiple matchings for the string: {}'.format(match))
         else:
             return matchings[0]
-
-    @classmethod
-    def __extract_dqt_name(cls, header):
-        return 'Keine name'
 
     @classmethod
     def __extract_dqt_uuid(cls, header):
