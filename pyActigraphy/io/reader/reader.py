@@ -1,5 +1,4 @@
 import glob
-import numpy as np
 import warnings
 
 from pandas import Timedelta
@@ -7,6 +6,7 @@ from pandas.tseries.frequencies import to_offset
 from pyActigraphy.metrics import ForwardMetricsMixin
 from joblib import Parallel, delayed
 from ..awd import read_raw_awd
+from ..awd import read_raw_dqt
 from ..mtn import read_raw_mtn
 from ..rpx import read_raw_rpx
 from pyActigraphy.filters import SSTLog
@@ -178,8 +178,11 @@ def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
             E.g. '/path/to/my/files/*.csv'
         reader_type: str
             Reader type.
-            Supported types: AWD (ActiWatch), MTN (MotionWatch8)
-            and RPX (Respironics)
+            Supported types:
+            * AWD (ActiWatch 4, CamNtech)
+            * DQT (Daqtometers, Daqtix)
+            * MTN (MotionWatch8, CamNtech)
+            * RPX (Actiwatch, Respironics)
         n_jobs: int
             Number of CPU to use for parallel reading
         prefer: str
@@ -197,7 +200,7 @@ def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
             A list of instances of RawAWD, RawMTN or RawRPX
         """
 
-        supported_types = ['AWD', 'MTN', 'RPX']
+        supported_types = ['AWD', 'DQT', 'MTN', 'RPX']
         if reader_type not in supported_types:
             raise ValueError(
                 'Type {0} unsupported. Supported types: {1}'.format(
@@ -217,6 +220,9 @@ def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
         readers = {
             'AWD': lambda files: parallel_reader(
                 n_jobs, read_raw_awd, files, prefer, verbose
+            ),
+            'DQT': lambda files: parallel_reader(
+                n_jobs, read_raw_dqt, files, prefer, verbose
             ),
             'MTN': lambda files: parallel_reader(
                 n_jobs, read_raw_mtn, files, prefer, verbose
