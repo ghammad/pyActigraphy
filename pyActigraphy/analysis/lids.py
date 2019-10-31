@@ -294,10 +294,14 @@ class LIDS():
     def concat(cls, ts_list, time_delta='15min'):
         r'''Concatenate time series
 
+        Consecutive time series that are apart by less than a user-defined
+        thresold are concatenanted. The gaps between the time series are filled
+        with NaN so that the resulting time series remain evenly spaced.
+
         Parameters
         ----------
         ts_list: list of pandas.Series
-            Data to concatenate.
+            Series to concatenate. Must have the same sampling frequency.
         time_delta: str, optional
             Maximal time delta between LIDS series to concatenate.
             Default is '15min'.
@@ -317,6 +321,31 @@ class LIDS():
                 UserWarning
             )
             return [], []
+
+        # Store the sampling frequency of all the input time series
+        freqs = [ts.index.freq for ts in ts_list]
+        # Check if one is None
+        if None in freqs:
+            raise ValueError(
+                "One of the input time series has no index frequency. "
+                "This could indicate unevenly sampled data.\n"
+                "The current implementation of the LIDS analysis does not "
+                "support such data. A possible workaround would consist in "
+                "resampling the data with the assumed acquisition frequency."
+            )
+        # Check if all the time series to concatenate have the same sampling
+        # frequency
+        if len(set(freqs)) != 1:
+            raise ValueError(
+                "One of the input time series has no index frequency. "
+                "This could indicate unevenly sampled data.\n"
+                "The current implementation of the LIDS analysis does not "
+                "support such data. A possible workaround would consist in "
+                "resampling the data with the assumed acquisition frequency."
+            )
+
+        # Store current sampling frequency
+        freq = set(freqs).pop()
 
         td = pd.Timedelta(time_delta)
 
@@ -344,9 +373,11 @@ class LIDS():
         concat_ts = []
         for idx in concat_indices:
             if len(idx) == 1:
-                concat_ts.append(ts_list[idx[0]])
+                concat_ts.append(ts_list[idx[0]].asfreq(freq))
             else:
-                concat_ts.append(pd.concat([ts_list[i] for i in idx]))
+                concat_ts.append(
+                    pd.concat([ts_list[i] for i in idx]).asfreq(freq)
+                )
 
         return concat_indices, concat_ts
 
