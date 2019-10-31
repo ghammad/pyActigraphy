@@ -224,7 +224,6 @@ class LIDS():
                 ('" or "'.join(list(fit_obj_funcs.keys())), fit_obj_func)
             )
 
-        self.__freq = None  # pd.Timedelta
         self.__lids_func = lids_funcs[lids_func]  # LIDS transformation fct
         self.__fit_func = fit_funcs[fit_func]  # Fit function to LIDS
         self.__fit_obj_func = fit_obj_funcs[fit_obj_func]  # Fit obj function
@@ -260,17 +259,6 @@ class LIDS():
         self.__fit_results = None
         self.__fit_mri_profile = None
         # self.__fit_period = None
-
-    @property
-    def freq(self):
-        r'''Sampling frequency of the LIDS transformed data'''
-        if self.__freq is None:
-            warnings.warn(
-                'The sampling frequency of the LIDS data is not set. '
-                'Run lids_transform() before accessing this attribute.',
-                UserWarning
-            )
-        return self.__freq
 
     @property
     def lids_func(self):
@@ -572,6 +560,15 @@ class LIDS():
 
         # Store actual sampling frequency
         freq = pd.Timedelta(lids.index.freq)
+        # Check if index frequency is not None
+        if freq is None:
+            raise ValueError(
+                "The input data have no index frequency. "
+                "This could indicate unevenly sampled data.\n"
+                "The current implementation of the LIDS analysis does not "
+                "support such data. A possible workaround would consist in "
+                "resampling the data with the assumed acquisition frequency."
+            )
 
         # Define the x range by converting timestamps to indices, in order to
         # deal with time series with irregular index.
@@ -625,12 +622,22 @@ class LIDS():
             # Fit the highest MRI peak
             peaks, peak_properties = find_peaks(mri, height=0)
             if len(peak_properties['peak_heights']) > 0:
+                # Store index of the highest MRI peak
                 peak_index = peaks[np.argmax(peak_properties['peak_heights'])]
-
-                # Store fit parameters
+                # Store fit parameters corresponding the highest MRI peak
                 self.__fit_results = fit_results[peak_index]
                 if verbose:
                     print('Highest MRI: {}'.format(mri[peak_index]))
+                # Add lids index frequency to fit result parameters
+                self.__fit_results.params.add(
+                    'freq(s)', value=freq.total_seconds()
+                )
+                # Add last value of the ordinal index of the input lids
+                # Needed for calculation of the phase at sleep offset
+                self.__fit_results.params.add(
+                    'x_max', value=x[-1]
+                )
+
             else:
                 # Store fit parameters
                 self.__fit_results = None
@@ -654,6 +661,15 @@ class LIDS():
                 args=(x,  lids.values, self.lids_fit_func),
                 nan_policy=nan_policy,
                 reduce_fcn=self.__fit_reduc_func
+            )
+            # Add lids index frequency to fit result parameters
+            self.__fit_results.params.add(
+                'freq(s)', value=freq.total_seconds()
+            )
+            # Add last value of the ordinal index of the input lids
+            # Needed for calculation of the phase at sleep offset
+            self.__fit_results.params.add(
+                'x_max', value=x[-1]
             )
             # Print fit parameters if verbose
             if verbose:
@@ -741,7 +757,7 @@ class LIDS():
 
         return mri
 
-    def lids_period(self, freq='s'):
+    def lids_period(self, params=None, freq='s'):
         r'''LIDS period
 
         Convert the period of the LIDS oscillations as estimated by the fit
@@ -749,6 +765,10 @@ class LIDS():
 
         Parameters
         ----------
+        params: lmfit.Parameters, optional
+            Parameters for the fit function.
+            If None, self.lids_fit_params is used instead.
+            Default is None.
         s: str, optional
             Frequency to cast the output timedelta to.
             Default is 's'.
@@ -764,17 +784,27 @@ class LIDS():
         parameters, the fitted period needs to be set via its own setter
         function.
         '''
-        if self.freq is None:
-            # TODO: evaluate if raise ValueError('') more appropriate
-            return None
-        elif self.lids_fit_results is None:
-            # TODO: evaluate if raise ValueError('') more appropriate
-            return None
-        else:
-            lids_period = self.lids_fit_results.params['period']*self.freq
-            return lids_period.astype('timedelta64[{}]'.format(freq))
+        # Access fit parameters
+        if params is None:
+            if self.lids_fit_results is None:
+                warnings.warn(
+                    'The LIDS fit results are not available.\n'
+                    'Run lids_fit() before accessing this method.\n'
+                    'Returning None.',
+                    UserWarning
+                )
+                # TODO: evaluate if raise ValueError('') more appropriate
+                return None
+            else:
+                params = self.lids_fit_results.params
 
-    def lids_phases(self, lids, params=None, radians=False):
+        lids_period = params['period']*pd.Timedelta(
+                params['freq(s)'],
+                unit='s'
+            )
+        return lids_period.astype('timedelta64[{}]'.format(freq))
+
+    def lids_phases(self, params=None, radians=False):
         r'''LIDS onset and offset phases
 
         These phases are defined as the minimal distance to the first/last peak
@@ -782,8 +812,6 @@ class LIDS():
 
         Parameters
         ----------
-        lids: pandas.Series
-            Output data from LIDS transformation.
         params: lmfit.Parameters, optional
             Parameters for the fit function.
             If None, self.lids_fit_params is used instead.
@@ -819,7 +847,7 @@ class LIDS():
         # Defined as the value of an inverse cosine fit function at sleep
         # offset t_1,
         # modulo 2*Pi: Phi@Offset = 2*pi*t_1/T + phi [2*pi]
-        t_1 = lids.index.values.ptp()/lids.index.freq
+        t_1 = params['x_max'].value
         T = params['period'].value
         phi = params['phase'].value
         offset_phase = (2*np.pi*t_1/T + phi) % (2*np.pi)
