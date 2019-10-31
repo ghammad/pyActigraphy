@@ -282,12 +282,6 @@ class LIDS():
     @property
     def lids_fit_results(self):
         r'''Results of the LIDS fit'''
-        if self.__fit_results is None:
-            warnings.warn(
-                'The fit results is None. '
-                'Run lids_fit() before accessing this attribute.',
-                UserWarning
-            )
         return self.__fit_results
 
     @classmethod
@@ -661,7 +655,7 @@ class LIDS():
                     print('Highest MRI: {}'.format(mri[peak_index]))
                 # Add lids index frequency to fit result parameters
                 self.__fit_results.params.add(
-                    'freq(s)', value=freq.total_seconds()
+                    'freq', value=freq.total_seconds()
                 )
                 # Add last value of the ordinal index of the input lids
                 # Needed for calculation of the phase at sleep offset
@@ -695,7 +689,7 @@ class LIDS():
             )
             # Add lids index frequency to fit result parameters
             self.__fit_results.params.add(
-                'freq(s)', value=freq.total_seconds()
+                'freq', value=freq.total_seconds()
             )
             # Add last value of the ordinal index of the input lids
             # Needed for calculation of the phase at sleep offset
@@ -846,7 +840,7 @@ class LIDS():
                 params = self.lids_fit_results.params
 
         lids_period = params['period']*pd.Timedelta(
-                params['freq(s)'],
+                params['freq'],
                 unit='s'
             )
         return lids_period.astype('timedelta64[{}]'.format(freq))
@@ -1042,7 +1036,6 @@ class LIDS():
         scan_period=True,
         bounds=('30min', '180min'),
         step='5min',
-        mri_profile=False,
         nan_policy='raise',
         verbose_fit=False,
         verbose=False
@@ -1075,10 +1068,6 @@ class LIDS():
         step: str, optional
             Time delta between the periods to be tested.
             Default is '5min'
-        mri_profile: bool, optional
-            If set to True, the function returns a list with the MRI calculated
-            for each test period.
-            Default is False.
         nan_policy: str, optional
             Specifies action if the objective function returns NaN values.
             One of:
@@ -1115,12 +1104,12 @@ class LIDS():
                 scan_period=scan_period,
                 bounds=bounds,
                 step=step,
-                mri_profile=mri_profile,
+                mri_profile=False,
                 nan_policy=nan_policy,
                 verbose=verbose_fit
             )
 
-            if self.lids_fit_results.params is None:
+            if self.lids_fit_results is None:
                 return None
 
             # Extract fit parameters
@@ -1141,7 +1130,7 @@ class LIDS():
             fit_params['redchisq'] = self.lids_fit_results.redchi
 
             # Calculate phase at sleep onset and offset
-            lids_onset_phase, lids_offset_phase = self.lids_phases(lids)
+            lids_onset_phase, lids_offset_phase = self.lids_phases()
 
             # Add phases to fit parameters
             fit_params['phase_onset'] = lids_onset_phase
