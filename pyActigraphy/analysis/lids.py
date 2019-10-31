@@ -600,12 +600,10 @@ class LIDS():
                 "support such data. A possible workaround would consist in "
                 "resampling the data with the assumed acquisition frequency."
             )
-        # Drop NaN
-        lids_cleaned = lids.dropna()
 
         # Define the x range by converting timestamps to indices, in order to
         # deal with time series with irregular index.
-        x = ((lids_cleaned.index - lids_cleaned.index[0])/freq).values
+        x = ((lids.index - lids.index[0])/freq).values
         mri = []
 
         if scan_period:
@@ -636,7 +634,7 @@ class LIDS():
                         self.__fit_obj_func,
                         self.__fit_initial_params,
                         method=method,
-                        args=(x, lids_cleaned.values, self.lids_fit_func),
+                        args=(x, lids.values, self.lids_fit_func),
                         nan_policy=nan_policy,
                         reduce_fcn=self.__fit_reduc_func
                     )
@@ -645,10 +643,10 @@ class LIDS():
                 if verbose:
                     print(fit_report(fit_results[-1]))
                 # Calculate the MR index
-                mri.append(self.lids_mri(lids_cleaned, fit_results[-1].params))
+                mri.append(self.lids_mri(lids, fit_results[-1].params))
                 if verbose:
                     pearson_r = self.lids_pearson_r(
-                        lids_cleaned, fit_results[-1].params)[0]
+                        lids, fit_results[-1].params)[0]
                     print('Pearson r: {}'.format(pearson_r))
                     print('MRI: {}'.format(mri[-1]))
 
@@ -691,7 +689,7 @@ class LIDS():
                 self.__fit_obj_func,
                 self.__fit_initial_params,
                 method=method,
-                args=(x,  lids_cleaned.values, self.lids_fit_func),
+                args=(x,  lids.values, self.lids_fit_func),
                 nan_policy=nan_policy,
                 reduce_fcn=self.__fit_reduc_func
             )
@@ -709,11 +707,11 @@ class LIDS():
                 print(fit_report(self.lids_fit_results))
             # Calculate the MR index
             mri.append(
-                self.lids_mri(lids_cleaned, self.lids_fit_results.params)
+                self.lids_mri(lids, self.lids_fit_results.params)
             )
             if verbose:
                 pearson_r = self.lids_pearson_r(
-                    lids_cleaned, self.lids_fit_results.params)[0]
+                    lids, self.lids_fit_results.params)[0]
                 print('Pearson r: {}'.format(pearson_r))
                 print('MRI: {}'.format(mri[-1]))
 
@@ -763,11 +761,13 @@ class LIDS():
                 "support such data. A possible workaround would consist in "
                 "resampling the data with the assumed acquisition frequency."
             )
+        # Drop potential NaN
+        lids_cleaned = lids.dropna()
         # Create associated ordinal index
-        x = ((lids.index - lids.index[0])/freq).values
+        x = ((lids_cleaned.index - lids_cleaned.index[0])/freq).values
         if params is None:
             params = self.lids_fit_results.params
-        return pearsonr(lids, self.lids_fit_func(x, params))
+        return pearsonr(lids_cleaned, self.lids_fit_func(x, params))
 
     def lids_mri(self, lids, params=None):
         r'''Munich Rhythmicity Index
