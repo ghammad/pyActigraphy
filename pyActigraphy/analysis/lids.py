@@ -485,6 +485,15 @@ class LIDS():
             rs = ts.resample(resampling_freq).sum()
         else:
             rs = ts
+
+        if rs.index.freq is None:
+            raise ValueError(
+                "The input data have no index frequency. "
+                "This could indicate unevenly sampled data.\n"
+                "The current implementation of the LIDS analysis does not "
+                "support such data. A possible workaround would consist in "
+                "resampling the data with the assumed acquisition frequency."
+            )
         # Apply LIDS transformation x: 100/(x+1)
         lids = rs.apply(self.lids_func)
 
@@ -561,20 +570,20 @@ class LIDS():
         '''
 
         # Store actual sampling frequency
-        self.__freq = pd.Timedelta(lids.index.freq)
+        freq = pd.Timedelta(lids.index.freq)
 
         # Define the x range by converting timestamps to indices, in order to
         # deal with time series with irregular index.
-        x = ((lids.index - lids.index[0])/self.freq).values
+        x = ((lids.index - lids.index[0])/freq).values
         mri = []
 
         if scan_period:
 
             # Define bounds for the period
-            period_start = pd.Timedelta(bounds[0])/self.freq
-            period_end = pd.Timedelta(bounds[1])/self.freq
+            period_start = pd.Timedelta(bounds[0])/freq
+            period_end = pd.Timedelta(bounds[1])/freq
             period_range = period_end-period_start
-            period_step = pd.Timedelta(step)/self.freq
+            period_step = pd.Timedelta(step)/freq
 
             test_periods = np.linspace(
                 period_start,
@@ -658,13 +667,13 @@ class LIDS():
 
         if mri_profile:
             if scan_period:
-                return pd.Series(index=test_periods*self.freq, data=mri)
+                return pd.Series(index=test_periods*freq, data=mri)
             else:
                 return pd.Series(
                     index=[
                         self.lids_fit_results.params[
                             'period'
-                        ].value*self.freq
+                        ].value*freq
                     ],
                     data=mri
                 )
