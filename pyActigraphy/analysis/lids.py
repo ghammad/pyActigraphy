@@ -486,6 +486,7 @@ class LIDS():
         else:
             rs = ts
 
+        # Check if index frequency is not None
         if rs.index.freq is None:
             raise ValueError(
                 "The input data have no index frequency. "
@@ -847,12 +848,14 @@ class LIDS():
         ts: pandas.Series
             LIDS data with internal time since sleep onset as index.
         '''
+        # Store actual sampling frequency
+        freq = pd.Timedelta(lids.index.freq)
 
         # External timeline of the current LIDS data since sleep onset
         t_ext = pd.timedelta_range(
             start='0 day',
             periods=lids.index.size,
-            freq=self.freq
+            freq=freq
         )
 
         # Scaling factor, relative to the LIDS period, normalized to t_norm
@@ -868,7 +871,7 @@ class LIDS():
         # Resample LIDS data to restore the original bin width of its Index
         # Infer missing data via interpolation
         lids_resampled = lids_rescaled.resample(
-            self.freq
+            freq
             # label='right',
             # closed='right'
         ).mean()
