@@ -372,9 +372,11 @@ class LIDS():
             Data to filter.
         duration_min: str, optional
             Minimal time duration for a time series to be kept.
+            If set to None, this criterion is not used for filtering.
             Default is '30min'.
         duration_max: str, optional
             Maximal time duration for a time series to be kept.
+            If set to None, this criterion is not used for filtering.
             Default is '12h'.
 
         Returns
@@ -409,7 +411,7 @@ class LIDS():
             Method to smooth the data.
             Available options are:
                 'mva': moving average
-                'kernel': gaussian kernel
+                'gaussian': gaussian kernel
                 'none': no smoothing
         resolution: float
             If method='mva': Size of the rolling window.
@@ -465,7 +467,7 @@ class LIDS():
             Method to smooth the data.
             Available options are:
                 'mva': moving average
-                'kernel': gaussian kernel
+                'gaussian': gaussian kernel
                 'none': no smoothing
             Default is 'mva'.
         resolution: str, optional
@@ -871,9 +873,13 @@ class LIDS():
         duration_max='12H',
         resampling_freq='10min',
         smooth_method='mva',
-        smooth_resolution='30Min'
+        smooth_resolution='30Min',
+        concat_time_delta=None
     ):
-        r'''Filter data according to their time duration and smooth them.
+        r'''Data preprocessing for LIDS analysis
+
+        Filter data according to their time duration, smooth them and
+        eventually concatenate them.
 
         Parameters
         ----------
@@ -887,7 +893,7 @@ class LIDS():
             Default is '12h'.
         resampling_freq: str, optional
             Frequency of the resampling applied prior to LIDS transformation.
-            Default is None.
+            Default is '10min'.
         smooth_method: str, optional
             Method used to smooth the data.
             Available options are:
@@ -899,14 +905,19 @@ class LIDS():
             If method='mva': Size of the rolling window.
             If method='gaussian': Standard deviation of the gaussian kernel.
             Default is '30min'.
+        concat_time_delta: str, optional
+            If not set to None, consecutive sleep bouts separated by less than
+            'concat_time_delta' are concatenated.
+            Default is None.
 
         Returns
         -------
-        smooth_lids: pandas.Series
+        concat_lids: pandas.Series
         '''
 
         # Filtering
-        # Sleep bouts shorted than 3h and longer than 12h are discarded
+        # Sleep bouts shorted than duration_min and
+        # longer than duration_max are discarded
         filtered_sleep_bouts = self.filter(
             sleep_bouts,
             duration_min=duration_min,
@@ -924,7 +935,17 @@ class LIDS():
             ) for ts in filtered_sleep_bouts
         ]
 
-        return smooth_lids
+        # LIDS concatenation
+        # Concatenate consecutive sleep bouts if delta_time < concat_time_delta
+        if concat_time_delta is not None:
+            concat_indices, concat_lids = self.concat(
+                smooth_lids,
+                time_delta=concat_time_delta
+            )
+        else:
+            concat_lids = smooth_lids
+
+        return concat_lids
 
     def lids_summary(
         self,
@@ -989,6 +1010,13 @@ class LIDS():
         df_params: pandas.DataFrame
             DataFrame with the estimated parameters and goodness-of-fit
             statistics.
+
+        References
+        ----------
+
+        .. [1] Non-Linear Least-Squares Minimization and Curve-Fitting for
+               Python.
+               https://lmfit.github.io/lmfit-py/index.html
         '''
 
         ldf = []
