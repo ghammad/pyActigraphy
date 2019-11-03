@@ -1110,7 +1110,7 @@ class LIDS():
             )
 
             if self.lids_fit_results is None:
-                return None
+                continue
 
             # Extract fit parameters
             fit_params = self.lids_fit_results.params.valuesdict()
