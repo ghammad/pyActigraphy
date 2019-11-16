@@ -74,7 +74,7 @@ class RawDQT(BaseRaw):
             infer_datetime_format=True,
             dtype=np.float,
             na_values='x'
-        )
+        ).asfreq(freq)
 
         # Convert activity from string to float
         index_data['activity'] = index_data['activity'].astype(np.float)
