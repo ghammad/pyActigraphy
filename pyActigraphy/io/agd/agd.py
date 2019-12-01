@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os
 import sqlite3
 
@@ -11,14 +12,9 @@ class RawAGD(BaseRaw):
     Parameters
     ----------
     input_fname: str
-        Path to the AWD file.
-    header_size: int
-        Header size (i.e. number of lines) of the raw data file. Default is 7.
+        Path to the AGD file.
     start_time: datetime-like, optional
         Read data from this time.
-        Default is None.
-    end-time: datetime-like, optional
-        Read data up to this time.
         Default is None.
     period: str, optional
         Length of the read data.
@@ -31,7 +27,7 @@ class RawAGD(BaseRaw):
         self,
         input_fname,
         start_time=None,
-        end_time=None,
+        # end_time=None,
         period=None
     ):
 
@@ -52,7 +48,7 @@ class RawAGD(BaseRaw):
 
         # extract informations from the header
         name = settings.at['subjectname', 'settingValue']
-        uuid = settings.at['devicename', 'settingValue']
+        uuid = settings.at['deviceserial', 'settingValue']
         start = self.__to_timestamps(
             int(settings.at['startdatetime', 'settingValue'])
         )
@@ -61,19 +57,38 @@ class RawAGD(BaseRaw):
             unit='s'
         )
 
+        # extract proximity (wear/no-wear) informations
+        capsense = pd.read_sql_query(
+            "SELECT state, timeStamp FROM capsense",
+            connection,
+            index_col='timeStamp'
+        ).squeeze()
+        # convert index to a date time
+        capsense.index = self.__to_timestamps(capsense.index)
+        # set index frequency
+        self.capsense = capsense.asfreq(
+            pd.to_timedelta(
+                int(settings.at['proximityIntervalInSeconds', 'settingValue']),
+                unit='s'
+            )
+        )
+
+        # extract acceleration and light data
         data = pd.read_sql_query(
             "SELECT * FROM data",
             connection,
             index_col='dataTimestamp'
         )
+        # convert index to a date time
+        data.index = self.__to_timestamps(data.index)
+        # set index frequency
+        data = data.asfreq(freq=freq)
 
-        index_data = pd.Series(
-            data=data,
-            index=pd.date_range(
-                start=start,
-                periods=len(data),
-                freq='1min'
-            )
+        # calculate the magnitude of the acceleration vector.
+        data['mag'] = np.sqrt(
+            data['axis1']*data['axis1'] +
+            data['axis2']*data['axis2'] +
+            data['axis3']*data['axis3']
         )
 
         if start_time is not None:
@@ -85,23 +100,26 @@ class RawAGD(BaseRaw):
             period = pd.Timedelta(period)
             stop_time = start_time+period
         else:
-            stop_time = index_data.index[-1]
+            stop_time = data.index[-1]
             period = stop_time - start_time
 
-        index_data = index_data.loc[start_time:stop_time]
+        data = data.loc[start_time:stop_time]
 
         # call __init__ function of the base class
         super().__init__(
             name=name,
             uuid=uuid,
-            format='AWD',
-            axial_mode='mono-axial',
+            format='AGD',
+            axial_mode='tri-axial',
             start_time=start_time,
             period=period,
             frequency=freq,
-            data=index_data,
-            light=None
+            data=data['mag'],
+            light=data['lux'] if 'lux' in data.columns else None
         )
+
+        # Close sqlite3 connection
+        connection.close()
 
     @staticmethod
     def __to_timestamps(ticks):
@@ -110,10 +128,9 @@ class RawAGD(BaseRaw):
             unit='s'
         )
 
-def read_raw_awd(
+
+def read_raw_agd(
     input_fname,
-    header_size=7,
-    frequency='1min',
     start_time=None,
     period=None
 ):
@@ -122,14 +139,7 @@ def read_raw_awd(
     Parameters
     ----------
     input_fname: str
-        Path to the AWD file.
-    header_size: int
-        Header size (i.e. number of lines) of the raw data file. Default is 7.
-    frequency: str
-        Data acquisition frequency.
-        Cf. #timeseries-offset-aliases in
-        <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
-        Default is '1T'.
+        Path to the AGD file.
     start_time: datetime-like, optional
         Read data from this time.
         Default is None.
@@ -145,10 +155,8 @@ def read_raw_awd(
         An object containing raw AWD data
     """
 
-    return RawAWD(
+    return RawAGD(
         input_fname=input_fname,
-        header_size=header_size,
-        frequency=frequency,
         start_time=start_time,
         period=period
     )
