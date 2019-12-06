@@ -331,11 +331,10 @@ class LIDS():
         # frequency
         if len(set(freqs)) != 1:
             raise ValueError(
-                "One of the input time series has no index frequency. "
-                "This could indicate unevenly sampled data.\n"
+                "The input time series do not have the same index frequency.\n"
                 "The current implementation of the LIDS analysis does not "
                 "support such data. A possible workaround would consist in "
-                "resampling the data with the assumed acquisition frequency."
+                "resampling the data with a common frequency."
             )
 
         # Store current sampling frequency
@@ -369,9 +368,12 @@ class LIDS():
             if len(idx) == 1:
                 concat_ts.append(ts_list[idx[0]].asfreq(freq))
             else:
-                concat_ts.append(
-                    pd.concat([ts_list[i] for i in idx]).asfreq(freq)
-                )
+                concat_tmp = pd.concat([ts_list[i] for i in idx])
+                # Check for duplicated indices
+                duplicated_indices = concat_tmp.index.duplicated(keep='first')
+                if any(duplicated_indices):
+                    concat_tmp = concat_tmp.loc[~duplicated_indices]
+                concat_ts.append(concat_tmp.asfreq(freq))
 
         return concat_indices, concat_ts
 
