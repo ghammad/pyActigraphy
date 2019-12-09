@@ -1566,3 +1566,55 @@ class ScoringMixin(object):
         AoffT = rbg[diff == 1].index
 
         return (AonT, AoffT)
+
+    def SleepProfile(
+        self,
+        freq='15min',
+        algo='Roenneberg',
+        *args,
+        **kwargs
+    ):
+        r"""Normalized sleep daily profile
+
+        XXXXX
+
+        Parameters
+        ----------
+        freq: str, optional
+            Resampling frequency.
+            Default is '5min'
+        algo: str, optional
+            Sleep scoring algorithm to use.
+            Default is 'Roenneberg'.
+        *args
+            Variable length argument list passed to the scoring algorithm.
+        **kwargs
+            Arbitrary keyword arguements passed to the scoring algorithm.
+
+        Returns
+        -------
+        sleep_prof: YYY
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> raw.SleepProfile()
+            ZZZZZZZZZZZZZZZZzZZZZZ
+
+        """
+
+        # Retrieve sleep scoring function dynamically by name
+        sleep_algo = getattr(self, algo)
+
+        # Score activity
+        sleep_scoring = sleep_algo(*args, **kwargs)
+
+        # Sleep profile over 24h
+        sleep_prof = _average_daily_activity(data=sleep_scoring, cyclic=False)
+
+        # Resampled sleep profile
+        rs_sleep_profile = sleep_prof.resample(freq).mean()
+
+        return rs_sleep_profile
