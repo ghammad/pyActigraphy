@@ -1138,7 +1138,8 @@ class LIDS():
             fit_params['phase_onset'] = lids_onset_phase
             fit_params['phase_offset'] = lids_offset_phase
 
-            # Add sleep bout duration
+            # Add sleep bout start time and duration
+            fit_params['start_time'] = lids.index[0]
             fit_params['duration'] = lids.index[-1]-lids.index[0]
 
             # Create a DF with the fit parameters
