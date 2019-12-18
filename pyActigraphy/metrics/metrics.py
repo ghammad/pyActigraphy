@@ -1783,7 +1783,9 @@ class ForwardMetricsMixin(object):
         whs=12,
         start='12:00:00',
         period='5h',
-        algo='unanimous'
+        algo='Roenneberg',
+        *args,
+        **kwargs
     ):
 
         return {
@@ -1794,7 +1796,9 @@ class ForwardMetricsMixin(object):
                 whs=whs,
                 start=start,
                 period=period,
-                algo=algo
+                algo=algo,
+                *args,
+                **kwargs
             ) for iread in self.readers
         }
 
