@@ -739,11 +739,13 @@ class ScoringMixin(object):
         self,
         freq='5min',
         binarize=True,
-        threshold=4,
+        bin_threshold=4,
         whs=4,
         start='12:00:00',
         period='5h',
-        algo='unanimous'
+        algo='Roenneberg',
+        *args,
+        **kwargs
     ):
 
         r"""Sleep over Daytime
@@ -761,7 +763,7 @@ class ScoringMixin(object):
             activity onset and offset times. Only valid if start='AonT' or
             'AoffT'.
             Default is True.
-        threshold: int, optional
+        bin_threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
             Default is 4.
@@ -777,9 +779,11 @@ class ScoringMixin(object):
             Default is '5h'
         algo: str, optional
             Sleep scoring algorithm to use.
-            Default is 'unanimous'.
-            Supported algorithms: 'ck', 'sadeh', 'scripps', 'majority',
-            'unanimous'
+            Default is 'Roenneberg'.
+        *args
+            Variable length argument list passed to the scoring algorithm.
+        **kwargs
+            Arbitrary keyword arguements passed to the scoring algorithm.
 
         Returns
         -------
@@ -805,14 +809,33 @@ class ScoringMixin(object):
 
         """
 
-        data = self.resampled_data(freq, binarize, threshold)
+        # Retrieve sleep scoring function dynamically by name
+        sleep_algo = getattr(self, algo)
+
+        # Score activity
+        sleep_scoring = sleep_algo(*args, **kwargs)
+
+        # data = self.resampled_data(freq, binarize, threshold)
 
         # Regex pattern for HH:MM:SS time string
         pattern = re.compile(r"^([0-1]\d|2[0-3])(?::([0-5]\d))(?::([0-5]\d))$")
+
         if start == 'AonT':
-            td = _activity_onset_time(data, whs=whs)
+            td = self.AonT(
+                freq=freq,
+                whs=whs,
+                binarize=binarize,
+                threshold=bin_threshold
+            )
+            # td = _activity_onset_time(data, whs=whs)
         elif start == 'AoffT':
-            td = _activity_offset_time(data, whs=whs)
+            td = self.AoffT(
+                freq=freq,
+                whs=whs,
+                binarize=binarize,
+                threshold=bin_threshold
+            )
+            # td = _activity_offset_time(data, whs=whs)
         elif pattern.match(start):
             td = pd.Timedelta(start)
         else:
@@ -822,152 +845,153 @@ class ScoringMixin(object):
         start_time = _td_format(td)
         end_time = _td_format(td+pd.Timedelta(period))
 
-        ts_days = self.data.between_time(start_time, end_time)
-
-        if algo == 'ck':
-            sod = _cole_kripke(
-                ts_days,
-                scale=0.00001,
-                window=np.array(
-                    [400, 600, 300, 400, 1400, 500, 350, 0, 0],
-                    np.int32
-                ),
-                threshold=1.0
-            )
-        elif algo == 'sadeh':
-            sod = _sadeh(
-                ts_days,
-                offset=7.601,
-                weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
-                threshold=0.0
-            )
-        elif algo == 'scripps':
-            sod = _scripps(
-                ts_days,
-                scale=0.204,
-                window=np.array(
-                    [
-                        0.0064,  # b_{-10}
-                        0.0074,  # b_{-9}
-                        0.0112,  # b_{-8}
-                        0.0112,  # b_{-7}
-                        0.0118,  # b_{-6}
-                        0.0118,  # b_{-5}
-                        0.0128,  # b_{-4}
-                        0.0188,  # b_{-3}
-                        0.0280,  # b_{-2}
-                        0.0664,  # b_{-1}
-                        0.0300,  # b_{+0}
-                        0.0112,  # b_{+1}
-                        0.0100,  # b_{+2}
-                        0.0000,  # b_{+3}
-                        0.0000,  # b_{+4}
-                        0.0000,  # b_{+5}
-                        0.0000,  # b_{+6}
-                        0.0000,  # b_{+7}
-                        0.0000,  # b_{+8}
-                        0.0000,  # b_{+9}
-                        0.0000   # b_{+10}
-                    ], np.float
-                ),
-                threshold=1.0
-            )
-        elif algo == 'majority':
-            ck = _cole_kripke(
-                ts_days,
-                scale=0.00001,
-                window=np.array(
-                    [400, 600, 300, 400, 1400, 500, 350, 0, 0],
-                    np.int32
-                ),
-                threshold=1.0
-            )
-            sadeh = _sadeh(
-                ts_days,
-                offset=7.601,
-                weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
-                threshold=0.0
-            )
-            scripps = _scripps(
-                ts_days,
-                scale=0.204,
-                window=np.array(
-                    [
-                        0.0064,  # b_{-10}
-                        0.0074,  # b_{-9}
-                        0.0112,  # b_{-8}
-                        0.0112,  # b_{-7}
-                        0.0118,  # b_{-6}
-                        0.0118,  # b_{-5}
-                        0.0128,  # b_{-4}
-                        0.0188,  # b_{-3}
-                        0.0280,  # b_{-2}
-                        0.0664,  # b_{-1}
-                        0.0300,  # b_{+0}
-                        0.0112,  # b_{+1}
-                        0.0100,  # b_{+2}
-                        0.0000,  # b_{+3}
-                        0.0000,  # b_{+4}
-                        0.0000,  # b_{+5}
-                        0.0000,  # b_{+6}
-                        0.0000,  # b_{+7}
-                        0.0000,  # b_{+8}
-                        0.0000,  # b_{+9}
-                        0.0000   # b_{+10}
-                    ],
-                    np.float
-                ),
-                threshold=1.0
-            )
-            sod = ((ck + sadeh + scripps) > 1).astype(int)
-        elif algo == 'unanimous':
-            ck = _cole_kripke(
-                ts_days,
-                scale=0.00001,
-                window=np.array(
-                    [400, 600, 300, 400, 1400, 500, 350, 0, 0],
-                    np.int32
-                ),
-                threshold=1.0
-            )
-            sadeh = _sadeh(
-                ts_days,
-                offset=7.601,
-                weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
-                threshold=0.0
-            )
-            scripps = _scripps(
-                ts_days,
-                scale=0.204,
-                window=np.array(
-                    [
-                        0.0064,  # b_{-10}
-                        0.0074,  # b_{-9}
-                        0.0112,  # b_{-8}
-                        0.0112,  # b_{-7}
-                        0.0118,  # b_{-6}
-                        0.0118,  # b_{-5}
-                        0.0128,  # b_{-4}
-                        0.0188,  # b_{-3}
-                        0.0280,  # b_{-2}
-                        0.0664,  # b_{-1}
-                        0.0300,  # b_{+0}
-                        0.0112,  # b_{+1}
-                        0.0100,  # b_{+2}
-                        0.0000,  # b_{+3}
-                        0.0000,  # b_{+4}
-                        0.0000,  # b_{+5}
-                        0.0000,  # b_{+6}
-                        0.0000,  # b_{+7}
-                        0.0000,  # b_{+8}
-                        0.0000,  # b_{+9}
-                        0.0000   # b_{+10}
-                    ],
-                    np.float
-                ),
-                threshold=1.0
-            )
-            sod = ((ck * sadeh * scripps) > 0).astype(int)
+        sod = sleep_scoring.between_time(start_time, end_time)
+        # ts_days = self.data.between_time(start_time, end_time)
+        #
+        # if algo == 'ck':
+        #     sod = _cole_kripke(
+        #         ts_days,
+        #         scale=0.00001,
+        #         window=np.array(
+        #             [400, 600, 300, 400, 1400, 500, 350, 0, 0],
+        #             np.int32
+        #         ),
+        #         threshold=1.0
+        #     )
+        # elif algo == 'sadeh':
+        #     sod = _sadeh(
+        #         ts_days,
+        #         offset=7.601,
+        #         weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
+        #         threshold=0.0
+        #     )
+        # elif algo == 'scripps':
+        #     sod = _scripps(
+        #         ts_days,
+        #         scale=0.204,
+        #         window=np.array(
+        #             [
+        #                 0.0064,  # b_{-10}
+        #                 0.0074,  # b_{-9}
+        #                 0.0112,  # b_{-8}
+        #                 0.0112,  # b_{-7}
+        #                 0.0118,  # b_{-6}
+        #                 0.0118,  # b_{-5}
+        #                 0.0128,  # b_{-4}
+        #                 0.0188,  # b_{-3}
+        #                 0.0280,  # b_{-2}
+        #                 0.0664,  # b_{-1}
+        #                 0.0300,  # b_{+0}
+        #                 0.0112,  # b_{+1}
+        #                 0.0100,  # b_{+2}
+        #                 0.0000,  # b_{+3}
+        #                 0.0000,  # b_{+4}
+        #                 0.0000,  # b_{+5}
+        #                 0.0000,  # b_{+6}
+        #                 0.0000,  # b_{+7}
+        #                 0.0000,  # b_{+8}
+        #                 0.0000,  # b_{+9}
+        #                 0.0000   # b_{+10}
+        #             ], np.float
+        #         ),
+        #         threshold=1.0
+        #     )
+        # elif algo == 'majority':
+        #     ck = _cole_kripke(
+        #         ts_days,
+        #         scale=0.00001,
+        #         window=np.array(
+        #             [400, 600, 300, 400, 1400, 500, 350, 0, 0],
+        #             np.int32
+        #         ),
+        #         threshold=1.0
+        #     )
+        #     sadeh = _sadeh(
+        #         ts_days,
+        #         offset=7.601,
+        #         weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
+        #         threshold=0.0
+        #     )
+        #     scripps = _scripps(
+        #         ts_days,
+        #         scale=0.204,
+        #         window=np.array(
+        #             [
+        #                 0.0064,  # b_{-10}
+        #                 0.0074,  # b_{-9}
+        #                 0.0112,  # b_{-8}
+        #                 0.0112,  # b_{-7}
+        #                 0.0118,  # b_{-6}
+        #                 0.0118,  # b_{-5}
+        #                 0.0128,  # b_{-4}
+        #                 0.0188,  # b_{-3}
+        #                 0.0280,  # b_{-2}
+        #                 0.0664,  # b_{-1}
+        #                 0.0300,  # b_{+0}
+        #                 0.0112,  # b_{+1}
+        #                 0.0100,  # b_{+2}
+        #                 0.0000,  # b_{+3}
+        #                 0.0000,  # b_{+4}
+        #                 0.0000,  # b_{+5}
+        #                 0.0000,  # b_{+6}
+        #                 0.0000,  # b_{+7}
+        #                 0.0000,  # b_{+8}
+        #                 0.0000,  # b_{+9}
+        #                 0.0000   # b_{+10}
+        #             ],
+        #             np.float
+        #         ),
+        #         threshold=1.0
+        #     )
+        #     sod = ((ck + sadeh + scripps) > 1).astype(int)
+        # elif algo == 'unanimous':
+        #     ck = _cole_kripke(
+        #         ts_days,
+        #         scale=0.00001,
+        #         window=np.array(
+        #             [400, 600, 300, 400, 1400, 500, 350, 0, 0],
+        #             np.int32
+        #         ),
+        #         threshold=1.0
+        #     )
+        #     sadeh = _sadeh(
+        #         ts_days,
+        #         offset=7.601,
+        #         weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
+        #         threshold=0.0
+        #     )
+        #     scripps = _scripps(
+        #         ts_days,
+        #         scale=0.204,
+        #         window=np.array(
+        #             [
+        #                 0.0064,  # b_{-10}
+        #                 0.0074,  # b_{-9}
+        #                 0.0112,  # b_{-8}
+        #                 0.0112,  # b_{-7}
+        #                 0.0118,  # b_{-6}
+        #                 0.0118,  # b_{-5}
+        #                 0.0128,  # b_{-4}
+        #                 0.0188,  # b_{-3}
+        #                 0.0280,  # b_{-2}
+        #                 0.0664,  # b_{-1}
+        #                 0.0300,  # b_{+0}
+        #                 0.0112,  # b_{+1}
+        #                 0.0100,  # b_{+2}
+        #                 0.0000,  # b_{+3}
+        #                 0.0000,  # b_{+4}
+        #                 0.0000,  # b_{+5}
+        #                 0.0000,  # b_{+6}
+        #                 0.0000,  # b_{+7}
+        #                 0.0000,  # b_{+8}
+        #                 0.0000,  # b_{+9}
+        #                 0.0000   # b_{+10}
+        #             ],
+        #             np.float
+        #         ),
+        #         threshold=1.0
+        #     )
+        #     sod = ((ck * sadeh * scripps) > 0).astype(int)
 
         return sod
 
@@ -975,11 +999,13 @@ class ScoringMixin(object):
         self,
         freq='5min',
         binarize=True,
-        threshold=4,
+        bin_threshold=4,
         whs=12,
         start='12:00:00',
         period='5h',
-        algo='unanimous'
+        algo='Roenneberg',
+        *args,
+        **kwargs
     ):
 
         r"""Fraction of Sleep over Daytime
@@ -997,7 +1023,7 @@ class ScoringMixin(object):
             activity onset and offset times. Only valid if start='AonT' or
             'AoffT'.
             Default is True.
-        threshold: int, optional
+        bin_threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
             Default is 4.
@@ -1013,15 +1039,27 @@ class ScoringMixin(object):
             Default is '10h'
         algo: str, optional
             Sleep scoring algorithm to use.
-            Default is 'unanimous'.
-            Supported algorithms: 'ck', 'sadeh', 'scripps', 'majority',
-            'unanimous'
+            Default is 'Roenneberg'.
+        *args
+            Variable length argument list passed to the scoring algorithm.
+        **kwargs
+            Arbitrary keyword arguements passed to the scoring algorithm.
 
         Returns
         -------
         fsod: float
             Fraction of epochs scored as sleep, relatively to the length of
             the specified period.
+
+        .. warning:: The value of this variable depends on the convention used
+                     by the underlying sleep scoring algorithm. The expected
+                     convention is the following:
+                    * epochs scored as 1 refer to inactivity/sleep
+
+                    Otherwise, this variable will actually return the fraction
+                    of epochs scored as activity. The fraction of sleep can
+                    simply be recovered by calculating (1-fSOD).
+
 
         Examples
         --------
@@ -1036,7 +1074,15 @@ class ScoringMixin(object):
         """
 
         SoD = self.SoD(
-            freq=freq, whs=whs, start=start, period=period, algo=algo
+            freq=freq,
+            binarize=binarize,
+            bin_threshold=bin_threshold,
+            whs=whs,
+            start=start,
+            period=period,
+            algo=algo,
+            *args,
+            **kwargs
         )
 
         return SoD.sum()/len(SoD)
@@ -1520,3 +1566,55 @@ class ScoringMixin(object):
         AoffT = rbg[diff == 1].index
 
         return (AonT, AoffT)
+
+    def SleepProfile(
+        self,
+        freq='15min',
+        algo='Roenneberg',
+        *args,
+        **kwargs
+    ):
+        r"""Normalized sleep daily profile
+
+        XXXXX
+
+        Parameters
+        ----------
+        freq: str, optional
+            Resampling frequency.
+            Default is '5min'
+        algo: str, optional
+            Sleep scoring algorithm to use.
+            Default is 'Roenneberg'.
+        *args
+            Variable length argument list passed to the scoring algorithm.
+        **kwargs
+            Arbitrary keyword arguements passed to the scoring algorithm.
+
+        Returns
+        -------
+        sleep_prof: YYY
+
+        Examples
+        --------
+
+            >>> import pyActigraphy
+            >>> rawAWD = pyActigraphy.io.read_raw_awd(fpath + 'SUBJECT_01.AWD')
+            >>> raw.SleepProfile()
+            ZZZZZZZZZZZZZZZZzZZZZZ
+
+        """
+
+        # Retrieve sleep scoring function dynamically by name
+        sleep_algo = getattr(self, algo)
+
+        # Score activity
+        sleep_scoring = sleep_algo(*args, **kwargs)
+
+        # Sleep profile over 24h
+        sleep_prof = _average_daily_activity(data=sleep_scoring, cyclic=False)
+
+        # Resampled sleep profile
+        rs_sleep_profile = sleep_prof.resample(freq).mean()
+
+        return rs_sleep_profile
