@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 import sqlite3
+import warnings
 
 from ..base import BaseRaw
 
@@ -66,12 +67,28 @@ class RawAGD(BaseRaw):
         # convert index to a date time
         capsense.index = self.__to_timestamps(capsense.index)
         # set index frequency
-        self.capsense = capsense.asfreq(
-            pd.to_timedelta(
-                int(settings.at['proximityIntervalInSeconds', 'settingValue']),
-                unit='s'
+        if 'proximityIntervalInSeconds' in settings.index:
+            self.capsense = capsense.asfreq(
+                pd.to_timedelta(
+                    int(
+                        settings.at[
+                            'proximityIntervalInSeconds',
+                            'settingValue'
+                        ]
+                    ),
+                    unit='s'
+                )
             )
-        )
+        elif capsense.index.inferred_freq is not None:
+            self.capsense = capsense.asfreq(capsense.index.inferred_freq)
+        else:
+            warnings.warn(
+                'Acquisition frequency for the wearing sensor data ' +
+                '(capsense) could neither be retrieved nor inferred from ' +
+                'the data.\n Use this information at your own risk',
+                UserWarning
+            )
+            self.capsense = capsense
 
         # extract acceleration and light data
         data = pd.read_sql_query(
