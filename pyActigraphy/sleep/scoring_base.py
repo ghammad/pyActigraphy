@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import re
-from .scoring import roenneberg
+from .scoring import roenneberg, sleep_midpoint, sri
 from scipy.ndimage import binary_closing, binary_opening
 from ..filters import _create_inactivity_mask
 from ..utils.utils import _average_daily_activity
@@ -815,8 +815,6 @@ class ScoringMixin(object):
         # Score activity
         sleep_scoring = sleep_algo(*args, **kwargs)
 
-        # data = self.resampled_data(freq, binarize, threshold)
-
         # Regex pattern for HH:MM:SS time string
         pattern = re.compile(r"^([0-1]\d|2[0-3])(?::([0-5]\d))(?::([0-5]\d))$")
 
@@ -827,7 +825,6 @@ class ScoringMixin(object):
                 binarize=binarize,
                 threshold=bin_threshold
             )
-            # td = _activity_onset_time(data, whs=whs)
         elif start == 'AoffT':
             td = self.AoffT(
                 freq=freq,
@@ -835,7 +832,6 @@ class ScoringMixin(object):
                 binarize=binarize,
                 threshold=bin_threshold
             )
-            # td = _activity_offset_time(data, whs=whs)
         elif pattern.match(start):
             td = pd.Timedelta(start)
         else:
@@ -846,152 +842,6 @@ class ScoringMixin(object):
         end_time = _td_format(td+pd.Timedelta(period))
 
         sod = sleep_scoring.between_time(start_time, end_time)
-        # ts_days = self.data.between_time(start_time, end_time)
-        #
-        # if algo == 'ck':
-        #     sod = _cole_kripke(
-        #         ts_days,
-        #         scale=0.00001,
-        #         window=np.array(
-        #             [400, 600, 300, 400, 1400, 500, 350, 0, 0],
-        #             np.int32
-        #         ),
-        #         threshold=1.0
-        #     )
-        # elif algo == 'sadeh':
-        #     sod = _sadeh(
-        #         ts_days,
-        #         offset=7.601,
-        #         weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
-        #         threshold=0.0
-        #     )
-        # elif algo == 'scripps':
-        #     sod = _scripps(
-        #         ts_days,
-        #         scale=0.204,
-        #         window=np.array(
-        #             [
-        #                 0.0064,  # b_{-10}
-        #                 0.0074,  # b_{-9}
-        #                 0.0112,  # b_{-8}
-        #                 0.0112,  # b_{-7}
-        #                 0.0118,  # b_{-6}
-        #                 0.0118,  # b_{-5}
-        #                 0.0128,  # b_{-4}
-        #                 0.0188,  # b_{-3}
-        #                 0.0280,  # b_{-2}
-        #                 0.0664,  # b_{-1}
-        #                 0.0300,  # b_{+0}
-        #                 0.0112,  # b_{+1}
-        #                 0.0100,  # b_{+2}
-        #                 0.0000,  # b_{+3}
-        #                 0.0000,  # b_{+4}
-        #                 0.0000,  # b_{+5}
-        #                 0.0000,  # b_{+6}
-        #                 0.0000,  # b_{+7}
-        #                 0.0000,  # b_{+8}
-        #                 0.0000,  # b_{+9}
-        #                 0.0000   # b_{+10}
-        #             ], np.float
-        #         ),
-        #         threshold=1.0
-        #     )
-        # elif algo == 'majority':
-        #     ck = _cole_kripke(
-        #         ts_days,
-        #         scale=0.00001,
-        #         window=np.array(
-        #             [400, 600, 300, 400, 1400, 500, 350, 0, 0],
-        #             np.int32
-        #         ),
-        #         threshold=1.0
-        #     )
-        #     sadeh = _sadeh(
-        #         ts_days,
-        #         offset=7.601,
-        #         weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
-        #         threshold=0.0
-        #     )
-        #     scripps = _scripps(
-        #         ts_days,
-        #         scale=0.204,
-        #         window=np.array(
-        #             [
-        #                 0.0064,  # b_{-10}
-        #                 0.0074,  # b_{-9}
-        #                 0.0112,  # b_{-8}
-        #                 0.0112,  # b_{-7}
-        #                 0.0118,  # b_{-6}
-        #                 0.0118,  # b_{-5}
-        #                 0.0128,  # b_{-4}
-        #                 0.0188,  # b_{-3}
-        #                 0.0280,  # b_{-2}
-        #                 0.0664,  # b_{-1}
-        #                 0.0300,  # b_{+0}
-        #                 0.0112,  # b_{+1}
-        #                 0.0100,  # b_{+2}
-        #                 0.0000,  # b_{+3}
-        #                 0.0000,  # b_{+4}
-        #                 0.0000,  # b_{+5}
-        #                 0.0000,  # b_{+6}
-        #                 0.0000,  # b_{+7}
-        #                 0.0000,  # b_{+8}
-        #                 0.0000,  # b_{+9}
-        #                 0.0000   # b_{+10}
-        #             ],
-        #             np.float
-        #         ),
-        #         threshold=1.0
-        #     )
-        #     sod = ((ck + sadeh + scripps) > 1).astype(int)
-        # elif algo == 'unanimous':
-        #     ck = _cole_kripke(
-        #         ts_days,
-        #         scale=0.00001,
-        #         window=np.array(
-        #             [400, 600, 300, 400, 1400, 500, 350, 0, 0],
-        #             np.int32
-        #         ),
-        #         threshold=1.0
-        #     )
-        #     sadeh = _sadeh(
-        #         ts_days,
-        #         offset=7.601,
-        #         weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
-        #         threshold=0.0
-        #     )
-        #     scripps = _scripps(
-        #         ts_days,
-        #         scale=0.204,
-        #         window=np.array(
-        #             [
-        #                 0.0064,  # b_{-10}
-        #                 0.0074,  # b_{-9}
-        #                 0.0112,  # b_{-8}
-        #                 0.0112,  # b_{-7}
-        #                 0.0118,  # b_{-6}
-        #                 0.0118,  # b_{-5}
-        #                 0.0128,  # b_{-4}
-        #                 0.0188,  # b_{-3}
-        #                 0.0280,  # b_{-2}
-        #                 0.0664,  # b_{-1}
-        #                 0.0300,  # b_{+0}
-        #                 0.0112,  # b_{+1}
-        #                 0.0100,  # b_{+2}
-        #                 0.0000,  # b_{+3}
-        #                 0.0000,  # b_{+4}
-        #                 0.0000,  # b_{+5}
-        #                 0.0000,  # b_{+6}
-        #                 0.0000,  # b_{+7}
-        #                 0.0000,  # b_{+8}
-        #                 0.0000,  # b_{+9}
-        #                 0.0000   # b_{+10}
-        #             ],
-        #             np.float
-        #         ),
-        #         threshold=1.0
-        #     )
-        #     sod = ((ck * sadeh * scripps) > 0).astype(int)
 
         return sod
 
@@ -1582,7 +1432,7 @@ class ScoringMixin(object):
         ----------
         freq: str, optional
             Resampling frequency.
-            Default is '5min'
+            Default is '15min'
         algo: str, optional
             Sleep scoring algorithm to use.
             Default is 'Roenneberg'.
@@ -1618,3 +1468,164 @@ class ScoringMixin(object):
         rs_sleep_profile = sleep_prof.resample(freq).mean()
 
         return rs_sleep_profile
+
+    def SleepRegularityIndex(
+        self,
+        freq='15min',
+        bin_threshold=None,
+        algo='Roenneberg',
+        *args,
+        **kwargs
+    ):
+        r""" Sleep regularity index
+
+        Likelihood that any two time-points (epoch-by-epoch) 24 hours apart are
+        in the same sleep/wake state, across all days. This index is originally
+        defined in [1]_ and validated in older adults in [2]_.
+
+        Parameters
+        ----------
+        freq: str, optional
+            Resampling frequency.
+            Default is '15min'
+        bin_threshold: bool, optional
+            If bin_threshold is not set to None, scoring data above this
+            threshold are set to 1 and to 0 otherwise.
+            Default is None.
+        algo: str, optional
+            Sleep scoring algorithm to use.
+            Default is 'Roenneberg'.
+        *args
+            Variable length argument list passed to the scoring algorithm.
+        **kwargs
+            Arbitrary keyword arguements passed to the scoring algorithm.
+
+        Returns
+        -------
+        sri: float
+
+        Notes
+        -----
+
+        The sleep regularity index (SRI) is defined as:
+
+        .. math::
+
+            SRI = -100 + \frac{200}{M(N-1)} \sum_{j=1}^M\sum_{i=1}^N
+                  \delta(s_{i,j}, s_{i+1,j})
+
+        with:
+            :math:`\delta(s_{i,j}, s_{i+1,j}) = 1` if
+            :math:`s_{i,j} = s_{i+1,j}` and 0 otherwise.
+
+        References
+        ----------
+
+        .. [1] Phillips, A. J. K., Clerx, W. M., O’Brien, C. S., Sano, A.,
+               Barger, L. K., Picard, R. W., … Czeisler, C. A. (2017).
+               Irregular sleep/wake patterns are associated with poorer
+               academic performance and delayed circadian and sleep/wake
+               timing. Scientific Reports, 7(1), 1–13.
+               https://doi.org/10.1038/s41598-017-03171-4
+        .. [2] Lunsford-Avery, J. R., Engelhard, M. M., Navar, A. M.,
+               & Kollins, S. H. (2018). Validation of the Sleep Regularity
+               Index in Older Adults and Associations with Cardiometabolic
+               Risk. Scientific Reports, 8(1), 14158.
+               https://doi.org/10.1038/s41598-018-32402-5
+
+        Examples
+        --------
+
+        """
+
+        # Retrieve sleep scoring function dynamically by name
+        sleep_algo = getattr(self, algo)
+
+        # Score activity
+        sleep_scoring = sleep_algo(*args, **kwargs)
+
+        # SRI
+        sleep_regularity_index = sri(sleep_scoring, bin_threshold)
+
+        return sleep_regularity_index
+
+    def SleepMidPoint(
+        self,
+        freq='15min',
+        bin_threshold=None,
+        to_td=True,
+        algo='Roenneberg',
+        *args,
+        **kwargs
+    ):
+        r""" Sleep midpoint
+
+        Center of the mean sleep periods
+
+        Parameters
+        ----------
+        freq: str, optional
+            Resampling frequency.
+            Default is '15min'
+        bin_threshold: bool, optional
+            If bin_threshold is not set to None, scoring data above this
+            threshold are set to 1 and to 0 otherwise.
+            Default is None.
+        to_td: bool, optional
+            If set to true, the sleep midpoint is returned as a Timedelta.
+            Otherwise, it represents the number of minutes since midnight.
+        algo: str, optional
+            Sleep scoring algorithm to use.
+            Default is 'Roenneberg'.
+        *args
+            Variable length argument list passed to the scoring algorithm.
+        **kwargs
+            Arbitrary keyword arguements passed to the scoring algorithm.
+
+        Returns
+        -------
+        smp: float or Timedelta
+
+        Notes
+        -----
+
+        Sleep midpoint (SMP) is an index of sleep timing and is calculated
+        as the following [1]_:
+
+        .. math::
+
+            SMP = \frac{1440}{2\pi} arctan2\left(
+                  \sum_{j=1}^M\sum_{i=1}^N
+                  s_{i,j} \times sin\left(\frac{2\pi t_i}{1440}\right),
+                  \sum_{j=1}^M\sum_{i=1}^N
+                  s_{i,j} \times cos\left(\frac{2\pi t_i}{1440}\right)
+                  \right)
+        with:
+            :math:`t_j`, time of day in minutes at epoch j,
+            :math:`\delta(s_{i,j}, s_{i+1,j}) = 1` if
+            :math:`s_{i,j} = s_{i+1,j}` and 0 otherwise.
+
+        References
+        ----------
+
+        .. [1] Lunsford-Avery, J. R., Engelhard, M. M., Navar, A. M.,
+               & Kollins, S. H. (2018). Validation of the Sleep Regularity
+               Index in Older Adults and Associations with Cardiometabolic
+               Risk. Scientific Reports, 8(1), 14158.
+               https://doi.org/10.1038/s41598-018-32402-5
+
+        Examples
+        --------
+
+        """
+
+        # Retrieve sleep scoring function dynamically by name
+        sleep_algo = getattr(self, algo)
+
+        # Score activity
+        sleep_scoring = sleep_algo(*args, **kwargs)
+
+        # Sleep midpoint
+        smp = sleep_midpoint(sleep_scoring, bin_threshold)
+
+        return pd.Timedelta(smp, unit='min') if to_td is True else smp
