@@ -6,6 +6,8 @@
 
 # import utils
 from .roenneberg import roenneberg
+from .smp import sleep_midpoint
+from .sri import sri
 
 # __all__ = ["utils", "chronosapiens"]
-__all__ = ["roenneberg"]
+__all__ = ["sleep_midpoint", "sri", "roenneberg"]
