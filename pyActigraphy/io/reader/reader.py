@@ -5,6 +5,7 @@ from pandas import Timedelta
 from pandas.tseries.frequencies import to_offset
 from pyActigraphy.metrics import ForwardMetricsMixin
 from joblib import Parallel, delayed
+from ..agd import read_raw_agd
 from ..awd import read_raw_awd
 from ..dqt import read_raw_dqt
 from ..mtn import read_raw_mtn
@@ -179,6 +180,7 @@ def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
         reader_type: str
             Reader type.
             Supported types:
+            * AGD ((w)GT3X(+)), ActiGraph)
             * AWD (ActiWatch 4, CamNtech)
             * DQT (Daqtometers, Daqtix)
             * MTN (MotionWatch8, CamNtech)
@@ -200,7 +202,7 @@ def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
             A list of instances of RawAWD, RawMTN or RawRPX
         """
 
-        supported_types = ['AWD', 'DQT', 'MTN', 'RPX']
+        supported_types = ['AGD', 'AWD', 'DQT', 'MTN', 'RPX']
         if reader_type not in supported_types:
             raise ValueError(
                 'Type {0} unsupported. Supported types: {1}'.format(
@@ -218,6 +220,9 @@ def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
             )
 
         readers = {
+            'AGD': lambda files: parallel_reader(
+                n_jobs, read_raw_agd, files, prefer, verbose
+            ),
             'AWD': lambda files: parallel_reader(
                 n_jobs, read_raw_awd, files, prefer, verbose
             ),
