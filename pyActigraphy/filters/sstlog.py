@@ -50,7 +50,7 @@ class SSTLog():
             Variable length argument list passed to the subsequent reader
             function.
         **kwargs
-            Arbitrary keyword arguements passed to the subsequent reader
+            Arbitrary keyword arguments passed to the subsequent reader
             function.
 
         Returns
