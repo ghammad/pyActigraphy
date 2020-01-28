@@ -119,25 +119,25 @@ class RawReader(ForwardMetricsMixin):
             ) for reader in self.readers
         ))
 
-    def read_sst_log(
-            self,
-            input_fname,
-            header_size=1
-    ):
+    def read_sst_log(self, input_fname, *args, **kwargs):
         r"""Reader function for start/stop-time log files.
 
         Parameters
         ----------
         input_fname: str
             Path to the start/stop-time log file.
-        header_size: int
-            Header size (i.e. number of lines) of the sst log file.
-            Default is 1.
+        *args
+            Variable length argument list passed to the subsequent reader
+            function.
+        **kwargs
+            Arbitrary keyword arguments passed to the subsequent reader
+            function.
         """
 
-        self.__sst_log = SSTLog(
+        self.__sst_log = SSTLog.from_file(
             input_fname=input_fname,
-            header_size=header_size
+            *args,
+            **kwargs
         )
 
     @property
