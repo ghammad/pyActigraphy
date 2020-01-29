@@ -1814,11 +1814,14 @@ class ForwardMetricsMixin(object):
             ) for iread in self.readers
         }
 
-    def average_daily_light(self):
+    def average_daily_light(self, freq='5min', cyclic=False):
 
         return {
             iread.display_name:
-            iread.average_daily_light() for iread in self.readers
+            iread.average_daily_light(
+                freq=freq,
+                cyclic=cyclic
+            ) for iread in self.readers
         }
 
     def Summary(self, mask_inactivity=True):
