@@ -13,23 +13,36 @@ def _average_daily_activity(data, cyclic=False):
 
     if cyclic:
         avgdaily = pd.concat([avgdaily, avgdaily])
-        index = pd.timedelta_range(
+        avgdaily.index = pd.timedelta_range(
             start='0 day',
             end='2 days',
             freq=data.index.freq,
             closed='left'
         )
     else:
-        index = pd.timedelta_range(
+        avgdaily.index = pd.timedelta_range(
             start='0 day',
             end='1 day',
             freq=data.index.freq,
             closed='left'
         )
 
-    avgdaily.index = index
-
     return avgdaily
+
+
+def _shit_time_axis(avgdaily, shift):
+
+    avgdaily_shifted = avgdaily.reindex(
+        index=np.roll(avgdaily.index, shift)
+    )
+    avgdaily_shifted.index = pd.timedelta_range(
+        start='-12h',
+        end='12h',
+        freq=avgdaily.index.freq,
+        closed='left'
+    )
+
+    return avgdaily_shifted
 
 
 def _onset_detection(x, whs):
