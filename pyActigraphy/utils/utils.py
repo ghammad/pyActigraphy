@@ -30,7 +30,7 @@ def _average_daily_activity(data, cyclic=False):
     return avgdaily
 
 
-def _shit_time_axis(avgdaily, shift):
+def _shift_time_axis(avgdaily, shift):
 
     avgdaily_shifted = avgdaily.reindex(
         index=np.roll(avgdaily.index, shift)
