@@ -5,7 +5,7 @@ import re
 from ..utils.utils import _average_daily_activity
 from ..utils.utils import _activity_onset_time
 from ..utils.utils import _activity_offset_time
-from ..utils.utils import _shit_time_axis
+from ..utils.utils import _shift_time_axis
 # from ..sleep.scoring import AonT, AoffT
 from statistics import mean
 import statsmodels.api as sm
@@ -298,7 +298,7 @@ class MetricsMixin(object):
 
             shift = int((pd.Timedelta('12h')-time_origin)/data.index.freq)
 
-            return _shit_time_axis(avgdaily, shift)
+            return _shift_time_axis(avgdaily, shift)
 
     def average_daily_light(self, freq='5min', cyclic=False):
         r"""Average daily light distribution
@@ -1869,14 +1869,22 @@ class ForwardMetricsMixin(object):
         }
 
     def average_daily_activity(
-        self, freq, cyclic=False, binarize=True, threshold=4
+        self,
+        freq,
+        cyclic=False,
+        binarize=True,
+        threshold=4,
+        time_origin=None,
+        whs='1h'
     ):
         return {
             iread.display_name: iread.average_daily_activity(
                 freq=freq,
                 cyclic=cyclic,
                 binarize=binarize,
-                threshold=threshold
+                threshold=threshold,
+                time_origin=time_origin,
+                whs=whs
             ) for iread in self.readers
         }
 
