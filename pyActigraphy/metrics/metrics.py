@@ -3,6 +3,9 @@ import numpy as np
 import re
 # from functools import lru_cache
 from ..utils.utils import _average_daily_activity
+from ..utils.utils import _activity_onset_time
+from ..utils.utils import _activity_offset_time
+from ..utils.utils import _shift_time_axis
 # from ..sleep.scoring import AonT, AoffT
 from statistics import mean
 import statsmodels.api as sm
@@ -199,7 +202,13 @@ class MetricsMixin(object):
     """ Mixin Class """
 
     def average_daily_activity(
-        self, freq='5min', cyclic=False, binarize=True, threshold=4
+        self,
+        freq='5min',
+        cyclic=False,
+        binarize=True,
+        threshold=4,
+        time_origin=None,
+        whs='1h'
     ):
         r"""Average daily activity distribution
 
@@ -222,6 +231,17 @@ class MetricsMixin(object):
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
+        time_origin: str or pd.Timedelta, optional
+            If not None, origin of the time axis for the daily profile.
+            Original time bins are translated as time delta with respect to
+            this new origin.
+            Default is None
+            Supported time string: 'AonT', 'AoffT', any 'HH:MM:SS'
+        whs: str, optional
+            Window half size parameter for the detection of the activity
+            onset/offset time. Relevant only if time_origin is set to
+            'AonT' or AoffT'.
+            Default is '1h'.
 
         Returns
         -------
@@ -230,9 +250,55 @@ class MetricsMixin(object):
         """
         data = self.resampled_data(freq, binarize, threshold)
 
-        avgdaily = _average_daily_activity(data, cyclic=cyclic)
+        if time_origin is None:
 
-        return avgdaily
+            return _average_daily_activity(data, cyclic=cyclic)
+
+        else:
+            if cyclic is True:
+                raise NotImplementedError(
+                    'Setting a time origin while cyclic option is True is not '
+                    'implemented yet.'
+                )
+
+            avgdaily = _average_daily_activity(data, cyclic=False)
+
+            if isinstance(time_origin, str):
+                # Regex pattern for HH:MM:SS time string
+                pattern = re.compile(
+                    r"^([0-1]\d|2[0-3])(?::([0-5]\d))(?::([0-5]\d))$"
+                )
+
+                if time_origin == 'AonT':
+                    # Convert width half size from Timedelta to a nr of points
+                    whs = int(pd.Timedelta(whs)/data.index.freq)
+                    time_origin = _activity_onset_time(avgdaily, whs=whs)
+                elif time_origin == 'AoffT':
+                    # Convert width half size from Timedelta to a nr of points
+                    whs = int(pd.Timedelta(whs)/data.index.freq)
+                    time_origin = _activity_offset_time(avgdaily, whs=whs)
+                elif pattern.match(time_origin):
+                    time_origin = pd.Timedelta(time_origin)
+                else:
+                    raise ValueError(
+                        'Time origin format ({}) not supported.\n'.format(
+                            time_origin
+                        ) +
+                        'Supported format: {}.'.format('HH:MM:SS')
+                    )
+
+            elif not isinstance(time_origin, pd.Timedelta):
+                raise ValueError(
+                    'Time origin is neither a time string with a supported'
+                    'format, nor a pd.Timedelta.'
+                )
+
+            # Round time origin to the required frequency
+            time_origin = time_origin.round(data.index.freq)
+
+            shift = int((pd.Timedelta('12h')-time_origin)/data.index.freq)
+
+            return _shift_time_axis(avgdaily, shift)
 
     def average_daily_light(self, freq='5min', cyclic=False):
         r"""Average daily light distribution
@@ -1803,14 +1869,22 @@ class ForwardMetricsMixin(object):
         }
 
     def average_daily_activity(
-        self, freq, cyclic=False, binarize=True, threshold=4
+        self,
+        freq,
+        cyclic=False,
+        binarize=True,
+        threshold=4,
+        time_origin=None,
+        whs='1h'
     ):
         return {
             iread.display_name: iread.average_daily_activity(
                 freq=freq,
                 cyclic=cyclic,
                 binarize=binarize,
-                threshold=threshold
+                threshold=threshold,
+                time_origin=time_origin,
+                whs=whs
             ) for iread in self.readers
         }
 

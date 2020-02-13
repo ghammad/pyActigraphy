@@ -5,6 +5,8 @@ from .scoring import roenneberg, sleep_midpoint, sri
 from scipy.ndimage import binary_closing, binary_opening
 from ..filters import _create_inactivity_mask
 from ..utils.utils import _average_daily_activity
+from ..utils.utils import _activity_onset_time
+from ..utils.utils import _activity_offset_time
 
 
 def _td_format(td):
@@ -13,34 +15,6 @@ def _td_format(td):
         td.components.minutes,
         td.components.seconds
     )
-
-
-def _activity_onset_time(data, whs=4):
-
-    avgdaily = _average_daily_activity(data=data, cyclic=True)
-
-    r = avgdaily.rolling(whs*2, center=True)
-
-    aot = r.apply(
-        lambda x: np.mean(x[whs:])/np.mean(x[0:whs])-1,
-        raw=False
-    ).idxmax()
-
-    return aot
-
-
-def _activity_offset_time(data, whs=4):
-
-    avgdaily = _average_daily_activity(data=data, cyclic=True)
-
-    r = avgdaily.rolling(whs*2, center=True)
-
-    aot = r.apply(
-        lambda x: np.mean(x[0:whs])/np.mean(x[whs:])-1,
-        raw=False
-    ).idxmax()
-
-    return aot
 
 
 def _actiware_automatic_threshold(data, scale_factor=0.88888):
@@ -270,7 +244,9 @@ class ScoringMixin(object):
         """
         data = self.resampled_data(freq, binarize, threshold)
 
-        return _activity_onset_time(data, whs=whs)
+        dailyprof = _average_daily_activity(data, cyclic=False)
+
+        return _activity_onset_time(dailyprof, whs=whs)
 
     def AoffT(self, freq='5min', whs=12, binarize=True, threshold=4):
         r"""Activity offset time.
@@ -331,7 +307,9 @@ class ScoringMixin(object):
 
         data = self.resampled_data(freq, binarize, threshold)
 
-        return _activity_offset_time(data, whs=whs)
+        dailyprof = _average_daily_activity(data, cyclic=False)
+
+        return _activity_offset_time(dailyprof, whs=whs)
 
     def CK(
         self,
