@@ -64,8 +64,8 @@ class RawATR(BaseRaw):
         if mode not in header['MODE'][0].split('/'):
             raise ValueError(
                 "The requested mode ({}) is not available".format(mode) +
-                " for this recording\n." +
-                " Available modes are {}.".format(header['MODE'][0])
+                " for this recording.\n" +
+                "Available modes are {}.".format(header['MODE'][0])
             )
 
         # extract informations from the header
