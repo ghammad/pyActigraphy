@@ -112,7 +112,18 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
             return self.__data
 
         if self.mask_inactivity is True:
-            data = self.raw_data.where(self.mask > 0)
+            if self.mask is not None:
+                data = self.raw_data.where(self.mask > 0)
+            else:
+                warnings.warn(
+                    (
+                        'Mask inactivity set to True but no mask could be'
+                        ' found.\n Please create a mask by using the '
+                        '"create_inactivity_mask" function.'
+                    ),
+                    UserWarning
+                )
+                data = self.raw_data
         else:
             data = self.raw_data
         return data[self.start_time:self.start_time+self.period]
@@ -157,6 +168,9 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
         self.__inactivity_length = value
         # Discard current mask (will be recreated upon access if needed)
         self.mask = None
+        # Set switch to False if None
+        if value is None:
+            self.mask_inactivity = False
 
     @property
     def mask(self):
@@ -233,7 +247,17 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
 
         resampled_data = data.resample(freq).sum()
         if self.mask_inactivity is True:
-            if self.exclude_if_mask:
+            if self.mask is None:
+                warnings.warn(
+                    (
+                        'Mask inactivity set to True but no mask could be'
+                        ' found.\n Please create a mask by using the '
+                        '"create_inactivity_mask" function.'
+                    ),
+                    UserWarning
+                )
+                return resampled_data
+            elif self.exclude_if_mask:
                 resampled_mask = self.mask.resample(freq).min()
             else:
                 resampled_mask = self.mask.resample(freq).max()
