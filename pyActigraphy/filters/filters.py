@@ -65,6 +65,7 @@ class FiltersMixin(object):
 
     def create_inactivity_mask(self, duration):
         """Create a mask for inactivity (count equal to zero) periods.
+
         This mask has the same length as its underlying data and can be used
         to offuscate inactive periods where the actimeter has most likely been
         removed.
@@ -96,3 +97,42 @@ class FiltersMixin(object):
 
         # Create actual mask
         self.mask = _create_inactivity_mask(self.raw_data, nepochs, 1)
+
+    def add_mask_period(self, start, stop):
+        """ Add a period to the inactivity mask
+
+        Parameters
+        ----------
+        start: str
+            Start time (YYYY-MM-DD HH:MM:SS) of the inactivity period.
+        stop: str
+            Stop time (YYYY-MM-DD HH:MM:SS) of the inactivity period.
+        """
+
+        # Check if a mask has already been created
+        # NB : if the inactivity_length is not None, this will trigger the
+        # creation of a mask.
+        if self.mask is None:
+            self.mask = pd.Series(
+                np.ones_like(self.data),
+                index=self.data.index
+            )
+
+        # Check if start and stop are within the index range
+        if (pd.Timestamp(start) < self.mask.index[0]):
+            raise ValueError((
+                "Attempting to set the start time of a mask period before " +
+                "the actual start time of the data.\n" +
+                "Mask start time: {}".format(start) +
+                "Data start time: {}".format(self.mask.index[0])
+            ))
+        if (pd.Timestamp(stop) > self.mask.index[-1]):
+            raise ValueError((
+                "Attempting to set the stop time of a mask period after " +
+                "the actual stop time of the data.\n" +
+                "Mask stop time: {}".format(stop) +
+                "Data stop time: {}".format(self.mask.index[-1])
+            ))
+
+        # Set mask values between start and stop to zeros
+        self.mask.loc[start:stop] = 0
