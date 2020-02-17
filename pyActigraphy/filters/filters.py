@@ -110,11 +110,11 @@ class FiltersMixin(object):
         """
 
         # Check if a mask has already been created
-        # NB : if the inactivity_length is not None, this will trigger the
-        # creation of a mask.
-        if self.mask is None:
+        # NB : if the inactivity_length is not None, accessing the mask will
+        # trigger its creation.
+        if self.inactivity_length is None:
             self.mask = pd.Series(
-                np.ones_like(self.data),
+                np.ones(self.length()),
                 index=self.data.index
             )
 
