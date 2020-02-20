@@ -147,9 +147,12 @@ class SSTLog():
         log = pd.DataFrame(
             sst_narray[1:, 1:3],
             index=sst_narray[1:, 0],
-            columns=['Start_time', 'Stop_time'],
-            dtype='datetime64[ns]'
+            columns=['Start_time', 'Stop_time']
+            # dtype='datetime64[ns]'
         )
+        log['Start_time'] = pd.to_datetime(log['Start_time'])
+        log['Stop_time'] = pd.to_datetime(log['Stop_time'])
+
         log.index.name = 'Subject_id'
 
         return log
