@@ -8,6 +8,13 @@ def _create_inactivity_mask(data, duration, threshold):
     if duration is None:
         return None
 
+    # Create the mask filled iwith ones by default.
+    mask = np.ones_like(data)
+
+    # If duration is -1, return a mask with 1s for later manual edition.
+    if duration == -1:
+        return pd.Series(mask, index=data.index)
+
     # Binary data
     binary_data = np.where(data >= threshold, 1, 0)
 
@@ -16,9 +23,6 @@ def _create_inactivity_mask(data, duration, threshold):
     # Add zero at the beginning of this series to mark the beginning of the
     # first sequence found in the data.
     edges = np.concatenate([[0], np.diff(binary_data)])
-
-    # Create the mask filled iwith ones by default.
-    mask = np.ones_like(data)
 
     # Test if there is no edge (i.e. no consecutive zeroes).
     if all(e == 0 for e in edges):
@@ -93,7 +97,7 @@ class FiltersMixin(object):
             )
 
         # Store requested mask duration (and discard current mask)
-        self.inactivity_length = duration
+        self.inactivity_length = nepochs
 
         # Create actual mask
         self.mask = _create_inactivity_mask(self.raw_data, nepochs, 1)
@@ -113,10 +117,11 @@ class FiltersMixin(object):
         # NB : if the inactivity_length is not None, accessing the mask will
         # trigger its creation.
         if self.inactivity_length is None:
-            self.mask = pd.Series(
-                np.ones(self.length()),
-                index=self.data.index
-            )
+            self.inactivity_length = -1
+            # self.mask = pd.Series(
+            #     np.ones(self.length()),
+            #     index=self.data.index
+            # )
 
         # Check if start and stop are within the index range
         if (pd.Timestamp(start) < self.mask.index[0]):
