@@ -10,7 +10,7 @@ from ..awd import read_raw_awd
 from ..dqt import read_raw_dqt
 from ..mtn import read_raw_mtn
 from ..rpx import read_raw_rpx
-from pyActigraphy.filters import SSTLog
+from pyActigraphy.log import read_sst_log
 
 
 class RawReader(ForwardMetricsMixin):
@@ -135,7 +135,7 @@ class RawReader(ForwardMetricsMixin):
             function.
         """
 
-        self.__sst_log = SSTLog.from_file(
+        self.__sst_log = read_sst_log(
             input_fname=input_fname,
             *args,
             **kwargs
