@@ -4,17 +4,15 @@ import pandas as pd
 import pyexcel as pxl
 
 
-class SSTLog():
-    """ Class for reading start/stop-time log files
-
-    Data structure for start and stop times.
+class BaseLog():
+    """ Base class for log files containing time stamps.
 
     Parameters
     ----------
     fname: str
         Absolute filepath of the input log file.
     log: pandas.DataFrame
-        Dataframe containing the data found in the SST log file.
+        Dataframe containing the data found in the log file.
 
     """
 
@@ -33,10 +31,11 @@ class SSTLog():
         # Inplace drop of NA
         log.dropna(inplace=True)
 
+        # add dataframe
         self.__log = log
 
     @classmethod
-    def from_file(cls, input_fname, *args, **kwargs):
+    def from_file(cls, input_fname, index_name, *args, **kwargs):
         """ Read start/stop-times from log files.
 
         Generic function to read start and stop times from log files. Supports
@@ -46,6 +45,8 @@ class SSTLog():
         ----------
         input_fname: str
             Path to the log file.
+        index_name: str
+            Name of the index.
         *args
             Variable length argument list passed to the subsequent reader
             function.
@@ -55,8 +56,10 @@ class SSTLog():
 
         Returns
         -------
-        sstlog : SSTLog
-            An instance of the SSTLog class
+        absname: str
+            Absolute filepath of the input log file.
+        log: pandas.DataFrame
+            Dataframe containing the data found in the log file.
 
         """
 
@@ -65,12 +68,12 @@ class SSTLog():
 
         # get basename and split it into base and extension
         basename = os.path.basename(absname)
-        name, ext = os.path.splitext(basename)
+        _, ext = os.path.splitext(basename)
 
         if(ext == '.csv'):
-            log = cls.from_csv(absname, *args, **kwargs)
+            log = cls.__from_csv(absname, index_name, *args, **kwargs)
         elif((ext == '.xlsx') or (ext == '.xls') or (ext == '.ods')):
-            log = cls.from_excel(absname, *args, **kwargs)
+            log = cls.__from_excel(absname, index_name, *args, **kwargs)
         else:
             raise ValueError(
                 (
@@ -82,10 +85,10 @@ class SSTLog():
                     '.xls (Excel spreadsheet).'
                 )
             )
-        return SSTLog(absname, log)
+        return absname, log
 
     @classmethod
-    def from_csv(cls, input_fname, sep=',', dayfirst=False):
+    def __from_csv(cls, input_fname, index_name, sep=',', dayfirst=False):
         """ Read start/stop-times from .csv files.
 
         Specific function to read start and stop times from csv files.
@@ -94,6 +97,8 @@ class SSTLog():
         ----------
         input_fname: str
             Path to the log file.
+        index_name: str
+            Name of the index.
         sep: str, optional
             Delimiter to use.
             Default is ','.
@@ -116,14 +121,14 @@ class SSTLog():
             header=0,
             index_col=[0],
             usecols=[0, 1, 2],
-            names=['Subject_id', 'Start_time', 'Stop_time'],
+            names=[index_name, 'Start_time', 'Stop_time'],
             parse_dates=[1, 2],
             infer_datetime_format=False
         )
         return log
 
     @classmethod
-    def from_excel(cls, input_fname):
+    def __from_excel(cls, input_fname, index_name):
         """ Read start/stop-times from excel-like files.
 
         Specific function to read start and stop times from .ods/.xls(x) files.
@@ -132,6 +137,8 @@ class SSTLog():
         ----------
         input_fname: str
             Path to the log file.
+        index_name: str
+            Name of the index.
 
         Returns
         -------
@@ -143,14 +150,14 @@ class SSTLog():
         # Read data from the log file into a np array
         sst_narray = np.array(pxl.get_array(file_name=input_fname))
 
-        # Create a DF with columns: subject_id, start_time, stop time
+        # Create a DF with columns: index_name, start_time, stop time
         log = pd.DataFrame(
             sst_narray[1:, 1:3],
             index=sst_narray[1:, 0],
             columns=['Start_time', 'Stop_time'],
             dtype='datetime64[ns]'
         )
-        log.index.name = 'Subject_id'
+        log.index.name = index_name
 
         return log
 
@@ -161,9 +168,9 @@ class SSTLog():
 
     @property
     def log(self):
-        """The dataframe containing the data found in the SST log file."""
+        """The dataframe containing the data found in the log file."""
         return self.__log
 
-    def summary(self):
+    def summary(self, colname):
         """ Returns a dataframe of summary statistics."""
-        return self.__log['Duration'].describe()
+        return self.__log[colname].describe()
