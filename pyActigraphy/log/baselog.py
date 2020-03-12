@@ -154,8 +154,8 @@ class BaseLog():
         log = pd.DataFrame(
             sst_narray[1:, 1:3],
             index=sst_narray[1:, 0],
-            columns=['Start_time', 'Stop_time'],
-            dtype='datetime64[ns]'
+            columns=['Start_time', 'Stop_time']
+            # dtype='datetime64[ns]'
         )
         log.index.name = index_name
 
