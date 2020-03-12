@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import warnings
+from ..log import BaseLog
 
 
 def _create_inactivity_mask(data, duration, threshold):
@@ -141,3 +142,28 @@ class FiltersMixin(object):
 
         # Set mask values between start and stop to zeros
         self.mask.loc[start:stop] = 0
+
+    def add_mask_periods(self, input_fname, *args, **kwargs):
+        """ Add periods to the inactivity mask
+
+        Function to read start and stop times from a Mask log file. Supports
+        different file format (.ods, .xls(x), .csv).
+
+        Parameters
+        ----------
+        input_fname: str
+            Path to the log file.
+        *args
+            Variable length argument list passed to the subsequent reader
+            function.
+        **kwargs
+            Arbitrary keyword arguments passed to the subsequent reader
+            function.
+        """
+
+        # Convert the log file into a DataFrame
+        absname, log = BaseLog.from_file(input_fname, 'Mask', *args, **kwargs)
+
+        # Iterate over the rows of the DataFrame
+        for _, row in log.iterrows():
+            self.add_mask_period(row['Start_time'], row['Stop_time'])
