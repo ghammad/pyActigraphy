@@ -5,8 +5,8 @@
 # License: BSD (3-clause)
 
 # from . import filters
-from .sstlog import SSTLog
+from .sstlog import BaseLog, SSTLog
 
 from .sstlog import read_sst_log
 
-__all__ = ["SSTLog", "read_sst_log"]
+__all__ = ["BaseLog", "SSTLog", "read_sst_log"]
