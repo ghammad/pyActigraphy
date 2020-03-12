@@ -10,21 +10,21 @@ from pytest import approx
 sampling_period = 60
 frequency = pd.Timedelta(sampling_period, unit='s')
 start_time = '01/01/2018 08:00:00'
-N = 20160*sampling_period
-period = pd.Timedelta(N, unit='s')
+N = 20160
+period = pd.Timedelta(N*sampling_period, unit='s')
 
 gaussian_noise = generate_series(
-    generate_gaussian_noise(N=N-1),
+    generate_gaussian_noise(N=N),
     start=start_time,
     sampling_period=sampling_period
 )
 square_wave = generate_series(
-    generate_squarewave(N=N-1),
+    generate_squarewave(N=N),
     start=start_time,
     sampling_period=sampling_period
 )
 sine_wave = generate_series(
-    generate_sinewave(N=N-1),
+    generate_sinewave(N=N),
     start=start_time,
     sampling_period=sampling_period
 )

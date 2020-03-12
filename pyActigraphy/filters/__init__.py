@@ -7,6 +7,5 @@
 # from . import filters
 
 from .filters import FiltersMixin, _create_inactivity_mask
-from .sstlog import SSTLog
 
-__all__ = ["FiltersMixin", "_create_inactivity_mask", "SSTLog"]
+__all__ = ["FiltersMixin", "_create_inactivity_mask"]
