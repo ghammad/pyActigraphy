@@ -36,7 +36,7 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
         self.__light = light
 
         self.__mask_inactivity = False
-        self.__inactivity_length = 120
+        self.__inactivity_length = None
         self.__mask = None
         self.__exclude_if_mask = True
 
