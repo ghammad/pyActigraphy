@@ -5,8 +5,9 @@
 # License: BSD (3-clause)
 
 from .flm import FLM
+from .fractal import Fractal
 from .lids import LIDS
 from .ssa import SSA
 
 
-__all__ = ["FLM", "LIDS", "SSA"]
+__all__ = ["FLM", "Fractal", "LIDS", "SSA"]
