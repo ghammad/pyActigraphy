@@ -1898,11 +1898,7 @@ class ForwardMetricsMixin(object):
             ) for iread in self.readers
         }
 
-    def Summary(self, mask_inactivity=True):
-
-        # set inactivity mask
-        for iread in self.readers:
-            iread.mask_inactivity = mask_inactivity
+    def Summary(self):
 
         # dict of dictionnaries
         ldic = {}
