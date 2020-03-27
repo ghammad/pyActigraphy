@@ -216,7 +216,7 @@ class Fractal():
                 raw.data,
                 freq=raw.frequency,
                 n=n,
-                deg=1
+                deg=deg
             ) for n in n_array)
         )
 
