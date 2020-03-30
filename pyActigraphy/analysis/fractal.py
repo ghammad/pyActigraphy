@@ -241,8 +241,10 @@ class Fractal():
         else:
             c, stats = polynomial.polyfit(
                 y=np.log(fluctuations),
-                x=np.log(lengths, deg=1, full=True)
-            )
+                x=np.log(lengths),
+                deg=1,
+                full=True
+	    )
 
         return c[1]
 
