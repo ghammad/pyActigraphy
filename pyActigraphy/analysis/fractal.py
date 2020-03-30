@@ -269,9 +269,9 @@ class Fractal():
         else:
             for t in np.arange(start_idx_offset, len(n)-stop_idx_offset+1):
                 # Fit the series of points (F(n) vs n) up to point n_t
-                alpha_1 = cls.HurstExp(n[:t], f_n[:t], log)
+                alpha_1 = cls.hurst_exponent(n[:t], f_n[:t], log)
                 # Fit the series of points (F(n) vs n) from point n_t to n_max
-                alpha_2 = cls.HurstExp(n[t:], f_n[t:], log)
+                alpha_2 = cls.hurst_exponent(n[t:], f_n[t:], log)
                 # Append n,a_1/a_2
                 times.append(n[t])
                 exponents.append(alpha_1/alpha_2)
