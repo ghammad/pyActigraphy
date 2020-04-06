@@ -1117,6 +1117,11 @@ class LIDS():
             # Extract fit parameters
             fit_params = self.lids_fit_results.params.valuesdict()
 
+            # Convert period in minutes
+            fit_params['period_in_minutes'] = fit_params[
+                'period'
+            ]*(pd.Timedelta(lids.index.freq)/pd.Timedelta('1min'))
+
             # Add subject ID
             fit_params['subject_id'] = subject_id
 
