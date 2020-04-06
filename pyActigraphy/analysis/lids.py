@@ -1138,9 +1138,17 @@ class LIDS():
             fit_params['phase_onset'] = lids_onset_phase
             fit_params['phase_offset'] = lids_offset_phase
 
-            # Add sleep bout start time and duration
+            # Add sleep bout start time, duration and prior wake (in minutes)
             fit_params['start_time'] = lids.index[0]
-            fit_params['duration'] = lids.index[-1]-lids.index[0]
+            fit_params['duration'] = (
+                lids.index[-1] - lids.index[0]
+            )/pd.Timedelta('1min')
+            if idx == 0:
+                fit_params['prior_wake'] = np.nan
+            else:
+                fit_params['prior_wake'] = (
+                    lids.index[0] - lids_bouts[idx-1].index[-1]
+                )/pd.Timedelta('1min')
 
             # Create a DF with the fit parameters
             df_params = pd.DataFrame(fit_params, index=[idx])
