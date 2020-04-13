@@ -170,7 +170,9 @@ class RawReader(ForwardMetricsMixin):
                   ' function before using the `apply_sst` function.')
 
 
-def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
+def read_raw(
+    input_path, reader_type, n_jobs=1, prefer=None, verbose=0, **kwargs
+):
         r"""Reader function for multiple raw files.
 
         Parameters
@@ -197,10 +199,13 @@ def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
         verbose: int
             Display a progress meter if set to a value > 0.
             Default is 0.
+        **kwargs
+            Arbitrary keyword arguments passed to the underlying reader
+            function.
 
         Returns
         -------
-        raw : Instance of RawATR
+        raw : Instance of RawReader
             An object containing raw data
         """
 
@@ -215,30 +220,30 @@ def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
         files = glob.glob(input_path)
 
         def parallel_reader(
-            n_jobs, read_func, file_list, prefer=None, verbose=0
+            n_jobs, read_func, file_list, prefer=None, verbose=0, **kwargs
         ):
             return Parallel(n_jobs=n_jobs, prefer=prefer, verbose=verbose)(
-                delayed(read_func)(file) for file in file_list
+                delayed(read_func)(file, **kwargs) for file in file_list
             )
 
         readers = {
             'AGD': lambda files: parallel_reader(
-                n_jobs, read_raw_agd, files, prefer, verbose
+                n_jobs, read_raw_agd, files, prefer, verbose, **kwargs
             ),
             'ATR': lambda files: parallel_reader(
-                n_jobs, read_raw_atr, files, prefer, verbose
+                n_jobs, read_raw_atr, files, prefer, verbose, **kwargs
             ),
             'AWD': lambda files: parallel_reader(
-                n_jobs, read_raw_awd, files, prefer, verbose
+                n_jobs, read_raw_awd, files, prefer, verbose, **kwargs
             ),
             'DQT': lambda files: parallel_reader(
-                n_jobs, read_raw_dqt, files, prefer, verbose
+                n_jobs, read_raw_dqt, files, prefer, verbose, **kwargs
             ),
             'MTN': lambda files: parallel_reader(
-                n_jobs, read_raw_mtn, files, prefer, verbose
+                n_jobs, read_raw_mtn, files, prefer, verbose, **kwargs
             ),
             'RPX': lambda files: parallel_reader(
-                n_jobs, read_raw_rpx, files, prefer, verbose
+                n_jobs, read_raw_rpx, files, prefer, verbose, **kwargs
             )
         }[reader_type](files)
 
