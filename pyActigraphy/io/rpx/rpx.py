@@ -19,8 +19,14 @@ class RawRPX(BaseRaw):
         Path to the rpx file.
     language: str, optional
         Language of the input csv file.
-        Available options are: 'US', 'FR'.
-        Default is 'US'.
+        Available options are: 'ENG_UK', 'ENG_US', 'FR'.
+        Default is 'ENG_US'.
+    dayfirst: bool, optional
+        Whether to interpret the first value of a date as the day.
+        If None, rely on the laguage:
+        * ENG_US: False
+        * ENG_UK or FR: True
+        Default is None.
     start_time: datetime-like, optional
         Read data from this time.
         Default is None.
@@ -43,7 +49,8 @@ class RawRPX(BaseRaw):
     def __init__(
         self,
         input_fname,
-        language='US',
+        language='ENG_US',
+        dayfirst=None,
         start_time=None,
         period=None,
         data_dtype='Int64',
@@ -56,8 +63,20 @@ class RawRPX(BaseRaw):
         # [TO-DO] check if file exists
         # [TO-DO] check it is has the right file extension .rpx
 
-        self.__language = language
+        if language not in fields.keys():
+            raise ValueError(
+                'Language {0} not supported. Supported languages: {1}'.format(
+                    language, '" or "'.join(fields.keys())
+                )
+            )
+        else:
+            self.__language = language
         # [TO-DO] check language is supported
+
+        # Unless specified otherwise,
+        # set dayfirst as a function of the language
+        if dayfirst is None:
+            dayfirst = day_first[language]
 
         # extract file header and data header
         header = []
@@ -103,7 +122,7 @@ class RawRPX(BaseRaw):
         # extract informations from the header
         name = self.__extract_rpx_name(header, delimiter)
         uuid = self.__extract_rpx_uuid(header, delimiter)
-        start = self.__extract_rpx_start_time(header, delimiter)
+        start = self.__extract_rpx_start_time(header, delimiter, dayfirst)
         frequency = self.__extract_rpx_frequency(header, delimiter)
         axial_mode = 'Unknown'
 
@@ -127,7 +146,7 @@ class RawRPX(BaseRaw):
                     columns[self.language]['Time']
                 ]
             },
-            dayfirst=(self.language in day_first),
+            dayfirst=dayfirst,  # (self.language in day_first),
             usecols=list(columns[self.language].values()),
             na_values='NAN',
             dtype={
@@ -191,7 +210,7 @@ class RawRPX(BaseRaw):
                 break
         return uuid
 
-    def __extract_rpx_start_time(self, header, delimiter):
+    def __extract_rpx_start_time(self, header, delimiter, dayfirst):
         start_time = []
         for line in header:
             if fields[self.language]['Start_date'] in line:
@@ -204,7 +223,7 @@ class RawRPX(BaseRaw):
                 )
         return pd.to_datetime(
             ' '.join(start_time),
-            dayfirst=(self.language in day_first)
+            dayfirst=dayfirst  # (self.language in day_first)
         )
 
     def __extract_rpx_frequency(self, header, delimiter):
@@ -235,7 +254,8 @@ Please verify your input file.
 
 def read_raw_rpx(
     input_fname,
-    language='US',
+    language='ENG_US',
+    dayfirst=None,
     start_time=None,
     period=None,
     data_dtype='Int64',
@@ -250,8 +270,14 @@ def read_raw_rpx(
         Path to the rpx file.
     language: str, optional
         Language of the input csv file.
-        Available options are: 'US', 'FR'.
-        Default is 'US'.
+        Available options are: 'ENG_UK', 'ENG_US', 'FR'.
+        Default is 'ENG_US'.
+    dayfirst: bool, optional
+        Whether to interpret the first value of a date as the day.
+        If None, rely on the laguage:
+        * ENG_US: False
+        * ENG_UK or FR: True
+        Default is None.
     start_time: datetime-like, optional
         Read data from this time.
         Default is None.
@@ -279,6 +305,7 @@ def read_raw_rpx(
     return RawRPX(
         input_fname=input_fname,
         language=language,
+        dayfirst=dayfirst,
         start_time=start_time,
         period=period,
         data_dtype=data_dtype,

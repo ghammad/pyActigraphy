@@ -11,12 +11,12 @@ fields_fr = {
     'Period': 'Longueur de la période'
 }
 
-# In American english
+# In English
 # N.B: I don't know if there are diff between the headers created by
-# Respironics softwares installed in the UK or in Canada.
+# Respironics softwares installed in the UK, in the US or in Canada.
 # If so, please submit a GIT issue with an example so that I can add a new
 # dictionary
-fields_us = {
+fields_eng = {
     'Name': 'Identity',
     'Device': 'Actiwatch Type',
     'Device_id': 'Actiwatch Serial Number',
@@ -26,7 +26,11 @@ fields_us = {
     'Period': 'Epoch Length'
 }
 
-fields = {'FR': fields_fr, 'US': fields_us}
+fields = {
+    'ENG_UK': fields_eng,
+    'ENG_US': fields_eng,
+    'FR': fields_fr
+}
 
 # Dictionary of the required columns in the data 'section' of the input file
 
@@ -39,12 +43,8 @@ columns_fr = {
     'White_light': 'Lumière blanche'
 }
 
-# In American english
-# N.B: I don't know if there are diff between the column names created by
-# Respironics softwares installed in the UK or in Canada.
-# If so, please submit a GIT issue with an example so that I can add a new
-# dictionary
-columns_us = {
+# In English
+columns_eng = {
     'Date': 'Date',
     'Time': 'Time',
     'Activity': 'Activity',
@@ -52,8 +52,10 @@ columns_us = {
     'White_light': 'White Light'
 }
 
-columns = {'FR': columns_fr, 'US': columns_us}
+columns = {
+    'ENG_UK': columns_eng,
+    'ENG_US': columns_eng,
+    'FR': columns_fr
+}
 
-# List of keys corresponding to countries where the dates are encoded with day
-# first.
-day_first = ['FR']
+day_first = {'ENG_UK': True, 'ENG_US': False, 'FR': True}
