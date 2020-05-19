@@ -497,7 +497,7 @@ class LIDS():
 
         # Resample data to the required frequency
         if resampling_freq is not None:
-            rs = ts.resample(resampling_freq).sum()
+            rs = ts.resample(resampling_freq).apply(lambda x: np.sum(x.values))
         else:
             rs = ts
 
@@ -961,8 +961,8 @@ class LIDS():
     ):
         r'''Data preprocessing for LIDS analysis
 
-        Filter data according to their time duration, smooth them and
-        eventually concatenate them.
+        Filter data according to their time duration and smooth them.
+        Input data are concatenated, prior to filtering, if required.
 
         Parameters
         ----------
@@ -995,14 +995,24 @@ class LIDS():
 
         Returns
         -------
-        concat_lids: pandas.Series
+        smooth_lids: pandas.Series
         '''
+
+        # Concatenation
+        # Concatenate consecutive sleep bouts if delta_time < concat_time_delta
+        if concat_time_delta is not None:
+            concat_indices, concat_sleep_bouts = self.concat(
+                sleep_bouts,
+                time_delta=concat_time_delta
+            )
+        else:
+            concat_sleep_bouts = sleep_bouts
 
         # Filtering
         # Sleep bouts shorted than duration_min and
         # longer than duration_max are discarded
         filtered_sleep_bouts = self.filter(
-            sleep_bouts,
+            concat_sleep_bouts,
             duration_min=duration_min,
             duration_max=duration_max
         )
@@ -1018,17 +1028,7 @@ class LIDS():
             ) for ts in filtered_sleep_bouts
         ]
 
-        # LIDS concatenation
-        # Concatenate consecutive sleep bouts if delta_time < concat_time_delta
-        if concat_time_delta is not None:
-            concat_indices, concat_lids = self.concat(
-                smooth_lids,
-                time_delta=concat_time_delta
-            )
-        else:
-            concat_lids = smooth_lids
-
-        return concat_lids
+        return smooth_lids
 
     def lids_summary(
         self,
