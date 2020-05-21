@@ -4,9 +4,10 @@
 #
 # License: BSD (3-clause)
 
+from .cosinor import Cosinor
 from .flm import FLM
 from .lids import LIDS
 from .ssa import SSA
 
 
-__all__ = ["FLM", "LIDS", "SSA"]
+__all__ = ["Cosinor", "FLM", "LIDS", "SSA"]
