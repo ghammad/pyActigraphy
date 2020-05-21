@@ -123,7 +123,12 @@ class Fractal():
         x = ((ts.index - ts.index[0])/freq).values
 
         # Fit the data
-        _, fit_result = polynomial.polyfit(y=ts.values, x=x, deg=deg, full=True)
+        _, fit_result = polynomial.polyfit(
+            y=ts.values,
+            x=x,
+            deg=deg,
+            full=True
+        )
 
         # Return mean squared residuals
         return fit_result[0][0]/len(x) if fit_result[0].size != 0 else np.nan
@@ -187,6 +192,32 @@ class Fractal():
 
     @classmethod
     def dfa(cls, raw, n_array, deg=1, log=False):
+        r'''Detrended Fluctuation Analysis function
+
+        Compute the q-th order mean squared fluctuations for different segment
+        lengths.
+
+        Parameters
+        ----------
+        raw : instance of BaseRaw or its child classes
+            Raw measurements to be used.
+        freq: pandas.Timedelta
+            Sampling frequency of the time series.
+            Needs to be set explicitly for unevenly spaced tim series.
+        n_array: array of int
+            Array of the numbers of non-overlapping segments of equal length
+        deg: int
+            Degree(s) of the fitting polynomials.
+        log: bool, optional
+            If set to True, returned values are log-transformed.
+            Default is False.
+
+        Returns
+        -------
+        lengths,q_th_order_msq_fluc: numpy.array, numpy.array
+            Array of segment lengths (in minutes) and array of q-th order mean
+            squared fluctuations.
+        '''
 
         lengths = np.empty_like(n_array, dtype=np.float)
         q_th_order_msq_fluc = np.empty_like(n_array, dtype=np.float)
@@ -206,12 +237,59 @@ class Fractal():
             return lengths, q_th_order_msq_fluc
 
     @classmethod
-    def dfa_parallel(cls, raw, n_array, deg=1, log=False, n_jobs=1):
+    def dfa_parallel(
+        cls,
+        raw,
+        n_array,
+        deg=1,
+        log=False,
+        n_jobs=2,
+        prefer=None,
+        verbose=0
+    ):
+        r'''Detrended Fluctuation Analysis function
+
+        Compute, in parallel,  the q-th order mean squared fluctuations for
+        different segment lengths.
+
+        Parameters
+        ----------
+        raw : instance of BaseRaw or its child classes
+            Raw measurements to be used.
+        freq: pandas.Timedelta
+            Sampling frequency of the time series.
+            Needs to be set explicitly for unevenly spaced tim series.
+        n_array: array of int
+            Array of the numbers of non-overlapping segments of equal length
+        deg: int
+            Degree(s) of the fitting polynomials.
+        log: bool, optional
+            If set to True, returned values are log-transformed.
+            Default is False.
+        n_jobs: int, optional
+            Number of CPU to use for parallel fitting.
+            Default is 2.
+        prefer: str, optional
+            Soft hint to choose the default backendself.
+            Supported option:'processes', 'threads'.
+            See joblib package documentation for more info.
+            Default is None.
+        verbose: int, optional
+            Display a progress meter if set to a value > 0.
+            Default is 0.
+
+        Returns
+        -------
+        lengths,q_th_order_msq_fluc: numpy.array, numpy.array
+            Array of segment lengths (in minutes) and array of q-th order mean
+            squared fluctuations.
+        '''
 
         lengths, flucts = zip(
             *Parallel(
                 n_jobs=n_jobs,
-                prefer="threads"
+                prefer=prefer,
+                verbose=verbose
             )(delayed(cls.fluctuations)(
                 raw.data,
                 freq=raw.frequency,
@@ -250,8 +328,14 @@ class Fractal():
 
     @classmethod
     def break_points(
-        cls, n, f_n, start_idx_offset=3, stop_idx_offset=3, log=True
+        cls,
+        n,
+        f_n,
+        start_idx_offset=3,
+        stop_idx_offset=3,
+        log=True
     ):
+
         times = []
         exponents = []
         # If the number of points for a single linear fit is less than 3
