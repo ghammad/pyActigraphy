@@ -305,7 +305,7 @@ class Fractal():
         if log:
             return np.log(lengths), np.log(q_th_order_msq_fluctuations)
         else:
-            return lengths, q_th_order_msq_fluctuations
+            return np.array(lengths), q_th_order_msq_fluctuations
 
     @classmethod
     def hurst_exponent(cls, lengths, fluctuations, log=True):
