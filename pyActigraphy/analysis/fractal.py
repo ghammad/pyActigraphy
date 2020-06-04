@@ -322,7 +322,7 @@ class Fractal():
                 x=np.log(lengths),
                 deg=1,
                 full=True
-	    )
+            )
 
         return c[1]
 
