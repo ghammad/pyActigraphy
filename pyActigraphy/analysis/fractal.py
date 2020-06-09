@@ -1,21 +1,38 @@
 # # (Multi-fractal)Detrended fluctuation analysis
 from joblib import Parallel, delayed
-from numba import jit  # , prange
+from numba import njit  # , prange
 import pandas as pd
 import numpy as np
 from numpy.polynomial import polynomial
+from scipy.stats import linregress
 
 
-@jit(nopython=True)
-def _integrate_detrended(X):
+@njit
+def _profile(X):
 
     trend = np.mean(X)
 
-    detrended_series = X - trend
+    prof = np.cumsum(X - trend)
 
-    integrated_series = np.cumsum(detrended_series)
+    return prof
 
-    return integrated_series
+
+@njit  # (float64[:,:](float64[:],int64,boolean))
+def _segmentation(x, n, backward=False):
+
+    # Number of elements
+    N = len(x)
+
+    # Number of segments of length n (and remainder r)
+    nseg, r = divmod(N, n)
+
+    # Non-overlapping segments
+    if backward:
+        segments = x[r:].reshape(nseg, n)
+    else:
+        segments = x[:N-r].reshape(nseg, n)
+
+    return segments
 
 
 class Fractal():
@@ -27,88 +44,59 @@ class Fractal():
         self.__q_array = q_array
 
     @classmethod
-    def integrate_detrended(cls, ts):
-        int_s = _integrate_detrended(ts.values)
-        return pd.Series(int_s, index=ts.index, name=ts.name)
+    def profile(cls, X):
+        r'''Profile function
+
+        Detrend and integrate the signal.
+
+        Parameters
+        ----------
+        x: numpy.array
+            Input array.
+        n: int
+            Window size.
+
+        Returns
+        -------
+        segments: numpy.array
+            Non-overlappping windows of size n.
+        '''
+
+        return _profile(X)
 
     @classmethod
-    def date_range(cls, ts, n_seg, unit='m', backward=False):
-        r"""Split a date index range
+    def segmentation(cls, x, n, backward=False):
+        r'''Segmentation function
 
-        Split the datetime index of a time series into non-overlapping chunks
+        Segment the signal into non-overlapping windows of equal size.
 
-        """
+        Parameters
+        ----------
+        x: numpy.array
+            Input array.
+        n: int
+            Window size.
+        backward: bool
+            If set to True, start segmentation for the end of the signal.
+            Default is False.
 
-        # Calculate duration of the time series
-        duration = ts.index[-1]-ts.index[0]
-
-        # Calculate the length of a non-overlapping segment
-        segment_length = duration/n_seg
-
-        # Start and end of the non-overlapping chunks
-        if backward:
-            dt_range = [(ts.index[-1]-(n+1)*segment_length,
-                         ts.index[-1]-n*segment_length)
-                        for n in range(n_seg)]
-        else:
-            dt_range = [(ts.index[0]+n*segment_length,
-                         ts.index[0]+(n+1)*segment_length)
-                        for n in range(n_seg)]
-
-        # Convert the segment length to the required unit
-        segment_length /= np.timedelta64('1', 'm')
-
-        # Return
-        return segment_length, dt_range
+        Returns
+        -------
+        segments: numpy.array
+            Non-overlappping windows of size n.
+        '''
+        return _segmentation(x, n, backward)
 
     @classmethod
-    def date_indices(cls, ts, n_seg, unit='m', backward=False):
-        r"""Split a date index range
-
-        Split the datetime index of a time series into non-overlapping chunks
-
-        """
-
-        # Calculate duration of the time series
-        duration = ts.index[-1]-ts.index[0]
-
-        # Calculate the length of a non-overlapping segment
-        segment_length = duration/n_seg
-
-        # Start and end of the non-overlapping chunks
-        if backward:
-            dt_range = [(ts.index[-1]-(n+1)*segment_length,
-                         ts.index[-1]-n*segment_length)
-                        for n in range(n_seg)]
-        else:
-            dt_range = [(ts.index[0]+n*segment_length,
-                         ts.index[0]+(n+1)*segment_length)
-                        for n in range(n_seg)]
-
-        # Convert index into positional index
-        dt_indices = [(ts.index.get_loc(idx[0], 'nearest'),
-                       ts.index.get_loc(idx[1], 'nearest'))
-                      for idx in dt_range]
-
-        # Convert the segment length to the required unit
-        segment_length /= np.timedelta64('1', 'm')
-
-        # Return
-        return segment_length, dt_indices
-
-    @classmethod
-    def local_msq_residuals(cls, ts, freq, deg):
+    def local_msq_residuals(cls, segment, deg):
         r'''Mean squared residuals
 
         Mean squared residuals of the least squares polynomial fit.
 
         Parameters
         ----------
-        ts: pandas.Series
-            Activity time series.
-        freq: pandas.Timedelta
-            Sampling frequency of the time series.
-            Needs to be set explicitly for unevenly spaced tim series.
+        segment: numpy.array
+            Input array.
         deg: int
             Degree(s) of the fitting polynomials.
 
@@ -118,80 +106,86 @@ class Fractal():
             Mean squared residuals.
         '''
 
-        # Define the x range by converting timestamps to indices, in order to
-        # deal with time series with irregular index.
-        x = ((ts.index - ts.index[0])/freq).values
+        # Segment length
+        n = len(segment)
+
+        # X-axis
+        x = np.linspace(1, n, n)
 
         # Fit the data
-        _, fit_result = polynomial.polyfit(
-            y=ts.values,
-            x=x,
-            deg=deg,
-            full=True
-        )
+        _, fit_result = polynomial.polyfit(y=segment, x=x, deg=deg, full=True)
 
         # Return mean squared residuals
-        return fit_result[0][0]/len(x) if fit_result[0].size != 0 else np.nan
+        return fit_result[0][0]/n if fit_result[0].size != 0 else np.nan
 
     @classmethod
-    def fluctuations(cls, ts, freq, n, deg, unit='m'):
+    def fluctuations(cls, X, n, deg):
         r'''Fluctuation function
 
-        The fluctuations are defined as the series of mean squared residuals
-        of the least squares fit in each non-overlapping segment.
+        The fluctuations are defined as the mean squared residuals
+        of the least squares fit in each non-overlapping window.
 
         Parameters
         ----------
-        ts: pandas.Series
-            Activity time series.
-        freq: pandas.Timedelta
-            Sampling frequency of the time series.
-            Needs to be set explicitly for unevenly spaced tim series.
+        X: numpy.array
+            Array of activity counts.
         n: int
-            Number of non-overlapping segment of equal length
+            Window size.
         deg: int
             Degree(s) of the fitting polynomials.
-        unit: str, optional
-            Units of the segment length.
-            Default is 'm' (minute).
 
         Returns
         -------
-        segment_length,residuals_msq: numpy.float, numpy.array
-            Length of the segment (in minutes) and array of mean
-            squared residuals in each segment.
+        F: numpy.array
+            Array of mean squared residuals in each segment.
         '''
 
         # Detrend and integrate time series
-        int_ts = cls.integrate_detrended(ts)
+        Y = cls.profile(X)
 
-        # Compute the length, the start and end times of each of the n
-        # non-overlapping segment
-        segment_length, dt_range = cls.date_range(int_ts, n)
+        # Define non-overlapping segments
+        segments_fwd = cls.segmentation(Y, n, backward=False)
+        segments_bwd = cls.segmentation(Y, n, backward=True)
 
+        # Assert equal numbers of segments
+        assert(segments_fwd.shape == segments_bwd.shape)
+
+        F = np.empty(len(segments_fwd)+len(segments_bwd))
         # Compute the sum of the squared residuals for each segment
-        iterable = (
-            cls.local_msq_residuals(
-                int_ts.loc[times[0]:times[1]],
-                freq,
-                deg
-            ) for times in dt_range)
+        for i in range(len(segments_fwd)):
+            F[i*2] = cls.local_msq_residuals(segments_fwd[i], deg)
+            F[i*2+1] = cls.local_msq_residuals(segments_bwd[i], deg)
 
-        residuals_msq = np.fromiter(
-            iterable,
-            dtype=np.float,
-            count=len(dt_range)
-        )
-
-        return segment_length, residuals_msq
+        return F
 
     @classmethod
-    def q_th_order_mean_square(cls, data, q):
+    def q_th_order_mean_square(cls, F, q):
+        r'''Qth-order mean square function
 
-        return np.power(np.nanmean(np.power(data, q/2.)), 1/q)
+        Compute the q-th order mean squares.
+
+        Parameters
+        ----------
+        F: numpy.array
+            Array of fluctuations.
+        q: scalar
+            Order.
+
+        Returns
+        -------
+        qth_msq: numpy.float
+            Q-th order mean square.
+        '''
+
+        if q == 0:
+            qth_msq = np.exp(0.5*np.nanmean(np.log(F)))
+        else:
+            qth_msq = np.power(np.nanmean(np.power(F, q/2)), 1/q)
+
+        return qth_msq
 
     @classmethod
-    def dfa(cls, raw, n_array, deg=1, log=False):
+    def dfa(cls, ts, n_array, deg=1, log=False):
         r'''Detrended Fluctuation Analysis function
 
         Compute the q-th order mean squared fluctuations for different segment
@@ -199,53 +193,55 @@ class Fractal():
 
         Parameters
         ----------
-        raw : instance of BaseRaw or its child classes
-            Raw measurements to be used.
-        freq: pandas.Timedelta
-            Sampling frequency of the time series.
-            Needs to be set explicitly for unevenly spaced tim series.
+        ts: pandas.Series
+            Input signal.
         n_array: array of int
-            Array of the numbers of non-overlapping segments of equal length
-        deg: int
+            Time scales (i.e window sizes). In minutes.
+        deg: int, optional
             Degree(s) of the fitting polynomials.
+            Default is 1.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
 
         Returns
         -------
-        lengths,q_th_order_msq_fluc: numpy.array, numpy.array
-            Array of segment lengths (in minutes) and array of q-th order mean
-            squared fluctuations.
+        q_th_order_msq_fluc: numpy.array
+            Array of q-th order mean squared fluctuations.
         '''
 
-        lengths = np.empty_like(n_array, dtype=np.float)
-        q_th_order_msq_fluc = np.empty_like(n_array, dtype=np.float)
-        for idx, n in enumerate(n_array):
-            seg_length, fluct = cls.fluctuations(
-                raw.data,
-                freq=raw.frequency,
-                n=n,
-                deg=deg
+        # Check sampling frequency
+        freq = ts.index.freq
+        if freq is None:
+            raise ValueError(
+                "Cannot check the sampling frequency of the input data.\n"
+                "Might be the case for unevenly spaced data or masked data.\n"
+                "Please, consider using pandas.Series.resample."
             )
-            lengths[idx] = seg_length
-            q_th_order_msq_fluc[idx] = cls.q_th_order_mean_square(fluct, q=2)
+        else:
+            factor = pd.Timedelta('1min')/freq
+
+        iterable = (
+            cls.q_th_order_mean_square(
+                cls.fluctuations(ts.values, n=int(n), deg=deg),
+                q=2
+            ) for n in factor*n_array
+        )
+
+        q_th_order_msq_fluc = np.fromiter(
+            iterable,
+            dtype=np.float,
+            count=len(n_array)
+        )
 
         if log:
-            return np.log(lengths), np.log(q_th_order_msq_fluc)
-        else:
-            return lengths, q_th_order_msq_fluc
+            q_th_order_msq_fluc = np.log(q_th_order_msq_fluc)
+
+        return q_th_order_msq_fluc
 
     @classmethod
     def dfa_parallel(
-        cls,
-        raw,
-        n_array,
-        deg=1,
-        log=False,
-        n_jobs=2,
-        prefer=None,
-        verbose=0
+        cls, ts, n_array, deg=1, log=False, n_jobs=2, prefer=None, verbose=0
     ):
         r'''Detrended Fluctuation Analysis function
 
@@ -254,15 +250,13 @@ class Fractal():
 
         Parameters
         ----------
-        raw : instance of BaseRaw or its child classes
-            Raw measurements to be used.
-        freq: pandas.Timedelta
-            Sampling frequency of the time series.
-            Needs to be set explicitly for unevenly spaced tim series.
+        ts : pandas.Series
+            Input signal.
         n_array: array of int
-            Array of the numbers of non-overlapping segments of equal length
-        deg: int
+            Time scales (i.e window sizes). In minutes.
+        deg: int, optional
             Degree(s) of the fitting polynomials.
+            Default is 1.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -270,7 +264,7 @@ class Fractal():
             Number of CPU to use for parallel fitting.
             Default is 2.
         prefer: str, optional
-            Soft hint to choose the default backendself.
+            Soft hint to choose the default backend.
             Supported option:'processes', 'threads'.
             See joblib package documentation for more info.
             Default is None.
@@ -280,112 +274,302 @@ class Fractal():
 
         Returns
         -------
-        lengths,q_th_order_msq_fluc: numpy.array, numpy.array
-            Array of segment lengths (in minutes) and array of q-th order mean
-            squared fluctuations.
+        q_th_order_msq_fluc: numpy.array
+            Array of q-th order mean squared fluctuations.
         '''
 
-        lengths, flucts = zip(
-            *Parallel(
-                n_jobs=n_jobs,
-                prefer=prefer,
-                verbose=verbose
-            )(delayed(cls.fluctuations)(
-                raw.data,
-                freq=raw.frequency,
-                n=n,
-                deg=deg
-            ) for n in n_array)
+        # Check sampling frequency
+        freq = ts.index.freq
+        if freq is None:
+            raise ValueError(
+                "Cannot check the sampling frequency of the input data.\n"
+                "Might be the case for unevenly spaced data or masked data.\n"
+                "Please, consider using pandas.Series.resample."
+            )
+        else:
+            factor = pd.Timedelta('1min')/freq
+
+        flucts = Parallel(
+            n_jobs=n_jobs,
+            prefer=prefer,
+            verbose=verbose
+        )(delayed(cls.fluctuations)(
+            ts.values,
+            n=int(n),
+            deg=deg
+        ) for n in factor*n_array)
+
+        q_th_order_msq_fluc = np.fromiter(
+            (cls.q_th_order_mean_square(fluct, q=2) for fluct in flucts),
+            dtype=np.float,
+            count=len(flucts)
         )
 
-        q_th_order_msq_fluctuations = [
-            cls.q_th_order_mean_square(fluct, q=2) for fluct in flucts
-        ]
-
         if log:
-            return np.log(lengths), np.log(q_th_order_msq_fluctuations)
-        else:
-            return np.array(lengths), q_th_order_msq_fluctuations
+            q_th_order_msq_fluc = np.log(q_th_order_msq_fluc)
+
+        return q_th_order_msq_fluc
 
     @classmethod
-    def hurst_exponent(cls, lengths, fluctuations, log=True):
-        if log:
-            c, stats = polynomial.polyfit(
-                y=fluctuations,
-                x=lengths,
-                deg=1,
-                full=True
-            )
-        else:
-            c, stats = polynomial.polyfit(
-                y=np.log(fluctuations),
-                x=np.log(lengths),
-                deg=1,
-                full=True
-            )
-
-        return c[1]
-
-    @classmethod
-    def break_points(
-        cls,
-        n,
-        f_n,
-        start_idx_offset=3,
-        stop_idx_offset=3,
-        log=True
+    def generalized_hurst_exponent(
+        cls, F_n, n_array, x_center=False, log=False
     ):
+        r'''Generalized Hurst exponent
 
-        times = []
-        exponents = []
+        Compute the generalized Hurst exponent, :math:`h(q)`, by fitting .
+
+        Parameters
+        ----------
+        F_n : array
+            Array of fluctuations.
+        n_array: array of int
+            Time scales (i.e window sizes). In minutes.
+        x_center: bool, optional
+            If set to True, time scales are mean-centered.
+            Default is false.
+        log: bool, optional
+            If set to True, assume that the input values have already been
+            log-transformed.
+            Default is False.
+
+        Returns
+        -------
+        h, _h_err: float,float
+            Estimate of the generalized Hurst exponent and its standard error.
+        '''
+
+        y = np.log(F_n) if not log else F_n
+        x = np.log(n_array) if not log else n_array
+
+        if x_center:
+            x = x - np.mean(x)
+
+        r = linregress(y=y, x=x)
+
+        return r.slope, r.stderr
+
+    @classmethod
+    def crossover_search(
+        cls,
+        F_n,
+        n_array,
+        n_min=3,
+        log=False
+    ):
+        r'''Search for crossovers
+
+        A crossover is defined as a change in scaling properties of the
+        fluctuations with respect time scales. A search is performed by
+        calculating the series of ratios between the generalized Hurst exponent
+        :math:`h(q)` obtained at time scales :math:`n<n_x` and time scales
+        :math:`n>n_x`, for various values of :math:`n_x`.
+
+        Parameters
+        ----------
+        F_n : array
+            Array of fluctuations.
+        n_array: array of int
+            Time scales (i.e window sizes). In minutes.
+        n_min: int, optional
+            Minimal number of time scales required to estimate the generalized
+            Hurst exponent.
+            Default is 3.
+        log: bool, optional
+            If set to True, assume that the input values have already been
+            log-transformed.
+            Default is False.
+
+        Returns
+        -------
+        h_ratios, h_ratios_err, n_x: arrays of floats
+            Ratio of h(q), and associated uncertainties, obtained for various
+            time scales n_x.
+
+        .. warning::
+            The calculation of the uncertainty on the ratio of scaling
+            exponents assumes uncorrelated variables:
+            .. math:: \sigma_{A/B}^2=(A/B)^2(\sigma_{A}^2/A^2+\sigma_{B}^2/B^2)
+
+            Most likely, the scaling exponents calculated for time scales
+            :math:`n<n_x` is not uncorrelated to the scaling exponents
+            calculated for time scales :math:`n>n_x`. Therefore, the resulting
+            uncertainty is either overestimated in case of positively
+            correlated variables or underestimated otherwise. However, the
+            magnitude of the calculated uncertainty provides a rough estimate.
+        '''
+
+        n_x = []
+        h_ratios = []
+        h_ratios_err = []
         # If the number of points for a single linear fit is less than 3
-        if(start_idx_offset < 3 or stop_idx_offset < 3):
+        if(n_min < 3):
             print(
                 ("Cannot perform a linear fit on series of less than"
                  " 3 points. Exiting now.")
             )
         # If the number of points to fit is less than 2*3
-        elif((len(n)-stop_idx_offset+1-start_idx_offset) < 1):
+        elif((len(n_array)-2*n_min+1) < 1):
             print(
                 ("Total number of points to fit is less than 2*3."
                  "Exiting now.")
             )
         else:
-            for t in np.arange(start_idx_offset, len(n)-stop_idx_offset+1):
-                # Fit the series of points (F(n) vs n) up to point n_t
-                alpha_1 = cls.hurst_exponent(n[:t], f_n[:t], log)
-                # Fit the series of points (F(n) vs n) from point n_t to n_max
-                alpha_2 = cls.hurst_exponent(n[t:], f_n[t:], log)
+            for t in np.arange(n_min, len(n_array)-n_min+1):
+                # Fit the series of points (F(n) vs n) up to point n_x
+                alpha_1, alpha_1_err = cls.generalized_hurst_exponent(
+                    F_n[:t], n_array[:t], log
+                )
+                # Fit the series of points (F(n) vs n) from point n_x to n_max
+                alpha_2, alpha_2_err = cls.generalized_hurst_exponent(
+                    F_n[t:], n_array[t:], log
+                )
                 # Append n,a_1/a_2
-                times.append(n[t])
-                exponents.append(alpha_1/alpha_2)
+                ratio = alpha_1/alpha_2
+                alpha_1_rel_err = alpha_1_err/alpha_1
+                alpha_2_rel_err = alpha_2_err/alpha_2
+                n_x.append(n_array[t])
+                h_ratios.append(ratio)
+                h_ratios_err.append(ratio*np.sqrt(
+                    alpha_1_rel_err*alpha_1_rel_err +
+                    alpha_2_rel_err*alpha_2_rel_err
+                ))
 
             if log:
-                times = np.exp(times)
+                n_x = np.exp(n_x)
 
-        return times, exponents
+        return h_ratios, h_ratios_err, n_x
 
     @classmethod
-    def mfdfa(cls, raw, n_array, q_array, deg=1, log=False):
+    def mfdfa(cls, ts, n_array, q_array, deg=1, log=False):
+        r'''Multifractal Detrended Fluctuation Analysis function
 
-        lengths = np.empty_like(n_array, dtype=np.float)
+        Compute the q-th order mean squared fluctuations for different segment
+        lengths and different index q values.
+
+        Parameters
+        ----------
+        ts: pandas.Series
+            Input signal.
+        n_array: array of int
+            Time scales (i.e window sizes). In minutes.
+        q_array: array of float
+            Orders of the mean squares.
+        deg: int, optional
+            Degree(s) of the fitting polynomials.
+            Default is 1.
+        log: bool, optional
+            If set to True, returned values are log-transformed.
+            Default is False.
+
+        Returns
+        -------
+        q_th_order_msq_fluctuations: numpy.array
+            (n,q) array of q-th order mean squared fluctuations.
+        '''
+
+        # Check sampling frequency
+        freq = ts.index.freq
+        if freq is None:
+            raise ValueError(
+                "Cannot check the sampling frequency of the input data.\n"
+                "Might be the case for unevenly spaced data or masked data.\n"
+                "Please, consider using pandas.Series.resample."
+            )
+        else:
+            factor = pd.Timedelta('1min')/freq
+
         q_th_order_msq_fluctuations = np.empty(
             (len(n_array), len(q_array)),
             dtype=np.float
         )
-        for idx, n in enumerate(n_array):
-            seg_length, fluct = cls.fluctuations(
-                raw.data,
-                freq=raw.frequency,
-                n=n,
-                deg=deg
-            )
-            lengths[idx] = seg_length
+        for idx, n in enumerate(factor*n_array):
+
+            fluct = cls.fluctuations(ts.values, n=int(n), deg=deg)
             q_th_order_msq_fluctuations[idx] = [
                 cls.q_th_order_mean_square(fluct, q=q) for q in q_array
             ]
 
         if log:
-            return np.log(lengths), np.log(q_th_order_msq_fluctuations)
+            q_th_order_msq_fluctuations = np.log(q_th_order_msq_fluctuations)
+
+        return q_th_order_msq_fluctuations
+
+    @classmethod
+    def mfdfa_parallel(
+        cls,
+        ts,
+        n_array,
+        q_array,
+        deg=1,
+        log=False,
+        n_jobs=2,
+        prefer=None,
+        verbose=0
+    ):
+        r'''Multifractal Detrended Fluctuation Analysis function
+
+        Compute, in parallel, the q-th order mean squared fluctuations for
+        different segment lengths and different index q values.
+
+        Parameters
+        ----------
+        ts : pandas.Series
+            Input signal.
+        n_array: array of int
+            Time scales (i.e window sizes). In minutes.
+        q_array: array of float
+            Orders of the mean squares.
+        deg: int, optional
+            Degree(s) of the fitting polynomials.
+            Default is 1.
+        log: bool, optional
+            If set to True, returned values are log-transformed.
+            Default is False.
+        n_jobs: int, optional
+            Number of CPU to use for parallel fitting.
+            Default is 2.
+        prefer: str, optional
+            Soft hint to choose the default backend.
+            Supported option:'processes', 'threads'.
+            See joblib package documentation for more info.
+            Default is None.
+        verbose: int, optional
+            Display a progress meter if set to a value > 0.
+            Default is 0.
+
+        Returns
+        -------
+        q_th_order_msq_fluctuations: numpy.array
+            (n,q) array of q-th order mean squared fluctuations.
+        '''
+
+        # Check sampling frequency
+        freq = ts.index.freq
+        if freq is None:
+            raise ValueError(
+                "Cannot check the sampling frequency of the input data.\n"
+                "Might be the case for unevenly spaced data or masked data.\n"
+                "Please, consider using pandas.Series.resample."
+            )
         else:
-            return lengths, q_th_order_msq_fluctuations
+            factor = pd.Timedelta('1min')/freq
+
+        flucts = Parallel(
+            n_jobs=n_jobs,
+            prefer=prefer,
+            verbose=verbose
+        )(delayed(cls.fluctuations)(
+            ts.values,
+            n=int(n),
+            deg=deg
+        ) for n in factor*n_array)
+
+        q_th_order_msq_fluctuations = np.array([
+            cls.q_th_order_mean_square(fluct, q=q)
+            for fluct in flucts for q in q_array
+        ]).reshape(len(n_array), len(q_array))
+
+        if log:
+            q_th_order_msq_fluctuations = np.log(q_th_order_msq_fluctuations)
+
+        return q_th_order_msq_fluctuations
