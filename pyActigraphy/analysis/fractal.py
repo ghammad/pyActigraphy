@@ -349,13 +349,7 @@ class Fractal():
         return r.slope, r.stderr
 
     @classmethod
-    def crossover_search(
-        cls,
-        F_n,
-        n_array,
-        n_min=3,
-        log=False
-    ):
+    def crossover_search(cls, F_n, n_array, n_min=3, log=False):
         r'''Search for crossovers
 
         A crossover is defined as a change in scaling properties of the
@@ -398,9 +392,9 @@ class Fractal():
             magnitude of the calculated uncertainty provides a rough estimate.
         '''
 
-        n_x = []
-        h_ratios = []
-        h_ratios_err = []
+        n_x = np.empty(len(n_array)-2*n_min+1)
+        h_ratios = np.empty(len(n_array)-2*n_min+1)
+        h_ratios_err = np.empty(len(n_array)-2*n_min+1)
         # If the number of points for a single linear fit is less than 3
         if(n_min < 3):
             print(
@@ -423,16 +417,17 @@ class Fractal():
                 alpha_2, alpha_2_err = cls.generalized_hurst_exponent(
                     F_n[t:], n_array[t:], log
                 )
-                # Append n,a_1/a_2
+                # Alpha ratio and relative uncertainties
                 ratio = alpha_1/alpha_2
                 alpha_1_rel_err = alpha_1_err/alpha_1
                 alpha_2_rel_err = alpha_2_err/alpha_2
-                n_x.append(n_array[t])
-                h_ratios.append(ratio)
-                h_ratios_err.append(ratio*np.sqrt(
+
+                n_x[t-n_min] = n_array[t]
+                h_ratios[t-n_min] = ratio
+                h_ratios_err[t-n_min] = ratio*np.sqrt(
                     alpha_1_rel_err*alpha_1_rel_err +
                     alpha_2_rel_err*alpha_2_rel_err
-                ))
+                )
 
             if log:
                 n_x = np.exp(n_x)
