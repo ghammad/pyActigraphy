@@ -55,6 +55,12 @@ class RawReader(ForwardMetricsMixin):
         else:
             self.__readers.append(raw_reader)
 
+    def names(self):
+
+        return [
+            read.display_name for read in self.__readers
+        ]
+
     def mask_fraction(self):
 
         return {
