@@ -151,7 +151,7 @@ class SSA():
         -----
 
         Factorization of the trajectory matrix A, using Singular Value
-        Decomposition (SVD), yields to[1]_:
+        Decomposition (SVD), yields to [1]_:
 
         .. math::
 
@@ -172,8 +172,8 @@ class SSA():
         ----------
 
         .. [1] Golyandina, N., & Zhigljavsky, A. (2013). Singular Spectrum
-        Analysis for Time Series. Springer Berlin Heidelberg
-        http://doi.org/10.1007/978-3-642-34913-3
+               Analysis for Time Series. Springer Berlin Heidelberg
+               http://doi.org/10.1007/978-3-642-34913-3
         '''
 
         A = self.trajectory_matrix()
@@ -213,7 +213,7 @@ class SSA():
         to magnitude from the most to the least dominant, where
         :math:`\lambda_k` can be interpreted as the variance of the
         *sub phase-space* of time-series component :math:`g_k(n)` and where
-        math:`\lambda_{tot} = \sum^r_{k=1} \lambda_k` is the total variance of
+        :math:`\lambda_{tot} = \sum^r_{k=1} \lambda_k` is the total variance of
         the phase space of the original time series.
         '''
         return self.__lambda_s
@@ -235,7 +235,7 @@ class SSA():
         Notes
         -----
 
-        The SVD of the trajectory matrix X can be written as[1]_ :
+        The SVD of the trajectory matrix X can be written as [1]_ :
 
         .. math:
 
@@ -251,8 +251,8 @@ class SSA():
         ----------
 
         .. [1] Golyandina, N., & Zhigljavsky, A. (2013). Singular Spectrum
-        Analysis for Time Series. Springer Berlin Heidelberg
-        http://doi.org/10.1007/978-3-642-34913-3
+               Analysis for Time Series. Springer Berlin Heidelberg
+               http://doi.org/10.1007/978-3-642-34913-3
         '''
         #  TODO: check if r is in range
 
@@ -287,8 +287,8 @@ class SSA():
         Notes
         -----
 
-        [1]_If the components of the series are separable and the indices are
-        being split accordingly, then all the matrices in the expansion
+        [1]_ : if the components of the series are separable and the indices
+        are being split accordingly, then all the matrices in the expansion
         :math:`X = X_{I_1} + \ldots + X_{I_m}` are the Hankel matrices.
         We thus immediately obtain the decomposition
         :math:`x_n = \sum_{k=1}^m \tilde{x}_n^{(k)}` of the original series:
@@ -300,6 +300,7 @@ class SSA():
         procedure of transforming an arbitrary matrix into a Hankel matrix and
         therefore into a series. As such, we shall consider the procedure of
         *diagonal averaging*, which defines the values of the time series
+
         .. math::
 
             \tilde{\mathbb{X}}^{(k)} = \left(
@@ -309,26 +310,29 @@ class SSA():
         :math:`X_{I_k}`.
 
         * for :math:`1 \leq n < L^{\star}`:
-        .. math::
-            \tilde{x}_n^{(k)} = \frac{1}{n} *
-            \sum_{m=1}^{n} x^{\star}_{I_k, (m,n-m+1)}
+
+          .. math::
+             \tilde{x}_n^{(k)} = \frac{1}{n} *
+             \sum_{m=1}^{n} x^{\star}_{I_k, (m,n-m+1)}
 
         * for :math:`L^{\star} \leq n < K^{\star}`:
-        .. math::
-            \tilde{x}_n^{(k)} = \frac{1}{L^{\star}} *
-            \sum_{m=1}^{L^{\star}} x^{\star}_{I_k, (m,n-m+1)}
+
+          .. math::
+             \tilde{x}_n^{(k)} = \frac{1}{L^{\star}} *
+             \sum_{m=1}^{L^{\star}} x^{\star}_{I_k, (m,n-m+1)}
 
         * for :math:`K^{\star} < n \leq N`:
-        .. math::
-            \tilde{x}_n^{(k)} = \frac{1}{N-n+1} *
-            \sum_{m=n-K^{\star}+1}^{N-K^{\star}+1} x^{\star}_{I_k, (m,n-m+1)}
+
+          .. math::
+             \tilde{x}_n^{(k)} = \frac{1}{N-n+1} *
+             \sum_{m=n-K^{\star}+1}^{N-K^{\star}+1} x^{\star}_{I_k, (m,n-m+1)}
 
         References
         ----------
 
         .. [1] Golyandina, N., & Zhigljavsky, A. (2013). Singular Spectrum
-        Analysis for Time Series. Springer Berlin Heidelberg
-        http://doi.org/10.1007/978-3-642-34913-3
+               Analysis for Time Series. Springer Berlin Heidelberg
+               http://doi.org/10.1007/978-3-642-34913-3
         '''
         if isinstance(r, list):
             X_elementaries = [self.X_elementary(i) for i in r]

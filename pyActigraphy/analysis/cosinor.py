@@ -85,9 +85,11 @@ class Cosinor():
         nan_policy: str, optional
             Specifies action if the objective function returns NaN values.
             One of:
-                'raise': a ValueError is raised
-                'propagate': the values returned from userfcn are un-altered
-                'omit': non-finite values are filtered
+
+            * 'raise': a ValueError is raised
+            * 'propagate': the values returned from userfcn are un-altered
+            * 'omit': non-finite values are filtered
+
             Default is 'raise'.
         reduce_fcn: str, optional
             Function to convert a residual array to a scalar value for the
@@ -147,6 +149,14 @@ class Cosinor():
         -------
         bestfit_data : pandas.Series
             Time series of the best fit data.
+
+        References
+        ----------
+
+        .. [1] Non-Linear Least-Squares Minimization and Curve-Fitting for
+               Python.
+               https://lmfit.github.io/lmfit-py/index.html
+
         """
 
         # Define the x range by converting timestamps to indices, in order to
@@ -184,16 +194,20 @@ class Cosinor():
         nan_policy: str, optional
             Specifies action if the objective function returns NaN values.
             One of:
-                'raise': a ValueError is raised
-                'propagate': the values returned from userfcn are un-altered
-                'omit': non-finite values are filtered
+
+            * 'raise': a ValueError is raised
+            * 'propagate': the values returned from userfcn are un-altered
+            * 'omit': non-finite values are filtered
+
             Default is 'raise'.
         reduce_fcn: str, optional
             Function to convert a residual array to a scalar value for the
             scalar minimizers. Optional values are:
+
             * None : sum of squares of residual
             * negentropy : neg entropy, using normal distribution
             * neglogcauchy: neg log likelihood, using Cauchy distribution
+
             Default is None.
         verbose_fit : bool.
             If True, print the fit summary.
