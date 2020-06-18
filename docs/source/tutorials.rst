@@ -42,9 +42,11 @@ Analysis examples
 
 * How to perform a Cosinor analysis with pyActigraphy: `cosinor`_
 * How to perform a (Multifractal) Detrended fluctuation analysis (MF-DFA) with pyActigraphy: `mfdfa`_
+* How to perform a Singular spectrum analysis (SSA) with pyActigraphy: `ssa`_
 
 .. _cosinor: pyActigraphy-Cosinor.ipynb
 .. _mfdfa: pyActigraphy-MFDFA.ipynb
+.. _ssa: pyActigraphy-SSA.ipynb
 
 
 Work-in-progress
