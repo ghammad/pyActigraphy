@@ -131,7 +131,7 @@ class FLM():
             from scipy.interpolate import splrep
 
             T = self.nsamples
-            t = np.linspace(0, T, T, endpoint=False)
+            t = np.linspace(0, T, T, endpoint=True)
             k = 3 if self.max_order is None else self.max_order
 
             if verbose:
@@ -176,10 +176,10 @@ class FLM():
 
         # Spline
         elif self.__basis == 'spline':
-            from scipy.interpolate import splev
+            from scipy.interpolate import BSpline
             T = self.nsamples
-            t = np.linspace(0, T, r*T, endpoint=False, dtype=np.float)
-            y_est = splev(t, tuple(self.beta[raw.display_name]))
+            t = np.linspace(0, T, r*T, endpoint=True, dtype=np.float)
+            y_est = BSpline(*self.beta[raw.display_name], extrapolate=False)(t)
             return y_est
 
     def fit_reader(
