@@ -5,7 +5,9 @@
 # License: BSD (3-clause)
 
 # import utils
-from .chronosapiens import chronosapiens
+from .roenneberg import roenneberg
+from .smp import sleep_midpoint
+from .sri import sri
 
 # __all__ = ["utils", "chronosapiens"]
-__all__ = ["chronosapiens"]
+__all__ = ["sleep_midpoint", "sri", "roenneberg"]

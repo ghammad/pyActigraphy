@@ -6,125 +6,94 @@ Python API Reference
     :local:
     :depth: 2
 
-:mod:`pyActigraphy`:
 
-.. automodule:: pyActigraphy
-   :no-members:
-   :no-inherited-members:
+Reading raw data
+================
 
-I/O
-===
+Raw file reader
+---------------
 
 Uniform API to read multiple actigraphy data formats.
 Currently, the supported formats are:
 
-* ActiWatch (CamNtech): .awd
-* MotionWatch8 (CamNtech): .mtn
-* Respironics (Philips): .rpx
+* wGT3X-BT, Actigraph (.agd file format only);
+* Actiwatch 4 and MotionWatch 8, CamNtech (.awd and .mtn);
+* ActTrust 2, Condor Instruments (.txt);
+* Daqtometer, Daqtix (.csv);
+* Actiwatch 2 and Actiwatch Spectrum Plus, Philips Respironics (.csv)
 
-Reading raw data
-----------------
-:mod:`pyActigraphy.io`:
+Associated functions:
 
 .. currentmodule:: pyActigraphy.io
-
-.. automodule:: pyActigraphy.io
-   :no-members:
 
 .. autosummary::
    :toctree: _autosummary/
    :template: function.rst
 
-    read_raw
-    read_raw_awd
-    read_raw_mtn
-    read_raw_rpx
+   read_raw_agd
+   read_raw_atr
+   read_raw_awd
+   read_raw_dqt
+   read_raw_mtn
+   read_raw_rpx
+
+These functions return a `BaseRaw` object. which is the main class in
+pyActigraphy: :class:`pyActigraphy.io.BaseRaw`
+
+Batch reader
+------------
+
+Reading actigraphy files by batch:
+
+.. currentmodule:: pyActigraphy.io
+
+.. autosummary::
+   :toctree: _autosummary/
+   :template: function.rst
+
+   read_raw
+
+This function return a `RawReader` object: :class:`pyActigraphy.io.RawReader`
+
+Spurious activity masking
+=========================
+
+* Masking: :mod:`pyActigraphy.filters.FiltersMixin`
 
 
-Reader classes
---------------
-.. currentmodule:: pyActigraphy.io.BaseRaw
-.. autoclass:: pyActigraphy.io.BaseRaw
+Log files
+=========
 
-    .. rubric:: Attributes
-    .. autoautosummary:: pyActigraphy.io.BaseRaw
-        :attributes:
+* Base log: :mod:`pyActigraphy.log.BaseLog`
 
-    .. rubric:: Methods
-    .. autosummary::
-        :toctree: _autosummary/
-
-        duration
-        length
-        time_range
-        mask_fraction
-        binarized_data
-        resampled_data
-        resampled_light
-        read_sleep_diary
-
-    .. rubric:: Daily profiles
-    .. autosummary::
-        :toctree: _autosummary/
-
-        average_daily_activity
-        average_daily_light
-
-    .. rubric:: Total activity
-    .. autosummary::
-        :toctree: _autosummary/
-
-        ADAT
-        ADATp
-
-    .. rubric:: Non-parametric methods
-    .. autosummary::
-        :toctree: _autosummary/
-
-        IS
-        ISm
-        ISp
-        IV
-        IVm
-        IVp
-        L5
-        L5p
-        M10
-        M10p
-        RA
-        RAp
-
-    .. rubric:: Transition probabilities
-    .. autosummary::
-        :toctree: _autosummary/
-
-        pRA
-        pAR
-        kRA
-        kAR
-
-    .. rubric:: Activity/Rest identification
-    .. autosummary::
-        :toctree: _autosummary/
-
-        Crespo
-        CK
-        Sadeh
-        Scripps
-        SoD
-        fSoD
-
-    .. rubric:: Activity onset/offset
-    .. autosummary::
-        :toctree: _autosummary/
-
-        AoffT
-        AonT
-        Crespo_AoT
+* Start/Stop time log: :mod:`pyActigraphy.log.SSTLog`
 
 
-    .. .. autoautosummary:: pyActigraphy.io.BaseRaw
-    ..     :methods:
+Rest-Activity Rhythms
+=====================
 
-.. currentmodule:: pyActigraphy.io.RawReader
-.. autoclass:: pyActigraphy.io.RawReader
+* Non-parametric and transition probability methods: :mod:`pyActigraphy.metrics.MetricsMixin`
+
+
+Rest-activity scoring and sleep diary
+=====================================
+
+* Rest-activity scoring: :mod:`pyActigraphy.sleep.ScoringMixin`
+
+* Sleep diary: :mod:`pyActigraphy.sleep.SleepDiary`
+
+* Sleep bout identification: :mod:`pyActigraphy.sleep.SleepBoutMixin`
+
+
+Analysis
+========
+
+* Cosinor analysis: :mod:`pyActigraphy.analysis.Cosinor`
+
+* Functional linear modeling: :mod:`pyActigraphy.analysis.FLM`
+
+* Fractality analysis: :mod:`pyActigraphy.analysis.Fractal`
+
+* Locomotor inactivity during sleep (LIDS): :mod:`pyActigraphy.analysis.LIDS`
+
+* Singular spectrum analysis : :mod:`pyActigraphy.analysis.SSA`

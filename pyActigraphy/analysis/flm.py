@@ -1,32 +1,27 @@
 import numpy as np
 # import pandas as pd
-import spm1d
+from scipy.ndimage import gaussian_filter1d
 import statsmodels.api as sm
 # from ..io.base import BaseRaw
 from joblib import Parallel, delayed
 
 
-def _scotts_factor(n, d):
-    return np.power(n, -1./(d+4))
+def _A(data):
+    norm_factor = 1.349
+    IQR = (np.percentile(data, 75) - np.percentile(data, 25))/norm_factor
+    return np.minimum(data.std(ddof=1), IQR)
 
 
-def _silverman_factor(n, d):
-    return np.power(n*(d+2.0)/4.0, -1./(d+4))
+def _bandwith_factor(data):
+    return _A(data)*np.power(data.size, -0.2)
 
 
-def _get_kernel_size(data, method, use_fwhm):
+def _get_kernel_size(data, method):
 
-    # In order to mimic scipy.kde, the kernel covariance matrix is weighted
-    # by the input data covariance matrix (N.B. in 1d, this simplifies...)
-    data_std = data.std(ddof=1)
+    # Calculate optimal kernel bandwith (i.e sigma)
+    bw = _bandwith_factor(data)
 
-    # If Scotts' or Silverman's method is used, apply a factor
-    # sqrt(8*log(2)) to convert sd to fwhm, if required
-    sd2fwhm = np.sqrt(8*np.log(2))
-    if use_fwhm:
-        data_std *= sd2fwhm
-
-    methods = ('scotts', 'silverman')
+    methods = ('scott', 'silverman')
     if isinstance(method, str):
         if method not in methods:
             raise ValueError(
@@ -35,10 +30,10 @@ def _get_kernel_size(data, method, use_fwhm):
                     method
                 )
             )
-        elif method == 'scotts':
-            kernel_size = _scotts_factor(data.size, 1)*data_std
+        elif method == 'scott':
+            kernel_size = 1.059*bw
         elif method == 'silverman':
-            kernel_size = _silverman_factor(data.size, 1)*data_std
+            kernel_size = 0.9*bw
     elif np.isscalar(method):
         kernel_size = method
     else:
@@ -57,7 +52,7 @@ class FLM():
 
     def __init__(self, basis, sampling_freq, max_order=None):
 
-        bases = ('fourier', 'spline', 'ssa', 'wavelet')
+        bases = ('fourier', 'spline')
         if basis not in bases:
             raise ValueError(
                 '`basis` must be "%s". You passed: "%s"' %
@@ -131,7 +126,7 @@ class FLM():
             from scipy.interpolate import splrep
 
             T = self.nsamples
-            t = np.linspace(0, T, T, endpoint=False)
+            t = np.linspace(0, T, T, endpoint=True)
             k = 3 if self.max_order is None else self.max_order
 
             if verbose:
@@ -176,10 +171,10 @@ class FLM():
 
         # Spline
         elif self.__basis == 'spline':
-            from scipy.interpolate import splev
+            from scipy.interpolate import BSpline
             T = self.nsamples
-            t = np.linspace(0, T, r*T, endpoint=False, dtype=np.float)
-            y_est = splev(t, tuple(self.beta[raw.display_name]))
+            t = np.linspace(0, T, r*T, endpoint=True, dtype=np.float)
+            y_est = BSpline(*self.beta[raw.display_name], extrapolate=False)(t)
             return y_est
 
     def fit_reader(
@@ -276,8 +271,10 @@ class FLM():
                 ) for raw in reader.readers
             ))
 
-    def smooth(self, raw, binarize=False, method='scotts', verbose=False):
+    def smooth(self, raw, binarize=False, method='scott', verbose=False):
         """Smooth the actigraphy data using a gaussian kernel.
+
+        Wrapper for the scipy.ndimage.gaussian_filter1d function.
 
         Parameters
         ----------
@@ -287,10 +284,10 @@ class FLM():
             If True, the data are binarized (i.e 0 or 1).
             Default is False.
         method: str, float.
-            Method to calculate the full-width at half-maximum of the gaussian
-            kernel. Available methods are `scotts`, `silverman`. Method can be
+            Method to calculate the width of the gaussian kernel.
+            Available methods are `scott`, `silverman`. Method can be
             a scalar value too.
-            Default is `scotts`.
+            Default is `scott`.
         verbose: bool.
             If True, print the kernel size used to smooth the data.
             Default is False.
@@ -307,14 +304,15 @@ class FLM():
         )
 
         # Calculate optimal kernel size
-        fwhm = _get_kernel_size(daily_avg.values, method=method, use_fwhm=True)
+        bw = _get_kernel_size(daily_avg.values, method=method)
 
         if verbose:
-            print('Kernel size used to smooth the data: {}'.format(fwhm))
+            print('Kernel size used to smooth the data: {}'.format(bw))
 
-        return spm1d.util.smooth(
+        return gaussian_filter1d(
             daily_avg,
-            fwhm=fwhm
+            sigma=bw,
+            mode='wrap'
         )
 
     @property

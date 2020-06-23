@@ -1,6 +1,7 @@
 import datetime
+import io
 import pandas as pd
-import numpy as np
+# import numpy as np
 import os
 import re
 import warnings
@@ -18,8 +19,14 @@ class RawRPX(BaseRaw):
         Path to the rpx file.
     language: str, optional
         Language of the input csv file.
-        Available options are: 'US', 'FR'.
-        Default is 'US'.
+        Available options are: 'ENG_UK', 'ENG_US', 'FR'.
+        Default is 'ENG_US'.
+    dayfirst: bool, optional
+        Whether to interpret the first value of a date as the day.
+        If None, rely on the laguage:
+        * ENG_US: False
+        * ENG_UK or FR: True
+        Default is None.
     start_time: datetime-like, optional
         Read data from this time.
         Default is None.
@@ -30,10 +37,10 @@ class RawRPX(BaseRaw):
         Default is None (i.e all the data).
     data_dtype: dtype, optional
         The dtype of the raw data.
-        Default is 'Int64'.
+        Default is 'float'.
     light_dtype: dtype, optional
         The dtype of the raw light data.
-        Default is 'np.float16'.
+        Default is 'float'.
     delimiter: str, optional
         Delimiter to use when reading the input file.
         Default is '.'
@@ -42,11 +49,12 @@ class RawRPX(BaseRaw):
     def __init__(
         self,
         input_fname,
-        language='US',
+        language='ENG_US',
+        dayfirst=None,
         start_time=None,
         period=None,
-        data_dtype='Int64',
-        light_dtype=np.float16,
+        data_dtype='float',
+        light_dtype='float',
         delimiter=','
     ):
 
@@ -55,29 +63,44 @@ class RawRPX(BaseRaw):
         # [TO-DO] check if file exists
         # [TO-DO] check it is has the right file extension .rpx
 
-        self.__language = language
+        if language not in fields.keys():
+            raise ValueError(
+                'Language {0} not supported. Supported languages: {1}'.format(
+                    language, '" or "'.join(fields.keys())
+                )
+            )
+        else:
+            self.__language = language
         # [TO-DO] check language is supported
+
+        # Unless specified otherwise,
+        # set dayfirst as a function of the language
+        if dayfirst is None:
+            dayfirst = day_first[language]
 
         # extract file header and data header
         header = []
         data_available_cols = []
-        with open(input_fname, encoding='utf-8') as file:
-            for header_offset, line in enumerate(file, 1):
-                if fields[self.language]['Data'] in line:
-                    break
-                else:
-                    header.append(line)
-            # Read file until the next blank line
-            # First, skip blank line after section title
-            next(file)
-            for data_offset, line in enumerate(file):
-                if line == '\n':
-                    break
-                else:
-                    data_available_cols.append(
-                        line.split(',')[0].strip('"').rstrip(':')
-                    )
-
+        with open(input_fname, mode='rb') as file:
+            data = file.readlines()
+        for header_offset, line in enumerate(data, 1):
+            if fields[self.language]['Data'] in line.decode('utf-8'):
+                break
+            else:
+                header.append(line.decode('utf-8'))
+        # Read file until the next blank line
+        # First, skip blank line after section title
+        # next(file)
+        for data_offset, line in enumerate(data[header_offset+1:]):
+            line_clean = line.replace(b'\r\r\n', b'\r\n')
+            if line_clean == b'\r\n':
+                break
+            else:
+                data_available_cols.append(
+                    line_clean.decode(
+                        'utf-8'
+                    ).split(',')[0].strip('"').rstrip(':')
+                )
         # Verify that the input file contains the needed informations
         try:
             assert (
@@ -99,13 +122,18 @@ class RawRPX(BaseRaw):
         # extract informations from the header
         name = self.__extract_rpx_name(header, delimiter)
         uuid = self.__extract_rpx_uuid(header, delimiter)
-        start = self.__extract_rpx_start_time(header, delimiter)
+        start = self.__extract_rpx_start_time(header, delimiter, dayfirst)
         frequency = self.__extract_rpx_frequency(header, delimiter)
         axial_mode = 'Unknown'
 
         # read actigraphy data
+        with open(input_fname, mode='rb') as file:
+            data = file.read()
+        data = data.replace(b'\r\r\n', b'\r\n')
+
         index_data = pd.read_csv(
-            input_fname,
+            # input_fname,
+            io.StringIO(data.decode('utf-8')),
             encoding='utf-8',
             skiprows=header_offset+data_offset+1,
             header=0,
@@ -118,7 +146,7 @@ class RawRPX(BaseRaw):
                     columns[self.language]['Time']
                 ]
             },
-            dayfirst=(self.language in day_first),
+            dayfirst=dayfirst,  # (self.language in day_first),
             usecols=list(columns[self.language].values()),
             na_values='NAN',
             dtype={
@@ -182,7 +210,7 @@ class RawRPX(BaseRaw):
                 break
         return uuid
 
-    def __extract_rpx_start_time(self, header, delimiter):
+    def __extract_rpx_start_time(self, header, delimiter, dayfirst):
         start_time = []
         for line in header:
             if fields[self.language]['Start_date'] in line:
@@ -191,11 +219,11 @@ class RawRPX(BaseRaw):
                 )
             elif fields[self.language]['Start_time'] in line:
                 start_time.append(
-                    re.sub(r'[^\d.:]+', '', line.split(delimiter)[1])
+                    re.sub(r'[^\d.:AMP]+', '', line.split(delimiter)[1])
                 )
         return pd.to_datetime(
             ' '.join(start_time),
-            dayfirst=(self.language in day_first)
+            dayfirst=dayfirst  # (self.language in day_first)
         )
 
     def __extract_rpx_frequency(self, header, delimiter):
@@ -226,11 +254,12 @@ Please verify your input file.
 
 def read_raw_rpx(
     input_fname,
-    language='US',
+    language='ENG_US',
+    dayfirst=None,
     start_time=None,
     period=None,
-    data_dtype='Int64',
-    light_dtype=np.float16,
+    data_dtype='float',
+    light_dtype='float',
     delimiter=','
 ):
     """Reader function for raw Respironics file.
@@ -241,8 +270,14 @@ def read_raw_rpx(
         Path to the rpx file.
     language: str, optional
         Language of the input csv file.
-        Available options are: 'US', 'FR'.
-        Default is 'US'.
+        Available options are: 'ENG_UK', 'ENG_US', 'FR'.
+        Default is 'ENG_US'.
+    dayfirst: bool, optional
+        Whether to interpret the first value of a date as the day.
+        If None, rely on the laguage:
+        * ENG_US: False
+        * ENG_UK or FR: True
+        Default is None.
     start_time: datetime-like, optional
         Read data from this time.
         Default is None.
@@ -253,10 +288,10 @@ def read_raw_rpx(
         Default is None (i.e all the data).
     data_dtype: dtype, optional
         The dtype of the raw data.
-        Default is 'Int64'.
+        Default is 'float'.
     light_dtype: dtype, optional
         The dtype of the raw light data.
-        Default is 'np.float16'.
+        Default is 'float'.
     delimiter: str, optional
         Delimiter to use when reading the input file.
         Default is '.'
@@ -270,6 +305,7 @@ def read_raw_rpx(
     return RawRPX(
         input_fname=input_fname,
         language=language,
+        dayfirst=dayfirst,
         start_time=start_time,
         period=period,
         data_dtype=data_dtype,

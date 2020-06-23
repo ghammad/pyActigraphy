@@ -1,15 +1,17 @@
 import glob
-import numpy as np
 import warnings
 
 from pandas import Timedelta
 from pandas.tseries.frequencies import to_offset
 from pyActigraphy.metrics import ForwardMetricsMixin
 from joblib import Parallel, delayed
+from ..agd import read_raw_agd
+from ..atr import read_raw_atr
 from ..awd import read_raw_awd
+from ..dqt import read_raw_dqt
 from ..mtn import read_raw_mtn
 from ..rpx import read_raw_rpx
-from pyActigraphy.filters import SSTLog
+from pyActigraphy.log import read_sst_log
 
 
 class RawReader(ForwardMetricsMixin):
@@ -52,6 +54,12 @@ class RawReader(ForwardMetricsMixin):
             ))
         else:
             self.__readers.append(raw_reader)
+
+    def names(self):
+
+        return [
+            read.display_name for read in self.__readers
+        ]
 
     def mask_fraction(self):
 
@@ -119,25 +127,25 @@ class RawReader(ForwardMetricsMixin):
             ) for reader in self.readers
         ))
 
-    def read_sst_log(
-            self,
-            input_fname,
-            header_size=1
-    ):
+    def read_sst_log(self, input_fname, *args, **kwargs):
         r"""Reader function for start/stop-time log files.
 
         Parameters
         ----------
         input_fname: str
             Path to the start/stop-time log file.
-        header_size: int
-            Header size (i.e. number of lines) of the sst log file.
-            Default is 1.
+        *args
+            Variable length argument list passed to the subsequent reader
+            function.
+        **kwargs
+            Arbitrary keyword arguments passed to the subsequent reader
+            function.
         """
 
-        self.__sst_log = SSTLog(
+        self.__sst_log = read_sst_log(
             input_fname=input_fname,
-            header_size=header_size
+            *args,
+            **kwargs
         )
 
     @property
@@ -168,7 +176,9 @@ class RawReader(ForwardMetricsMixin):
                   ' function before using the `apply_sst` function.')
 
 
-def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
+def read_raw(
+    input_path, reader_type, n_jobs=1, prefer=None, verbose=0, **kwargs
+):
         r"""Reader function for multiple raw files.
 
         Parameters
@@ -178,8 +188,15 @@ def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
             E.g. '/path/to/my/files/*.csv'
         reader_type: str
             Reader type.
-            Supported types: AWD (ActiWatch), MTN (MotionWatch8)
-            and RPX (Respironics)
+            Supported types:
+
+            * AGD ((w)GT3X(+)), ActiGraph)
+            * ATR (ActTrust, Condor Instruments)
+            * AWD (ActiWatch 4, CamNtech)
+            * DQT (Daqtometers, Daqtix)
+            * MTN (MotionWatch8, CamNtech)
+            * RPX (Actiwatch, Respironics)
+
         n_jobs: int
             Number of CPU to use for parallel reading
         prefer: str
@@ -190,14 +207,17 @@ def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
         verbose: int
             Display a progress meter if set to a value > 0.
             Default is 0.
+        **kwargs
+            Arbitrary keyword arguments passed to the underlying reader
+            function.
 
         Returns
         -------
-        raw : list
-            A list of instances of RawAWD, RawMTN or RawRPX
+        raw : Instance of RawReader
+            An object containing raw data
         """
 
-        supported_types = ['AWD', 'MTN', 'RPX']
+        supported_types = ['AGD', 'ATR', 'AWD', 'DQT', 'MTN', 'RPX']
         if reader_type not in supported_types:
             raise ValueError(
                 'Type {0} unsupported. Supported types: {1}'.format(
@@ -208,21 +228,30 @@ def read_raw(input_path, reader_type, n_jobs=1, prefer=None, verbose=0):
         files = glob.glob(input_path)
 
         def parallel_reader(
-            n_jobs, read_func, file_list, prefer=None, verbose=0
+            n_jobs, read_func, file_list, prefer=None, verbose=0, **kwargs
         ):
             return Parallel(n_jobs=n_jobs, prefer=prefer, verbose=verbose)(
-                delayed(read_func)(file) for file in file_list
+                delayed(read_func)(file, **kwargs) for file in file_list
             )
 
         readers = {
+            'AGD': lambda files: parallel_reader(
+                n_jobs, read_raw_agd, files, prefer, verbose, **kwargs
+            ),
+            'ATR': lambda files: parallel_reader(
+                n_jobs, read_raw_atr, files, prefer, verbose, **kwargs
+            ),
             'AWD': lambda files: parallel_reader(
-                n_jobs, read_raw_awd, files, prefer, verbose
+                n_jobs, read_raw_awd, files, prefer, verbose, **kwargs
+            ),
+            'DQT': lambda files: parallel_reader(
+                n_jobs, read_raw_dqt, files, prefer, verbose, **kwargs
             ),
             'MTN': lambda files: parallel_reader(
-                n_jobs, read_raw_mtn, files, prefer, verbose
+                n_jobs, read_raw_mtn, files, prefer, verbose, **kwargs
             ),
             'RPX': lambda files: parallel_reader(
-                n_jobs, read_raw_rpx, files, prefer, verbose
+                n_jobs, read_raw_rpx, files, prefer, verbose, **kwargs
             )
         }[reader_type](files)
 

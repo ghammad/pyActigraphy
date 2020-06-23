@@ -22,7 +22,7 @@ from sphinx.ext.autosummary import Autosummary
 from sphinx.ext.autosummary import get_documenter
 from docutils.parsers.rst import directives
 from sphinx.util.inspect import safe_getattr
-import re
+# import re
 
 # sys.path.insert(0, os.path.abspath(os.path.pardir))
 sys.path.insert(0, os.path.abspath('../..'))
@@ -50,7 +50,9 @@ class AutoAutoSummary(Autosummary):
                 continue
             if documenter.objtype == typ:
                 items.append(name)
-        public = [x for x in items if x in include_public or not x.startswith('_')]
+        public = [
+            x for x in items if x in include_public or not x.startswith('_')
+        ]
         return public, items
 
     def run(self):
@@ -62,17 +64,26 @@ class AutoAutoSummary(Autosummary):
             if 'methods' in self.options:
                 _, methods = self.get_members(c, 'method', ['__init__'])
 
-                self.content = ["~%s.%s" % (clazz, method) for method in methods if not method.startswith('_')]
+                self.content = [
+                    "~%s.%s" % (clazz, method)
+                    for method in methods if not method.startswith('_')
+                ]
             if 'attributes' in self.options:
                 _, attribs = self.get_members(c, 'attribute')
-                self.content = ["~%s.%s" % (clazz, attrib) for attrib in attribs if not attrib.startswith('_')]
+                self.content = [
+                    "~%s.%s" % (clazz, attrib)
+                    for attrib in attribs if not attrib.startswith('_')
+                ]
         finally:
             return super(AutoAutoSummary, self).run()
 
 
 def setup(app):
     app.add_directive('autoautosummary', AutoAutoSummary)
-    app.add_javascript('https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js')
+    app.add_javascript(
+        'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/'
+        'require.min.js'
+    )
 # -- Project information -----------------------------------------------------
 
 
@@ -169,7 +180,8 @@ html_theme_options = {
     # A list of tuples containing pages or urls to link to.
     'navbar_links': [
         # ("Quick Start", "quickstart"),
-        ("Documentation", "documentation"),
+        # ("Tests", "tests"),
+        ("Tutorials", "tutorials"),
         ("API", "api"),
         # ("Examples", "auto_examples/index"),
     ],

@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import pyexcel as pxl
-import numpy as np
 
 
 class SleepDiary():
@@ -76,7 +75,8 @@ class SleepDiary():
             x1=1,
             y1=1,
             fillcolor='',
-            opacity=0.3,
+            opacity=0.5,
+            layer='below',
             line=dict(width=0)
         )
 

@@ -11,7 +11,7 @@
 
 **pyActigraphy**
 ================
-Open-source python package for actigraphy data analysis.
+Open-source python package for actigraphy data visualization and analysis.
 
 
 This package is meant to provide a comprehensive set of tools to:
@@ -20,17 +20,14 @@ This package is meant to provide a comprehensive set of tools to:
 * calculate typical wake/sleep cycle-related variables (ex: IS, IV, ...)
 * perform complex analyses (ex: FDA, SSA, HMM, ...)
 
-Requirements
-============
-* python 3.X
-* joblib
-* pandas
-* numba
-* numpy
-* pyexcel
-* pyexcel-ods3
-* scipy
-* statsmodels
+Code and documentation
+======================
+
+The pyActigraphy package is open-source and its source code is accessible `online <https://github.com/ghammad/pyActigraphy>`_.
+
+
+An online documentation of the package is also available `here <https://ghammad.github.io/pyActigraphy/index.html>`_.
+It contains `notebooks <https://ghammad.github.io/pyActigraphy/documentation.html>`_ illustrating various functionalities of the package.
 
 Installation
 ============
