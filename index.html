@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pyActigraphy &#8212; pyActigraphy 0.2 documentation</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy &#8212; pyActigraphy 1.Orc1 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/js/jquery-1.11.0.min.js"></script>
+    <script src="_static/js/jquery-fix.js"></script>
+    <script src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
@@ -35,15 +36,15 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="#"><span><img src="_static/pyActigraphy_logo.png"></span>
+        <a class="navbar-brand" href="#">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
-                <li><a href="documentation.html">Documentation</a></li>
+                <li><a href="tutorials.html">Tutorials</a></li>
                 <li><a href="api.html">API</a></li>
             
             
@@ -99,9 +100,9 @@
 <p>Open-source python package for actigraphy data visualization and analysis.</p>
 <p>This package is meant to provide a comprehensive set of tools to:</p>
 <ul class="simple">
-<li>read actigraphy raw data files with various formats</li>
-<li>calculate typical wake/sleep cycle-related variables (ex: IS, IV, …)</li>
-<li>perform complex analyses (ex: FDA, SSA, HMM, …)</li>
+<li><p>read actigraphy raw data files with various formats</p></li>
+<li><p>calculate typical wake/sleep cycle-related variables (ex: IS, IV, …)</p></li>
+<li><p>perform complex analyses (ex: FDA, SSA, HMM, …)</p></li>
 </ul>
 </div>
 <div class="section" id="code-and-documentation">
@@ -114,7 +115,7 @@ It contains <a class="reference external" href="https://ghammad.github.io/pyActi
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p>In a (bash) shell, simply type:</p>
 <ul class="simple">
-<li>For users:</li>
+<li><p>For users:</p></li>
 </ul>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install pyActigraphy
 </pre></div>
@@ -125,7 +126,7 @@ It contains <a class="reference external" href="https://ghammad.github.io/pyActi
 </div>
 <p>It is strongly recommended to use the latest version of the pyActigraphy package.</p>
 <ul class="simple">
-<li>For developers:</li>
+<li><p>For developers:</p></li>
 </ul>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone git@github.com:ghammad/pyActigraphy.git
 <span class="nb">cd</span> pyActigraphy/
@@ -153,17 +154,17 @@ with the pyActigraphy package:</p>
 <h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
 <p>There are plenty of ways to contribute to this package, including (but not limiting to):</p>
 <ul class="simple">
-<li>report bugs (and, ideally, how to reproduce the bug)</li>
-<li>suggest improvements</li>
-<li>improve the documentation</li>
-<li>hug or high-five the authors when you meet them!</li>
+<li><p>report bugs (and, ideally, how to reproduce the bug)</p></li>
+<li><p>suggest improvements</p></li>
+<li><p>improve the documentation</p></li>
+<li><p>hug or high-five the authors when you meet them!</p></li>
 </ul>
 </div>
 <div class="section" id="authors">
 <h1>Authors<a class="headerlink" href="#authors" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><strong>Grégory Hammad</strong> <a class="reference external" href="https://github.com/ghammad">&#64;ghammad</a> - <em>Initial and main developer</em></li>
-<li><strong>Mathilde Reyt</strong> <a class="reference external" href="https://github.com/ReytMathilde">&#64;ReytMathilde</a></li>
+<li><p><strong>Grégory Hammad</strong> <a class="reference external" href="https://github.com/ghammad">&#64;ghammad</a> - <em>Initial and main developer</em></p></li>
+<li><p><strong>Mathilde Reyt</strong> <a class="reference external" href="https://github.com/ReytMathilde">&#64;ReytMathilde</a></p></li>
 </ul>
 <p>See also the list of <a class="reference external" href="https://github.com/ghammad/pyActigraphy/contributors">contributors</a> who participated in this project.</p>
 </div>
@@ -174,8 +175,8 @@ with the pyActigraphy package:</p>
 <div class="section" id="acknowledgments">
 <h1>Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><strong>Aubin Ardois</strong> <a class="reference external" href="https://github.com/aardoi">&#64;aardoi</a> developed the first version of the MTN class during his internship at the CRC, in May-August 2018.</li>
-<li>The CRC colleagues for their support, ideas, etc.</li>
+<li><p><strong>Aubin Ardois</strong> <a class="reference external" href="https://github.com/aardoi">&#64;aardoi</a> developed the first version of the MTN class during his internship at the CRC, in May-August 2018.</p></li>
+<li><p>The CRC colleagues for their support, ideas, etc.</p></li>
 </ul>
 </div>
 
@@ -191,8 +192,8 @@ with the pyActigraphy package:</p>
       
     </p>
     <p>
-        &copy; Copyright 2018-2019, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.<br/>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
     </p>
   </div>
 </footer>

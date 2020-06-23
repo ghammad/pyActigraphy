@@ -1,0 +1,6 @@
+pyActigraphy.sleep.ScoringMixin.SleepMidPoint
+=============================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: ScoringMixin.SleepMidPoint

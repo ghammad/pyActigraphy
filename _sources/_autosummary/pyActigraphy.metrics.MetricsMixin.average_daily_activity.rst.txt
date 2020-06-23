@@ -1,0 +1,6 @@
+pyActigraphy.metrics.MetricsMixin.average\_daily\_activity
+==========================================================
+
+.. currentmodule:: pyActigraphy.metrics
+
+.. automethod:: MetricsMixin.average_daily_activity

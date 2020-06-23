@@ -1,0 +1,6 @@
+pyActigraphy.analysis.Fractal.crossover\_search
+===============================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: Fractal.crossover_search

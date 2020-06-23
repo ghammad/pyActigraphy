@@ -1,0 +1,6 @@
+pyActigraphy.analysis.FLM.basis\_functions
+==========================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: FLM.basis_functions

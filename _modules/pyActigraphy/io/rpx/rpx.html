@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pyActigraphy.io.rpx.rpx &#8212; pyActigraphy 0.2 documentation</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.io.rpx.rpx &#8212; pyActigraphy 1.Orc1 documentation</title>
     <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/javascript" src="../../../../_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../../../../_static/js/jquery-fix.js"></script>
+    <script src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../../../../_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
 <meta charset='utf-8'>
@@ -35,15 +36,15 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="../../../../index.html"><span><img src="../../../../_static/pyActigraphy_logo.png"></span>
+        <a class="navbar-brand" href="../../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
-                <li><a href="../../../../documentation.html">Documentation</a></li>
+                <li><a href="../../../../tutorials.html">Tutorials</a></li>
                 <li><a href="../../../../api.html">API</a></li>
             
             
@@ -89,7 +90,7 @@
 <span></span><span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1"># import numpy as np</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
@@ -107,8 +108,14 @@
 <span class="sd">        Path to the rpx file.</span>
 <span class="sd">    language: str, optional</span>
 <span class="sd">        Language of the input csv file.</span>
-<span class="sd">        Available options are: &#39;US&#39;, &#39;FR&#39;.</span>
-<span class="sd">        Default is &#39;US&#39;.</span>
+<span class="sd">        Available options are: &#39;ENG_UK&#39;, &#39;ENG_US&#39;, &#39;FR&#39;.</span>
+<span class="sd">        Default is &#39;ENG_US&#39;.</span>
+<span class="sd">    dayfirst: bool, optional</span>
+<span class="sd">        Whether to interpret the first value of a date as the day.</span>
+<span class="sd">        If None, rely on the laguage:</span>
+<span class="sd">        * ENG_US: False</span>
+<span class="sd">        * ENG_UK or FR: True</span>
+<span class="sd">        Default is None.</span>
 <span class="sd">    start_time: datetime-like, optional</span>
 <span class="sd">        Read data from this time.</span>
 <span class="sd">        Default is None.</span>
@@ -119,10 +126,10 @@
 <span class="sd">        Default is None (i.e all the data).</span>
 <span class="sd">    data_dtype: dtype, optional</span>
 <span class="sd">        The dtype of the raw data.</span>
-<span class="sd">        Default is &#39;Int64&#39;.</span>
+<span class="sd">        Default is &#39;float&#39;.</span>
 <span class="sd">    light_dtype: dtype, optional</span>
 <span class="sd">        The dtype of the raw light data.</span>
-<span class="sd">        Default is &#39;np.float16&#39;.</span>
+<span class="sd">        Default is &#39;float&#39;.</span>
 <span class="sd">    delimiter: str, optional</span>
 <span class="sd">        Delimiter to use when reading the input file.</span>
 <span class="sd">        Default is &#39;.&#39;</span>
@@ -131,11 +138,12 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_fname</span><span class="p">,</span>
-        <span class="n">language</span><span class="o">=</span><span class="s1">&#39;US&#39;</span><span class="p">,</span>
+        <span class="n">language</span><span class="o">=</span><span class="s1">&#39;ENG_US&#39;</span><span class="p">,</span>
+        <span class="n">dayfirst</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">data_dtype</span><span class="o">=</span><span class="s1">&#39;Int64&#39;</span><span class="p">,</span>
-        <span class="n">light_dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span>
+        <span class="n">data_dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">,</span>
+        <span class="n">light_dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">,</span>
         <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span>
     <span class="p">):</span>
 
@@ -144,8 +152,20 @@
         <span class="c1"># [TO-DO] check if file exists</span>
         <span class="c1"># [TO-DO] check it is has the right file extension .rpx</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__language</span> <span class="o">=</span> <span class="n">language</span>
+        <span class="k">if</span> <span class="n">language</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fields</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Language </span><span class="si">{0}</span><span class="s1"> not supported. Supported languages: </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">language</span><span class="p">,</span> <span class="s1">&#39;&quot; or &quot;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fields</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__language</span> <span class="o">=</span> <span class="n">language</span>
         <span class="c1"># [TO-DO] check language is supported</span>
+
+        <span class="c1"># Unless specified otherwise,</span>
+        <span class="c1"># set dayfirst as a function of the language</span>
+        <span class="k">if</span> <span class="n">dayfirst</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dayfirst</span> <span class="o">=</span> <span class="n">day_first</span><span class="p">[</span><span class="n">language</span><span class="p">]</span>
 
         <span class="c1"># extract file header and data header</span>
         <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
@@ -191,7 +211,7 @@
         <span class="c1"># extract informations from the header</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_rpx_name</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">)</span>
         <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_rpx_uuid</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">)</span>
-        <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_rpx_start_time</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_rpx_start_time</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">,</span> <span class="n">dayfirst</span><span class="p">)</span>
         <span class="n">frequency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_rpx_frequency</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">)</span>
         <span class="n">axial_mode</span> <span class="o">=</span> <span class="s1">&#39;Unknown&#39;</span>
 
@@ -215,7 +235,7 @@
                     <span class="n">columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span>
                 <span class="p">]</span>
             <span class="p">},</span>
-            <span class="n">dayfirst</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="ow">in</span> <span class="n">day_first</span><span class="p">),</span>
+            <span class="n">dayfirst</span><span class="o">=</span><span class="n">dayfirst</span><span class="p">,</span>  <span class="c1"># (self.language in day_first),</span>
             <span class="n">usecols</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>
             <span class="n">na_values</span><span class="o">=</span><span class="s1">&#39;NAN&#39;</span><span class="p">,</span>
             <span class="n">dtype</span><span class="o">=</span><span class="p">{</span>
@@ -279,7 +299,7 @@
                 <span class="k">break</span>
         <span class="k">return</span> <span class="n">uuid</span>
 
-    <span class="k">def</span> <span class="nf">__extract_rpx_start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__extract_rpx_start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">,</span> <span class="n">dayfirst</span><span class="p">):</span>
         <span class="n">start_time</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;Start_date&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
@@ -292,7 +312,7 @@
                 <span class="p">)</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
             <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">start_time</span><span class="p">),</span>
-            <span class="n">dayfirst</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="ow">in</span> <span class="n">day_first</span><span class="p">)</span>
+            <span class="n">dayfirst</span><span class="o">=</span><span class="n">dayfirst</span>  <span class="c1"># (self.language in day_first)</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__extract_rpx_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
@@ -323,11 +343,12 @@
 
 <div class="viewcode-block" id="read_raw_rpx"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_rpx.html#pyActigraphy.io.read_raw_rpx">[docs]</a><span class="k">def</span> <span class="nf">read_raw_rpx</span><span class="p">(</span>
     <span class="n">input_fname</span><span class="p">,</span>
-    <span class="n">language</span><span class="o">=</span><span class="s1">&#39;US&#39;</span><span class="p">,</span>
+    <span class="n">language</span><span class="o">=</span><span class="s1">&#39;ENG_US&#39;</span><span class="p">,</span>
+    <span class="n">dayfirst</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">data_dtype</span><span class="o">=</span><span class="s1">&#39;Int64&#39;</span><span class="p">,</span>
-    <span class="n">light_dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span>
+    <span class="n">data_dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">,</span>
+    <span class="n">light_dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">,</span>
     <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Reader function for raw Respironics file.</span>
@@ -338,8 +359,14 @@
 <span class="sd">        Path to the rpx file.</span>
 <span class="sd">    language: str, optional</span>
 <span class="sd">        Language of the input csv file.</span>
-<span class="sd">        Available options are: &#39;US&#39;, &#39;FR&#39;.</span>
-<span class="sd">        Default is &#39;US&#39;.</span>
+<span class="sd">        Available options are: &#39;ENG_UK&#39;, &#39;ENG_US&#39;, &#39;FR&#39;.</span>
+<span class="sd">        Default is &#39;ENG_US&#39;.</span>
+<span class="sd">    dayfirst: bool, optional</span>
+<span class="sd">        Whether to interpret the first value of a date as the day.</span>
+<span class="sd">        If None, rely on the laguage:</span>
+<span class="sd">        * ENG_US: False</span>
+<span class="sd">        * ENG_UK or FR: True</span>
+<span class="sd">        Default is None.</span>
 <span class="sd">    start_time: datetime-like, optional</span>
 <span class="sd">        Read data from this time.</span>
 <span class="sd">        Default is None.</span>
@@ -350,10 +377,10 @@
 <span class="sd">        Default is None (i.e all the data).</span>
 <span class="sd">    data_dtype: dtype, optional</span>
 <span class="sd">        The dtype of the raw data.</span>
-<span class="sd">        Default is &#39;Int64&#39;.</span>
+<span class="sd">        Default is &#39;float&#39;.</span>
 <span class="sd">    light_dtype: dtype, optional</span>
 <span class="sd">        The dtype of the raw light data.</span>
-<span class="sd">        Default is &#39;np.float16&#39;.</span>
+<span class="sd">        Default is &#39;float&#39;.</span>
 <span class="sd">    delimiter: str, optional</span>
 <span class="sd">        Delimiter to use when reading the input file.</span>
 <span class="sd">        Default is &#39;.&#39;</span>
@@ -367,6 +394,7 @@
     <span class="k">return</span> <span class="n">RawRPX</span><span class="p">(</span>
         <span class="n">input_fname</span><span class="o">=</span><span class="n">input_fname</span><span class="p">,</span>
         <span class="n">language</span><span class="o">=</span><span class="n">language</span><span class="p">,</span>
+        <span class="n">dayfirst</span><span class="o">=</span><span class="n">dayfirst</span><span class="p">,</span>
         <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
         <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
         <span class="n">data_dtype</span><span class="o">=</span><span class="n">data_dtype</span><span class="p">,</span>
@@ -386,8 +414,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2019, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.<br/>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
     </p>
   </div>
 </footer>

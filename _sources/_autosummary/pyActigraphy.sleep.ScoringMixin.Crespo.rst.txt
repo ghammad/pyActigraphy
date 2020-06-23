@@ -1,0 +1,6 @@
+pyActigraphy.sleep.ScoringMixin.Crespo
+======================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: ScoringMixin.Crespo

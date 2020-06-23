@@ -1,0 +1,6 @@
+pyActigraphy.analysis.FLM.evaluate\_reader
+==========================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: FLM.evaluate_reader

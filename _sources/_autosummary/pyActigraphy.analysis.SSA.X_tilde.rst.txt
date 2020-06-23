@@ -1,0 +1,6 @@
+pyActigraphy.analysis.SSA.X\_tilde
+==================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: SSA.X_tilde

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSA class &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/js/jquery-1.11.0.min.js"></script>
+    <script src="_static/js/jquery-fix.js"></script>
+    <script src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="tutorials.html">Tutorials</a></li>
+                <li><a href="api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/SSA.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="ssa-class">
+<h1>SSA class<a class="headerlink" href="#ssa-class" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="pyActigraphy.analysis.SSA">
+<em class="property">class </em><code class="sig-prename descclassname">pyActigraphy.analysis.</code><code class="sig-name descname">SSA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">window_length</span><span class="o">=</span><span class="default_value">'24H'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/analysis/ssa.html#SSA"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyActigraphy.analysis.SSA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for Singular Spectrum Analysis</p>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.SSA.window_dim.html#pyActigraphy.analysis.SSA.window_dim" title="pyActigraphy.analysis.SSA.window_dim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">window_dim</span></code></a></p></td>
+<td><p>Window dimension for immersion of the signal.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.SSA.trajectory_matrix.html#pyActigraphy.analysis.SSA.trajectory_matrix" title="pyActigraphy.analysis.SSA.trajectory_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trajectory_matrix</span></code></a>()</p></td>
+<td><p>Trajectory matrix of the signal.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.SSA.U.html#pyActigraphy.analysis.SSA.U" title="pyActigraphy.analysis.SSA.U"><code class="xref py py-obj docutils literal notranslate"><span class="pre">U</span></code></a></p></td>
+<td><p>Unitary matrix having left singular vectors as columns.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.SSA.sigma.html#pyActigraphy.analysis.SSA.sigma" title="pyActigraphy.analysis.SSA.sigma"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sigma</span></code></a></p></td>
+<td><p>Singular values, sorted in decreasing order.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.SSA.Vh.html#pyActigraphy.analysis.SSA.Vh" title="pyActigraphy.analysis.SSA.Vh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Vh</span></code></a></p></td>
+<td><p>Unitary matrix having right singular vectors as rows.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.SSA.lambda_s.html#pyActigraphy.analysis.SSA.lambda_s" title="pyActigraphy.analysis.SSA.lambda_s"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lambda_s</span></code></a></p></td>
+<td><p>Partial variances, sorted in decreasing order.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.SSA.fit.html#pyActigraphy.analysis.SSA.fit" title="pyActigraphy.analysis.SSA.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>([check_finite, overwrite_a])</p></td>
+<td><p>Singular value decomposition of the trajectory matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.SSA.X_elementary.html#pyActigraphy.analysis.SSA.X_elementary" title="pyActigraphy.analysis.SSA.X_elementary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X_elementary</span></code></a>(r)</p></td>
+<td><p>Elementary matrix</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.SSA.X_tilde.html#pyActigraphy.analysis.SSA.X_tilde" title="pyActigraphy.analysis.SSA.X_tilde"><code class="xref py py-obj docutils literal notranslate"><span class="pre">X_tilde</span></code></a>(r)</p></td>
+<td><p>Diagonal averaged matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.SSA.reconstructed_signal.html#pyActigraphy.analysis.SSA.reconstructed_signal" title="pyActigraphy.analysis.SSA.reconstructed_signal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reconstructed_signal</span></code></a>(n)</p></td>
+<td><p>Reconstructed signal from diagonal averaged matrices.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.SSA.w_correlation_matrix.html#pyActigraphy.analysis.SSA.w_correlation_matrix" title="pyActigraphy.analysis.SSA.w_correlation_matrix"><code class="xref py py-obj docutils literal notranslate"><span class="pre">w_correlation_matrix</span></code></a>(k)</p></td>
+<td><p>W-correlation matrix.</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

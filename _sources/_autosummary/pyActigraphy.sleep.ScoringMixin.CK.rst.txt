@@ -1,0 +1,6 @@
+pyActigraphy.sleep.ScoringMixin.CK
+==================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: ScoringMixin.CK

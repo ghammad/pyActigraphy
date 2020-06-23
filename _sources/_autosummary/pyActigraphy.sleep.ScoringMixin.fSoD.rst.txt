@@ -1,0 +1,6 @@
+pyActigraphy.sleep.ScoringMixin.fSoD
+====================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: ScoringMixin.fSoD

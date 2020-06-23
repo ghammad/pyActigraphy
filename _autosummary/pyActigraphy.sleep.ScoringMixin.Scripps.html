@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.sleep.ScoringMixin.Scripps &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../_static/js/jquery-fix.js"></script>
+    <script src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../tutorials.html">Tutorials</a></li>
+                <li><a href="../api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../_sources/_autosummary/pyActigraphy.sleep.ScoringMixin.Scripps.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="pyactigraphy-sleep-scoringmixin-scripps">
+<h1>pyActigraphy.sleep.ScoringMixin.Scripps<a class="headerlink" href="#pyactigraphy-sleep-scoringmixin-scripps" title="Permalink to this headline">¶</a></h1>
+<dl class="py method">
+<dt id="pyActigraphy.sleep.ScoringMixin.Scripps">
+<code class="sig-prename descclassname">ScoringMixin.</code><code class="sig-name descname">Scripps</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">0.204</span></em>, <em class="sig-param"><span class="n">window</span><span class="o">=</span><span class="default_value">array([0.0064, 0.0074, 0.0112, 0.0112, 0.0118, 0.0118, 0.0128, 0.0188, 0.028, 0.0664, 0.03, 0.0112, 0.01, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/sleep/scoring_base.html#ScoringMixin.Scripps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyActigraphy.sleep.ScoringMixin.Scripps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scripps Clinic algorithm for sleep-wake identification.</p>
+<p>Algorithm for automatic sleep scoring based on wrist activity,
+developed by Kripke et al <a class="reference internal" href="#r9a638edfafbc-1" id="id1">[1]</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scale</strong> (<em>float</em><em>, </em><em>optional</em>) – Scale parameter P
+Default is 0.204.</p></li>
+<li><p><strong>window</strong> (<em>np.array</em><em>, </em><em>optional</em>) – Array of weighting factors <span class="math notranslate nohighlight">\(W_{i}\)</span>
+Default values are identical to those found in the original
+publication <a class="reference internal" href="#r9a638edfafbc-1" id="id2">[1]</a>.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold value for scoring sleep/wake.
+Default is 1.0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>scripps</strong> – Time series containing the <cite>D</cite> scores (0: sleep, 1: wake) for each
+epoch.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.core.Series</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The output variable D of the Scripps algorithm is defined in <a class="reference internal" href="#r9a638edfafbc-1" id="id3">[1]</a> as:</p>
+<div class="math notranslate nohighlight">
+\[D = P*(
+    [W_{-10},\dots,W_{0},\dots,W_{+10}]
+    \cdot
+    [A_{-10},\dots,A_{0},\dots,A_{+10}])\]</div>
+<p>with:</p>
+<ul class="simple">
+<li><p>D &lt; 1 == sleep, D &gt;= 1 == wake;</p></li>
+<li><p>P, scale factor;</p></li>
+<li><p><span class="math notranslate nohighlight">\(W_{0},W_{-1},W_{+1},\dots\)</span>, weighting factors for the present
+epoch, the previous epoch, the following epoch, etc.;</p></li>
+<li><p><span class="math notranslate nohighlight">\(A_{0},A_{-1},A_{+1},\dots\)</span>, activity scores for the present
+epoch, the previous epoch, the following epoch, etc.</p></li>
+</ul>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r9a638edfafbc-1"><span class="brackets">1</span><span class="fn-backref">(<a href="#id1">1</a>,<a href="#id2">2</a>,<a href="#id3">3</a>)</span></dt>
+<dd><p>Kripke, D. F., Hahn, E. K., Grizas, A. P., Wadiak, K. H.,
+Loving, R. T., Poceta, J. S., … Kline, L. E. (2010).
+Wrist actigraphic scoring for sleep laboratory patients:
+algorithm development. Journal of Sleep Research, 19(4),
+612–619. <a class="reference external" href="http://doi.org/10.1111/j.1365-2869.2010.00835.x">http://doi.org/10.1111/j.1365-2869.2010.00835.x</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+pyActigraphy.io.BaseRaw.Roenneberg\_AoT
+=======================================
+
+.. currentmodule:: pyActigraphy.io
+
+.. automethod:: BaseRaw.Roenneberg_AoT

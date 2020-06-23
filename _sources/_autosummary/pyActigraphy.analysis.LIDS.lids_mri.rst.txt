@@ -1,0 +1,6 @@
+pyActigraphy.analysis.LIDS.lids\_mri
+====================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: LIDS.lids_mri

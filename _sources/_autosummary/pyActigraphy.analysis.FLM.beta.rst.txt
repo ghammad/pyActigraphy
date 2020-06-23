@@ -1,0 +1,6 @@
+pyActigraphy.analysis.FLM.beta
+==============================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: FLM.beta

@@ -1,0 +1,6 @@
+pyActigraphy.analysis.LIDS.lids\_pearson\_r
+===========================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: LIDS.lids_pearson_r

@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.analysis.lids &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../../../_static/js/jquery-fix.js"></script>
+    <script src="../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../tutorials.html">Tutorials</a></li>
+                <li><a href="../../../api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for pyActigraphy.analysis.lids</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
+<span class="kn">from</span> <span class="nn">lmfit</span> <span class="k">import</span> <span class="n">fit_report</span><span class="p">,</span> <span class="n">minimize</span><span class="p">,</span> <span class="n">Parameters</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">pearsonr</span><span class="p">,</span> <span class="n">poisson</span>
+<span class="kn">from</span> <span class="nn">spm1d.util</span> <span class="k">import</span> <span class="n">smooth</span> <span class="k">as</span> <span class="n">spm_smooth</span>
+
+
+<span class="k">def</span> <span class="nf">_zero_crossing_points</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Zero crossing points&#39;&#39;&#39;</span>
+    <span class="n">x_sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">zero_crossing</span> <span class="o">=</span> <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">x_sign</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">x_sign</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="c1"># the first point is set to 1 if the last and the first points have</span>
+    <span class="c1"># different signs as the rolling window is cyclic</span>
+    <span class="n">zero_crossing</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">zero_crossing</span>
+
+
+<span class="k">def</span> <span class="nf">_extrema_points</span><span class="p">(</span><span class="n">df_dx</span><span class="p">,</span> <span class="n">d2f_dx2</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Extrema (either minimum or maximum) points&#39;&#39;&#39;</span>
+    <span class="c1"># Extrema are located where the first derivative, df_dx = 0</span>
+    <span class="n">extrema</span> <span class="o">=</span> <span class="n">_zero_crossing_points</span><span class="p">(</span><span class="n">df_dx</span><span class="p">)</span>
+    <span class="c1"># Second derivative is used to differentiate maxima (d2f_dx2&lt;0)</span>
+    <span class="c1"># from minima (d2f_dx2&gt;0)</span>
+    <span class="n">extrema</span> <span class="o">=</span> <span class="n">extrema</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">d2f_dx2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">extrema</span>
+
+
+<span class="k">def</span> <span class="nf">_inflexion_points</span><span class="p">(</span><span class="n">df_dx</span><span class="p">,</span> <span class="n">d2f_dx2</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Inflexion points&#39;&#39;&#39;</span>
+    <span class="c1"># Inflexion points are located where the second derivative, d2f_dx2 = 0</span>
+    <span class="c1"># The first derivative is then used to distinguish between an</span>
+    <span class="c1"># &#39;increasing&#39; or &#39;decreasing&#39; inflexion.</span>
+    <span class="k">return</span> <span class="n">_extrema_points</span><span class="p">(</span><span class="n">d2f_dx2</span><span class="p">,</span> <span class="n">df_dx</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_lids_func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;LIDS transformation function&#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="mi">100</span><span class="o">/</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_lids_inverse_func</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;LIDS inverse transformation function&#39;&#39;&#39;</span>
+
+    <span class="k">return</span> <span class="mi">100</span><span class="o">/</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span>
+
+
+<span class="k">def</span> <span class="nf">_lids_pmf</span><span class="p">(</span><span class="n">x_lids</span><span class="p">,</span> <span class="n">mu_lids</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Probability mass function of the LIDS&#39;&#39;&#39;</span>
+
+    <span class="c1"># Expected number of counts</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">_lids_inverse_func</span><span class="p">(</span><span class="n">mu_lids</span><span class="p">)</span>
+
+    <span class="n">k1</span> <span class="o">=</span> <span class="n">_lids_inverse_func</span><span class="p">(</span><span class="n">x_lids</span><span class="p">)</span>
+    <span class="n">k2</span> <span class="o">=</span> <span class="n">_lids_inverse_func</span><span class="p">(</span><span class="n">x_lids</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">poisson</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="n">k1</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">)</span> <span class="o">-</span> <span class="n">poisson</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="n">k2</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="n">mu</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_cosine</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;1-harmonic cosine function&#39;&#39;&#39;</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;amp&#39;</span><span class="p">]</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;phase&#39;</span><span class="p">]</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">A</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="n">T</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">phi</span><span class="p">)</span> <span class="o">+</span> <span class="n">offset</span>
+
+
+<span class="k">def</span> <span class="nf">_lfm</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Linear frequency modulated cosine function&#39;&#39;&#39;</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;amp&#39;</span><span class="p">]</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;phase&#39;</span><span class="p">]</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">]</span>
+    <span class="n">slope</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;slope&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">A</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="n">T</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">phi</span><span class="p">)</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">slope</span><span class="o">*</span><span class="n">x</span>
+
+
+<span class="k">def</span> <span class="nf">_lfam</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Linear frequency and amplitude modulated cosine function&#39;&#39;&#39;</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;amp&#39;</span><span class="p">]</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;mod&#39;</span><span class="p">]</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;phase&#39;</span><span class="p">]</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span>
+    <span class="n">offset</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">]</span>
+    <span class="n">slope</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;slope&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">A</span> <span class="o">+</span> <span class="n">b</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="n">T</span><span class="o">+</span><span class="n">k</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="n">phi</span><span class="p">)</span> <span class="o">+</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">slope</span><span class="o">*</span><span class="n">x</span>
+
+
+<span class="k">def</span> <span class="nf">_residual</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">fit_func</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Residual function to minimize&#39;&#39;&#39;</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="o">-</span><span class="n">model</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_residual_rel</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">fit_func</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Residual function to minimize&#39;&#39;&#39;</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="o">-</span><span class="n">model</span><span class="p">)</span><span class="o">/</span><span class="n">sigma</span>
+
+
+<span class="k">def</span> <span class="nf">_lids_likelihood</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">fit_func</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;LIDS likelihood function</span>
+
+<span class="sd">    Defined as the product of the probability mass functions, evaluated at each</span>
+<span class="sd">    data point, using the current fit value as the expected value.</span>
+
+<span class="sd">    NB: when the difference between the expected value and the observed one is</span>
+<span class="sd">    large, the probability drops to zero, due to finite floating precision.</span>
+<span class="sd">    A temporary solution consists in replacing all values below eps with eps.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="c1"># Expected LIDS counts (i.e fitted values, &#39;mu_i&#39;)</span>
+    <span class="n">expected_val</span> <span class="o">=</span> <span class="n">fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+    <span class="c1"># Create empty array</span>
+    <span class="n">lids_ll</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">expected_val</span><span class="p">)</span>
+
+    <span class="c1"># Iterate over all the values of the currently fitted function</span>
+    <span class="n">it</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nditer</span><span class="p">(</span><span class="n">expected_val</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;c_index&#39;</span><span class="p">])</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">it</span><span class="o">.</span><span class="n">finished</span><span class="p">:</span>
+        <span class="c1"># lids_ll[it.index] = np.sqrt(</span>
+        <span class="c1">#     -2*np.log(_lids_pmf(data[it.index], it[0]))</span>
+        <span class="c1"># )</span>
+        <span class="n">lids_ll</span><span class="p">[</span><span class="n">it</span><span class="o">.</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">_lids_pmf</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">it</span><span class="o">.</span><span class="n">index</span><span class="p">],</span> <span class="n">it</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">it</span><span class="o">.</span><span class="n">iternext</span><span class="p">()</span>
+
+    <span class="c1"># Replace zeros with eps</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">place</span><span class="p">(</span><span class="n">lids_ll</span><span class="p">,</span> <span class="n">lids_ll</span> <span class="o">&lt;</span> <span class="n">eps</span><span class="p">,</span> <span class="p">[</span><span class="n">eps</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">lids_ll</span>
+
+
+<span class="k">def</span> <span class="nf">_nlog</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="LIDS"><a class="viewcode-back" href="../../../LIDS.html#pyActigraphy.analysis.LIDS">[docs]</a><span class="k">class</span> <span class="nc">LIDS</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for Locomotor inactivity during sleep (LIDS) Analysis</span>
+
+<span class="sd">    Winnebeck, E. C., Fischer, D., Leise, T., &amp; Roenneberg, T. (2018).</span>
+<span class="sd">    Dynamics and Ultradian Structure of Human Sleep in Real Life.</span>
+<span class="sd">    Current Biology, 28(1), 49–59.e5. http://doi.org/10.1016/j.cub.2017.11.063</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lids_func_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lids&#39;</span><span class="p">]</span>
+    <span class="n">fit_func_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cosine&#39;</span><span class="p">,</span> <span class="s1">&#39;chirp&#39;</span><span class="p">,</span> <span class="s1">&#39;modchirp&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">lids_func</span><span class="o">=</span><span class="s1">&#39;lids&#39;</span><span class="p">,</span>
+        <span class="n">fit_func</span><span class="o">=</span><span class="s1">&#39;cosine&#39;</span><span class="p">,</span>
+        <span class="n">fit_obj_func</span><span class="o">=</span><span class="s1">&#39;residuals&#39;</span><span class="p">,</span>
+        <span class="n">fit_params</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+
+        <span class="c1"># LIDS functions</span>
+        <span class="n">lids_funcs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;lids&#39;</span><span class="p">:</span> <span class="n">_lids_func</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">lids_func</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lids_funcs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;`LIDS function` must be &quot;</span><span class="si">%s</span><span class="s1">&quot;. You passed: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="s1">&#39;&quot; or &quot;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">lids_funcs</span><span class="o">.</span><span class="n">keys</span><span class="p">())),</span> <span class="n">lids_func</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Fit functions</span>
+        <span class="n">fit_funcs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cosine&#39;</span><span class="p">:</span> <span class="n">_cosine</span><span class="p">,</span> <span class="s1">&#39;chirp&#39;</span><span class="p">:</span> <span class="n">_lfm</span><span class="p">,</span> <span class="s1">&#39;modchirp&#39;</span><span class="p">:</span> <span class="n">_lfam</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">fit_func</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fit_funcs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;`Fit function` must be &quot;</span><span class="si">%s</span><span class="s1">&quot;. You passed: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="s1">&#39;&quot; or &quot;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">fit_funcs</span><span class="o">.</span><span class="n">keys</span><span class="p">())),</span> <span class="n">fit_func</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Fit objective functions (i.e. funcitons to be minimized)</span>
+        <span class="n">fit_obj_funcs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;residuals&#39;</span><span class="p">:</span> <span class="n">_residual</span><span class="p">,</span>
+            <span class="s1">&#39;nll&#39;</span><span class="p">:</span> <span class="n">_lids_likelihood</span>
+        <span class="p">}</span>
+        <span class="c1"># and associated functions to convert the residuals to a scalar value</span>
+        <span class="n">fit_reduc_funcs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;residuals&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s1">&#39;nll&#39;</span><span class="p">:</span> <span class="n">_nlog</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">fit_obj_func</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fit_obj_funcs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;`Fit objective function` must be &quot;</span><span class="si">%s</span><span class="s1">&quot;. You passed: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="s1">&#39;&quot; or &quot;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">fit_obj_funcs</span><span class="o">.</span><span class="n">keys</span><span class="p">())),</span> <span class="n">fit_obj_func</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__freq</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># pd.Timedelta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lids_func</span> <span class="o">=</span> <span class="n">lids_funcs</span><span class="p">[</span><span class="n">lids_func</span><span class="p">]</span>  <span class="c1"># LIDS transformation fct</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fit_func</span> <span class="o">=</span> <span class="n">fit_funcs</span><span class="p">[</span><span class="n">fit_func</span><span class="p">]</span>  <span class="c1"># Fit function to LIDS</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fit_obj_func</span> <span class="o">=</span> <span class="n">fit_obj_funcs</span><span class="p">[</span><span class="n">fit_obj_func</span><span class="p">]</span>  <span class="c1"># Fit obj function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fit_reduc_func</span> <span class="o">=</span> <span class="n">fit_reduc_funcs</span><span class="p">[</span><span class="n">fit_obj_func</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">fit_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fit_params</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
+            <span class="c1"># Default parameters for the cosine fit function</span>
+            <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;amp&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+            <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;phase&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;period&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Dummy value</span>
+            <span class="c1"># Introduce inequality amp+offset &lt; 100</span>
+            <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;delta&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">vary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;offset&#39;</span><span class="p">,</span> <span class="n">expr</span><span class="o">=</span><span class="s1">&#39;delta-amp&#39;</span><span class="p">)</span>
+            <span class="c1"># Additional parameters for the chirp fit function</span>
+            <span class="k">if</span> <span class="n">fit_func</span> <span class="o">==</span> <span class="s1">&#39;chirp&#39;</span><span class="p">:</span>
+                <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=-.</span><span class="mi">0001</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;slope&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="c1"># Additional parameters for the modchirp fit function</span>
+            <span class="k">if</span> <span class="n">fit_func</span> <span class="o">==</span> <span class="s1">&#39;modchirp&#39;</span><span class="p">:</span>
+                <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=-.</span><span class="mi">0001</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;slope&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=-</span><span class="mf">0.5</span><span class="p">)</span>
+                <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;mod&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span> <span class="o">=</span> <span class="n">fit_params</span>
+        <span class="c1"># self.__fit_params = None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fit_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># self.__fit_period = None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">freq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Sampling frequency of the LIDS transformed data&#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__freq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s1">&#39;The sampling frequency of the LIDS data is not set. &#39;</span>
+                <span class="s1">&#39;Run lids_transform() before accessing this attribute.&#39;</span><span class="p">,</span>
+                <span class="ne">UserWarning</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__freq</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lids_func</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;LIDS transformation function&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lids_func</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lids_fit_func</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Fit function to LIDS oscillations&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fit_func</span>
+
+    <span class="nd">@lids_fit_func</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">lids_fit_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fit_func</span> <span class="o">=</span> <span class="n">func</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lids_fit_initial_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Initial parameters of the fit function to LIDS oscillations&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lids_fit_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Results of the LIDS fit&#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fit_results</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s1">&#39;The fit results is None. &#39;</span>
+                <span class="s1">&#39;Run lids_fit() before accessing this attribute.&#39;</span><span class="p">,</span>
+                <span class="ne">UserWarning</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fit_results</span>
+
+<div class="viewcode-block" id="LIDS.filter"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.LIDS.filter.html#pyActigraphy.analysis.LIDS.filter">[docs]</a>    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">duration_min</span><span class="o">=</span><span class="s1">&#39;3H&#39;</span><span class="p">,</span> <span class="n">duration_max</span><span class="o">=</span><span class="s1">&#39;12H&#39;</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Filter data according to their duration</span>
+
+<span class="sd">        Before performing a LIDS analysis, it is necessary to drop sleep bouts</span>
+<span class="sd">        that too short or too long.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">td_min</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">duration_min</span><span class="p">)</span>
+        <span class="n">td_max</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">duration_max</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">filterfalse</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">filtered</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">filterfalse</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">duration</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">td_min</span> <span class="ow">or</span> <span class="n">duration</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">td_max</span><span class="p">,</span>
+            <span class="n">ts</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">filtered</span></div>
+
+    <span class="k">def</span> <span class="nf">__smooth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lids</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">win_size</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Smooth LIDS data</span>
+
+<span class="sd">        By default, smooth with a centered moving average using a `win_size`</span>
+<span class="sd">        window&#39;&#39;&#39;</span>
+
+        <span class="c1"># Smooth functions</span>
+        <span class="n">lids_smooth_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mva&#39;</span><span class="p">,</span> <span class="s1">&#39;kernel&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lids_smooth_funcs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;`LIDS smooth function` must be &quot;</span><span class="si">%s</span><span class="s1">&quot;. You passed: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="s1">&#39;&quot; or &quot;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">lids_smooth_funcs</span><span class="p">)),</span> <span class="n">method</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;mva&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lids</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">win_size</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;kernel&#39;</span><span class="p">:</span>
+            <span class="n">smooth_lids</span> <span class="o">=</span> <span class="n">spm_smooth</span><span class="p">(</span><span class="n">lids</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">fwhm</span><span class="o">=</span><span class="n">win_size</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">smooth_lids</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">lids</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;none&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lids</span>
+
+<div class="viewcode-block" id="LIDS.lids_transform"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.LIDS.lids_transform.html#pyActigraphy.analysis.LIDS.lids_transform">[docs]</a>    <span class="k">def</span> <span class="nf">lids_transform</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mva&#39;</span><span class="p">,</span> <span class="n">win_td</span><span class="o">=</span><span class="s1">&#39;30min&#39;</span><span class="p">,</span> <span class="n">resampling_freq</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Apply LIDS transformation to activity data</span>
+
+<span class="sd">        This transformation comprises:</span>
+
+<span class="sd">        * resampling via summation (optional)</span>
+<span class="sd">        * non-linear LIDS transformation</span>
+<span class="sd">        * smoothing with a centered moving average</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ts: pandas.Series</span>
+<span class="sd">            Data identified as locomotor activity during sleep.</span>
+<span class="sd">        method: str, optional</span>
+<span class="sd">            Method to smooth the data.</span>
+<span class="sd">            Available options are:</span>
+
+<span class="sd">            * &#39;mva&#39;: moving average</span>
+<span class="sd">            * &#39;kernel&#39;: gaussian kernel</span>
+<span class="sd">            * &#39;none&#39;: no smoothing</span>
+
+<span class="sd">            Default is &#39;mva&#39;.</span>
+<span class="sd">        win_td: str, optional</span>
+<span class="sd">            Size of the moving average window.</span>
+<span class="sd">            Default is &#39;30min&#39;.</span>
+<span class="sd">        resampling_freq: str, optional</span>
+<span class="sd">            Frequency of the resampling applied prior to LIDS transformation.</span>
+<span class="sd">            Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        smooth_lids: pandas.Series</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Resample data to the required frequency</span>
+        <span class="k">if</span> <span class="n">resampling_freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rs</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">resampling_freq</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rs</span> <span class="o">=</span> <span class="n">ts</span>
+        <span class="c1"># Apply LIDS transformation x: 100/(x+1)</span>
+        <span class="n">lids</span> <span class="o">=</span> <span class="n">rs</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lids_func</span><span class="p">)</span>
+
+        <span class="c1"># Store actual sampling frequency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__freq</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">lids</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+
+        <span class="c1"># Series with a DateTimeIndex don&#39;t accept &#39;time-aware&#39; centered window</span>
+        <span class="c1"># Convert win_size (TimeDelta) into a number of time bins</span>
+        <span class="n">win_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">win_td</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">__freq</span><span class="p">)</span>
+
+        <span class="c1"># Smooth LIDS-transformed data</span>
+        <span class="n">smooth_lids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__smooth</span><span class="p">(</span><span class="n">lids</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">win_size</span><span class="o">=</span><span class="n">win_size</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">smooth_lids</span></div>
+
+<div class="viewcode-block" id="LIDS.lids_fit"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.LIDS.lids_fit.html#pyActigraphy.analysis.LIDS.lids_fit">[docs]</a>    <span class="k">def</span> <span class="nf">lids_fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">lids</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s1">&#39;leastsq&#39;</span><span class="p">,</span>
+        <span class="n">scan_period</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">bounds</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;30min&#39;</span><span class="p">,</span> <span class="s1">&#39;180min&#39;</span><span class="p">),</span>
+        <span class="n">step</span><span class="o">=</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span>
+        <span class="n">nan_policy</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Fit oscillations of the LIDS data</span>
+
+<span class="sd">        The fit is performed with a fixed period ranging from 30 min to 180 min</span>
+<span class="sd">        with a step of 5 min by default. The best-fit criterion is the maximal</span>
+<span class="sd">        Munich Rhythmicity Index (MRI).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lids: pandas.Series</span>
+<span class="sd">            Output data from LIDS transformation.</span>
+<span class="sd">        method: str, optional</span>
+<span class="sd">            Name of the fitting method to use [1]_.</span>
+<span class="sd">            Default is &#39;leastsq&#39;.</span>
+<span class="sd">        scan_period: bool, optional</span>
+<span class="sd">            If set to True, the period of the LIDS fit function is fixed and</span>
+<span class="sd">            varied between the specified bounds.</span>
+<span class="sd">            The selected period corresponds to the highest MRI value.</span>
+<span class="sd">            Otherwise, the period is a free parameter of the fit.</span>
+<span class="sd">            Default is True.</span>
+<span class="sd">        bounds: 2-tuple of str, optional</span>
+<span class="sd">            Lower and upper bounds for the periods to be tested.</span>
+<span class="sd">            If scan_period is set to False, the bounds are ignored.</span>
+<span class="sd">            Default is (&#39;30min&#39;,&#39;180min&#39;).</span>
+<span class="sd">        step: str, optional</span>
+<span class="sd">            Time delta between the periods to be tested.</span>
+<span class="sd">        nan_policy: str, optional</span>
+<span class="sd">            Specifies action if the objective function returns NaN values.</span>
+<span class="sd">            One of:</span>
+
+<span class="sd">            * &#39;raise&#39;: a ValueError is raised</span>
+<span class="sd">            * &#39;propagate&#39;: the values returned from userfcn are un-altered</span>
+<span class="sd">            * &#39;omit&#39;: non-finite values are filtered</span>
+
+<span class="sd">            Default is &#39;raise&#39;.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            If set to True, display fit informations</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Non-Linear Least-Squares Minimization and Curve-Fitting for</span>
+<span class="sd">               Python.</span>
+<span class="sd">               https://lmfit.github.io/lmfit-py/index.html</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># # Define residual function to minimize</span>
+        <span class="c1"># def residual(params, x, data):</span>
+        <span class="c1">#     model = self.lids_fit_func(x, params)</span>
+        <span class="c1">#     return (data-model)</span>
+
+        <span class="c1"># Define the x range</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">lids</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">scan_period</span><span class="p">:</span>
+
+            <span class="c1"># Define bounds for the period</span>
+            <span class="n">period_start</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">__freq</span>
+            <span class="n">period_end</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">__freq</span>
+            <span class="n">period_range</span> <span class="o">=</span> <span class="n">period_end</span><span class="o">-</span><span class="n">period_start</span>
+            <span class="n">period_step</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">step</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">__freq</span>
+
+            <span class="n">test_periods</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span>
+                <span class="n">period_start</span><span class="p">,</span>
+                <span class="n">period_end</span><span class="p">,</span>
+                <span class="n">num</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">period_range</span><span class="o">/</span><span class="n">period_step</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Fit data for each test period</span>
+            <span class="n">mri</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="n">fit_result_tmp</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">initial_period</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">for</span> <span class="n">test_period</span> <span class="ow">in</span> <span class="n">test_periods</span><span class="p">:</span>
+                <span class="c1"># Fix test period</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">test_period</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">vary</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="c1"># Minimize residuals</span>
+                <span class="n">fit_result_tmp</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__fit_obj_func</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span><span class="p">,</span>
+                    <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>  <span class="n">lids</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_fit_func</span><span class="p">),</span>
+                    <span class="n">nan_policy</span><span class="o">=</span><span class="n">nan_policy</span><span class="p">,</span>
+                    <span class="n">reduce_fcn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__fit_reduc_func</span>
+                <span class="p">)</span>
+                <span class="c1"># Print fit parameters if verbose</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">fit_report</span><span class="p">(</span><span class="n">fit_result_tmp</span><span class="p">))</span>
+                <span class="c1"># Calculate the MR index</span>
+                <span class="n">mri_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_mri</span><span class="p">(</span><span class="n">lids</span><span class="p">,</span> <span class="n">fit_result_tmp</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="n">pearson_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_pearson_r</span><span class="p">(</span>
+                        <span class="n">lids</span><span class="p">,</span> <span class="n">fit_result_tmp</span><span class="o">.</span><span class="n">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Pearson r: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pearson_r</span><span class="p">))</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MRI: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mri_tmp</span><span class="p">))</span>
+
+                <span class="c1"># If the newly calculated MRI is higher than the current MRI</span>
+                <span class="k">if</span> <span class="n">mri_tmp</span> <span class="o">&gt;</span> <span class="n">mri</span> <span class="ow">and</span> <span class="p">(</span><span class="n">test_period</span> <span class="o">!=</span> <span class="n">period_end</span><span class="p">):</span>
+                    <span class="c1"># Store MRI</span>
+                    <span class="n">mri</span> <span class="o">=</span> <span class="n">mri_tmp</span>
+                    <span class="c1"># Store fit parameters</span>
+                    <span class="n">fit_result</span> <span class="o">=</span> <span class="n">fit_result_tmp</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Highest MRI: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mri</span><span class="p">))</span>
+            <span class="c1"># Set back original value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">initial_period</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">vary</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="c1"># Minimize residuals</span>
+            <span class="n">fit_result</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__fit_obj_func</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>  <span class="n">lids</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_fit_func</span><span class="p">),</span>
+                <span class="n">nan_policy</span><span class="o">=</span><span class="n">nan_policy</span><span class="p">,</span>
+                <span class="n">reduce_fcn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__fit_reduc_func</span>
+            <span class="p">)</span>
+            <span class="c1"># Print fit parameters if verbose</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">fit_report</span><span class="p">(</span><span class="n">fit_result</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="c1"># Calculate the MR index</span>
+                <span class="n">pearson_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_pearson_r</span><span class="p">(</span><span class="n">lids</span><span class="p">,</span> <span class="n">fit_result</span><span class="o">.</span><span class="n">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">mri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_mri</span><span class="p">(</span><span class="n">lids</span><span class="p">,</span> <span class="n">fit_result</span><span class="o">.</span><span class="n">params</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Pearson r: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pearson_r</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MRI: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mri</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fit_results</span> <span class="o">=</span> <span class="n">fit_result</span></div>
+        <span class="c1"># self.lids_fit_params = fit_result.params</span>
+        <span class="c1"># self.lids_fit_period = fit_result.params[&#39;period&#39;].value</span>
+
+<div class="viewcode-block" id="LIDS.lids_pearson_r"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.LIDS.lids_pearson_r.html#pyActigraphy.analysis.LIDS.lids_pearson_r">[docs]</a>    <span class="k">def</span> <span class="nf">lids_pearson_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lids</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Pearson correlation factor</span>
+
+<span class="sd">        Pearson correlation factor between LIDS data and its fit function</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lids: pandas.Series</span>
+<span class="sd">            Output data from LIDS transformation.</span>
+<span class="sd">        params: lmfit.Parameters, optional</span>
+<span class="sd">            Parameters for the fit function.</span>
+<span class="sd">            If None, self.lids_fit_params is used instead.</span>
+<span class="sd">            Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        r: numpy.float64</span>
+<span class="sd">            Pearson’s correlation coefficient</span>
+<span class="sd">        p: numpy.float64</span>
+<span class="sd">            2-tailed p-value</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">lids</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_fit_results</span><span class="o">.</span><span class="n">params</span>
+        <span class="k">return</span> <span class="n">pearsonr</span><span class="p">(</span><span class="n">lids</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="LIDS.lids_mri"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.LIDS.lids_mri.html#pyActigraphy.analysis.LIDS.lids_mri">[docs]</a>    <span class="k">def</span> <span class="nf">lids_mri</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lids</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Munich Rhythmicity Index</span>
+
+<span class="sd">        The Munich Rhythmicity Index (MRI) is defined as</span>
+<span class="sd">        :math:`MRI = A \times r` with :math:`A`, the cosine fit amplitude and</span>
+<span class="sd">        :math:`r`, the bivariate correlation coefficient (a.k.a. Pearson&#39;r).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lids: pandas.Series</span>
+<span class="sd">            Output data from LIDS transformation.</span>
+<span class="sd">        params: lmfit.Parameters, optional</span>
+<span class="sd">            Parameters for the fit function.</span>
+<span class="sd">            If None, self.lids_fit_params is used instead.</span>
+<span class="sd">            Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mri: numpy.float64</span>
+<span class="sd">            Munich Rhythmicity Index</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_fit_results</span><span class="o">.</span><span class="n">params</span>
+
+        <span class="c1"># Pearson&#39;s r</span>
+        <span class="n">pearson_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_pearson_r</span><span class="p">(</span><span class="n">lids</span><span class="p">,</span> <span class="n">params</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Oscillation range = [-A,+A] =&gt; 2*A</span>
+        <span class="n">oscillation_range</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;amp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="c1"># MRI</span>
+        <span class="n">mri</span> <span class="o">=</span> <span class="n">pearson_r</span><span class="o">*</span><span class="n">oscillation_range</span>
+
+        <span class="k">return</span> <span class="n">mri</span></div>
+
+<div class="viewcode-block" id="LIDS.lids_period"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.LIDS.lids_period.html#pyActigraphy.analysis.LIDS.lids_period">[docs]</a>    <span class="k">def</span> <span class="nf">lids_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;LIDS period</span>
+
+<span class="sd">        Convert the period of the LIDS oscillations as estimated by the fit</span>
+<span class="sd">        function to a TimeDelta.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        s: str, optional</span>
+<span class="sd">            Frequency to cast the output timedelta to.</span>
+<span class="sd">            Default is &#39;s&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lids_period: numpy.timedelta64[freq]</span>
+
+
+<span class="sd">        Note</span>
+<span class="sd">        ----</span>
+<span class="sd">        As there is no way to automatically derive the LIDS period from the fit</span>
+<span class="sd">        parameters, the fitted period needs to be set via its own setter</span>
+<span class="sd">        function.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">freq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># TODO: evaluate if raise ValueError(&#39;&#39;) more appropriate</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_fit_results</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># TODO: evaluate if raise ValueError(&#39;&#39;) more appropriate</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lids_period</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_fit_results</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">freq</span>
+            <span class="k">return</span> <span class="n">lids_period</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;timedelta64[</span><span class="si">{}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">freq</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="LIDS.lids_phases"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.LIDS.lids_phases.html#pyActigraphy.analysis.LIDS.lids_phases">[docs]</a>    <span class="k">def</span> <span class="nf">lids_phases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lids</span><span class="p">,</span> <span class="n">step</span><span class="o">=.</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;LIDS onset and offset phases in degrees</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lids: pandas.Series</span>
+<span class="sd">            Output data from LIDS transformation.</span>
+<span class="sd">        step: float, optional</span>
+<span class="sd">            Step between points at which the LIDS fit is evaluated.</span>
+<span class="sd">            Default is &#39;0.1&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        onset_phase, offset_phase: numpy.float64</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_fit_results</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># TODO: evaluate if raise ValueError(&#39;&#39;) more appropriate</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_fit_results</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># TODO: evaluate if raise ValueError(&#39;&#39;) more appropriate</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Access fit parameters</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_fit_results</span><span class="o">.</span><span class="n">params</span>
+
+        <span class="c1"># Fit support range</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">lids</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">)</span>
+
+        <span class="c1"># LIDS fit derivatives (1st and 2nd)</span>
+        <span class="n">df_dx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lids_fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">),</span> <span class="n">step</span><span class="p">)</span>
+        <span class="n">d2f_dx2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">df_dx</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+
+        <span class="c1"># Index of the 1st maxima (i.e 1st maximum of the LIDS oscillations)</span>
+        <span class="n">first_max_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">_extrema_points</span><span class="p">(</span><span class="n">df_dx</span><span class="p">,</span> <span class="n">d2f_dx2</span><span class="p">))</span>
+        <span class="c1"># Convert the index into a phase using the fitted period</span>
+        <span class="n">onset_phase</span> <span class="o">=</span> <span class="p">(</span><span class="n">first_max_idx</span><span class="o">*</span><span class="n">step</span><span class="p">)</span><span class="o">/</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span><span class="o">*</span><span class="mi">360</span>
+
+        <span class="c1"># Index of the last &#39;increasing&#39; inflexion points in LIDS oscillations</span>
+        <span class="c1"># before sleep offset</span>
+        <span class="n">last_inflex_idx</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="c1"># reverse order to find last</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">_inflexion_points</span><span class="p">(</span><span class="n">df_dx</span><span class="p">,</span> <span class="n">d2f_dx2</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span>
+            <span class="mi">1</span>  <span class="c1"># to account for index shifting during reverse (-1: 0th elem)</span>
+        <span class="p">)</span>
+        <span class="c1"># Convert the index into a phase using the fitted period</span>
+        <span class="n">offset_phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">last_inflex_idx</span><span class="o">*</span><span class="n">step</span><span class="o">/</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;period&#39;</span><span class="p">]</span><span class="o">*</span><span class="mi">360</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">onset_phase</span><span class="p">,</span> <span class="n">offset_phase</span></div>
+
+<div class="viewcode-block" id="LIDS.lids_convert_to_internal_time"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.LIDS.lids_convert_to_internal_time.html#pyActigraphy.analysis.LIDS.lids_convert_to_internal_time">[docs]</a>    <span class="k">def</span> <span class="nf">lids_convert_to_internal_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lids</span><span class="p">,</span> <span class="n">t_norm</span><span class="o">=</span><span class="s1">&#39;90min&#39;</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Convert LIDS data index to internal time.</span>
+
+<span class="sd">        XXX</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lids: pandas.Series</span>
+<span class="sd">            Output data from LIDS transformation.</span>
+<span class="sd">        t_norm: str, optional</span>
+<span class="sd">            Default period used to normalize the fitted LIDS period.</span>
+<span class="sd">            Default is &#39;90min&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ts: pandas.Series</span>
+<span class="sd">            LIDS data with internal time since sleep onset as index.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># External timeline of the current LIDS data since sleep onset</span>
+        <span class="n">t_ext</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">timedelta_range</span><span class="p">(</span>
+            <span class="n">start</span><span class="o">=</span><span class="s1">&#39;0 day&#39;</span><span class="p">,</span>
+            <span class="n">periods</span><span class="o">=</span><span class="n">lids</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">freq</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">freq</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Scaling factor, relative to the LIDS period, normalized to t_norm</span>
+        <span class="n">scaling_factor</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">t_norm</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">lids_period</span><span class="p">()</span>
+
+        <span class="c1"># Internal timeline (aka: external timeline, rescaled to LIDS period)</span>
+        <span class="c1"># t_int = scaling_factor*t_ext</span>
+        <span class="n">t_int</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">TimedeltaIndex</span><span class="p">(</span><span class="n">scaling_factor</span><span class="o">*</span><span class="n">t_ext</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;infer&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Construct a new Series with internal timeline as index</span>
+        <span class="n">lids_rescaled</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">lids</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">t_int</span><span class="p">)</span>
+
+        <span class="c1"># Resample LIDS data to restore the original bin width of its Index</span>
+        <span class="c1"># Infer missing data via interpolation</span>
+        <span class="n">lids_resampled</span> <span class="o">=</span> <span class="n">lids_rescaled</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">freq</span>
+            <span class="c1"># label=&#39;right&#39;,</span>
+            <span class="c1"># closed=&#39;right&#39;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">lids_resampled</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LIDS.lids_summary"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.LIDS.lids_summary.html#pyActigraphy.analysis.LIDS.lids_summary">[docs]</a>    <span class="k">def</span> <span class="nf">lids_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lids</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Calculate summary statistics for LIDS</span>
+
+<span class="sd">        Fit all LIDS-transformed bouts and calculate the mean period, the mean</span>
+<span class="sd">        mri, the mean number of LIDS cycles and the dampening factor of the</span>
+<span class="sd">        mean LIDS profile.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lids: list of pandas.Series</span>
+<span class="sd">            Output data from LIDS transformation.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            If set to True, print summary statistics.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        summary: dict</span>
+<span class="sd">            Dictionary with the summary statistics.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">ilids</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># LIDS profiles</span>
+        <span class="n">periods</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># List of LIDS periods</span>
+        <span class="n">mris</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># MRI indices</span>
+        <span class="n">ncycles</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Number of LIDS cycles/sleep bout</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lids</span><span class="p">):</span>
+            <span class="c1"># Fit LIDS data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lids_fit</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="c1"># Verify LIDS period</span>
+            <span class="n">period</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_period</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Calculate MRI</span>
+            <span class="n">mri</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_mri</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+            <span class="c1"># Calculate the number of LIDS cycle (as sleep bout length/period):</span>
+            <span class="n">ncycle</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ptp</span><span class="p">()</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">)</span>
+            <span class="n">ncycle</span> <span class="o">/=</span> <span class="n">period</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="mi">20</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sleep bout nr </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;- Period: </span><span class="si">{!s}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">period</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;- MRI: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mri</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;- Number of cycles: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ncycle</span><span class="p">))</span>
+
+            <span class="c1"># Rescale LIDS timeline to LIDS period</span>
+            <span class="n">rescaled_lids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lids_convert_to_internal_time</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+            <span class="n">periods</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+            <span class="n">mris</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mri</span><span class="p">)</span>
+            <span class="n">ncycles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ncycle</span><span class="p">)</span>
+            <span class="n">ilids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rescaled_lids</span><span class="p">)</span>
+
+        <span class="c1"># Create the mean LIDS profile</span>
+        <span class="n">lids_profile</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">(</span>
+            <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)),</span>
+            <span class="n">ilids</span>
+        <span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">ilids</span><span class="p">)</span>
+
+        <span class="c1"># Fit mean LIDS profile with a pol0</span>
+        <span class="n">fit_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">polyfit</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lids_profile</span><span class="o">.</span><span class="n">index</span><span class="p">)),</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">lids_profile</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">deg</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+
+        <span class="c1"># LIDS summary</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;Mean number of LIDS cycles&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ncycles</span><span class="p">)</span>
+        <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;Mean LIDS period (s)&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">periods</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;Mean MRI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">mris</span><span class="p">)</span>
+        <span class="n">summary</span><span class="p">[</span>
+            <span class="s1">&#39;LIDS dampening factor (counts/</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">fit_params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">summary</span></div></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

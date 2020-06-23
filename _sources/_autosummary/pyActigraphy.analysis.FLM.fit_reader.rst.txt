@@ -1,0 +1,6 @@
+pyActigraphy.analysis.FLM.fit\_reader
+=====================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: FLM.fit_reader

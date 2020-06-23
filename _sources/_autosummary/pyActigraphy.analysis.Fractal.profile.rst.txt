@@ -1,0 +1,6 @@
+pyActigraphy.analysis.Fractal.profile
+=====================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: Fractal.profile

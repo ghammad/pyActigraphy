@@ -1,0 +1,6 @@
+pyActigraphy.sleep.ScoringMixin.Oakley
+======================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: ScoringMixin.Oakley

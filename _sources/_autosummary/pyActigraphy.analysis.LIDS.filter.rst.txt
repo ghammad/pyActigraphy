@@ -1,0 +1,6 @@
+pyActigraphy.analysis.LIDS.filter
+=================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: LIDS.filter

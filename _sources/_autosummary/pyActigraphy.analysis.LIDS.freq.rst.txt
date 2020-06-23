@@ -1,0 +1,6 @@
+pyActigraphy.analysis.LIDS.freq
+===============================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: LIDS.freq

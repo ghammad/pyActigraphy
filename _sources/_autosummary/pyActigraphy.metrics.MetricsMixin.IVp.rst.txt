@@ -1,0 +1,6 @@
+pyActigraphy.metrics.MetricsMixin.IVp
+=====================================
+
+.. currentmodule:: pyActigraphy.metrics
+
+.. automethod:: MetricsMixin.IVp

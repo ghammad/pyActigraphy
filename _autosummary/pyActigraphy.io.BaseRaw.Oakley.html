@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pyActigraphy.io.BaseRaw.Oakley &#8212; pyActigraphy 0.2 documentation</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.io.BaseRaw.Oakley &#8212; pyActigraphy 1.Orc1 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../_static/js/jquery-fix.js"></script>
+    <script src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
 <meta charset='utf-8'>
@@ -35,15 +36,15 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pyActigraphy_logo.png"></span>
+        <a class="navbar-brand" href="../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
-                <li><a href="../documentation.html">Documentation</a></li>
+                <li><a href="../tutorials.html">Tutorials</a></li>
                 <li><a href="../api.html">API</a></li>
             
             
@@ -91,27 +92,26 @@
       
   <div class="section" id="pyactigraphy-io-baseraw-oakley">
 <h1>pyActigraphy.io.BaseRaw.Oakley<a class="headerlink" href="#pyactigraphy-io-baseraw-oakley" title="Permalink to this headline">¶</a></h1>
-<dl class="method">
+<dl class="py method">
 <dt id="pyActigraphy.io.BaseRaw.Oakley">
-<code class="descclassname">BaseRaw.</code><code class="descname">Oakley</code><span class="sig-paren">(</span><em>threshold=40</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.Oakley" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">BaseRaw.</code><code class="sig-name descname">Oakley</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">40</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.Oakley" title="Permalink to this definition">¶</a></dt>
 <dd><p>Oakley’s algorithm for sleep/wake scoring.</p>
 <p>Algorithm for automatic sleep/wake scoring based on wrist activity,
 developed by Oakley <a class="reference internal" href="#r5f2603a1bf67-1" id="id1">[1]</a>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>threshold</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Threshold value for scoring sleep/wake. Can be set to “automatic”
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>threshold</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Threshold value for scoring sleep/wake. Can be set to “automatic”
 (cf. Notes).
-Default is 40.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>oakley</strong> – Time series containing scores (1: sleep, 0: wake) for each
-epoch.</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">pandas.core.Series</td>
-</tr>
-</tbody>
-</table>
+Default is 40.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>oakley</strong> – Time series containing scores (1: sleep, 0: wake) for each
+epoch.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.core.Series</p>
+</dd>
+</dl>
 <p class="rubric">Notes</p>
 <p>The output variable O of Oakley’s algorithm is defined as:</p>
 <div class="math notranslate nohighlight">
@@ -121,46 +121,42 @@ epoch.</td>
     [A_{-2},A_{-1},A_{0},A_{+1},A_{+2}])\]</div>
 <p>with:</p>
 <ul class="simple">
-<li>O &lt;= threshold == sleep, 0 &gt; threshold == wake;</li>
-<li><span class="math notranslate nohighlight">\(W_{0},W_{-1},W_{+1},\dots\)</span>, weighting factors for the present
-epoch, the previous epoch, the following epoch, etc.;</li>
-<li><span class="math notranslate nohighlight">\(A_{0},A_{-1},A_{+1},\dots\)</span>, activity scores for the present
-epoch, the previous epoch, the following epoch, etc.</li>
+<li><p>O &lt;= threshold == sleep, 0 &gt; threshold == wake;</p></li>
+<li><p><span class="math notranslate nohighlight">\(W_{0},W_{-1},W_{+1},\dots\)</span>, weighting factors for the present
+epoch, the previous epoch, the following epoch, etc.;</p></li>
+<li><p><span class="math notranslate nohighlight">\(A_{0},A_{-1},A_{+1},\dots\)</span>, activity scores for the present
+epoch, the previous epoch, the following epoch, etc.</p></li>
 </ul>
 <p>The current implementation of this algorithm follows the description
 provided in the instruction manual of the Actiwatch Communication and
 Sleep Analysis Software (Respironics, Inc.) <a class="reference internal" href="#r5f2603a1bf67-2" id="id2">[2]</a> :</p>
 <ul>
-<li><dl class="first docutils">
-<dt>15-second sampling frequency:</dt>
-<dd><div class="first last math notranslate nohighlight">
+<li><dl>
+<dt>15-second sampling frequency:</dt><dd><div class="math notranslate nohighlight">
 \[\begin{split}W_{-8} &amp;= \ldots = W_{-5} = W_{+5} = \ldots = W_{+8} = 1/25 \\
 W_{-4} &amp;= \ldots = W_{-1} = W_{+1} = \ldots = W_{+4} = 1/5 \\
 W_{0} &amp;= 4\end{split}\]</div>
 </dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>30-second sampling frequency:</dt>
-<dd><div class="first last math notranslate nohighlight">
+<li><dl>
+<dt>30-second sampling frequency:</dt><dd><div class="math notranslate nohighlight">
 \[\begin{split}W_{-4} &amp;= W_{-3} = W_{+3} = W_{+4} = 1/25 \\
 W_{-2} &amp;= W_{-1} = W_{+1} = W_{+2} = 1/5 \\
 W_{0} &amp;= 2\end{split}\]</div>
 </dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>60-second sampling frequency:</dt>
-<dd><div class="first last math notranslate nohighlight">
+<li><dl>
+<dt>60-second sampling frequency:</dt><dd><div class="math notranslate nohighlight">
 \[\begin{split}W_{-2} &amp;= W_{+2} = 1/25 \\
 W_{-1} &amp;= W_{+1} = 1/5 \\
 W_{0} &amp;= 1\end{split}\]</div>
 </dd>
 </dl>
 </li>
-<li><dl class="first docutils">
-<dt>120-second sampling frequency:</dt>
-<dd><div class="first last math notranslate nohighlight">
+<li><dl>
+<dt>120-second sampling frequency:</dt><dd><div class="math notranslate nohighlight">
 \[\begin{split}W_{-1} &amp;= W_{+1} = 1/8 \\
 W_{0} &amp;= 1/2\end{split}\]</div>
 </dd>
@@ -169,13 +165,13 @@ W_{0} &amp;= 1/2\end{split}\]</div>
 </ul>
 <p>The <em>Automatic Wake Threshold Value</em> calculation is this <a class="reference internal" href="#r5f2603a1bf67-2" id="id3">[2]</a>:</p>
 <ol class="arabic simple">
-<li>Sum the activity counts for all epochs of the data set.</li>
-<li>Count the number of epochs scored as MOBILE for the data set
-(the definition of MOBILE follows).</li>
-<li>Compute the MOBILE TIME (number of epochs scored as MOBILE from
-step 2 multiplied by the Epoch Length) in minutes.</li>
-<li>Compute the Auto Wake Threshold = ((sum of activity counts from
-step 1) divided by (MOBILE TIME from step 3)) multiplied by 0.88888.</li>
+<li><p>Sum the activity counts for all epochs of the data set.</p></li>
+<li><p>Count the number of epochs scored as MOBILE for the data set
+(the definition of MOBILE follows).</p></li>
+<li><p>Compute the MOBILE TIME (number of epochs scored as MOBILE from
+step 2 multiplied by the Epoch Length) in minutes.</p></li>
+<li><p>Compute the Auto Wake Threshold = ((sum of activity counts from
+step 1) divided by (MOBILE TIME from step 3)) multiplied by 0.88888.</p></li>
 </ol>
 <p><em>Definition of Mobile</em> <a class="reference internal" href="#r5f2603a1bf67-2" id="id4">[2]</a>:</p>
 <p>An epoch is scored as MOBILE if the number of activity counts recorded
@@ -184,23 +180,19 @@ intervals. For example,there are four 15-second intervals for a
 1-minute epoch length; hence, the activity value in an epoch must be
 greater than, or equal to, four, to be scored as MOBILE.</p>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r5f2603a1bf67-1" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Oakley, N.R. Validation with Polysomnography of the Sleepwatch
+<dl class="citation">
+<dt class="label" id="r5f2603a1bf67-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Oakley, N.R. Validation with Polysomnography of the Sleepwatch
 Sleep/Wake Scoring Algorithm Used by the Actiwatch Activity
 Monitoring System; Technical Report; Mini-Mitter: Bend, OR, USA,
-1997</td></tr>
-</tbody>
-</table>
-<table class="docutils citation" frame="void" id="r5f2603a1bf67-2" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[2]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id3">2</a>, <a class="fn-backref" href="#id4">3</a>)</em> Instruction manual, Actiwatch Communication and Sleep Analysis
+1997</p>
+</dd>
+<dt class="label" id="r5f2603a1bf67-2"><span class="brackets">2</span><span class="fn-backref">(<a href="#id2">1</a>,<a href="#id3">2</a>,<a href="#id4">3</a>)</span></dt>
+<dd><p>Instruction manual, Actiwatch Communication and Sleep Analysis
 Software
-(<a class="reference external" href="https://fccid.io/JIAAWR1/Users-Manual/USERS-MANUAL-1-920937">https://fccid.io/JIAAWR1/Users-Manual/USERS-MANUAL-1-920937</a>)</td></tr>
-</tbody>
-</table>
+(<a class="reference external" href="https://fccid.io/JIAAWR1/Users-Manual/USERS-MANUAL-1-920937">https://fccid.io/JIAAWR1/Users-Manual/USERS-MANUAL-1-920937</a>)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -217,8 +209,8 @@ Software
       
     </p>
     <p>
-        &copy; Copyright 2018-2019, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.<br/>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
     </p>
   </div>
 </footer>

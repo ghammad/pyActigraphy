@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.filters.filters &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../../../_static/js/jquery-fix.js"></script>
+    <script src="../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../tutorials.html">Tutorials</a></li>
+                <li><a href="../../../api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for pyActigraphy.filters.filters</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">..log</span> <span class="k">import</span> <span class="n">BaseLog</span>
+
+
+<span class="k">def</span> <span class="nf">_create_inactivity_mask</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Create the mask filled iwith ones by default.</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># If duration is -1, return a mask with 1s for later manual edition.</span>
+    <span class="k">if</span> <span class="n">duration</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="c1"># Binary data</span>
+    <span class="n">binary_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">data</span> <span class="o">&gt;=</span> <span class="n">threshold</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># The first order diff Series indicates the indices of the transitions</span>
+    <span class="c1"># between series of zeroes and series of ones.</span>
+    <span class="c1"># Add zero at the beginning of this series to mark the beginning of the</span>
+    <span class="c1"># first sequence found in the data.</span>
+    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">binary_data</span><span class="p">)])</span>
+
+    <span class="c1"># Test if there is no edge (i.e. no consecutive zeroes).</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">e</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="c1"># Indices of upper transitions (zero to one).</span>
+    <span class="n">idx_plus_one</span> <span class="o">=</span> <span class="p">(</span><span class="n">edges</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># Indices of lower transitions (one to zero).</span>
+    <span class="n">idx_minus_one</span> <span class="o">=</span> <span class="p">(</span><span class="n">edges</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">nonzero</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Even number of transitions.</span>
+    <span class="k">if</span> <span class="n">idx_plus_one</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="n">idx_minus_one</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+
+        <span class="c1"># Start with zeros</span>
+        <span class="k">if</span> <span class="n">idx_plus_one</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">idx_minus_one</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="n">idx_minus_one</span><span class="p">])</span>
+            <span class="n">ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">idx_plus_one</span><span class="p">,</span> <span class="p">[</span><span class="n">edges</span><span class="o">.</span><span class="n">size</span><span class="p">]])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">starts</span> <span class="o">=</span> <span class="n">idx_minus_one</span>
+            <span class="n">ends</span> <span class="o">=</span> <span class="n">idx_plus_one</span>
+    <span class="c1"># Odd number of transitions</span>
+    <span class="c1"># starting with an upper transition</span>
+    <span class="k">elif</span> <span class="n">idx_plus_one</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="n">idx_minus_one</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
+        <span class="n">starts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="n">idx_minus_one</span><span class="p">])</span>
+        <span class="n">ends</span> <span class="o">=</span> <span class="n">idx_plus_one</span>
+    <span class="c1"># starting with an lower transition</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">starts</span> <span class="o">=</span> <span class="n">idx_minus_one</span>
+        <span class="n">ends</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">idx_plus_one</span><span class="p">,</span> <span class="p">[</span><span class="n">edges</span><span class="o">.</span><span class="n">size</span><span class="p">]])</span>
+
+    <span class="c1"># Index pairs (start,end) of the sequences of zeroes</span>
+    <span class="n">seq_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">starts</span><span class="p">,</span> <span class="n">ends</span><span class="p">]</span>
+    <span class="c1"># Length of the aforementioned sequences</span>
+    <span class="n">seq_len</span> <span class="o">=</span> <span class="n">ends</span> <span class="o">-</span> <span class="n">starts</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">seq_idx</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">seq_len</span> <span class="o">&gt;=</span> <span class="n">duration</span><span class="p">)]:</span>
+        <span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="FiltersMixin"><a class="viewcode-back" href="../../../FiltersMixin.html#pyActigraphy.filters.FiltersMixin">[docs]</a><span class="k">class</span> <span class="nc">FiltersMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="FiltersMixin.create_inactivity_mask"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.filters.FiltersMixin.create_inactivity_mask.html#pyActigraphy.filters.FiltersMixin.create_inactivity_mask">[docs]</a>    <span class="k">def</span> <span class="nf">create_inactivity_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a mask for inactivity (count equal to zero) periods.</span>
+
+<span class="sd">        This mask has the same length as its underlying data and can be used</span>
+<span class="sd">        to offuscate inactive periods where the actimeter has most likely been</span>
+<span class="sd">        removed.</span>
+<span class="sd">        Warning: use a sufficiently long duration in order not to mask sleep</span>
+<span class="sd">        periods.</span>
+<span class="sd">        A minimal duration corresponding to two hours seems reasonable.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        duration: int or str</span>
+<span class="sd">            Minimal number of consecutive zeroes for an inactive period.</span>
+<span class="sd">            Time offset strings (ex: &#39;90min&#39;) can also be used.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">nepochs</span> <span class="o">=</span> <span class="n">duration</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">nepochs</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nepochs</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s1">&#39;Inactivity length must be a int and time offset string (ex: &#39;</span>
+                <span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">90min</span><span class="se">\&#39;</span><span class="s1">). Could not create a mask.&#39;</span><span class="p">,</span>
+                <span class="ne">UserWarning</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Store requested mask duration (and discard current mask)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inactivity_length</span> <span class="o">=</span> <span class="n">nepochs</span>
+
+        <span class="c1"># Create actual mask</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">_create_inactivity_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">nepochs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FiltersMixin.add_mask_period"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.filters.FiltersMixin.add_mask_period.html#pyActigraphy.filters.FiltersMixin.add_mask_period">[docs]</a>    <span class="k">def</span> <span class="nf">add_mask_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add a period to the inactivity mask</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        start: str</span>
+<span class="sd">            Start time (YYYY-MM-DD HH:MM:SS) of the inactivity period.</span>
+<span class="sd">        stop: str</span>
+<span class="sd">            Stop time (YYYY-MM-DD HH:MM:SS) of the inactivity period.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check if a mask has already been created</span>
+        <span class="c1"># NB : if the inactivity_length is not None, accessing the mask will</span>
+        <span class="c1"># trigger its creation.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inactivity_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inactivity_length</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="c1"># self.mask = pd.Series(</span>
+            <span class="c1">#     np.ones(self.length()),</span>
+            <span class="c1">#     index=self.data.index</span>
+            <span class="c1"># )</span>
+
+        <span class="c1"># Check if start and stop are within the index range</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span>
+                <span class="s2">&quot;Attempting to set the start time of a mask period before &quot;</span> <span class="o">+</span>
+                <span class="s2">&quot;the actual start time of the data.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                <span class="s2">&quot;Mask start time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="o">+</span>
+                <span class="s2">&quot;Data start time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span>
+                <span class="s2">&quot;Attempting to set the stop time of a mask period after &quot;</span> <span class="o">+</span>
+                <span class="s2">&quot;the actual stop time of the data.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
+                <span class="s2">&quot;Mask stop time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span> <span class="o">+</span>
+                <span class="s2">&quot;Data stop time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="p">))</span>
+
+        <span class="c1"># Set mask values between start and stop to zeros</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="FiltersMixin.add_mask_periods"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.filters.FiltersMixin.add_mask_periods.html#pyActigraphy.filters.FiltersMixin.add_mask_periods">[docs]</a>    <span class="k">def</span> <span class="nf">add_mask_periods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_fname</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add periods to the inactivity mask</span>
+
+<span class="sd">        Function to read start and stop times from a Mask log file. Supports</span>
+<span class="sd">        different file format (.ods, .xls(x), .csv).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_fname: str</span>
+<span class="sd">            Path to the log file.</span>
+<span class="sd">        *args</span>
+<span class="sd">            Variable length argument list passed to the subsequent reader</span>
+<span class="sd">            function.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Arbitrary keyword arguments passed to the subsequent reader</span>
+<span class="sd">            function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Convert the log file into a DataFrame</span>
+        <span class="n">absname</span><span class="p">,</span> <span class="n">log</span> <span class="o">=</span> <span class="n">BaseLog</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">input_fname</span><span class="p">,</span> <span class="s1">&#39;Mask&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Iterate over the rows of the DataFrame</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">log</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_mask_period</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Start_time&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Stop_time&#39;</span><span class="p">])</span></div></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

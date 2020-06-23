@@ -1,0 +1,6 @@
+pyActigraphy.analysis.Fractal.generalized\_hurst\_exponent
+==========================================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: Fractal.generalized_hurst_exponent

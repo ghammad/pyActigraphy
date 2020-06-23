@@ -1,0 +1,6 @@
+pyActigraphy.analysis.SSA.U
+===========================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: SSA.U

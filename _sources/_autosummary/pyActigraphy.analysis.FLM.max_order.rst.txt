@@ -1,0 +1,6 @@
+pyActigraphy.analysis.FLM.max\_order
+====================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: FLM.max_order

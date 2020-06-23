@@ -1,0 +1,6 @@
+pyActigraphy.analysis.FLM.nsamples
+==================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: FLM.nsamples

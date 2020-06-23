@@ -1,0 +1,6 @@
+pyActigraphy.analysis.LIDS.lids\_fit\_results
+=============================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: LIDS.lids_fit_results

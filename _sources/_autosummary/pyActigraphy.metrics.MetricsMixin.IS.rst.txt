@@ -1,0 +1,6 @@
+pyActigraphy.metrics.MetricsMixin.IS
+====================================
+
+.. currentmodule:: pyActigraphy.metrics
+
+.. automethod:: MetricsMixin.IS

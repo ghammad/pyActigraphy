@@ -1,0 +1,6 @@
+pyActigraphy.analysis.SSA.sigma
+===============================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: SSA.sigma

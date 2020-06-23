@@ -1,0 +1,6 @@
+pyActigraphy.sleep.ScoringMixin.SleepRegularityIndex
+====================================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: ScoringMixin.SleepRegularityIndex

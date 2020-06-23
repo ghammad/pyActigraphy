@@ -1,0 +1,6 @@
+pyActigraphy.metrics.MetricsMixin.L5
+====================================
+
+.. currentmodule:: pyActigraphy.metrics
+
+.. automethod:: MetricsMixin.L5

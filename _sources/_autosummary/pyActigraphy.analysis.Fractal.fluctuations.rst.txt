@@ -1,0 +1,6 @@
+pyActigraphy.analysis.Fractal.fluctuations
+==========================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: Fractal.fluctuations

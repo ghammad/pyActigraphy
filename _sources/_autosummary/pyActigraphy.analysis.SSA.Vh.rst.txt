@@ -1,0 +1,6 @@
+pyActigraphy.analysis.SSA.Vh
+============================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: SSA.Vh

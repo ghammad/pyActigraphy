@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fractal class &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/js/jquery-1.11.0.min.js"></script>
+    <script src="_static/js/jquery-fix.js"></script>
+    <script src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="tutorials.html">Tutorials</a></li>
+                <li><a href="api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/Fractal.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="fractal-class">
+<h1>Fractal class<a class="headerlink" href="#fractal-class" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="pyActigraphy.analysis.Fractal">
+<em class="property">class </em><code class="sig-prename descclassname">pyActigraphy.analysis.</code><code class="sig-name descname">Fractal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_array</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">q_array</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/analysis/fractal.html#Fractal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyActigraphy.analysis.Fractal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for Fractality Analysis</p>
+<p>This class implements methods used to perform a (multifractal) detrended
+fluctuation analysis, (MF)DFA.</p>
+<p>The implementation follows the original description made in <a class="reference internal" href="#rada057412133-1" id="id1">[1]</a> and <a class="reference internal" href="#rada057412133-2" id="id2">[2]</a>.</p>
+<p>The (MF)DFA consists in:</p>
+<ol class="arabic">
+<li><p>removing the global mean and integrating the time series of a signal:</p>
+<div class="math notranslate nohighlight">
+\[X_{t} = \sum_i^N(x_i - \bar{x})\]</div>
+<p>where <span class="math notranslate nohighlight">\(\bar{x}\)</span> denotes the mean value of the time series
+<span class="math notranslate nohighlight">\(\{x_i\}_{i\in[1:N]}\)</span>;</p>
+</li>
+<li><p>dividing the integrated signal into N non-overlapping windows of the
+same chosen size n;</p></li>
+<li><p>detrending the integrated signal in each window using polynomial
+functions to obtain residuals, that is:</p>
+<div class="math notranslate nohighlight">
+\[\widehat{X_t} = X_{t} - Y_{t}\]</div>
+<p>where <span class="math notranslate nohighlight">\(Y_t\)</span> denotes the trend obtained by polynomial fit and
+<span class="math notranslate nohighlight">\(\widehat{X_t}\)</span> the integrated time series after detrending;</p>
+</li>
+<li><p>calculating the root mean square of residuals in all windows as
+detrended fluctuation amplitude <span class="math notranslate nohighlight">\(F_q(n)\)</span>, that is:</p>
+<div class="math notranslate nohighlight">
+\[F_q(n) = \left[\frac{1}{N} \sum_{t=1}^N \widehat{X_t}^q\right]^{1/q}\]</div>
+</li>
+</ol>
+<p>For <span class="math notranslate nohighlight">\(q=2\)</span>, the DFA is retrieved.</p>
+<p>In the context of actigraphy, further informations can be found in:</p>
+<ul class="simple">
+<li><p>Hu, K., Ivanov, P. C., Chen, Z., Hilton, M. F., Stanley, H. E., &amp; Shea,
+S. A. (2004). Non-random fluctuations and multi-scale dynamics regulation
+of human activity. Physica A: Statistical Mechanics and Its Applications,
+337(1–2), 307–318. <a class="reference external" href="https://doi.org/10.1016/j.physa.2004.01.042">https://doi.org/10.1016/j.physa.2004.01.042</a></p></li>
+</ul>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="rada057412133-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Peng, C.-K., Buldyrev, S. V., Havlin, S., Simons, M., Stanley,
+H. E., &amp; Goldberger, A. L. (1994). Mosaic organization of DNA
+nucleotides. Physical Review E, 49(2), 1685–1689.
+<a class="reference external" href="https://doi.org/10.1103/PhysRevE.49.1685">https://doi.org/10.1103/PhysRevE.49.1685</a></p>
+</dd>
+<dt class="label" id="rada057412133-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Kantelhardt, J. W., Zschiegner, S. A., Koscielny-Bunde, E., Havlin,
+S., Bunde, A., &amp; Stanley, H. E. (2002). Multifractal detrended
+fluctuation analysis of nonstationary time series. Physica A:
+Statistical Mechanics and Its Applications, 316(1–4), 87–114.
+<a class="reference external" href="https://doi.org/10.1016/S0378-4371(02)01383-3">https://doi.org/10.1016/S0378-4371(02)01383-3</a></p>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.Fractal.profile.html#pyActigraphy.analysis.Fractal.profile" title="pyActigraphy.analysis.Fractal.profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">profile</span></code></a>(X)</p></td>
+<td><p>Profile function</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.Fractal.segmentation.html#pyActigraphy.analysis.Fractal.segmentation" title="pyActigraphy.analysis.Fractal.segmentation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">segmentation</span></code></a>(x, n[, backward])</p></td>
+<td><p>Segmentation function</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.Fractal.local_msq_residuals.html#pyActigraphy.analysis.Fractal.local_msq_residuals" title="pyActigraphy.analysis.Fractal.local_msq_residuals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">local_msq_residuals</span></code></a>(segment, deg)</p></td>
+<td><p>Mean squared residuals</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.Fractal.fluctuations.html#pyActigraphy.analysis.Fractal.fluctuations" title="pyActigraphy.analysis.Fractal.fluctuations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fluctuations</span></code></a>(X, n, deg)</p></td>
+<td><p>Fluctuation function</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.Fractal.dfa.html#pyActigraphy.analysis.Fractal.dfa" title="pyActigraphy.analysis.Fractal.dfa"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dfa</span></code></a>(ts, n_array[, deg, log])</p></td>
+<td><p>Detrended Fluctuation Analysis function</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.Fractal.dfa_parallel.html#pyActigraphy.analysis.Fractal.dfa_parallel" title="pyActigraphy.analysis.Fractal.dfa_parallel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dfa_parallel</span></code></a>(ts, n_array[, deg, log, …])</p></td>
+<td><p>Detrended Fluctuation Analysis function</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.Fractal.mfdfa.html#pyActigraphy.analysis.Fractal.mfdfa" title="pyActigraphy.analysis.Fractal.mfdfa"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mfdfa</span></code></a>(ts, n_array, q_array[, deg, log])</p></td>
+<td><p>Multifractal Detrended Fluctuation Analysis function</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.Fractal.mfdfa_parallel.html#pyActigraphy.analysis.Fractal.mfdfa_parallel" title="pyActigraphy.analysis.Fractal.mfdfa_parallel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mfdfa_parallel</span></code></a>(ts, n_array, q_array[, deg, …])</p></td>
+<td><p>Multifractal Detrended Fluctuation Analysis function</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.Fractal.generalized_hurst_exponent.html#pyActigraphy.analysis.Fractal.generalized_hurst_exponent" title="pyActigraphy.analysis.Fractal.generalized_hurst_exponent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generalized_hurst_exponent</span></code></a>(F_n, n_array[, …])</p></td>
+<td><p>Generalized Hurst exponent</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.analysis.Fractal.crossover_search.html#pyActigraphy.analysis.Fractal.crossover_search" title="pyActigraphy.analysis.Fractal.crossover_search"><code class="xref py py-obj docutils literal notranslate"><span class="pre">crossover_search</span></code></a>(F_n, n_array[, n_min, log])</p></td>
+<td><p>Search for crossovers</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.analysis.ssa &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../../../_static/js/jquery-fix.js"></script>
+    <script src="../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../tutorials.html">Tutorials</a></li>
+                <li><a href="../../../api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for pyActigraphy.analysis.ssa</h1><div class="highlight"><pre>
+<span></span><span class="c1"># from functools import lru_cache</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="k">import</span> <span class="n">jit</span><span class="p">,</span> <span class="n">prange</span>  <span class="c1"># float64, int32</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">linalg</span>
+
+
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_weights</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">K</span><span class="p">):</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="n">L</span> <span class="o">+</span> <span class="n">K</span>
+    <span class="c1"># weights = np.empty(N-1, dtype=np.float32)</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">N</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">L</span><span class="p">):</span>
+        <span class="n">weights</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">k</span>
+
+    <span class="c1"># for k in range(L,K+1):</span>
+    <span class="n">weights</span><span class="p">[</span><span class="n">L</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">K</span><span class="p">]</span> <span class="o">=</span> <span class="n">L</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="n">K</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+        <span class="n">weights</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">N</span><span class="o">-</span><span class="n">k</span>
+
+    <span class="k">return</span> <span class="n">weights</span>
+
+
+<span class="k">def</span> <span class="nf">_weighted_scalar_product</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_weighted_correlation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">w</span><span class="p">):</span>
+
+    <span class="n">w_norm_X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">_weighted_scalar_product</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">w</span><span class="p">))</span>
+    <span class="n">w_norm_Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">_weighted_scalar_product</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">w</span><span class="p">))</span>
+
+    <span class="n">w_rho</span> <span class="o">=</span> <span class="n">_weighted_scalar_product</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">w_norm_X</span><span class="o">*</span><span class="n">w_norm_Y</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">w_rho</span>
+
+
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_x_elementary</span><span class="p">(</span><span class="n">U</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">Vh</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+
+    <span class="n">X_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">L</span><span class="p">,</span> <span class="n">K</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="c1"># Implement the dot product s * U[,i] x Vh[i].T</span>
+    <span class="n">sVh_i</span> <span class="o">=</span> <span class="n">s</span><span class="o">*</span><span class="n">Vh</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="n">L</span><span class="p">):</span>
+        <span class="n">X_i</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">U</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">sVh_i</span>
+
+    <span class="k">return</span> <span class="n">X_i</span>
+
+
+<span class="nd">@jit</span><span class="p">(</span><span class="n">nopython</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_diagonal_averaging</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+
+    <span class="n">L</span><span class="p">,</span> <span class="n">K</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">L_star</span><span class="p">,</span> <span class="n">K_star</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">K</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">L</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+    <span class="c1"># N_star = L_star + K_star</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">L</span> <span class="o">&lt;</span> <span class="n">K</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">T</span>
+
+    <span class="n">sum_antidiags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">L_star</span> <span class="o">+</span> <span class="n">K_star</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">L_star</span><span class="p">,</span> <span class="n">K_star</span><span class="p">):</span>
+        <span class="c1"># Avoid using np.flipud as it does not compile with numba.</span>
+        <span class="c1"># Besides, it seems slower than [::-1,...]</span>
+        <span class="n">sum_antidiags</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="n">L_star</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">X</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">offset</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
+
+    <span class="n">scale_factors</span> <span class="o">=</span> <span class="n">_weights</span><span class="p">(</span><span class="n">L_star</span><span class="p">,</span> <span class="n">K_star</span><span class="p">)</span>
+    <span class="c1"># scale_factors = np.empty(N_star-1, dtype=np.float32)</span>
+    <span class="c1"># for k in prange(1, L_star):</span>
+    <span class="c1">#     scale_factors[k-1] = k</span>
+    <span class="c1">#</span>
+    <span class="c1"># # for k in range(L_star,K_star+1):</span>
+    <span class="c1"># scale_factors[L_star-1:K_star] = L_star</span>
+    <span class="c1">#</span>
+    <span class="c1"># for k in prange(K_star+1, N_star):</span>
+    <span class="c1">#     scale_factors[k-1] = N_star-k</span>
+
+    <span class="n">sum_antidiags</span> <span class="o">/=</span> <span class="n">scale_factors</span>
+
+    <span class="k">return</span> <span class="n">sum_antidiags</span>
+
+
+<div class="viewcode-block" id="SSA"><a class="viewcode-back" href="../../../SSA.html#pyActigraphy.analysis.SSA">[docs]</a><span class="k">class</span> <span class="nc">SSA</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Class for Singular Spectrum Analysis&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">window_length</span><span class="o">=</span><span class="s1">&#39;24H&#39;</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__freq</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__window_dim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">window_length</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">__freq</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__L</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__window_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__K</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__L</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__U</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sigma</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Vh</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lambda_s</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">window_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Window dimension for immersion of the signal.</span>
+<span class="sd">        Window dimension (or embedding dimension) in number of epochs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__window_dim</span>
+
+    <span class="c1"># @lru_cache(maxsize=6)</span>
+<div class="viewcode-block" id="SSA.trajectory_matrix"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.SSA.trajectory_matrix.html#pyActigraphy.analysis.SSA.trajectory_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">trajectory_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Trajectory matrix of the signal.</span>
+<span class="sd">        Time-series :math:`x=(x_0,x_1,\dots,x_n,\dots,x_{N−1})^\intercal`, with</span>
+<span class="sd">        length N, represents the signal under analysis. The mapping of this</span>
+<span class="sd">        signal into a matrix A, of dimension L × K , assuming :math:`L \leq K`,</span>
+<span class="sd">        is called immersion, and can be defined as:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            A = \begin{bmatrix}</span>
+<span class="sd">                x_{0} &amp; x_{1} &amp; x_{2} &amp; \dots  &amp; x_{K-1} \\</span>
+<span class="sd">                x_{1} &amp; x_{2} &amp; x_{3} &amp; \dots  &amp; x_{K} \\</span>
+<span class="sd">                \vdots &amp; \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\</span>
+<span class="sd">                x_{L-1} &amp; x_{L} &amp; x_{L+1} &amp; \dots  &amp; x_{N-1}</span>
+<span class="sd">                \end{bmatrix}</span>
+
+<span class="sd">        where L is the window length, or embedding dimension, and</span>
+<span class="sd">        :math:`K = N − L + 1`. A is a Hankel matrix, called the trajectory</span>
+<span class="sd">        matrix.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">ts</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">__L</span><span class="p">]</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">ts</span><span class="p">[</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">__K</span><span class="p">:]</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">hankel</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">A</span></div>
+
+<div class="viewcode-block" id="SSA.fit"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.SSA.fit.html#pyActigraphy.analysis.SSA.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check_finite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overwrite_a</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Singular value decomposition of the trajectory matrix.</span>
+<span class="sd">        Wrapper around the scipy.linalg.svd function.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        overwrite_a : bool, optional</span>
+<span class="sd">            Whether to overwrite `a`; may improve performance.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        check_finite : bool, optional</span>
+<span class="sd">            Whether to check that the input matrix contains only finite</span>
+<span class="sd">            numbers. Disabling may give a performance gain, but may result in</span>
+<span class="sd">            problems (crashes, non-termination) if the inputs do contain</span>
+<span class="sd">            infinities or NaNs.</span>
+<span class="sd">            Default is True.</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        Factorization of the trajectory matrix A, using Singular Value</span>
+<span class="sd">        Decomposition (SVD), yields to [1]_:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            A &amp;= U\Sigma V^\intercal \\</span>
+<span class="sd">              &amp;= \sum_{r=1}^{R} \sigma_r u_r v_{r}^\intercal</span>
+
+<span class="sd">        where :math:`R = rank(A) \leq L`, :math:`{u_1,\ldots, u_d }` is the</span>
+<span class="sd">        corresponding orthonormal system of the eigenvectors of the matrix</span>
+<span class="sd">        :math:`S = AA^{\intercal}` such as :math:`ui \cdot uj = 0` for</span>
+<span class="sd">        :math:`i \neq j` and :math:`\lVert u_r \rVert = 1`,</span>
+<span class="sd">        :math:`v_r = A^{\intercal} u_r / \sigma_r`, and :math:`\Sigma` is a</span>
+<span class="sd">        diagonal matrix :math:`\in \mathbb{R}^{L×K}`, whose diagonal elements</span>
+<span class="sd">        :math:`{\sigma_r}` are the singular values of A. The eigenvalues of</span>
+<span class="sd">        :math:`AA^\intercal` are given by :math:`\lambda_r = \sigma_r^2`.</span>
+
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Golyandina, N., &amp; Zhigljavsky, A. (2013). Singular Spectrum</span>
+<span class="sd">               Analysis for Time Series. Springer Berlin Heidelberg</span>
+<span class="sd">               http://doi.org/10.1007/978-3-642-34913-3</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">A</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_matrix</span><span class="p">()</span>
+        <span class="n">U</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">Vh</span> <span class="o">=</span> <span class="n">linalg</span><span class="o">.</span><span class="n">svd</span><span class="p">(</span>
+            <span class="n">A</span><span class="p">,</span>
+            <span class="n">full_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">check_finite</span><span class="o">=</span><span class="n">check_finite</span><span class="p">,</span>
+            <span class="n">overwrite_a</span><span class="o">=</span><span class="n">overwrite_a</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__U</span> <span class="o">=</span> <span class="n">U</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__Vh</span> <span class="o">=</span> <span class="n">Vh</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lambda_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">s</span><span class="p">))</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">U</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Unitary matrix having left singular vectors as columns.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__U</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sigma</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Singular values, sorted in decreasing order.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sigma</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">Vh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Unitary matrix having right singular vectors as rows.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__Vh</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lambda_s</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Partial variances, sorted in decreasing order.</span>
+<span class="sd">        The partial variances :math:`\lambda_k = \sigma^2_k`, ordered according</span>
+<span class="sd">        to magnitude from the most to the least dominant, where</span>
+<span class="sd">        :math:`\lambda_k` can be interpreted as the variance of the</span>
+<span class="sd">        *sub phase-space* of time-series component :math:`g_k(n)` and where</span>
+<span class="sd">        :math:`\lambda_{tot} = \sum^r_{k=1} \lambda_k` is the total variance of</span>
+<span class="sd">        the phase space of the original time series.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lambda_s</span>
+
+<div class="viewcode-block" id="SSA.X_elementary"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.SSA.X_elementary.html#pyActigraphy.analysis.SSA.X_elementary">[docs]</a>    <span class="k">def</span> <span class="nf">X_elementary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Elementary matrix</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        r: int</span>
+<span class="sd">            Index of the elementary matrix.</span>
+<span class="sd">            Must lower or equal to the embedding dimension, L.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        x_elem: ndarray of shape (L,K)</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        The SVD of the trajectory matrix X can be written as [1]_ :</span>
+
+<span class="sd">        .. math:</span>
+
+<span class="sd">            X = X_1 + \ldots + X_R</span>
+
+<span class="sd">        where :math:`X_r = \sqrt{\lambda_r} u_r v_{r}^\intercal`.</span>
+
+<span class="sd">        The matrices :math:`X_r` have rank 1. Such matrices are sometimes</span>
+<span class="sd">        called *elementary* matrices.</span>
+
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Golyandina, N., &amp; Zhigljavsky, A. (2013). Singular Spectrum</span>
+<span class="sd">               Analysis for Time Series. Springer Berlin Heidelberg</span>
+<span class="sd">               http://doi.org/10.1007/978-3-642-34913-3</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1">#  TODO: check if r is in range</span>
+
+        <span class="n">X_r</span> <span class="o">=</span> <span class="n">_x_elementary</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__U</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__sigma</span><span class="p">[</span><span class="n">r</span><span class="p">][</span><span class="n">r</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__Vh</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__L</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__K</span><span class="p">,</span>
+            <span class="n">r</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X_r</span></div>
+
+<div class="viewcode-block" id="SSA.X_tilde"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.SSA.X_tilde.html#pyActigraphy.analysis.SSA.X_tilde">[docs]</a>    <span class="k">def</span> <span class="nf">X_tilde</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Diagonal averaged matrix.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        r: int or list of int</span>
+<span class="sd">            Index of the elementary matrix to be diagonal-averaged.</span>
+<span class="sd">            Must be lower than or equal to the embedding dimension, L.</span>
+<span class="sd">            If a list of indices is given instead, the corresponding elementary</span>
+<span class="sd">            matrices are grouped (ie. reduced to a single matrix by summation)</span>
+<span class="sd">            before diagonal-averaging.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        x_tilde: ndarray of shape (M,)</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        [1]_ : if the components of the series are separable and the indices</span>
+<span class="sd">        are being split accordingly, then all the matrices in the expansion</span>
+<span class="sd">        :math:`X = X_{I_1} + \ldots + X_{I_m}` are the Hankel matrices.</span>
+<span class="sd">        We thus immediately obtain the decomposition</span>
+<span class="sd">        :math:`x_n = \sum_{k=1}^m \tilde{x}_n^{(k)}` of the original series:</span>
+<span class="sd">        for all k and n, :math:`\tilde{x}_n^{(k)}` is equal to all entries</span>
+<span class="sd">        :math:`x^{(k)}_{ij}` along the antidiagonal</span>
+<span class="sd">        :math:`{(i, j)| i + j = n+1}` of the matrix :math:`X_{Ik}`. In</span>
+<span class="sd">        practice, however, this situation is not realistic. In the general</span>
+<span class="sd">        case, no antidiagonal consists of equal elements. We thus need a formal</span>
+<span class="sd">        procedure of transforming an arbitrary matrix into a Hankel matrix and</span>
+<span class="sd">        therefore into a series. As such, we shall consider the procedure of</span>
+<span class="sd">        *diagonal averaging*, which defines the values of the time series</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \tilde{\mathbb{X}}^{(k)} = \left(</span>
+<span class="sd">                \tilde{x}^{(k)}_1, \ldots, \tilde{x}^{(k)}_N \right)</span>
+
+<span class="sd">        as averages for the corresponding antidiagonals of the matrices</span>
+<span class="sd">        :math:`X_{I_k}`.</span>
+
+<span class="sd">        * for :math:`1 \leq n &lt; L^{\star}`:</span>
+
+<span class="sd">          .. math::</span>
+<span class="sd">             \tilde{x}_n^{(k)} = \frac{1}{n} *</span>
+<span class="sd">             \sum_{m=1}^{n} x^{\star}_{I_k, (m,n-m+1)}</span>
+
+<span class="sd">        * for :math:`L^{\star} \leq n &lt; K^{\star}`:</span>
+
+<span class="sd">          .. math::</span>
+<span class="sd">             \tilde{x}_n^{(k)} = \frac{1}{L^{\star}} *</span>
+<span class="sd">             \sum_{m=1}^{L^{\star}} x^{\star}_{I_k, (m,n-m+1)}</span>
+
+<span class="sd">        * for :math:`K^{\star} &lt; n \leq N`:</span>
+
+<span class="sd">          .. math::</span>
+<span class="sd">             \tilde{x}_n^{(k)} = \frac{1}{N-n+1} *</span>
+<span class="sd">             \sum_{m=n-K^{\star}+1}^{N-K^{\star}+1} x^{\star}_{I_k, (m,n-m+1)}</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Golyandina, N., &amp; Zhigljavsky, A. (2013). Singular Spectrum</span>
+<span class="sd">               Analysis for Time Series. Springer Berlin Heidelberg</span>
+<span class="sd">               http://doi.org/10.1007/978-3-642-34913-3</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">X_elementaries</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X_elementary</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">r</span><span class="p">]</span>
+            <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
+            <span class="n">X_elementary</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">((</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)),</span> <span class="n">X_elementaries</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X_elementary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_elementary</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+
+        <span class="n">X_tilde</span> <span class="o">=</span> <span class="n">_diagonal_averaging</span><span class="p">(</span><span class="n">X_elementary</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X_tilde</span></div>
+
+<div class="viewcode-block" id="SSA.reconstructed_signal"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.SSA.reconstructed_signal.html#pyActigraphy.analysis.SSA.reconstructed_signal">[docs]</a>    <span class="k">def</span> <span class="nf">reconstructed_signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Reconstructed signal from diagonal averaged matrices.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n: array of int</span>
+<span class="sd">            Indices of the diagonal-averaged matrices to merge.</span>
+<span class="sd">            Must be lower than or equal to the embedding dimension, L.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        reco: pandas.Series</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">X_tildes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X_tilde</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">n</span><span class="p">]</span>
+
+        <span class="c1"># add the X_tilde matrices recursively</span>
+        <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
+        <span class="n">X_reco</span> <span class="o">=</span> <span class="n">reduce</span><span class="p">((</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)),</span> <span class="n">X_tildes</span><span class="p">)</span>
+
+        <span class="n">reco_signal</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">X_reco</span><span class="p">,</span>
+            <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__data</span><span class="o">.</span><span class="n">index</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">reco_signal</span></div>
+
+<div class="viewcode-block" id="SSA.w_correlation_matrix"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.SSA.w_correlation_matrix.html#pyActigraphy.analysis.SSA.w_correlation_matrix">[docs]</a>    <span class="k">def</span> <span class="nf">w_correlation_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;W-correlation matrix.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n: int</span>
+<span class="sd">            Maximal index of the diagonal-averaged matrices to use.</span>
+<span class="sd">            Must be lower than or equal to the embedding dimension, L.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        wmat: numpy.ndarray</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+        <span class="n">w_corr_mat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">k</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>
+
+        <span class="n">w</span> <span class="o">=</span> <span class="n">_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__L</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__K</span><span class="p">)</span>
+
+        <span class="n">X_tildes</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X_tilde</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">n</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">n</span><span class="p">[</span><span class="n">i</span><span class="p">:]:</span>
+                <span class="n">w_corr</span> <span class="o">=</span> <span class="n">_weighted_correlation</span><span class="p">(</span>
+                    <span class="n">X_tildes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="n">X_tildes</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                    <span class="n">w</span>
+                <span class="p">)</span>
+                <span class="n">w_corr_mat</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">w_corr</span>
+                <span class="n">w_corr_mat</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">w_corr</span>
+
+        <span class="k">return</span> <span class="n">w_corr_mat</span></div></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

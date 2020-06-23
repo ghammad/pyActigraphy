@@ -1,0 +1,6 @@
+pyActigraphy.analysis.SSA.trajectory\_matrix
+============================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: SSA.trajectory_matrix

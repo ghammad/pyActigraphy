@@ -1,0 +1,6 @@
+pyActigraphy.analysis.Cosinor.fit\_initial\_params
+==================================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: Cosinor.fit_initial_params

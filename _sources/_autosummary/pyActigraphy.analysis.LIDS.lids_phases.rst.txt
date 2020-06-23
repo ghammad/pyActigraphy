@@ -1,0 +1,6 @@
+pyActigraphy.analysis.LIDS.lids\_phases
+=======================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: LIDS.lids_phases

@@ -1,0 +1,6 @@
+pyActigraphy.analysis.SSA.w\_correlation\_matrix
+================================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: SSA.w_correlation_matrix

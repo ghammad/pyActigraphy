@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.sleep.ScoringMixin.Oakley &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../_static/js/jquery-fix.js"></script>
+    <script src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../tutorials.html">Tutorials</a></li>
+                <li><a href="../api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../_sources/_autosummary/pyActigraphy.sleep.ScoringMixin.Oakley.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="pyactigraphy-sleep-scoringmixin-oakley">
+<h1>pyActigraphy.sleep.ScoringMixin.Oakley<a class="headerlink" href="#pyactigraphy-sleep-scoringmixin-oakley" title="Permalink to this headline">¶</a></h1>
+<dl class="py method">
+<dt id="pyActigraphy.sleep.ScoringMixin.Oakley">
+<code class="sig-prename descclassname">ScoringMixin.</code><code class="sig-name descname">Oakley</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">40</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/sleep/scoring_base.html#ScoringMixin.Oakley"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyActigraphy.sleep.ScoringMixin.Oakley" title="Permalink to this definition">¶</a></dt>
+<dd><p>Oakley’s algorithm for sleep/wake scoring.</p>
+<p>Algorithm for automatic sleep/wake scoring based on wrist activity,
+developed by Oakley <a class="reference internal" href="#rd68fc4e670ec-1" id="id1">[1]</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>threshold</strong> (<em>float</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – Threshold value for scoring sleep/wake. Can be set to “automatic”
+(cf. Notes).
+Default is 40.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>oakley</strong> – Time series containing scores (1: sleep, 0: wake) for each
+epoch.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.core.Series</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The output variable O of Oakley’s algorithm is defined as:</p>
+<div class="math notranslate nohighlight">
+\[O = (
+    [W_{-2},W_{-1},W_{0},W_{+1},W_{+2}]
+    \cdot
+    [A_{-2},A_{-1},A_{0},A_{+1},A_{+2}])\]</div>
+<p>with:</p>
+<ul class="simple">
+<li><p>O &lt;= threshold == sleep, 0 &gt; threshold == wake;</p></li>
+<li><p><span class="math notranslate nohighlight">\(W_{0},W_{-1},W_{+1},\dots\)</span>, weighting factors for the present
+epoch, the previous epoch, the following epoch, etc.;</p></li>
+<li><p><span class="math notranslate nohighlight">\(A_{0},A_{-1},A_{+1},\dots\)</span>, activity scores for the present
+epoch, the previous epoch, the following epoch, etc.</p></li>
+</ul>
+<p>The current implementation of this algorithm follows the description
+provided in the instruction manual of the Actiwatch Communication and
+Sleep Analysis Software (Respironics, Inc.) <a class="reference internal" href="#rd68fc4e670ec-2" id="id2">[2]</a> :</p>
+<ul>
+<li><dl>
+<dt>15-second sampling frequency:</dt><dd><div class="math notranslate nohighlight">
+\[\begin{split}W_{-8} &amp;= \ldots = W_{-5} = W_{+5} = \ldots = W_{+8} = 1/25 \\
+W_{-4} &amp;= \ldots = W_{-1} = W_{+1} = \ldots = W_{+4} = 1/5 \\
+W_{0} &amp;= 4\end{split}\]</div>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>30-second sampling frequency:</dt><dd><div class="math notranslate nohighlight">
+\[\begin{split}W_{-4} &amp;= W_{-3} = W_{+3} = W_{+4} = 1/25 \\
+W_{-2} &amp;= W_{-1} = W_{+1} = W_{+2} = 1/5 \\
+W_{0} &amp;= 2\end{split}\]</div>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>60-second sampling frequency:</dt><dd><div class="math notranslate nohighlight">
+\[\begin{split}W_{-2} &amp;= W_{+2} = 1/25 \\
+W_{-1} &amp;= W_{+1} = 1/5 \\
+W_{0} &amp;= 1\end{split}\]</div>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>120-second sampling frequency:</dt><dd><div class="math notranslate nohighlight">
+\[\begin{split}W_{-1} &amp;= W_{+1} = 1/8 \\
+W_{0} &amp;= 1/2\end{split}\]</div>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The <em>Automatic Wake Threshold Value</em> calculation is this <a class="reference internal" href="#rd68fc4e670ec-2" id="id3">[2]</a>:</p>
+<ol class="arabic simple">
+<li><p>Sum the activity counts for all epochs of the data set.</p></li>
+<li><p>Count the number of epochs scored as MOBILE for the data set
+(the definition of MOBILE follows).</p></li>
+<li><p>Compute the MOBILE TIME (number of epochs scored as MOBILE from
+step 2 multiplied by the Epoch Length) in minutes.</p></li>
+<li><p>Compute the Auto Wake Threshold = ((sum of activity counts from
+step 1) divided by (MOBILE TIME from step 3)) multiplied by 0.88888.</p></li>
+</ol>
+<p><em>Definition of Mobile</em> <a class="reference internal" href="#rd68fc4e670ec-2" id="id4">[2]</a>:</p>
+<p>An epoch is scored as MOBILE if the number of activity counts recorded
+in that epoch is greater than or equal to the epoch length in 15-second
+intervals. For example,there are four 15-second intervals for a
+1-minute epoch length; hence, the activity value in an epoch must be
+greater than, or equal to, four, to be scored as MOBILE.</p>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="rd68fc4e670ec-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Oakley, N.R. Validation with Polysomnography of the Sleepwatch
+Sleep/Wake Scoring Algorithm Used by the Actiwatch Activity
+Monitoring System; Technical Report; Mini-Mitter: Bend, OR, USA,
+1997</p>
+</dd>
+<dt class="label" id="rd68fc4e670ec-2"><span class="brackets">2</span><span class="fn-backref">(<a href="#id2">1</a>,<a href="#id3">2</a>,<a href="#id4">3</a>)</span></dt>
+<dd><p>Instruction manual, Actiwatch Communication and Sleep Analysis
+Software
+(<a class="reference external" href="https://fccid.io/JIAAWR1/Users-Manual/USERS-MANUAL-1-920937">https://fccid.io/JIAAWR1/Users-Manual/USERS-MANUAL-1-920937</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

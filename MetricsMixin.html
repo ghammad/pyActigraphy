@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metrics class &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="_static/js/jquery-1.11.0.min.js"></script>
+    <script src="_static/js/jquery-fix.js"></script>
+    <script src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="tutorials.html">Tutorials</a></li>
+                <li><a href="api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/MetricsMixin.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="metrics-class">
+<h1>Metrics class<a class="headerlink" href="#metrics-class" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="pyActigraphy.metrics.MetricsMixin">
+<em class="property">class </em><code class="sig-prename descclassname">pyActigraphy.metrics.</code><code class="sig-name descname">MetricsMixin</code><a class="reference internal" href="_modules/pyActigraphy/metrics/metrics.html#MetricsMixin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyActigraphy.metrics.MetricsMixin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mixin Class</p>
+<p class="rubric">Daily profiles</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.average_daily_activity.html#pyActigraphy.metrics.MetricsMixin.average_daily_activity" title="pyActigraphy.metrics.MetricsMixin.average_daily_activity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">average_daily_activity</span></code></a>([freq, cyclic, …])</p></td>
+<td><p>Average daily activity distribution</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.average_daily_light.html#pyActigraphy.metrics.MetricsMixin.average_daily_light" title="pyActigraphy.metrics.MetricsMixin.average_daily_light"><code class="xref py py-obj docutils literal notranslate"><span class="pre">average_daily_light</span></code></a>([freq, cyclic])</p></td>
+<td><p>Average daily light distribution</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Total activity</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.ADAT.html#pyActigraphy.metrics.MetricsMixin.ADAT" title="pyActigraphy.metrics.MetricsMixin.ADAT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ADAT</span></code></a>([binarize, threshold])</p></td>
+<td><p>Total average daily activity</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.ADATp.html#pyActigraphy.metrics.MetricsMixin.ADATp" title="pyActigraphy.metrics.MetricsMixin.ADATp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ADATp</span></code></a>([period, binarize, threshold, verbose])</p></td>
+<td><p>Total average daily activity per period</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Non-parametric methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.IS.html#pyActigraphy.metrics.MetricsMixin.IS" title="pyActigraphy.metrics.MetricsMixin.IS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IS</span></code></a>([freq, binarize, threshold])</p></td>
+<td><p>Interdaily stability</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.ISm.html#pyActigraphy.metrics.MetricsMixin.ISm" title="pyActigraphy.metrics.MetricsMixin.ISm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ISm</span></code></a>([freqs, binarize, threshold])</p></td>
+<td><p>Average interdaily stability</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.ISp.html#pyActigraphy.metrics.MetricsMixin.ISp" title="pyActigraphy.metrics.MetricsMixin.ISp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ISp</span></code></a>([period, freq, binarize, threshold, verbose])</p></td>
+<td><p>Interdaily stability per period</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.IV.html#pyActigraphy.metrics.MetricsMixin.IV" title="pyActigraphy.metrics.MetricsMixin.IV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IV</span></code></a>([freq, binarize, threshold])</p></td>
+<td><p>Intradaily variability</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.IVm.html#pyActigraphy.metrics.MetricsMixin.IVm" title="pyActigraphy.metrics.MetricsMixin.IVm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IVm</span></code></a>([freqs, binarize, threshold])</p></td>
+<td><p>Average intradaily variability</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.IVp.html#pyActigraphy.metrics.MetricsMixin.IVp" title="pyActigraphy.metrics.MetricsMixin.IVp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IVp</span></code></a>([period, freq, binarize, threshold, verbose])</p></td>
+<td><p>Intradaily variability per period</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.L5.html#pyActigraphy.metrics.MetricsMixin.L5" title="pyActigraphy.metrics.MetricsMixin.L5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">L5</span></code></a>([binarize, threshold])</p></td>
+<td><p>Mean activity during the 5 least active hours of the day.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.L5p.html#pyActigraphy.metrics.MetricsMixin.L5p" title="pyActigraphy.metrics.MetricsMixin.L5p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">L5p</span></code></a>([period, binarize, threshold, verbose])</p></td>
+<td><p>L5 per period</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.M10.html#pyActigraphy.metrics.MetricsMixin.M10" title="pyActigraphy.metrics.MetricsMixin.M10"><code class="xref py py-obj docutils literal notranslate"><span class="pre">M10</span></code></a>([binarize, threshold])</p></td>
+<td><p>Mean activity during the 10 most active hours of the day.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.M10p.html#pyActigraphy.metrics.MetricsMixin.M10p" title="pyActigraphy.metrics.MetricsMixin.M10p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">M10p</span></code></a>([period, binarize, threshold, verbose])</p></td>
+<td><p>M10 per period</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.RA.html#pyActigraphy.metrics.MetricsMixin.RA" title="pyActigraphy.metrics.MetricsMixin.RA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RA</span></code></a>([binarize, threshold])</p></td>
+<td><p>Relative rest/activity amplitude</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.RAp.html#pyActigraphy.metrics.MetricsMixin.RAp" title="pyActigraphy.metrics.MetricsMixin.RAp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RAp</span></code></a>([period, binarize, threshold, verbose])</p></td>
+<td><p>RA per period</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Transition probabilities</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.pRA.html#pyActigraphy.metrics.MetricsMixin.pRA" title="pyActigraphy.metrics.MetricsMixin.pRA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pRA</span></code></a>(threshold[, start, period])</p></td>
+<td><p>Rest-&gt;Activity transition probability distribution</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.pAR.html#pyActigraphy.metrics.MetricsMixin.pAR" title="pyActigraphy.metrics.MetricsMixin.pAR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pAR</span></code></a>(threshold[, start, period])</p></td>
+<td><p>Activity-&gt;Rest transition probability distribution</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.kRA.html#pyActigraphy.metrics.MetricsMixin.kRA" title="pyActigraphy.metrics.MetricsMixin.kRA"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kRA</span></code></a>(threshold[, start, period, frac, it, …])</p></td>
+<td><p>Rest-&gt;Activity transition probability</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.metrics.MetricsMixin.kAR.html#pyActigraphy.metrics.MetricsMixin.kAR" title="pyActigraphy.metrics.MetricsMixin.kAR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">kAR</span></code></a>(threshold[, start, period, frac, it, …])</p></td>
+<td><p>Rest-&gt;Activity transition probability</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

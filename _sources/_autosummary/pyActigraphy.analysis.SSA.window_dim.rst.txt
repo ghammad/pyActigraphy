@@ -1,0 +1,6 @@
+pyActigraphy.analysis.SSA.window\_dim
+=====================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: SSA.window_dim

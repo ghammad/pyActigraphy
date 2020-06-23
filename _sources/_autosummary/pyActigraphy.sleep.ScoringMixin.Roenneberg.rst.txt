@@ -1,0 +1,6 @@
+pyActigraphy.sleep.ScoringMixin.Roenneberg
+==========================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: ScoringMixin.Roenneberg

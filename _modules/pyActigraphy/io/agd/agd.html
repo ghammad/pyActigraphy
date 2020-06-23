@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.io.agd.agd &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../../../../_static/js/jquery-fix.js"></script>
+    <script src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../../tutorials.html">Tutorials</a></li>
+                <li><a href="../../../../api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for pyActigraphy.io.agd.agd</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">BaseRaw</span>
+
+
+<span class="k">class</span> <span class="nc">RawAGD</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Raw object from .agd file (recorded by Actigraph)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_fname: str</span>
+<span class="sd">        Path to the AGD file.</span>
+<span class="sd">    start_time: datetime-like, optional</span>
+<span class="sd">        Read data from this time.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    period: str, optional</span>
+<span class="sd">        Length of the read data.</span>
+<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        Default is None (i.e all the data).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_fname</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># end_time=None,</span>
+        <span class="n">period</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+
+        <span class="c1"># get absolute file path</span>
+        <span class="n">input_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span>
+        <span class="c1"># [TO-DO] check if file exists</span>
+        <span class="c1"># [TO-DO] check it is has the right file extension .agd</span>
+
+        <span class="c1"># create connection to the SQLITE3 .agd file in read-only mode</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;file:&#39;</span><span class="o">+</span><span class="n">input_fname</span><span class="o">+</span><span class="s1">&#39;?mode=ro&#39;</span><span class="p">,</span> <span class="n">uri</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># extract header and data size</span>
+        <span class="n">settings</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span>
+            <span class="s2">&quot;SELECT * FROM settings&quot;</span><span class="p">,</span>
+            <span class="n">connection</span><span class="p">,</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;settingName&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># extract informations from the header</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="s1">&#39;subjectname&#39;</span><span class="p">,</span> <span class="s1">&#39;settingValue&#39;</span><span class="p">]</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="s1">&#39;deviceserial&#39;</span><span class="p">,</span> <span class="s1">&#39;settingValue&#39;</span><span class="p">]</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__to_timestamps</span><span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="s1">&#39;startdatetime&#39;</span><span class="p">,</span> <span class="s1">&#39;settingValue&#39;</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="s1">&#39;epochlength&#39;</span><span class="p">,</span> <span class="s1">&#39;settingValue&#39;</span><span class="p">]),</span>
+            <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># extract proximity (wear/no-wear) informations</span>
+        <span class="n">capsense</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span>
+            <span class="s2">&quot;SELECT state, timeStamp FROM capsense&quot;</span><span class="p">,</span>
+            <span class="n">connection</span><span class="p">,</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;timeStamp&#39;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+        <span class="c1"># convert index to a date time</span>
+        <span class="n">capsense</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__to_timestamps</span><span class="p">(</span><span class="n">capsense</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="c1"># set index frequency</span>
+        <span class="k">if</span> <span class="s1">&#39;proximityIntervalInSeconds&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">capsense</span> <span class="o">=</span> <span class="n">capsense</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span>
+                    <span class="nb">int</span><span class="p">(</span>
+                        <span class="n">settings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span>
+                            <span class="s1">&#39;proximityIntervalInSeconds&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;settingValue&#39;</span>
+                        <span class="p">]</span>
+                    <span class="p">),</span>
+                    <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">capsense</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">inferred_freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">capsense</span> <span class="o">=</span> <span class="n">capsense</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="n">capsense</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">inferred_freq</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s1">&#39;Acquisition frequency for the wearing sensor data &#39;</span> <span class="o">+</span>
+                <span class="s1">&#39;(capsense) could neither be retrieved nor inferred from &#39;</span> <span class="o">+</span>
+                <span class="s1">&#39;the data.</span><span class="se">\n</span><span class="s1"> Use this information at your own risk&#39;</span><span class="p">,</span>
+                <span class="ne">UserWarning</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">capsense</span> <span class="o">=</span> <span class="n">capsense</span>
+
+        <span class="c1"># extract acceleration and light data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span>
+            <span class="s2">&quot;SELECT * FROM data&quot;</span><span class="p">,</span>
+            <span class="n">connection</span><span class="p">,</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;dataTimestamp&#39;</span>
+        <span class="p">)</span>
+        <span class="c1"># convert index to a date time</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__to_timestamps</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="c1"># set index frequency</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="n">freq</span><span class="p">)</span>
+
+        <span class="c1"># calculate the magnitude of the acceleration vector.</span>
+        <span class="n">data</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis1&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis1&#39;</span><span class="p">]</span> <span class="o">+</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis2&#39;</span><span class="p">]</span> <span class="o">+</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis3&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis3&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_time</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">start</span>
+
+        <span class="k">if</span> <span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">period</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+            <span class="n">stop_time</span> <span class="o">=</span> <span class="n">start_time</span><span class="o">+</span><span class="n">period</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stop_time</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">period</span> <span class="o">=</span> <span class="n">stop_time</span> <span class="o">-</span> <span class="n">start_time</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_time</span><span class="p">:</span><span class="n">stop_time</span><span class="p">]</span>
+
+        <span class="c1"># call __init__ function of the base class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
+            <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;AGD&#39;</span><span class="p">,</span>
+            <span class="n">axial_mode</span><span class="o">=</span><span class="s1">&#39;tri-axial&#39;</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+            <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+            <span class="n">frequency</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">],</span>
+            <span class="n">light</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;lux&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;lux&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Close sqlite3 connection</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__to_timestamps</span><span class="p">(</span><span class="n">ticks</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">ticks</span><span class="o">/</span><span class="mi">10000000</span><span class="p">)</span> <span class="o">-</span> <span class="mi">62135596800</span><span class="p">,</span>
+            <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span>
+        <span class="p">)</span>
+
+
+<div class="viewcode-block" id="read_raw_agd"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_agd.html#pyActigraphy.io.read_raw_agd">[docs]</a><span class="k">def</span> <span class="nf">read_raw_agd</span><span class="p">(</span>
+    <span class="n">input_fname</span><span class="p">,</span>
+    <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">period</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for raw AWD file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_fname: str</span>
+<span class="sd">        Path to the AGD file.</span>
+<span class="sd">    start_time: datetime-like, optional</span>
+<span class="sd">        Read data from this time.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    period: str, optional</span>
+<span class="sd">        Length of the read data.</span>
+<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        Default is None (i.e all the data).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    raw : Instance of RawAWD</span>
+<span class="sd">        An object containing raw AWD data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">RawAGD</span><span class="p">(</span>
+        <span class="n">input_fname</span><span class="o">=</span><span class="n">input_fname</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+        <span class="n">period</span><span class="o">=</span><span class="n">period</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

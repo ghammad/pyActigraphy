@@ -1,0 +1,6 @@
+pyActigraphy.metrics.MetricsMixin.ISp
+=====================================
+
+.. currentmodule:: pyActigraphy.metrics
+
+.. automethod:: MetricsMixin.ISp

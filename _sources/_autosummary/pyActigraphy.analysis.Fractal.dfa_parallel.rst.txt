@@ -1,0 +1,6 @@
+pyActigraphy.analysis.Fractal.dfa\_parallel
+===========================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: Fractal.dfa_parallel

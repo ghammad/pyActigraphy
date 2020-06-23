@@ -1,0 +1,6 @@
+pyActigraphy.analysis.LIDS.lids\_summary
+========================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: LIDS.lids_summary

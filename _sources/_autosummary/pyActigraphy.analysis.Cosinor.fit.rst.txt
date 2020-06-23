@@ -1,0 +1,6 @@
+pyActigraphy.analysis.Cosinor.fit
+=================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: Cosinor.fit

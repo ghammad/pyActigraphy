@@ -1,0 +1,6 @@
+pyActigraphy.sleep.SleepBoutMixin.active\_bouts
+===============================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: SleepBoutMixin.active_bouts

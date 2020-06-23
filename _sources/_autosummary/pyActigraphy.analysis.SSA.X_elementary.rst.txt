@@ -1,0 +1,6 @@
+pyActigraphy.analysis.SSA.X\_elementary
+=======================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: SSA.X_elementary

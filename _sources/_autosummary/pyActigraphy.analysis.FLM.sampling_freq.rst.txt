@@ -1,0 +1,6 @@
+pyActigraphy.analysis.FLM.sampling\_freq
+========================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: FLM.sampling_freq

@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pyActigraphy.io.BaseRaw.Sadeh &#8212; pyActigraphy 0.2 documentation</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.io.BaseRaw.Sadeh &#8212; pyActigraphy 1.Orc1 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../_static/js/jquery-fix.js"></script>
+    <script src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
 <meta charset='utf-8'>
@@ -35,15 +36,15 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pyActigraphy_logo.png"></span>
+        <a class="navbar-brand" href="../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
-                <li><a href="../documentation.html">Documentation</a></li>
+                <li><a href="../tutorials.html">Tutorials</a></li>
                 <li><a href="../api.html">API</a></li>
             
             
@@ -91,65 +92,57 @@
       
   <div class="section" id="pyactigraphy-io-baseraw-sadeh">
 <h1>pyActigraphy.io.BaseRaw.Sadeh<a class="headerlink" href="#pyactigraphy-io-baseraw-sadeh" title="Permalink to this headline">¶</a></h1>
-<dl class="method">
+<dl class="py method">
 <dt id="pyActigraphy.io.BaseRaw.Sadeh">
-<code class="descclassname">BaseRaw.</code><code class="descname">Sadeh</code><span class="sig-paren">(</span><em>offset=7.601</em>, <em>weights=array([-0.065</em>, <em>-1.08</em>, <em>-0.056</em>, <em>-0.703])</em>, <em>threshold=0.0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.Sadeh" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">BaseRaw.</code><code class="sig-name descname">Sadeh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">7.601</span></em>, <em class="sig-param"><span class="n">weights</span><span class="o">=</span><span class="default_value">array([- 0.065, - 1.08, - 0.056, - 0.703])</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.Sadeh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sadeh algorithm for sleep identification</p>
 <p>Algorithm for automatic sleep scoring based on wrist activity,
 developped by Sadeh et al <a class="reference internal" href="#r84df5a90cd40-1" id="id1">[1]</a>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>offset</strong> (<em>float</em><em>, </em><em>optional</em>) – Offset parameter.
-Default is 7.601.</li>
-<li><strong>weights</strong> (<em>np.array</em>) – Array of weighting factors for mean_W5, NAT, sd_Last6 and logAct.
-Default is [-0.065, -1.08, -0.056, -0.703].</li>
-<li><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold value for scoring sleep/wake.
-Default is 0.0.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>offset</strong> (<em>float</em><em>, </em><em>optional</em>) – Offset parameter.
+Default is 7.601.</p></li>
+<li><p><strong>weights</strong> (<em>np.array</em>) – Array of weighting factors for mean_W5, NAT, sd_Last6 and logAct.
+Default is [-0.065, -1.08, -0.056, -0.703].</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold value for scoring sleep/wake.
+Default is 0.0.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <p class="rubric">Notes</p>
 <p>The output variable PS of the Sadeh algorithm is defined in <a class="reference internal" href="#r84df5a90cd40-2" id="id2">[2]</a> as:</p>
 <div class="math notranslate nohighlight">
 \[PS = 7.601-0.065·mean_W5-1.08·NAT-0.056·sd_Last6-0.703·logAct\]</div>
 <p>with:</p>
 <ul class="simple">
-<li>PS &gt;= 0 == sleep, PS &lt; 0 == wake;</li>
-<li>mean_W5, the average number of activity counts during the scored
-epoch and the window of five epochs preceding and following it;</li>
-<li>sd_Last6, the standard deviation of the activity counts during
-the scored epoch and the five epochs preceding it;</li>
-<li>NAT, the number of epochs with activity level equal to or higher
+<li><p>PS &gt;= 0 == sleep, PS &lt; 0 == wake;</p></li>
+<li><p>mean_W5, the average number of activity counts during the scored
+epoch and the window of five epochs preceding and following it;</p></li>
+<li><p>sd_Last6, the standard deviation of the activity counts during
+the scored epoch and the five epochs preceding it;</p></li>
+<li><p>NAT, the number of epochs with activity level equal to or higher
 than 50 but lower than 100 activity counts in a window of 11 minutes
 that includes the scored epoch and the five epochs preceding and
-following it;</li>
-<li>logAct, the natural logarithm of the number of activity counts during
-the scored epoch + 1.</li>
+following it;</p></li>
+<li><p>logAct, the natural logarithm of the number of activity counts during
+the scored epoch + 1.</p></li>
 </ul>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="r84df5a90cd40-1" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Sadeh, A., Alster, J., Urbach, D., &amp; Lavie, P. (1989).
+<dl class="citation">
+<dt class="label" id="r84df5a90cd40-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Sadeh, A., Alster, J., Urbach, D., &amp; Lavie, P. (1989).
 Actigraphically based automatic bedtime sleep-wake scoring:
 validity and clinical applications.
-Journal of ambulatory monitoring, 2(3), 209-216.</td></tr>
-</tbody>
-</table>
-<table class="docutils citation" frame="void" id="r84df5a90cd40-2" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Sadeh, A., Sharkey, M., &amp; Carskadon, M. A. (1994).
+Journal of ambulatory monitoring, 2(3), 209-216.</p>
+</dd>
+<dt class="label" id="r84df5a90cd40-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Sadeh, A., Sharkey, M., &amp; Carskadon, M. A. (1994).
 Activity-Based Sleep-Wake Identification: An Empirical Test of
 Methodological Issues. Sleep, 17(3), 201–207.
-<a class="reference external" href="http://doi.org/10.1093/sleep/17.3.201">http://doi.org/10.1093/sleep/17.3.201</a></td></tr>
-</tbody>
-</table>
+<a class="reference external" href="http://doi.org/10.1093/sleep/17.3.201">http://doi.org/10.1093/sleep/17.3.201</a></p>
+</dd>
+</dl>
 <p class="rubric">Examples</p>
 </dd></dl>
 
@@ -167,8 +160,8 @@ Methodological Issues. Sleep, 17(3), 201–207.
       
     </p>
     <p>
-        &copy; Copyright 2018-2019, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.<br/>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
     </p>
   </div>
 </footer>

@@ -1,0 +1,6 @@
+pyActigraphy.analysis.LIDS.lids\_fit\_initial\_params
+=====================================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: LIDS.lids_fit_initial_params

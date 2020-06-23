@@ -1,0 +1,6 @@
+pyActigraphy.analysis.Fractal.segmentation
+==========================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: Fractal.segmentation

@@ -1,0 +1,6 @@
+pyActigraphy.sleep.SleepDiary.state\_infos
+==========================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: SleepDiary.state_infos

@@ -1,0 +1,6 @@
+pyActigraphy.log.SSTLog.summary
+===============================
+
+.. currentmodule:: pyActigraphy.log
+
+.. automethod:: SSTLog.summary

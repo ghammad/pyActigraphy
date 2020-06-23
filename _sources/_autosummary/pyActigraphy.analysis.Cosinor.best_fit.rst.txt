@@ -1,0 +1,6 @@
+pyActigraphy.analysis.Cosinor.best\_fit
+=======================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: Cosinor.best_fit

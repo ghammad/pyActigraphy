@@ -1,0 +1,6 @@
+pyActigraphy.analysis.FLM.fit
+=============================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: FLM.fit

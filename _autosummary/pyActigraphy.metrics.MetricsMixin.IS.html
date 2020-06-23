@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.metrics.MetricsMixin.IS &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../_static/js/jquery-fix.js"></script>
+    <script src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../tutorials.html">Tutorials</a></li>
+                <li><a href="../api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../_sources/_autosummary/pyActigraphy.metrics.MetricsMixin.IS.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="pyactigraphy-metrics-metricsmixin-is">
+<h1>pyActigraphy.metrics.MetricsMixin.IS<a class="headerlink" href="#pyactigraphy-metrics-metricsmixin-is" title="Permalink to this headline">¶</a></h1>
+<dl class="py method">
+<dt id="pyActigraphy.metrics.MetricsMixin.IS">
+<code class="sig-prename descclassname">MetricsMixin.</code><code class="sig-name descname">IS</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">freq</span><span class="o">=</span><span class="default_value">'1H'</span></em>, <em class="sig-param"><span class="n">binarize</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">4</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/metrics/metrics.html#MetricsMixin.IS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyActigraphy.metrics.MetricsMixin.IS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interdaily stability</p>
+<p>The Interdaily stability (IS) quantifies the repeatibilty of the
+daily rest-activity pattern over each day contained in the activity
+recording.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>freq</strong> (<em>str</em><em>, </em><em>optional</em>) – Data resampling <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/timeseries.html">frequency string</a>.
+Default is ‘1H’.</p></li>
+<li><p><strong>binarize</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, the data are binarized.
+Default is True.</p></li>
+<li><p><strong>threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – If binarize is set to True, data above this threshold are set to 1
+and to 0 otherwise.
+Default is 4.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>is</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>This variable is defined in ref <a class="reference internal" href="#r6eb3c386e188-1" id="id1">[1]</a>:</p>
+<div class="math notranslate nohighlight">
+\[IS = \frac{d^{24h}}{d^{1h}}\]</div>
+<p>with:</p>
+<div class="math notranslate nohighlight">
+\[d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}\]</div>
+<p>where <span class="math notranslate nohighlight">\(x_{i}\)</span> is the number of active (counts higher than a
+predefined threshold) minutes during the <span class="math notranslate nohighlight">\(i^{th}\)</span> period,
+<span class="math notranslate nohighlight">\(\bar{x}\)</span> is the mean of all data and <span class="math notranslate nohighlight">\(n\)</span> is the number of
+periods covered by the actigraphy data and with:</p>
+<div class="math notranslate nohighlight">
+\[d^{24h} = \sum_{i}^{p} \frac{
+          \left( \bar{x}_{h,i} - \bar{x} \right)^{2}
+          }{p}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\bar{x}^{h,i}\)</span> is the average number of active minutes
+over the <span class="math notranslate nohighlight">\(i^{th}\)</span> period and <span class="math notranslate nohighlight">\(p\)</span> is the number of periods
+per day. The average runs over all the days.</p>
+<p>For the record, tt is the 24h value from the chi-square periodogram
+(Sokolove and Bushel1 1978).</p>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r6eb3c386e188-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Witting W., Kwa I.H., Eikelenboom P., Mirmiran M., Swaab D.F.
+Alterations in the circadian rest–activity rhythm in aging and
+Alzheimer׳s disease. Biol Psychiatry. 1990;27:563–572.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span> <span class="o">=</span> <span class="n">pyActigraphy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw_awd</span><span class="p">(</span><span class="n">fpath</span> <span class="o">+</span> <span class="s1">&#39;SUBJECT_01.AWD&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span><span class="o">.</span><span class="n">IS</span><span class="p">()</span>
+<span class="go">0.6900175913031027</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span><span class="o">.</span><span class="n">IS</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;30min&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">0.6245582891144925</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span><span class="o">.</span><span class="n">IS</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="go">0.5257020914453097</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+pyActigraphy.analysis.SSA.lambda\_s
+===================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: SSA.lambda_s

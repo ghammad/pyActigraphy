@@ -1,0 +1,6 @@
+pyActigraphy.sleep.ScoringMixin.Sadeh
+=====================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: ScoringMixin.Sadeh

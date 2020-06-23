@@ -1,0 +1,10 @@
+pyActigraphy.io.read_raw_dqt
+============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. autofunction:: read_raw_dqt
+
+.. raw:: html
+
+    <div style='clear:both'></div>

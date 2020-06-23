@@ -1,0 +1,6 @@
+pyActigraphy.analysis.FLM.evaluate
+==================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: FLM.evaluate

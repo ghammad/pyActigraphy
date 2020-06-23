@@ -1,0 +1,6 @@
+pyActigraphy.metrics.MetricsMixin.average\_daily\_light
+=======================================================
+
+.. currentmodule:: pyActigraphy.metrics
+
+.. automethod:: MetricsMixin.average_daily_light

@@ -1,0 +1,6 @@
+pyActigraphy.analysis.LIDS.lids\_convert\_to\_internal\_time
+============================================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: LIDS.lids_convert_to_internal_time

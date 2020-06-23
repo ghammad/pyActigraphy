@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pyActigraphy.io.BaseRaw.read_sleep_diary &#8212; pyActigraphy 0.2 documentation</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.io.BaseRaw.read_sleep_diary &#8212; pyActigraphy 1.Orc1 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../_static/js/jquery-fix.js"></script>
+    <script src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
 <meta charset='utf-8'>
@@ -35,15 +36,15 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pyActigraphy_logo.png"></span>
+        <a class="navbar-brand" href="../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
-                <li><a href="../documentation.html">Documentation</a></li>
+                <li><a href="../tutorials.html">Tutorials</a></li>
                 <li><a href="../api.html">API</a></li>
             
             
@@ -91,27 +92,23 @@
       
   <div class="section" id="pyactigraphy-io-baseraw-read-sleep-diary">
 <h1>pyActigraphy.io.BaseRaw.read_sleep_diary<a class="headerlink" href="#pyactigraphy-io-baseraw-read-sleep-diary" title="Permalink to this headline">¶</a></h1>
-<dl class="method">
+<dl class="py method">
 <dt id="pyActigraphy.io.BaseRaw.read_sleep_diary">
-<code class="descclassname">BaseRaw.</code><code class="descname">read_sleep_diary</code><span class="sig-paren">(</span><em>input_fname</em>, <em>header_size=2</em>, <em>state_index={'ACTIVE': 2</em>, <em>'NAP': 1</em>, <em>'NIGHT': 0</em>, <em>'NOWEAR': -1}</em>, <em>state_colour={'NAP': '#7bc043'</em>, <em>'NIGHT': '#d3d3d3'</em>, <em>'NOWEAR': '#ee4035'}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/io/base.html#BaseRaw.read_sleep_diary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.read_sleep_diary" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">BaseRaw.</code><code class="sig-name descname">read_sleep_diary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_fname</span></em>, <em class="sig-param"><span class="n">header_size</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">state_index</span><span class="o">=</span><span class="default_value">{'ACTIVE': 2, 'NAP': 1, 'NIGHT': 0, 'NOWEAR': - 1}</span></em>, <em class="sig-param"><span class="n">state_colour</span><span class="o">=</span><span class="default_value">{'NAP': '#7bc043', 'NIGHT': '#d3d3d3', 'NOWEAR': '#ee4035'}</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/io/base.html#BaseRaw.read_sleep_diary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.read_sleep_diary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reader function for sleep diaries.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>input_fname</strong> (<em>str</em>) – Path to the sleep diary file.</li>
-<li><strong>header_size</strong> (<em>int</em>) – Header size (i.e. number of lines) of the sleep diary.
-Default is 2.</li>
-<li><strong>state_index</strong> (<em>dict</em>) – The dictionnary of state’s indices.
-Default is ACTIVE=2, NAP=1, NIGHT=0, NOWEAR=-1.</li>
-<li><strong>state_color</strong> (<em>dict</em>) – The dictionnary of state’s colours.
-Default is NAP=’#7bc043’, NIGHT=’#d3d3d3’, NOWEAR=’#ee4035’.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_fname</strong> (<em>str</em>) – Path to the sleep diary file.</p></li>
+<li><p><strong>header_size</strong> (<em>int</em>) – Header size (i.e. number of lines) of the sleep diary.
+Default is 2.</p></li>
+<li><p><strong>state_index</strong> (<em>dict</em>) – The dictionnary of state’s indices.
+Default is ACTIVE=2, NAP=1, NIGHT=0, NOWEAR=-1.</p></li>
+<li><p><strong>state_color</strong> (<em>dict</em>) – The dictionnary of state’s colours.
+Default is NAP=’#7bc043’, NIGHT=’#d3d3d3’, NOWEAR=’#ee4035’.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -128,8 +125,8 @@ Default is NAP=’#7bc043’, NIGHT=’#d3d3d3’, NOWEAR=’#ee4035’.</li>
       
     </p>
     <p>
-        &copy; Copyright 2018-2019, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.<br/>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
     </p>
   </div>
 </footer>

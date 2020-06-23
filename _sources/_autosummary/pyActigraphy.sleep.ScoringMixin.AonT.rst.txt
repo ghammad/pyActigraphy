@@ -1,0 +1,6 @@
+pyActigraphy.sleep.ScoringMixin.AonT
+====================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: ScoringMixin.AonT

@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>pyActigraphy.io.BaseRaw.CK &#8212; pyActigraphy 0.2 documentation</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.io.BaseRaw.CK &#8212; pyActigraphy 1.Orc1 documentation</title>
     <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
-    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../_static/js/jquery-fix.js"></script>
+    <script src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../_static/bootstrap-sphinx.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
 <meta charset='utf-8'>
@@ -35,15 +36,15 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="../index.html"><span><img src="../_static/pyActigraphy_logo.png"></span>
+        <a class="navbar-brand" href="../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>0.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
           <ul class="nav navbar-nav">
             
-                <li><a href="../documentation.html">Documentation</a></li>
+                <li><a href="../tutorials.html">Tutorials</a></li>
                 <li><a href="../api.html">API</a></li>
             
             
@@ -91,35 +92,31 @@
       
   <div class="section" id="pyactigraphy-io-baseraw-ck">
 <h1>pyActigraphy.io.BaseRaw.CK<a class="headerlink" href="#pyactigraphy-io-baseraw-ck" title="Permalink to this headline">¶</a></h1>
-<dl class="method">
+<dl class="py method">
 <dt id="pyActigraphy.io.BaseRaw.CK">
-<code class="descclassname">BaseRaw.</code><code class="descname">CK</code><span class="sig-paren">(</span><em>scale=1e-05, window=array([ 400,  600,  300,  400, 1400,  500,  350,    0,    0], dtype=int32), threshold=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.CK" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">BaseRaw.</code><code class="sig-name descname">CK</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">window</span><span class="o">=</span><span class="default_value">array([400, 600, 300, 400, 1400, 500, 350, 0, 0], dtype=int32)</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">1.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.CK" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cole&amp;Kripke algorithm for sleep-wake identification.</p>
 <p>Algorithm for automatic sleep scoring based on wrist activity,
 developped by Cole, Kripke et al <a class="reference internal" href="#rb23f536509f7-1" id="id1">[1]</a>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>scale</strong> (<em>float</em><em>, </em><em>optional</em>) – Scale parameter P.
-Default is 0.00001.</li>
-<li><strong>window</strong> (<em>np.array</em>) – Array of weighting factors, <span class="math notranslate nohighlight">\(W_{i}\)</span>.
-Default is [400, 600, 300, 400, 1400, 500, 350, 0, 0]</li>
-<li><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold value for scoring sleep/wake.
-Default is 1.0.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scale</strong> (<em>float</em><em>, </em><em>optional</em>) – Scale parameter P.
+Default is 0.00001.</p></li>
+<li><p><strong>window</strong> (<em>np.array</em>) – Array of weighting factors, <span class="math notranslate nohighlight">\(W_{i}\)</span>.
+Default is [400, 600, 300, 400, 1400, 500, 350, 0, 0]</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold value for scoring sleep/wake.
+Default is 1.0.</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ck</strong> – Time series containing the <cite>D</cite> scores (0: sleep, 1: wake) for each
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>ck</strong> – Time series containing the <cite>D</cite> scores (0: sleep, 1: wake) for each
 epoch.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.core.Series</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.core.Series</p>
+</dd>
+</dl>
 <p class="rubric">Notes</p>
 <p>The output variable D of the CK algorithm is defined in <a class="reference internal" href="#rb23f536509f7-1" id="id2">[1]</a> as:</p>
 <div class="math notranslate nohighlight">
@@ -129,23 +126,22 @@ epoch.</p>
     [A_{-4},\dots,A_{0},\dots,A_{+2}])\]</div>
 <p>with:</p>
 <ul class="simple">
-<li>D &lt; 1 == sleep, D &gt;= 1 == wake;</li>
-<li>P, scale factor;</li>
-<li><span class="math notranslate nohighlight">\(W_{0},W_{-1},W_{+1},\dots\)</span>, weighting factors for the present
-minute, the previous minute, the following minute, etc.;</li>
-<li><span class="math notranslate nohighlight">\(A_{0},A_{-1},A_{+1},\dots\)</span>, activity scores for the present
-minute, the previous minute, the following minute, etc.</li>
+<li><p>D &lt; 1 == sleep, D &gt;= 1 == wake;</p></li>
+<li><p>P, scale factor;</p></li>
+<li><p><span class="math notranslate nohighlight">\(W_{0},W_{-1},W_{+1},\dots\)</span>, weighting factors for the present
+minute, the previous minute, the following minute, etc.;</p></li>
+<li><p><span class="math notranslate nohighlight">\(A_{0},A_{-1},A_{+1},\dots\)</span>, activity scores for the present
+minute, the previous minute, the following minute, etc.</p></li>
 </ul>
 <p class="rubric">References</p>
-<table class="docutils citation" frame="void" id="rb23f536509f7-1" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>)</em> Cole, R. J., Kripke, D. F., Gruen, W., Mullaney, D. J.,
+<dl class="citation">
+<dt class="label" id="rb23f536509f7-1"><span class="brackets">1</span><span class="fn-backref">(<a href="#id1">1</a>,<a href="#id2">2</a>)</span></dt>
+<dd><p>Cole, R. J., Kripke, D. F., Gruen, W., Mullaney, D. J.,
 &amp; Gillin, J. C. (1992). Automatic Sleep/Wake Identification
 From Wrist Activity. Sleep, 15(5), 461–469.
-<a class="reference external" href="http://doi.org/10.1093/sleep/15.5.461">http://doi.org/10.1093/sleep/15.5.461</a></td></tr>
-</tbody>
-</table>
+<a class="reference external" href="http://doi.org/10.1093/sleep/15.5.461">http://doi.org/10.1093/sleep/15.5.461</a></p>
+</dd>
+</dl>
 <p class="rubric">Examples</p>
 </dd></dl>
 
@@ -163,8 +159,8 @@ From Wrist Activity. Sleep, 15(5), 461–469.
       
     </p>
     <p>
-        &copy; Copyright 2018-2019, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.<br/>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
     </p>
   </div>
 </footer>

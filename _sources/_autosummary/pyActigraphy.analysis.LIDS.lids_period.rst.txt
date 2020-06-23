@@ -1,0 +1,6 @@
+pyActigraphy.analysis.LIDS.lids\_period
+=======================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: LIDS.lids_period

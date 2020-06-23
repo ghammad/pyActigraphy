@@ -1,0 +1,6 @@
+pyActigraphy.sleep.SleepDiary.total\_nowear\_time
+=================================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: SleepDiary.total_nowear_time

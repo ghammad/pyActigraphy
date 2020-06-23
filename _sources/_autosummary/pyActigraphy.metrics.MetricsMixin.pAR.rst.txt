@@ -1,0 +1,6 @@
+pyActigraphy.metrics.MetricsMixin.pAR
+=====================================
+
+.. currentmodule:: pyActigraphy.metrics
+
+.. automethod:: MetricsMixin.pAR

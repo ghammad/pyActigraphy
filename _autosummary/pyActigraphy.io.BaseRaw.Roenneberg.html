@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.io.BaseRaw.Roenneberg &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../_static/js/jquery-fix.js"></script>
+    <script src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../tutorials.html">Tutorials</a></li>
+                <li><a href="../api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../_sources/_autosummary/pyActigraphy.io.BaseRaw.Roenneberg.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="pyactigraphy-io-baseraw-roenneberg">
+<h1>pyActigraphy.io.BaseRaw.Roenneberg<a class="headerlink" href="#pyactigraphy-io-baseraw-roenneberg" title="Permalink to this headline">¶</a></h1>
+<dl class="py method">
+<dt id="pyActigraphy.io.BaseRaw.Roenneberg">
+<code class="sig-prename descclassname">BaseRaw.</code><code class="sig-name descname">Roenneberg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trend_period</span><span class="o">=</span><span class="default_value">'24h'</span></em>, <em class="sig-param"><span class="n">min_trend_period</span><span class="o">=</span><span class="default_value">'12h'</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">0.15</span></em>, <em class="sig-param"><span class="n">min_seed_period</span><span class="o">=</span><span class="default_value">'30Min'</span></em>, <em class="sig-param"><span class="n">max_test_period</span><span class="o">=</span><span class="default_value">'12h'</span></em>, <em class="sig-param"><span class="n">n_succ</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.Roenneberg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatic sleep detection.</p>
+<p>Identification of consolidated sleep episodes using the
+algorithm developped by Roenneberg et al. <a class="reference internal" href="#r9aa8a3ceddee-1" id="id1">[1]</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trend_period</strong> (<em>str</em><em>, </em><em>optional</em>) – Time period of the rolling window used to extract the data trend.
+Default is ‘24h’.</p></li>
+<li><p><strong>min_trend_period</strong> (<em>str</em><em>, </em><em>optional</em>) – Minimum time period required for the rolling window to produce a
+value. Values default to NaN otherwise.
+Default is ‘12h’.</p></li>
+<li><p><strong>threshold</strong> (<em>float</em><em>, </em><em>optional</em>) – Fraction of the trend to use as a threshold for sleep/wake
+categorization.
+Default is ‘0.15’</p></li>
+<li><p><strong>min_seed_period</strong> (<em>str</em><em>, </em><em>optional</em>) – Minimum time period required to identify a potential sleep onset.
+Default is ‘30Min’.</p></li>
+<li><p><strong>max_test_period</strong> (<em>str</em><em>, </em><em>optional</em>) – Maximal period of the test series.
+Default is ‘12h’</p></li>
+<li><p><strong>n_succ</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of successive elements to consider when searching for the
+maximum correlation peak.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>rbg</strong> – Time series containing the estimated periods of rest (1) and
+activity (0).</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.core.Series</p>
+</dd>
+</dl>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r9aa8a3ceddee-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Roenneberg, T., Keller, L. K., Fischer, D., Matera, J. L.,
+Vetter, C., &amp; Winnebeck, E. C. (2015). Human Activity and Rest
+In Situ. In Methods in Enzymology (Vol. 552, pp. 257-283).
+<a class="reference external" href="http://doi.org/10.1016/bs.mie.2014.11.028">http://doi.org/10.1016/bs.mie.2014.11.028</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+</dd></dl>
+
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

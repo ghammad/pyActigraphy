@@ -1,0 +1,6 @@
+pyActigraphy.analysis.Fractal.local\_msq\_residuals
+===================================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: Fractal.local_msq_residuals

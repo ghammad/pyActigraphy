@@ -1,0 +1,6 @@
+pyActigraphy.analysis.LIDS.lids\_func
+=====================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. autoproperty:: LIDS.lids_func

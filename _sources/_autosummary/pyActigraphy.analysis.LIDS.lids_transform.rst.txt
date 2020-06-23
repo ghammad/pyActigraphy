@@ -1,0 +1,6 @@
+pyActigraphy.analysis.LIDS.lids\_transform
+==========================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: LIDS.lids_transform

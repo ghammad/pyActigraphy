@@ -1,0 +1,6 @@
+pyActigraphy.analysis.Cosinor.fit\_reader
+=========================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: Cosinor.fit_reader

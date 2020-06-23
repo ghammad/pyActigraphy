@@ -1,0 +1,6 @@
+pyActigraphy.sleep.ScoringMixin.SleepProfile
+============================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: ScoringMixin.SleepProfile

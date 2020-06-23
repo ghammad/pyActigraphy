@@ -1,0 +1,6 @@
+pyActigraphy.analysis.SSA.fit
+=============================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: SSA.fit

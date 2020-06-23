@@ -1,0 +1,6 @@
+pyActigraphy.analysis.FLM.smooth
+================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: FLM.smooth

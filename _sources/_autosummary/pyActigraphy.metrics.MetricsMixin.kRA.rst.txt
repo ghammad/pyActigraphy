@@ -1,0 +1,6 @@
+pyActigraphy.metrics.MetricsMixin.kRA
+=====================================
+
+.. currentmodule:: pyActigraphy.metrics
+
+.. automethod:: MetricsMixin.kRA

@@ -1,0 +1,6 @@
+pyActigraphy.sleep.SleepBoutMixin.sleep\_durations
+==================================================
+
+.. currentmodule:: pyActigraphy.sleep
+
+.. automethod:: SleepBoutMixin.sleep_durations

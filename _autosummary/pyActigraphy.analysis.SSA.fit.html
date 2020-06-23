@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.analysis.SSA.fit &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../_static/js/jquery-fix.js"></script>
+    <script src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../tutorials.html">Tutorials</a></li>
+                <li><a href="../api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../_sources/_autosummary/pyActigraphy.analysis.SSA.fit.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="pyactigraphy-analysis-ssa-fit">
+<h1>pyActigraphy.analysis.SSA.fit<a class="headerlink" href="#pyactigraphy-analysis-ssa-fit" title="Permalink to this headline">¶</a></h1>
+<dl class="py method">
+<dt id="pyActigraphy.analysis.SSA.fit">
+<code class="sig-prename descclassname">SSA.</code><code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">check_finite</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">overwrite_a</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/analysis/ssa.html#SSA.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyActigraphy.analysis.SSA.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Singular value decomposition of the trajectory matrix.
+Wrapper around the scipy.linalg.svd function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>overwrite_a</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to overwrite <cite>a</cite>; may improve performance.
+Default is False.</p></li>
+<li><p><strong>check_finite</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to check that the input matrix contains only finite
+numbers. Disabling may give a performance gain, but may result in
+problems (crashes, non-termination) if the inputs do contain
+infinities or NaNs.
+Default is True.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>Factorization of the trajectory matrix A, using Singular Value
+Decomposition (SVD), yields to <a class="reference internal" href="#r5ee160f6e3ca-1" id="id1">[1]</a>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}A &amp;= U\Sigma V^\intercal \\
+  &amp;= \sum_{r=1}^{R} \sigma_r u_r v_{r}^\intercal\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(R = rank(A) \leq L\)</span>, <span class="math notranslate nohighlight">\({u_1,\ldots, u_d }\)</span> is the
+corresponding orthonormal system of the eigenvectors of the matrix
+<span class="math notranslate nohighlight">\(S = AA^{\intercal}\)</span> such as <span class="math notranslate nohighlight">\(ui \cdot uj = 0\)</span> for
+<span class="math notranslate nohighlight">\(i \neq j\)</span> and <span class="math notranslate nohighlight">\(\lVert u_r \rVert = 1\)</span>,
+<span class="math notranslate nohighlight">\(v_r = A^{\intercal} u_r / \sigma_r\)</span>, and <span class="math notranslate nohighlight">\(\Sigma\)</span> is a
+diagonal matrix <span class="math notranslate nohighlight">\(\in \mathbb{R}^{L×K}\)</span>, whose diagonal elements
+<span class="math notranslate nohighlight">\({\sigma_r}\)</span> are the singular values of A. The eigenvalues of
+<span class="math notranslate nohighlight">\(AA^\intercal\)</span> are given by <span class="math notranslate nohighlight">\(\lambda_r = \sigma_r^2\)</span>.</p>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r5ee160f6e3ca-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Golyandina, N., &amp; Zhigljavsky, A. (2013). Singular Spectrum
+Analysis for Time Series. Springer Berlin Heidelberg
+<a class="reference external" href="http://doi.org/10.1007/978-3-642-34913-3">http://doi.org/10.1007/978-3-642-34913-3</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

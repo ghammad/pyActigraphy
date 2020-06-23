@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyActigraphy.analysis.cosinor &#8212; pyActigraphy 1.Orc1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../../../_static/js/jquery-1.11.0.min.js"></script>
+    <script src="../../../_static/js/jquery-fix.js"></script>
+    <script src="../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script src="../../../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.Orc1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../tutorials.html">Tutorials</a></li>
+                <li><a href="../../../api.html">API</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for pyActigraphy.analysis.cosinor</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="k">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">lmfit</span> <span class="k">import</span> <span class="n">fit_report</span><span class="p">,</span> <span class="n">minimize</span><span class="p">,</span> <span class="n">Parameters</span>
+
+
+<span class="k">def</span> <span class="nf">_cosinor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;1-harmonic cosine function&#39;&#39;&#39;</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Amplitude&#39;</span><span class="p">]</span>
+    <span class="n">phi</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Acrophase&#39;</span><span class="p">]</span>
+    <span class="n">T</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Period&#39;</span><span class="p">]</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Mesor&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">M</span> <span class="o">+</span> <span class="n">A</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="n">T</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">phi</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_residual</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">fit_func</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Residual function to minimize&#39;&#39;&#39;</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="o">-</span><span class="n">model</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Cosinor"><a class="viewcode-back" href="../../../Cosinor.html#pyActigraphy.analysis.Cosinor">[docs]</a><span class="k">class</span> <span class="nc">Cosinor</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for Cosinor analysis.</span>
+
+<span class="sd">    Cornelissen, G. (2014). Cosinor-based rhythmometry.</span>
+<span class="sd">    Theoretical Biology and Medical Modelling, 11(1), 16.</span>
+<span class="sd">    https://doi.org/10.1186/1742-4682-11-16</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">fit_params</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fit_func</span> <span class="o">=</span> <span class="n">_cosinor</span>  <span class="c1"># Fit function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fit_obj_func</span> <span class="o">=</span> <span class="n">_residual</span>
+
+        <span class="k">if</span> <span class="n">fit_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fit_params</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
+            <span class="c1"># Default parameters for the cosinor fit function</span>
+            <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;Amplitude&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;Acrophase&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;Period&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1440</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Dummy value</span>
+            <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;Mesor&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span> <span class="o">=</span> <span class="n">fit_params</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fit_func</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Cosinor fit function&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fit_func</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fit_initial_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Initial parameters of the cosinor fit function&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span>
+
+    <span class="nd">@fit_initial_params</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">fit_initial_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span> <span class="o">=</span> <span class="n">params</span>
+
+<div class="viewcode-block" id="Cosinor.fit"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Cosinor.fit.html#pyActigraphy.analysis.Cosinor.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+            <span class="n">raw</span><span class="p">,</span>
+            <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="s1">&#39;leastsq&#39;</span><span class="p">,</span>
+            <span class="n">nan_policy</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">,</span>
+            <span class="n">reduce_fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit the actigraphy data using a cosinor function.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        raw : instance of BaseRaw or its child classes</span>
+<span class="sd">            Raw measurements to be fitted.</span>
+<span class="sd">        params: instance of Parameters [1]_, optional.</span>
+<span class="sd">            Initial fit parameters. If None, use the default parameters.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        method: str, optional</span>
+<span class="sd">            Name of the fitting method to use [1]_.</span>
+<span class="sd">            Default is &#39;leastsq&#39;.</span>
+<span class="sd">        nan_policy: str, optional</span>
+<span class="sd">            Specifies action if the objective function returns NaN values.</span>
+<span class="sd">            One of:</span>
+
+<span class="sd">            * &#39;raise&#39;: a ValueError is raised</span>
+<span class="sd">            * &#39;propagate&#39;: the values returned from userfcn are un-altered</span>
+<span class="sd">            * &#39;omit&#39;: non-finite values are filtered</span>
+
+<span class="sd">            Default is &#39;raise&#39;.</span>
+<span class="sd">        reduce_fcn: str, optional</span>
+<span class="sd">            Function to convert a residual array to a scalar value for the</span>
+<span class="sd">            scalar minimizers. Optional values are:</span>
+<span class="sd">            * None : sum of squares of residual</span>
+<span class="sd">            * negentropy : neg entropy, using normal distribution</span>
+<span class="sd">            * neglogcauchy: neg log likelihood, using Cauchy distribution</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            If set to True, display fit informations.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fit_results : MinimizerResult</span>
+<span class="sd">            Fit results.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Non-Linear Least-Squares Minimization and Curve-Fitting for</span>
+<span class="sd">               Python.</span>
+<span class="sd">               https://lmfit.github.io/lmfit-py/index.html</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Define the x range by converting timestamps to indices, in order to</span>
+        <span class="c1"># deal with time series with irregular index.</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">((</span><span class="n">raw</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span> <span class="o">-</span> <span class="n">raw</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="n">raw</span><span class="o">.</span><span class="n">frequency</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+
+        <span class="c1"># Minimize residuals</span>
+        <span class="n">fit_results</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__fit_obj_func</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_initial_params</span> <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">params</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">,</span>  <span class="n">raw</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_func</span><span class="p">),</span>
+            <span class="n">nan_policy</span><span class="o">=</span><span class="n">nan_policy</span><span class="p">,</span>
+            <span class="n">reduce_fcn</span><span class="o">=</span><span class="n">reduce_fcn</span>
+        <span class="p">)</span>
+        <span class="c1"># Print fit parameters if verbose</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">fit_report</span><span class="p">(</span><span class="n">fit_results</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">fit_results</span></div>
+
+<div class="viewcode-block" id="Cosinor.best_fit"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Cosinor.best_fit.html#pyActigraphy.analysis.Cosinor.best_fit">[docs]</a>    <span class="k">def</span> <span class="nf">best_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Best fit function of the data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        raw : instance of BaseRaw or its child classes</span>
+<span class="sd">            Raw measurements to be fitted.</span>
+<span class="sd">        params: instance of Parameters [1]_</span>
+<span class="sd">            Best fit parameters.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        bestfit_data : pandas.Series</span>
+<span class="sd">            Time series of the best fit data.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Non-Linear Least-Squares Minimization and Curve-Fitting for</span>
+<span class="sd">               Python.</span>
+<span class="sd">               https://lmfit.github.io/lmfit-py/index.html</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Define the x range by converting timestamps to indices, in order to</span>
+        <span class="c1"># deal with time series with irregular index.</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="p">((</span><span class="n">raw</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span> <span class="o">-</span> <span class="n">raw</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="n">raw</span><span class="o">.</span><span class="n">frequency</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">raw</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">y</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Cosinor.fit_reader"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Cosinor.fit_reader.html#pyActigraphy.analysis.Cosinor.fit_reader">[docs]</a>    <span class="k">def</span> <span class="nf">fit_reader</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">reader</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">method</span><span class="o">=</span><span class="s1">&#39;leastsq&#39;</span><span class="p">,</span>
+        <span class="n">nan_policy</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">,</span>
+        <span class="n">reduce_fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose_parallel</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit the actigraphy data contained in a reader using a cosinor</span>
+<span class="sd">        function.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        reader : instance of RawReader</span>
+<span class="sd">            Raw measurements to be fitted.</span>
+<span class="sd">        params: instance of Parameters [1]_, optional.</span>
+<span class="sd">            Initial fit parameters. If None, use the default parameters.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        method: str, optional</span>
+<span class="sd">            Name of the fitting method to use [1]_.</span>
+<span class="sd">            Default is &#39;leastsq&#39;.</span>
+<span class="sd">        nan_policy: str, optional</span>
+<span class="sd">            Specifies action if the objective function returns NaN values.</span>
+<span class="sd">            One of:</span>
+
+<span class="sd">            * &#39;raise&#39;: a ValueError is raised</span>
+<span class="sd">            * &#39;propagate&#39;: the values returned from userfcn are un-altered</span>
+<span class="sd">            * &#39;omit&#39;: non-finite values are filtered</span>
+
+<span class="sd">            Default is &#39;raise&#39;.</span>
+<span class="sd">        reduce_fcn: str, optional</span>
+<span class="sd">            Function to convert a residual array to a scalar value for the</span>
+<span class="sd">            scalar minimizers. Optional values are:</span>
+
+<span class="sd">            * None : sum of squares of residual</span>
+<span class="sd">            * negentropy : neg entropy, using normal distribution</span>
+<span class="sd">            * neglogcauchy: neg log likelihood, using Cauchy distribution</span>
+
+<span class="sd">            Default is None.</span>
+<span class="sd">        verbose_fit : bool.</span>
+<span class="sd">            If True, print the fit summary.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        n_jobs: int</span>
+<span class="sd">            Number of CPU to use for parallel fitting</span>
+<span class="sd">        prefer: str</span>
+<span class="sd">            Soft hint to choose the default backendself.</span>
+<span class="sd">            Supported option:&#39;processes&#39;, &#39;threads&#39;.</span>
+<span class="sd">            See joblib package documentation for more info.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        verbose_parallel: int</span>
+<span class="sd">            Display a progress meter if set to a value &gt; 0.</span>
+<span class="sd">            Default is 0.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># avoid Parallel overhead if n_job == 1</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">n_jobs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span>
+                    <span class="n">raw</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                        <span class="n">raw</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span>
+                        <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                        <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                        <span class="n">nan_policy</span><span class="o">=</span><span class="n">nan_policy</span><span class="p">,</span>
+                        <span class="n">reduce_fcn</span><span class="o">=</span><span class="n">reduce_fcn</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose_fit</span>
+                    <span class="p">)</span>
+                <span class="p">)</span> <span class="k">for</span> <span class="n">raw</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">readers</span>
+            <span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">parallel_fitting</span><span class="p">(</span>
+                <span class="n">raw</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">nan_policy</span><span class="p">,</span> <span class="n">reduce_fcn</span><span class="p">,</span> <span class="n">verbose</span>
+            <span class="p">):</span>
+                <span class="n">fit_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                    <span class="n">raw</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span>
+                    <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                    <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                    <span class="n">nan_policy</span><span class="o">=</span><span class="n">nan_policy</span><span class="p">,</span>
+                    <span class="n">reduce_fcn</span><span class="o">=</span><span class="n">reduce_fcn</span><span class="p">,</span>
+                    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+                <span class="p">)</span>
+                <span class="n">fit_params</span> <span class="o">=</span> <span class="n">fit_result</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">valuesdict</span><span class="p">()</span>
+                <span class="c1"># Add Goodness-of-fit informations</span>
+                <span class="n">fit_params</span><span class="p">[</span><span class="s1">&#39;BIC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fit_result</span><span class="o">.</span><span class="n">bic</span>
+                <span class="n">fit_params</span><span class="p">[</span><span class="s1">&#39;RedChiSq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fit_result</span><span class="o">.</span><span class="n">redchi</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="n">raw</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">fit_params</span>
+                <span class="p">)</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span>
+                <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span>
+                <span class="n">prefer</span><span class="o">=</span><span class="n">prefer</span><span class="p">,</span>
+                <span class="n">verbose</span><span class="o">=</span><span class="n">verbose_parallel</span>
+            <span class="p">)(</span>
+                <span class="n">delayed</span><span class="p">(</span><span class="n">parallel_fitting</span><span class="p">)(</span>
+                    <span class="n">raw</span><span class="o">=</span><span class="n">raw</span><span class="p">,</span>
+                    <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                    <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                    <span class="n">nan_policy</span><span class="o">=</span><span class="n">nan_policy</span><span class="p">,</span>
+                    <span class="n">reduce_fcn</span><span class="o">=</span><span class="n">reduce_fcn</span><span class="p">,</span>
+                    <span class="n">verbose</span><span class="o">=</span><span class="n">verbose_fit</span>
+                <span class="p">)</span> <span class="k">for</span> <span class="n">raw</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">readers</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                <span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">results</span>
+        <span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

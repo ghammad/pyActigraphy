@@ -1,0 +1,6 @@
+pyActigraphy.analysis.SSA.reconstructed\_signal
+===============================================
+
+.. currentmodule:: pyActigraphy.analysis
+
+.. automethod:: SSA.reconstructed_signal
