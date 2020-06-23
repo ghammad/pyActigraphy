@@ -68,15 +68,20 @@ In a (bash) shell, simply type:
 
 .. code-block:: shell
 
-  pip3 install pyActigraphy
+  pip3 install pyActigraphy==1.0rc1
 
 To update the package:
 
 .. code-block:: shell
 
-  pip3 install -U pyActigraphy
+  pip3 install -U pyActigraphy==1.0rc1
 
-It is strongly recommended to use the latest version of the pyActigraphy package.
+
+.. note::
+   Although it is not the version of the pyActigraphy package available by default
+   on the PyPI server, it is strongly recommended to use this version (v1.0rc1) for the moment as
+   it contains all the features (and bug fixes) that will be available in the official
+   release (v1.0), to be released soon.
 
 
 * For developers:
