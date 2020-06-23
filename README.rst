@@ -17,23 +17,36 @@ Open-source python package for actigraphy data visualization and analysis.
 This package is meant to provide a comprehensive set of tools to:
 
 * read native actigraphy data files with various formats:
+
   * Actigraph: wGT3X-BT
   * Condor Instrument: ActTrust 2
   * CamNtech: Actiwatch 4 and MotionWatch 8
   * Respironics: Actiwatch 2 and Actiwatch Spectrum (plus)
   * Daqtix: Daqtometer
+
+..
+
 * clean the raw data and mask spurious periods of inactivity
+
 * produce activity profile plots
+
 * visualize sleep agendas and compute summary statistics
+
 * calculate typical wake/sleep cycle-related variables:
+
   * Non-parametric rest-activity variables: IS(m), IV(m), RA
-  * Rest/Activity fragmentation: kRA, kAR
+  * Activity or Rest  fragmentation: kRA, kAR
   * Sleep regularity index (SRI)
+
+..
+
 * automatically detect rest periods using various algorithms (Cole-Kripke, Sadeh, ..., Crespo, Roenneberg)
+
 * perform complex analyses:
+
   * Cosinor analysis
   * Detrended Fluctuation Analysis (DFA)
-  * Functional linear modelling (FLM)
+  * Functional Linear Modelling (FLM)
   * Locomotor Inactivity During Sleep (LIDS)
   * Singular Spectrum Analysis (SSA)
   * and much more...
