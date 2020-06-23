@@ -16,9 +16,27 @@ Open-source python package for actigraphy data visualization and analysis.
 
 This package is meant to provide a comprehensive set of tools to:
 
-* read actigraphy raw data files with various formats
-* calculate typical wake/sleep cycle-related variables (ex: IS, IV, ...)
-* perform complex analyses (ex: FDA, SSA, HMM, ...)
+* read native actigraphy data files with various formats:
+  * Actigraph: wGT3X-BT
+  * Condor Instrument: ActTrust 2
+  * CamNtech: Actiwatch 4 and MotionWatch 8
+  * Respironics: Actiwatch 2 and Actiwatch Spectrum (plus)
+  * Daqtix: Daqtometer
+* clean the raw data and mask spurious periods of inactivity
+* produce activity profile plots
+* visualize sleep agendas and compute summary statistics
+* calculate typical wake/sleep cycle-related variables:
+  * Non-parametric rest-activity variables: IS(m), IV(m), RA
+  * Rest/Activity fragmentation: kRA, kAR
+  * Sleep regularity index (SRI)
+* automatically detect rest periods using various algorithms (Cole-Kripke, Sadeh, ..., Crespo, Roenneberg)
+* perform complex analyses:
+  * Cosinor analysis
+  * Detrended Fluctuation Analysis (DFA)
+  * Functional linear modelling (FLM)
+  * Locomotor Inactivity During Sleep (LIDS)
+  * Singular Spectrum Analysis (SSA)
+  * and much more...
 
 Code and documentation
 ======================
@@ -37,13 +55,13 @@ In a (bash) shell, simply type:
 
 .. code-block:: shell
 
-  pip install pyActigraphy
+  pip3 install pyActigraphy
 
 To update the package:
 
 .. code-block:: shell
 
-  pip install -U pyActigraphy
+  pip3 install -U pyActigraphy
 
 It is strongly recommended to use the latest version of the pyActigraphy package.
 
@@ -55,7 +73,7 @@ It is strongly recommended to use the latest version of the pyActigraphy package
   git clone git@github.com:ghammad/pyActigraphy.git
   cd pyActigraphy/
   git checkout develop
-  pip install -e .
+  pip3 install -e .
 
 Quick start
 ===========
@@ -83,7 +101,6 @@ There are plenty of ways to contribute to this package, including (but not limit
 * report bugs (and, ideally, how to reproduce the bug)
 * suggest improvements
 * improve the documentation
-* hug or high-five the authors when you meet them!
 
 Authors
 =======
