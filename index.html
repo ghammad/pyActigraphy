@@ -100,9 +100,40 @@
 <p>Open-source python package for actigraphy data visualization and analysis.</p>
 <p>This package is meant to provide a comprehensive set of tools to:</p>
 <ul class="simple">
-<li><p>read actigraphy raw data files with various formats</p></li>
-<li><p>calculate typical wake/sleep cycle-related variables (ex: IS, IV, …)</p></li>
-<li><p>perform complex analyses (ex: FDA, SSA, HMM, …)</p></li>
+<li><p>read native actigraphy data files with various formats:</p>
+<ul>
+<li><p>Actigraph: wGT3X-BT</p></li>
+<li><p>Condor Instrument: ActTrust 2</p></li>
+<li><p>CamNtech: Actiwatch 4 and MotionWatch 8</p></li>
+<li><p>Respironics: Actiwatch 2 and Actiwatch Spectrum (plus)</p></li>
+<li><p>Daqtix: Daqtometer</p></li>
+</ul>
+</li>
+</ul>
+<ul class="simple">
+<li><p>clean the raw data and mask spurious periods of inactivity</p></li>
+<li><p>produce activity profile plots</p></li>
+<li><p>visualize sleep agendas and compute summary statistics</p></li>
+<li><p>calculate typical wake/sleep cycle-related variables:</p>
+<ul>
+<li><p>Non-parametric rest-activity variables: IS(m), IV(m), RA</p></li>
+<li><p>Activity or Rest  fragmentation: kRA, kAR</p></li>
+<li><p>Sleep regularity index (SRI)</p></li>
+</ul>
+</li>
+</ul>
+<ul class="simple">
+<li><p>automatically detect rest periods using various algorithms (Cole-Kripke, Sadeh, …, Crespo, Roenneberg)</p></li>
+<li><p>perform complex analyses:</p>
+<ul>
+<li><p>Cosinor analysis</p></li>
+<li><p>Detrended Fluctuation Analysis (DFA)</p></li>
+<li><p>Functional Linear Modelling (FLM)</p></li>
+<li><p>Locomotor Inactivity During Sleep (LIDS)</p></li>
+<li><p>Singular Spectrum Analysis (SSA)</p></li>
+<li><p>and much more…</p></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="section" id="code-and-documentation">
@@ -117,11 +148,11 @@ It contains <a class="reference external" href="https://ghammad.github.io/pyActi
 <ul class="simple">
 <li><p>For users:</p></li>
 </ul>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install pyActigraphy
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3 install pyActigraphy
 </pre></div>
 </div>
 <p>To update the package:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install -U pyActigraphy
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3 install -U pyActigraphy
 </pre></div>
 </div>
 <p>It is strongly recommended to use the latest version of the pyActigraphy package.</p>
@@ -131,7 +162,7 @@ It contains <a class="reference external" href="https://ghammad.github.io/pyActi
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone git@github.com:ghammad/pyActigraphy.git
 <span class="nb">cd</span> pyActigraphy/
 git checkout develop
-pip install -e .
+pip3 install -e .
 </pre></div>
 </div>
 </div>
@@ -157,7 +188,6 @@ with the pyActigraphy package:</p>
 <li><p>report bugs (and, ideally, how to reproduce the bug)</p></li>
 <li><p>suggest improvements</p></li>
 <li><p>improve the documentation</p></li>
-<li><p>hug or high-five the authors when you meet them!</p></li>
 </ul>
 </div>
 <div class="section" id="authors">
