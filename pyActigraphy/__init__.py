@@ -19,4 +19,4 @@ from . import analysis, io, filters, metrics, sleep, utils, tests
 
 __all__ = ["analysis", "io", "filters", "metrics", "sleep", "utils", "tests"]
 
-__version__ = '0.2'
+__version__ = '1.Orc1'
