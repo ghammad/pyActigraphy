@@ -55,6 +55,12 @@ class RawReader(ForwardMetricsMixin):
         else:
             self.__readers.append(raw_reader)
 
+    def names(self):
+
+        return [
+            read.display_name for read in self.__readers
+        ]
+
     def mask_fraction(self):
 
         return {
@@ -183,12 +189,14 @@ def read_raw(
         reader_type: str
             Reader type.
             Supported types:
+
             * AGD ((w)GT3X(+)), ActiGraph)
             * ATR (ActTrust, Condor Instruments)
             * AWD (ActiWatch 4, CamNtech)
             * DQT (Daqtometers, Daqtix)
             * MTN (MotionWatch8, CamNtech)
             * RPX (Actiwatch, Respironics)
+
         n_jobs: int
             Number of CPU to use for parallel reading
         prefer: str

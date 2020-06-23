@@ -36,7 +36,68 @@ def _segmentation(x, n, backward=False):
 
 
 class Fractal():
-    """ Class for Fractality Analysis"""
+    r''' Class for Fractality Analysis
+
+    This class implements methods used to perform a (multifractal) detrended
+    fluctuation analysis, (MF)DFA.
+
+    The implementation follows the original description made in [1]_ and [2]_.
+
+    The (MF)DFA consists in:
+
+    1. removing the global mean and integrating the time series of a signal:
+
+       .. math::
+
+           X_{t} = \sum_i^N(x_i - \bar{x})
+
+       where :math:`\bar{x}` denotes the mean value of the time series
+       :math:`\{x_i\}_{i\in[1:N]}`;
+
+    2. dividing the integrated signal into N non-overlapping windows of the
+       same chosen size n;
+
+    3. detrending the integrated signal in each window using polynomial
+       functions to obtain residuals, that is:
+
+       .. math::
+
+           \widehat{X_t} = X_{t} - Y_{t}
+
+       where :math:`Y_t` denotes the trend obtained by polynomial fit and
+       :math:`\widehat{X_t}` the integrated time series after detrending;
+
+    4. calculating the root mean square of residuals in all windows as
+       detrended fluctuation amplitude :math:`F_q(n)`, that is:
+
+       .. math::
+
+          F_q(n) = \left[\frac{1}{N} \sum_{t=1}^N \widehat{X_t}^q\right]^{1/q}
+
+    For :math:`q=2`, the DFA is retrieved.
+
+    In the context of actigraphy, further informations can be found in:
+
+    * Hu, K., Ivanov, P. C., Chen, Z., Hilton, M. F., Stanley, H. E., & Shea,
+      S. A. (2004). Non-random fluctuations and multi-scale dynamics regulation
+      of human activity. Physica A: Statistical Mechanics and Its Applications,
+      337(1–2), 307–318. https://doi.org/10.1016/j.physa.2004.01.042
+
+
+    References
+    ----------
+
+    .. [1] Peng, C.-K., Buldyrev, S. V., Havlin, S., Simons, M., Stanley,
+           H. E., & Goldberger, A. L. (1994). Mosaic organization of DNA
+           nucleotides. Physical Review E, 49(2), 1685–1689.
+           https://doi.org/10.1103/PhysRevE.49.1685
+    .. [2] Kantelhardt, J. W., Zschiegner, S. A., Koscielny-Bunde, E., Havlin,
+           S., Bunde, A., & Stanley, H. E. (2002). Multifractal detrended
+           fluctuation analysis of nonstationary time series. Physica A:
+           Statistical Mechanics and Its Applications, 316(1–4), 87–114.
+           https://doi.org/10.1016/S0378-4371(02)01383-3
+
+    '''
 
     def __init__(self, n_array=None, q_array=None):
 
@@ -379,11 +440,14 @@ class Fractal():
             Ratio of h(q), and associated uncertainties, obtained for various
             time scales n_x.
 
+        Notes
+        -----
+
         .. warning::
+
             The calculation of the uncertainty on the ratio of scaling
             exponents assumes uncorrelated variables:
-            .. math:: \sigma_{A/B}^2=(A/B)^2(\sigma_{A}^2/A^2+\sigma_{B}^2/B^2)
-
+            :math:`\sigma_{A/B}^2=(A/B)^2(\sigma_{A}^2/A^2+\sigma_{B}^2/B^2)`.
             Most likely, the scaling exponents calculated for time scales
             :math:`n<n_x` is not uncorrelated to the scaling exponents
             calculated for time scales :math:`n>n_x`. Therefore, the resulting

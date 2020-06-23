@@ -180,7 +180,8 @@ html_theme_options = {
     # A list of tuples containing pages or urls to link to.
     'navbar_links': [
         # ("Quick Start", "quickstart"),
-        ("Documentation", "documentation"),
+        # ("Tests", "tests"),
+        ("Tutorials", "tutorials"),
         ("API", "api"),
         # ("Examples", "auto_examples/index"),
     ],

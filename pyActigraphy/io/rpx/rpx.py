@@ -1,7 +1,7 @@
 import datetime
 import io
 import pandas as pd
-import numpy as np
+# import numpy as np
 import os
 import re
 import warnings
@@ -37,10 +37,10 @@ class RawRPX(BaseRaw):
         Default is None (i.e all the data).
     data_dtype: dtype, optional
         The dtype of the raw data.
-        Default is 'Int64'.
+        Default is 'float'.
     light_dtype: dtype, optional
         The dtype of the raw light data.
-        Default is 'np.float16'.
+        Default is 'float'.
     delimiter: str, optional
         Delimiter to use when reading the input file.
         Default is '.'
@@ -53,8 +53,8 @@ class RawRPX(BaseRaw):
         dayfirst=None,
         start_time=None,
         period=None,
-        data_dtype='Int64',
-        light_dtype=np.float16,
+        data_dtype='float',
+        light_dtype='float',
         delimiter=','
     ):
 
@@ -258,8 +258,8 @@ def read_raw_rpx(
     dayfirst=None,
     start_time=None,
     period=None,
-    data_dtype='Int64',
-    light_dtype=np.float16,
+    data_dtype='float',
+    light_dtype='float',
     delimiter=','
 ):
     """Reader function for raw Respironics file.
@@ -288,10 +288,10 @@ def read_raw_rpx(
         Default is None (i.e all the data).
     data_dtype: dtype, optional
         The dtype of the raw data.
-        Default is 'Int64'.
+        Default is 'float'.
     light_dtype: dtype, optional
         The dtype of the raw light data.
-        Default is 'np.float16'.
+        Default is 'float'.
     delimiter: str, optional
         Delimiter to use when reading the input file.
         Default is '.'

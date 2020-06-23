@@ -322,6 +322,7 @@ class LIDS():
         r'''Apply LIDS transformation to activity data
 
         This transformation comprises:
+
         * resampling via summation (optional)
         * non-linear LIDS transformation
         * smoothing with a centered moving average
@@ -333,9 +334,11 @@ class LIDS():
         method: str, optional
             Method to smooth the data.
             Available options are:
-                'mva': moving average
-                'kernel': gaussian kernel
-                'none': no smoothing
+
+            * 'mva': moving average
+            * 'kernel': gaussian kernel
+            * 'none': no smoothing
+
             Default is 'mva'.
         win_td: str, optional
             Size of the moving average window.
@@ -407,9 +410,11 @@ class LIDS():
         nan_policy: str, optional
             Specifies action if the objective function returns NaN values.
             One of:
-                'raise': a ValueError is raised
-                'propagate': the values returned from userfcn are un-altered
-                'omit': non-finite values are filtered
+
+            * 'raise': a ValueError is raised
+            * 'propagate': the values returned from userfcn are un-altered
+            * 'omit': non-finite values are filtered
+
             Default is 'raise'.
         verbose: bool, optional
             If set to True, display fit informations

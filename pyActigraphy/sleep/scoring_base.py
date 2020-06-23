@@ -34,7 +34,8 @@ def _actiware_automatic_threshold(data, scale_factor=0.88888):
     that epoch is greater than or equal to the epoch length in 15-second
     intervals. For example,there are four 15-second intervals for a 1-minute
     epoch length; hence, the activity value in an epoch must be greater than,
-    or equal to, four, to be scored as MOBILE.'''
+    or equal to, four, to be scored as MOBILE.
+    '''
 
     # Sum of activity counts
     counts_sum = data.sum()
@@ -43,7 +44,7 @@ def _actiware_automatic_threshold(data, scale_factor=0.88888):
     mobile_thr = int(data.index.freq/pd.Timedelta('15sec'))
 
     # Counts the number of epochs scored as "mobile"
-    counts_mobile = (data.values >= mobile_thr).sum()
+    counts_mobile = (data.values >= mobile_thr).astype(int).sum()
 
     # Mobile time
     mobile_time = counts_mobile*(data.index.freq/pd.Timedelta('1min'))
@@ -65,7 +66,7 @@ def _padded_data(data, value, periods, frequency):
             freq=date_offset,
             closed='left'
         ),
-        dtype=int
+        dtype=data.dtype
     )
     pad_end = pd.Series(
         data=value,
@@ -75,7 +76,7 @@ def _padded_data(data, value, periods, frequency):
             freq=date_offset,
             closed='right'
         ),
-        dtype=int
+        dtype=data.dtype
     )
     return pd.concat([pad_beginning, data, pad_end])
 
@@ -1013,17 +1014,17 @@ class ScoringMixin(object):
         # with the t-percentile value of the actigraphy data
         # zeta = 15
         if estimate_zeta:
-            zeta = _estimate_zeta(self.data, seq_length_max)
+            zeta = _estimate_zeta(self.raw_data, seq_length_max)
             if verbose:
                 print("CRESPO: estimated zeta = {}".format(zeta))
         # Determine the sequences of consecutive zeroes
-        mask_zeta = _create_inactivity_mask(self.data, zeta, 1)
+        mask_zeta = _create_inactivity_mask(self.raw_data, zeta, 1)
 
         # Determine the user-specified t-percentile value
-        s_t = self.data.quantile(t)
+        s_t = self.raw_data.quantile(t)
 
         # Replace zeroes with the t-percentile value
-        x = self.data.copy()
+        x = self.raw_data.copy()
         x[mask_zeta > 0] = s_t
 
         # Median filter window length L_w
@@ -1037,15 +1038,15 @@ class ScoringMixin(object):
         # alpha_epochs_half = int(alpha_epochs/2)
         # beta_epochs = int(pd.Timedelta(beta)/self.frequency)
 
-        s_t_max = self.data.max()
+        s_t_max = self.raw_data.max()
 
         x_p = _padded_data(
-            self.data, s_t_max, L_w_over_2, self.frequency
+            self.raw_data, s_t_max, L_w_over_2, self.frequency
         )
 
         # 1.2 Rank-order processing and decision logic
         # Apply a median filter to the $x_p$ series
-        x_f = x_p.rolling(L_w, center=True).median()
+        x_f = x_p.rolling(L_w, center=True, min_periods=L_w_over_2).median()
 
         # Rank-order thresholding
         # Create a series $y_1(n)$ where $y_1(n) = 1$ for $x_f(n)>p$, $0$ otw.
@@ -1096,12 +1097,12 @@ class ScoringMixin(object):
 
         # Use y_e series as a filter for the rest periods
         mask_rest = _create_inactivity_mask(
-            self.data[y_e < 1], zeta_r, 1
+            self.raw_data[y_e < 1], zeta_r, 1
         )
 
         # Use y_e series as a filter for the active periods
         mask_actv = _create_inactivity_mask(
-            self.data[y_e > 0], zeta_a, 1
+            self.raw_data[y_e > 0], zeta_a, 1
         )
 
         mask = pd.concat([mask_actv, mask_rest], verify_integrity=True)
@@ -1112,7 +1113,7 @@ class ScoringMixin(object):
         # by the median filter.
         # Done before padding to avoid unaligned time series.
 
-        x_nan = self.data.copy()
+        x_nan = self.raw_data.copy()
         x_nan[mask < 1] = np.NaN
 
         # Pad the signal at the beginning and at the end with a sequence of 1h
@@ -1124,7 +1125,6 @@ class ScoringMixin(object):
         )
 
         # Apply an adaptative median filter to the $x_{sp}$ series
-
         # no need to use a time-aware window as there is no time gap
         # in this time series by definition.
         x_fa = x_sp.rolling(L_w, center=True, min_periods=L_p-1).median()
@@ -1330,7 +1330,7 @@ class ScoringMixin(object):
         n_succ=3
     ):
         """Automatic identification of activity onset/offset times, based on
-        the Chronosapiens algorithm.
+        Roenneberg's algorithm.
 
         Identification of the activity onset and offset times using the
         algorithm for automatic identification of consolidated sleep episodes
