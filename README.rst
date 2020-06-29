@@ -58,7 +58,7 @@ The pyActigraphy package is open-source and its source code is accessible `onlin
 
 
 An online documentation of the package is also available `here <https://ghammad.github.io/pyActigraphy/index.html>`_.
-It contains `notebooks <https://ghammad.github.io/pyActigraphy/documentation.html>`_ illustrating various functionalities of the package.
+It contains `notebooks <https://ghammad.github.io/pyActigraphy/tutorials.html>`_ illustrating various functionalities of the package.
 
 Installation
 ============
