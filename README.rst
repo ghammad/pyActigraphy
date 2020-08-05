@@ -19,10 +19,11 @@ This package is meant to provide a comprehensive set of tools to:
 * read native actigraphy data files with various formats:
 
   * Actigraph: wGT3X-BT
-  * Condor Instrument: ActTrust 2
   * CamNtech: Actiwatch 4 and MotionWatch 8
-  * Respironics: Actiwatch 2 and Actiwatch Spectrum (plus)
+  * Condor Instrument: ActTrust 2
   * Daqtix: Daqtometer
+  * Respironics: Actiwatch 2 and Actiwatch Spectrum (plus)
+  * Tempatilumi (CE Brasil)
 
 ..
 
