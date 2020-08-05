@@ -11,6 +11,7 @@ from ..awd import read_raw_awd
 from ..dqt import read_raw_dqt
 from ..mtn import read_raw_mtn
 from ..rpx import read_raw_rpx
+from ..tal import read_raw_tal
 from pyActigraphy.log import read_sst_log
 
 
@@ -196,6 +197,7 @@ def read_raw(
             * DQT (Daqtometers, Daqtix)
             * MTN (MotionWatch8, CamNtech)
             * RPX (Actiwatch, Respironics)
+            * TAL (Tempatilumi, CE Brasil)
 
         n_jobs: int
             Number of CPU to use for parallel reading
@@ -217,7 +219,7 @@ def read_raw(
             An object containing raw data
         """
 
-        supported_types = ['AGD', 'ATR', 'AWD', 'DQT', 'MTN', 'RPX']
+        supported_types = ['AGD', 'ATR', 'AWD', 'DQT', 'MTN', 'RPX', 'TAL']
         if reader_type not in supported_types:
             raise ValueError(
                 'Type {0} unsupported. Supported types: {1}'.format(
@@ -252,6 +254,9 @@ def read_raw(
             ),
             'RPX': lambda files: parallel_reader(
                 n_jobs, read_raw_rpx, files, prefer, verbose, **kwargs
+            ),
+            'TAL': lambda files: parallel_reader(
+                n_jobs, read_raw_tal, files, prefer, verbose, **kwargs
             )
         }[reader_type](files)
 

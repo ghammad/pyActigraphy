@@ -18,7 +18,7 @@ from .awd import read_raw_awd
 from .dqt import read_raw_dqt
 from .mtn import read_raw_mtn
 from .rpx import read_raw_rpx
-from .tmp import read_raw_tmp
+from .tal import read_raw_tal
 
 __all__ = [
     "BaseRaw", "RawReader",
@@ -29,5 +29,5 @@ __all__ = [
     "read_raw_dqt",
     "read_raw_mtn",
     "read_raw_rpx",
-    "read_raw_tmp"
+    "read_raw_tal"
 ]

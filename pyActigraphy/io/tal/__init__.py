@@ -4,8 +4,8 @@
 #
 # License: BSD (3-clause)
 
-from .tmp import RawTMP
+from .tal import RawTAL
 
-from .tmp import read_raw_tmp
+from .tal import read_raw_tal
 
-__all__ = ["RawTMP", "read_raw_tmp"]
+__all__ = ["RawTAL", "read_raw_tal"]

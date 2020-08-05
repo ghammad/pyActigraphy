@@ -5,7 +5,7 @@ import re
 from ..base import BaseRaw
 
 
-class RawTMP(BaseRaw):
+class RawTAL(BaseRaw):
     r"""Raw object from .txt file recorded by Tempatilumi (CE Brasil)
 
     Parameters
@@ -15,9 +15,9 @@ class RawTMP(BaseRaw):
     name: str, optional
         Name of the recording. If None, the device UUID is used instead.
         Default is None.
-    header_size: int, optional
-        Header size (i.e. number of lines) of the raw data file.
-        Default is 5.
+    sep: str, optional
+        Delimiter to use.
+        Default is ";".
     frequency: str, optional
         Sampling frequency.
         Cf. #timeseries-offset-aliases in
@@ -42,7 +42,7 @@ class RawTMP(BaseRaw):
         self,
         input_fname,
         name=None,
-        header_size=5,
+        sep=';',
         frequency=None,
         start_time=None,
         period=None,
@@ -54,32 +54,58 @@ class RawTMP(BaseRaw):
         # [TO-DO] check if file exists
         # [TO-DO] check it is has the right file extension .awd
 
-        # extract header and data size
+        # extract header and data
+        # if os.stat(input_fname).st_size == 0:
+        #     raise ValueError("File is empty")
         with open(input_fname, encoding=encoding) as f:
-            header = [next(f) for x in range(header_size)]
+            header = []
+            pos = 0
+            cur_line = f.readline()
+            while not cur_line.startswith(sep.join(["Data", " Hora"])):
+                header.append(cur_line)
+                pos = f.tell()
+                cur_line = f.readline()
+            f.seek(pos)
+            index_data = pd.read_csv(
+                filepath_or_buffer=f,
+                # encoding=encoding,
+                skipinitialspace=True,
+                sep=sep,
+                infer_datetime_format=True,
+                index_col=False,
+                parse_dates={
+                    'Date_Time': [
+                        'Data',
+                        'Hora'
+                    ]
+                },
+            )
+        index_data.set_index('Date_Time', inplace=True)
+        # with open(input_fname, encoding=encoding) as f:
+        #     header = [next(f) for x in range(header_size)]
 
         # extract informations from the header
-        uuid = self.__extract_tmp_uuid(header)
+        uuid = self.__extract_tal_uuid(header)
         if name is None:
             name = uuid
 
-        index_data = pd.read_csv(
-            # input_fname,
-            filepath_or_buffer=input_fname,
-            encoding=encoding,
-            skipinitialspace=True,
-            skiprows=len(header),
-            delimiter='\t',
-            infer_datetime_format=True,
-            index_col=0,
-            parse_dates={
-                'Date_Time': [
-                    'Data',
-                    'Hora'
-                ]
-            },
-            dayfirst=True
-        )
+        # index_data = pd.read_csv(
+        #     # input_fname,
+        #     filepath_or_buffer=input_fname,
+        #     encoding=encoding,
+        #     skipinitialspace=True,
+        #     skiprows=len(header),
+        #     delimiter='\t',
+        #     infer_datetime_format=True,
+        #     index_col=0,
+        #     parse_dates={
+        #         'Date_Time': [
+        #             'Data',
+        #             'Hora'
+        #         ]
+        #     },
+        #     dayfirst=True
+        # )
 
         # Check column names
         # Evento	 Temperatura	 Luminosidade	 Atividade
@@ -129,7 +155,7 @@ class RawTMP(BaseRaw):
         super().__init__(
             name=name,
             uuid=uuid,
-            format='TMP',
+            format='TAL',
             axial_mode='tri-axial',
             start_time=start_time,
             period=period,
@@ -145,15 +171,15 @@ class RawTMP(BaseRaw):
 
     @property
     def events(self):
-        r"""Events markers."""
+        r"""Event markers."""
         return self.__events
 
     @classmethod
-    def __extract_tmp_uuid(cls, header):
-        match = re.search(r'\d+', header[0])
+    def __extract_tal_uuid(cls, header):
+        match = re.search(r'Série: (\d+)', ''.join(header))
         if not match:
             raise ValueError('UUID cannot be extracted from the file header.')
-        return match[0]
+        return match.group(1)
 
     @classmethod
     def __extract_from_data(cls, data, key):
@@ -163,10 +189,10 @@ class RawTMP(BaseRaw):
             return None
 
 
-def read_raw_tmp(
+def read_raw_tal(
     input_fname,
     name=None,
-    header_size=5,
+    sep=';',
     frequency=None,
     start_time=None,
     period=None,
@@ -181,8 +207,9 @@ def read_raw_tmp(
     name: str, optional
         Name of the recording. If None, the device UUID is used instead.
         Default is None.
-    header_size: int
-        Header size (i.e. number of lines) of the raw data file. Default is 15.
+    sep: str, optional
+        Delimiter to use.
+        Default is ';'.
     start_time: datetime-like, optional
         Read data from this time.
         Default is None.
@@ -191,17 +218,20 @@ def read_raw_tmp(
         Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
         Default is None (i.e all the data).
+    encoding: str, optional
+        Encoding to use for UTF when reading the file.
+        Default is 'latin-1'.
 
     Returns
     -------
-    raw : Instance of RawTMP
-        An object containing raw TMP data
+    raw : Instance of RawTAL
+        An object containing raw TAL data
     """
 
-    return RawTMP(
+    return RawTAL(
         input_fname=input_fname,
         name=name,
-        header_size=header_size,
+        sep=sep,
         frequency=frequency,
         start_time=start_time,
         period=period,
