@@ -1,9 +1,9 @@
 .. image:: https://img.shields.io/badge/License-GPL%20v3-blue.svg
   :target: https://www.gnu.org/licenses/gpl-3.0
-.. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/pipeline.svg
+.. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/pipeline.svg?key_text=CI+tests
   :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
-.. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/coverage.svg
-  :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
+.. .. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/coverage.svg
+..   :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
 .. image:: https://img.shields.io/pypi/v/pyActigraphy.svg
   :target: https://pypi.org/project/pyActigraphy
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg
