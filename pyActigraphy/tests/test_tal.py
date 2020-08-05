@@ -10,7 +10,13 @@ data_dir = op.join(op.dirname(pyActigraphy.__file__), 'tests/data/')
 tal_path = op.join(data_dir, 'test_sample_tal.txt')
 
 # read TAL with default parameters
-rawTAL = pyActigraphy.io.read_raw_tal(tal_path, name='TEST_SAMPLE', sep='\t')
+rawTAL = pyActigraphy.io.read_raw_tal(
+    tal_path,
+    name='TEST_SAMPLE',
+    # sep='\t',
+    encoding='utf-8',  # test file is encoded in UTF-8 (cf pytest issue)
+    # frequency='1min'
+)
 
 
 def test_instance_tal():
