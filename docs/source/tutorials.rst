@@ -23,6 +23,8 @@ Feature examples
   * `Invalid sequences during the recordings`_
   * `Invalid sequences at the beginning and/or the end of the recordings`_
 
+..
+
 * `How to calculate the usual rest-activity rhythm variables`_
 * `How to visualise sleep diaries and compute summary statistics`_
 * `How to detect rest periods automatically`_

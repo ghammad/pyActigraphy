@@ -1,13 +1,13 @@
 .. image:: https://img.shields.io/badge/License-GPL%20v3-blue.svg
   :target: https://www.gnu.org/licenses/gpl-3.0
-.. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/pipeline.svg
+.. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/pipeline.svg?key_text=CI+tests
   :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
-.. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/coverage.svg
-  :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
+.. .. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/coverage.svg
+..   :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
 .. image:: https://img.shields.io/pypi/v/pyActigraphy.svg
   :target: https://pypi.org/project/pyActigraphy
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2537921.svg
-  :target: https://doi.org/10.5281/zenodo.2537921
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg
+  :target: https://doi.org/10.5281/zenodo.2537920
 
 **pyActigraphy**
 ================
@@ -19,10 +19,11 @@ This package is meant to provide a comprehensive set of tools to:
 * read native actigraphy data files with various formats:
 
   * Actigraph: wGT3X-BT
-  * Condor Instrument: ActTrust 2
   * CamNtech: Actiwatch 4 and MotionWatch 8
-  * Respironics: Actiwatch 2 and Actiwatch Spectrum (plus)
+  * Condor Instrument: ActTrust 2
   * Daqtix: Daqtometer
+  * Respironics: Actiwatch 2 and Actiwatch Spectrum (plus)
+  * Tempatilumi (CE Brasil)
 
 ..
 
@@ -58,7 +59,7 @@ The pyActigraphy package is open-source and its source code is accessible `onlin
 
 
 An online documentation of the package is also available `here <https://ghammad.github.io/pyActigraphy/index.html>`_.
-It contains `notebooks <https://ghammad.github.io/pyActigraphy/documentation.html>`_ illustrating various functionalities of the package.
+It contains `notebooks <https://ghammad.github.io/pyActigraphy/tutorials.html>`_ illustrating various functionalities of the package.
 
 Installation
 ============
@@ -68,20 +69,13 @@ In a (bash) shell, simply type:
 
 .. code-block:: shell
 
-  pip3 install pyActigraphy==1.0rc1
+  pip3 install pyActigraphy
 
 To update the package:
 
 .. code-block:: shell
 
-  pip3 install -U pyActigraphy==1.0rc1
-
-
-.. note::
-   Although it is not the version of the pyActigraphy package available by default
-   on the PyPI server, it is strongly recommended to use this version (v1.0rc1) for the moment as
-   it contains all the features (and bug fixes) that will be available in the official
-   release (v1.0), to be released soon.
+  pip3 install -U pyActigraphy
 
 
 * For developers:
