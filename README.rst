@@ -6,8 +6,8 @@
   :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
 .. image:: https://img.shields.io/pypi/v/pyActigraphy.svg
   :target: https://pypi.org/project/pyActigraphy
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2537921.svg
-  :target: https://doi.org/10.5281/zenodo.2537921
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg
+  :target: https://doi.org/10.5281/zenodo.2537920
 
 **pyActigraphy**
 ================
