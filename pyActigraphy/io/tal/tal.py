@@ -210,6 +210,13 @@ def read_raw_tal(
     sep: str, optional
         Delimiter to use.
         Default is ';'.
+    frequency: str, optional
+        Sampling frequency.
+        Cf. #timeseries-offset-aliases in
+        <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+        If None, the sampling frequency is inferred from the data. Otherwise,
+        the data are resampled to the specified frequency.
+        Default is None.
     start_time: datetime-like, optional
         Read data from this time.
         Default is None.
