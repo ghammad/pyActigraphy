@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pyActigraphy.io.reader.reader &#8212; pyActigraphy 1.0rc1 documentation</title>
+    <title>pyActigraphy.io.reader.reader &#8212; pyActigraphy 1.0 documentation</title>
     <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
@@ -38,7 +38,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0rc1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -100,6 +100,7 @@
 <span class="kn">from</span> <span class="nn">..dqt</span> <span class="k">import</span> <span class="n">read_raw_dqt</span>
 <span class="kn">from</span> <span class="nn">..mtn</span> <span class="k">import</span> <span class="n">read_raw_mtn</span>
 <span class="kn">from</span> <span class="nn">..rpx</span> <span class="k">import</span> <span class="n">read_raw_rpx</span>
+<span class="kn">from</span> <span class="nn">..tal</span> <span class="k">import</span> <span class="n">read_raw_tal</span>
 <span class="kn">from</span> <span class="nn">pyActigraphy.log</span> <span class="k">import</span> <span class="n">read_sst_log</span>
 
 
@@ -285,6 +286,7 @@
 <span class="sd">            * DQT (Daqtometers, Daqtix)</span>
 <span class="sd">            * MTN (MotionWatch8, CamNtech)</span>
 <span class="sd">            * RPX (Actiwatch, Respironics)</span>
+<span class="sd">            * TAL (Tempatilumi, CE Brasil)</span>
 
 <span class="sd">        n_jobs: int</span>
 <span class="sd">            Number of CPU to use for parallel reading</span>
@@ -306,7 +308,7 @@
 <span class="sd">            An object containing raw data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">supported_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AGD&#39;</span><span class="p">,</span> <span class="s1">&#39;ATR&#39;</span><span class="p">,</span> <span class="s1">&#39;AWD&#39;</span><span class="p">,</span> <span class="s1">&#39;DQT&#39;</span><span class="p">,</span> <span class="s1">&#39;MTN&#39;</span><span class="p">,</span> <span class="s1">&#39;RPX&#39;</span><span class="p">]</span>
+        <span class="n">supported_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AGD&#39;</span><span class="p">,</span> <span class="s1">&#39;ATR&#39;</span><span class="p">,</span> <span class="s1">&#39;AWD&#39;</span><span class="p">,</span> <span class="s1">&#39;DQT&#39;</span><span class="p">,</span> <span class="s1">&#39;MTN&#39;</span><span class="p">,</span> <span class="s1">&#39;RPX&#39;</span><span class="p">,</span> <span class="s1">&#39;TAL&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">reader_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_types</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s1">&#39;Type </span><span class="si">{0}</span><span class="s1"> unsupported. Supported types: </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -341,6 +343,9 @@
             <span class="p">),</span>
             <span class="s1">&#39;RPX&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
                 <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_rpx</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">),</span>
+            <span class="s1">&#39;TAL&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
+                <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_tal</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
             <span class="p">)</span>
         <span class="p">}[</span><span class="n">reader_type</span><span class="p">](</span><span class="n">files</span><span class="p">)</span>
 
