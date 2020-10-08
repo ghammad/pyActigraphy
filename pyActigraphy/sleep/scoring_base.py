@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import re
 from .scoring import roenneberg, sleep_midpoint, sri
+from .scoring.utils import rescore
 from scipy.ndimage import binary_closing, binary_opening
 from ..filters import _create_inactivity_mask
 from ..utils.utils import _average_daily_activity
@@ -314,9 +315,9 @@ class ScoringMixin(object):
 
     def CK(
         self,
-        scale=0.00001,
-        window=np.array([400, 600, 300, 400, 1400, 500, 350, 0, 0], np.int32),
-        threshold=1.0
+        settings='10sec_max_overlap',
+        threshold=1.0,
+        rescoring=True
     ):
 
         r"""Cole&Kripke algorithm for sleep-wake identification.
@@ -327,15 +328,25 @@ class ScoringMixin(object):
 
         Parameters
         ----------
-        scale: float, optional
-            Scale parameter P.
-            Default is 0.00001.
-        window: np.array
-            Array of weighting factors, :math:`W_{i}`.
-            Default is [400, 600, 300, 400, 1400, 500, 350, 0, 0]
+        settings: str, optional
+            Data reduction settings for which the optimal parameters have been
+            derived. Available settings are:
+
+            * "mean": mean activity per minute
+            * "10sec_max_overlap": maximum 10-second overlapping epoch per
+              minute
+            * "10sec_max_non_overlap": maximum 10-second nonoverlapping epoch
+              per minute
+            * "30sec_max_non_overlap": maximum 30-second nonoverlapping epoch
+              per minute
+            Default is "max30sec_non_overlap".
+
         threshold: float, optional
-            Threshold value for scoring sleep/wake.
-            Default is 1.0.
+            Threshold value for scoring sleep/wake. Default is 1.0.
+
+        rescoring: bool, optional
+            If set to True, Webster's rescoring rules are applied [2]_.
+            Default is True.
 
         Returns
         -------
@@ -365,6 +376,26 @@ class ScoringMixin(object):
           minute, the previous minute, the following minute, etc.
 
 
+        .. warning:: This algorithm yields scores with a period of 1 minute.
+                     Therefore, the time series returned by the CK function has
+                     a 1-min period. In the original paper, this algorithm is
+                     validated for devices configured in "zero-crossing mode".
+
+        Webster's rescoring rules [2]_:
+
+        1. After at least 4 minutes scored as wake, the next 1 minute scored as
+           sleep is rescored as wake
+        2. After at least 10 minutes scored as wake, the next 3 minutes scored
+           as sleep are rescored as wake;
+        3. After at least 15 minutes scored as wake, the next 4 minutes scored
+           as sleep are rescored as wake;
+        4. If a period of 6 minutes or less that is scored as sleep is
+           surrounded by at least 15 minutes scored as wake, then rescore to
+           wake;
+        5. If a period of 10 minutes or less that is scored as sleep is
+           surrounded by at least 20 minutes scored as wake, then rescore to
+           wake.
+
         References
         ----------
 
@@ -372,14 +403,135 @@ class ScoringMixin(object):
                & Gillin, J. C. (1992). Automatic Sleep/Wake Identification
                From Wrist Activity. Sleep, 15(5), 461–469.
                http://doi.org/10.1093/sleep/15.5.461
+        .. [2] Webster, J. B., Kripke, D. F., Messin, S., Mullaney, D. J., &
+               Wyborney, G. (1982). An Activity-Based Sleep Monitor System for
+               Ambulatory Use. Sleep, 5(4), 389–399.
+               https://doi.org/10.1093/sleep/5.4.389
 
         Examples
         --------
 
 
         """
+        available_settings = [
+            "mean",
+            "10sec_max_overlap",
+            "10sec_max_non_overlap",
+            "30sec_max_non_overlap"
+        ]
 
-        return _cole_kripke(self.data, scale, window, threshold)
+        if settings not in available_settings:
+            raise ValueError("CK sleep/wake identification:\n" +
+                             "Required settings: {}\n".format(settings) +
+                             "Available settings are:\n" +
+                             "\n".join(available_settings))
+
+        ck = None
+
+        if settings == "mean":
+            if pd.Timedelta(self.data.index.freq) > pd.Timedelta('60s'):
+                raise ValueError((
+                    "The sampling frequency of the input data does not allow" +
+                    " the use of the requested settings ({}).\n".format(
+                        settings) +
+                    "For such settings, the sampling frequency should less" +
+                    " than 60 seconds."
+                    ))
+            else:
+                # Compute the resampling factor as the original weights are
+                # calculated for an average of 2-sec epochs over 60 seconds:
+                rs_f = 30  # 60sec/2sec
+                # Resample to 60 sec and take the sum
+                # WARNING: valid if the input data is a sum of activity counts
+                data_mean = self.data.resample('60s').sum()/rs_f
+
+                # Define the scale and weights for this settings
+                scale = 0.001
+                window = np.array(
+                    [106, 54, 58, 76, 230, 74, 67, 0, 0],
+                    np.int32
+                )
+
+                ck = _cole_kripke(data_mean, scale, window, threshold)
+
+        elif settings == "10sec_max_overlap":
+            if pd.Timedelta(self.data.index.freq) > pd.Timedelta('5s'):
+                raise ValueError((
+                    "The sampling frequency of the input data does not allow" +
+                    " the use of the requested settings ({}).\n".format(
+                        settings) +
+                    "For such settings, the sampling frequency should less" +
+                    " than 5 seconds."
+                    ))
+            else:
+                # Resample to 10/2 sec and then sum over a sliding window
+                data = self.data.resample('5s').sum().rolling('10s').sum()
+                # Resample to 60 sec and take the max of the 10 sec periods
+                data_max = data.resample('60s').max()
+
+                # Define the scale and weights for this settings
+                scale = 0.00001
+                window = np.array(
+                    [50, 30, 300, 400, 1400, 500, 350, 0, 0],
+                    np.int32
+                )
+
+                ck = _cole_kripke(data_max, scale, window, threshold)
+
+        elif settings == "10sec_max_non_overlap":
+            if pd.Timedelta(self.data.index.freq) > pd.Timedelta('10s'):
+                raise ValueError((
+                    "The sampling frequency of the input data does not allow" +
+                    " the use of the requested settings ({}).\n".format(
+                        settings) +
+                    "For such settings, the sampling frequency should less" +
+                    " or equal to 10 seconds."
+                    ))
+            else:
+                # Resample to 10 sec and then sum
+                data = self.data.resample('10s').sum()
+                # Resample to 60 sec and take the max of the 10 sec periods
+                data_max = data.resample('60s').max()
+
+                # Define the scale and weights for this settings
+                scale = 0.00001
+                window = np.array(
+                    [550, 378, 413, 699, 1736, 287, 300, 0, 0],
+                    np.int32
+                )
+
+                ck = _cole_kripke(data_max, scale, window, threshold)
+
+        elif settings == "30sec_max_non_overlap":
+            if pd.Timedelta(self.data.index.freq) > pd.Timedelta('30s'):
+                raise ValueError((
+                    "The sampling frequency of the input data does not allow" +
+                    " the use of the requested settings ({}).\n".format(
+                        settings) +
+                    "For such settings, the sampling frequency should less" +
+                    " or equal to 30 seconds."
+                    ))
+            else:
+                # Resample to 30 sec and then sum
+                data = self.data.resample('30s').sum()
+                # Resample to 60 sec and take the max of the 10 sec periods
+                data_max = data.resample('60s').max()
+
+                # Define the scale and weights for this settings
+                scale = 0.0001
+                window = np.array(
+                    [50, 30, 14, 28, 12, 8, 50, 0, 0],
+                    np.int32
+                )
+
+                ck = _cole_kripke(data_max, scale, window, threshold)
+
+        if rescoring:
+            # Rescoring
+            mask = rescore(ck.values, sleep_score=1)
+            ck = ck*mask
+
+        return ck
 
     def Sadeh(
         self,
