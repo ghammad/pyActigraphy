@@ -178,7 +178,7 @@ def rescore_if_preceded(scoring, n_periods, n_previous, sleep_score=1):
 
     Parameters
     ----------
-    scoring : array_like
+    scoring : np.ndarray
         Binary series with sleep-wake scoring
 
     n_periods : int
@@ -198,6 +198,12 @@ def rescore_if_preceded(scoring, n_periods, n_previous, sleep_score=1):
         Binary array.
 
     '''
+    # Check input type
+    if not isinstance(scoring, (np.ndarray)):
+        raise TypeError(
+            "Wrong input type for 'scoring': {}.\nExpect np.array.".format(
+                type(scoring)
+            ))
 
     # Search for the indices of the stretches of epochs scored as sleep
     indices = consecutive_values(
@@ -209,7 +215,7 @@ def rescore_if_preceded(scoring, n_periods, n_previous, sleep_score=1):
 
     # For each stretch of epochs scored as sleep:
     for index in indices:
-        if (index[0] < n_previous) or (index[1] >= len(scoring)):
+        if (index[0] < n_previous) or (index[1] > len(scoring)):
             continue
         # If all preceding epochs are scored as wake:
         if np.all(scoring[index[0]-n_previous:index[0]] == 0):
@@ -224,7 +230,7 @@ def rescore_if_surrounded(scoring, n_periods, n_surround, sleep_score=1):
 
     Parameters
     ----------
-    scoring : array_like
+    scoring : np.ndarray
         Binary series with sleep-wake scoring
 
     n_periods : int
@@ -244,6 +250,12 @@ def rescore_if_surrounded(scoring, n_periods, n_surround, sleep_score=1):
         Binary array.
 
     '''
+    # Check input type
+    if not isinstance(scoring, (np.ndarray)):
+        raise TypeError(
+            "Wrong input type for 'scoring': {}.\nExpect np.array.".format(
+                type(scoring)
+            ))
 
     # Search for the indices of the stretches of epochs scored as wake
     indices = consecutive_values(
@@ -272,7 +284,7 @@ def rescore(scoring, sleep_score=1):
 
     Parameters
     ----------
-    scoring : array_like
+    scoring : np.ndarray
         Binary series with sleep-wake scoring
 
     sleep_score: int, optional
@@ -285,7 +297,6 @@ def rescore(scoring, sleep_score=1):
         Binary array.
 
     '''
-
     # create an initial series of 1
     rescoring_masks = np.empty((5, len(scoring)))
 
