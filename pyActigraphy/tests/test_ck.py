@@ -9,7 +9,7 @@ from pyActigraphy.sleep.scoring.utils import rescore
 # 3. After at least 15 minutes scored as wake, the next 4 minutes scored
 # as sleep are rescored as wake;
 # 4. If a period of 6 minutes or less that is scored as sleep is
-# surrounded by at least 15 minutes scored as wake, then rescore to wake;
+# surrounded by at least 10 minutes scored as wake, then rescore to wake;
 # 5. If a period of 10 minutes or less that is scored as sleep is
 # surrounded by at least 20 minutes scored as wake, then rescore to wake.
 
@@ -17,7 +17,7 @@ test_series = np.asarray(
     [0]*4+[1] +  # 1st rule
     [0]*10+[1, 1, 1] +  # 2nd rule
     [0]*15+[1, 1, 1, 1] +  # 3rd rule
-    [0]*15+[1, 1, 1, 1, 1, 1]+[0]*15 +  # 4th rule
+    [0]*10+[1, 1, 1, 1, 1, 1]+[0]*10 +  # 4th rule
     [0]*20+[1, 1, 1, 1, 1, 1, 1, 1, 1, 1]+[0]*20  # 5th rule
 )
 

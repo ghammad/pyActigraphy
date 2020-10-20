@@ -312,9 +312,9 @@ def rescore(scoring, sleep_score=1):
     rescoring_masks[2] = rescore_if_preceded(
         scoring, n_periods=4, n_previous=15, sleep_score=1)
 
-    # Rule 4: Search for series of at least 15 minutes scored as wake...
+    # Rule 4: Search for series of at least 10 minutes scored as wake...
     rescoring_masks[3] = rescore_if_surrounded(
-        scoring, n_periods=6, n_surround=15, sleep_score=1)
+        scoring, n_periods=6, n_surround=10, sleep_score=1)
 
     # Rule 5: Search for series of at least 20 minutes scored as wake...
     rescoring_masks[4] = rescore_if_surrounded(
