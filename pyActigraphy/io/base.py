@@ -221,7 +221,7 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
         return pd.Series(
             np.where(self.data > threshold, 1, 0),
             index=self.data.index
-        )
+        ).where(self.data.notna(), np.nan)
 
     # TODO: @lru_cache(maxsize=6) ???
     def resampled_data(self, freq, binarize=False, threshold=0):
