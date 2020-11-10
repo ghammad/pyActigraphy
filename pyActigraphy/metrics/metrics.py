@@ -25,9 +25,32 @@ __all__ = [
     '_td_format']
 
 
-def _average_daily_total_activity(data):
+def _average_daily_total_activity(data, rescale, exclude_ends):
+    r"""Calculate the average daily activity"""
 
-    return data.resample('1D').sum().mean()
+    # Shortcut: if rescale is false, compute the daily average
+    if rescale is False:
+        daily_sum = data.resample('1D').sum()
+    else:
+        # Aggregate data daily:
+        # - compute the daily sum
+        # - count the number of epochs included in each day
+        daily_agg = data.resample('1D').agg(['count', 'sum'])
+
+        # Compute weights as a function of the number of epochs per day:
+        # weight =  (#epochs/day) / (#count/day)
+        # NB: needed to account for potentially masked periods.
+        daily_agg['weigth'] = (pd.Timedelta('24h')/data.index.freq)
+        daily_agg['weigth'] /= daily_agg['count']
+
+        # Rescale activity
+        daily_sum = daily_agg['sum']*daily_agg['weigth']
+
+    # Exclude first and last days
+    if exclude_ends:
+        daily_sum = daily_sum.iloc[1:-1]
+
+    return daily_sum.mean()
 
 
 def _interdaily_stability(data):
@@ -330,7 +353,9 @@ class MetricsMixin(object):
 
         return avgdaily_light
 
-    def ADAT(self, binarize=True, threshold=4):
+    def ADAT(
+        self, binarize=True, threshold=4, rescale=True, exclude_ends=False
+    ):
         """Total average daily activity
 
         Calculate the total activity counts, averaged over all the days.
@@ -343,6 +368,13 @@ class MetricsMixin(object):
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
+        rescale: bool, optional
+            If set to True, the activity counts are rescaled to account for
+            masked periods (if any).
+        exclude_ends: bool, optional
+            If set to True, the first and last daily periods are excluded from
+            the calculation. Useful when the recording does start or end at
+            midnigth.
 
         Returns
         -------
@@ -354,7 +386,8 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        adat = _average_daily_total_activity(data)
+        adat = _average_daily_total_activity(
+            data, rescale=rescale, exclude_ends=exclude_ends)
 
         return adat
 
