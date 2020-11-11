@@ -1,6 +1,6 @@
 from generate_dataset import generate_series
-from stochastic.noise import BrownianNoise, FractionalGaussianNoise
-from stochastic.continuous import FractionalBrownianMotion
+from stochastic.processes.noise import BrownianNoise, FractionalGaussianNoise
+from stochastic.processes.continuous import FractionalBrownianMotion
 
 import numpy as np
 import pandas as pd
