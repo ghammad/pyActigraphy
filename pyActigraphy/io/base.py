@@ -5,6 +5,7 @@ import warnings
 from pandas.tseries.frequencies import to_offset
 from ..filters import FiltersMixin
 from ..metrics import MetricsMixin
+from ..reports import ActivityReports
 from ..sleep import SleepDiary, ScoringMixin, SleepBoutMixin
 
 
@@ -327,3 +328,36 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
     @sleep_diary.setter
     def sleep_diary(self, value):
         self.__sleep_diary = value
+
+    def create_activity_report(self, cut_points, labels, verbose=False):
+        r"""Activity report.
+
+        Create an activity report with the fraction of time spent with an
+        activity level comprised between the specified cut-points.
+
+        Parameters
+        ----------
+        input_fname: str
+            Path to the sleep diary file.
+        cut_points: array
+            Activity cut-points. If all the values are below 1, they are
+            interpreted as percentiles of the activity counts. Lower
+            (i.e 0 count) and upper (i.e infty count) boundaries are
+            automatically added.
+        labels: array
+            Labels for the intervals defined by the cut points.
+            The number of labels should be N+1 for N cut-points.
+        verbose: bool, optional
+            If set to True, print out info about the cut points.
+            Default is False.
+        """
+        # Create activity report
+        self.__activity_report = ActivityReports(self.data, cut_points, labels)
+        # Fill the activity report
+        self.__activity_report.fit(verbose=verbose)
+
+    @property
+    def activity_report(self):
+        r"""Activity report accessor"""
+        self.__activity_report.results.name = self.name
+        return self.__activity_report.pretty_results()

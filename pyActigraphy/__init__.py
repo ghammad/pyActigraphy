@@ -15,8 +15,12 @@
 #
 # Dev branch marker is: 'X.Y.devN' where N is an integer.
 #
-from . import analysis, io, filters, metrics, sleep, utils, tests
+from . import analysis, io, filters, metrics, reports, sleep, utils, tests
 
-__all__ = ["analysis", "io", "filters", "metrics", "sleep", "utils", "tests"]
+__all__ = [
+    "analysis", "io", "filters",
+    "metrics", "reports", "sleep",
+    "utils", "tests"
+]
 
 __version__ = '1.0'

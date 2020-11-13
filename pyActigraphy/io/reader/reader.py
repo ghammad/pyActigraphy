@@ -1,6 +1,7 @@
 import glob
 import warnings
 
+from pandas import concat
 from pandas import Timedelta
 from pandas.tseries.frequencies import to_offset
 from pyActigraphy.metrics import ForwardMetricsMixin
@@ -175,6 +176,37 @@ class RawReader(ForwardMetricsMixin):
         else:
             print('Could not find a SST log file. Please run the read_sst_log'
                   ' function before using the `apply_sst` function.')
+
+    def create_activity_report(self, cut_points, labels, verbose=False):
+        r"""Activity report.
+
+        Create an activity report with the fraction of time spent with an
+        activity level comprised between the specified cut-points.
+
+        Parameters
+        ----------
+        input_fname: str
+            Path to the sleep diary file.
+        cut_points: array
+            Activity cut-points. If all the values are below 1, they are
+            interpreted as percentiles of the activity counts. Lower
+            (i.e 0 count) and upper (i.e max count) boundaries are
+            automatically added.
+        labels: array
+            Labels for the intervals defined by the cut points.
+            The number of labels should be N+1 for N cut-points.
+        verbose: bool, optional
+            If set to True, print out info about the cut points.
+            Default is False.
+        """
+        # Create activity reports
+        for iread in self.readers:
+            iread.create_activity_report(cut_points, labels, verbose)
+
+    @property
+    def activity_report(self):
+        r"""Activity report accessor"""
+        return concat([iread.activity_report for iread in self.readers])
 
 
 def read_raw(
