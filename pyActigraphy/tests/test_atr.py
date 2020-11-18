@@ -28,6 +28,18 @@ def test_read_raw_atr_uuid():
     assert rawATR.uuid == 'myUUID'
 
 
+def test_read_raw_atr_format():
+
+    assert rawATR.format == 'ATR'
+
+
+def test_read_raw_atr_available_modes():
+
+    assert rawATR.available_modes == [
+        'PIM', 'PIMn', 'TAT', 'TATn', 'ZCM', 'ZCMn'
+    ]
+
+
 def test_read_raw_atr_start_time():
 
     assert rawATR.start_time == pd.Timestamp('1918-01-01 09:00:00')

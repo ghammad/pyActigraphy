@@ -27,6 +27,8 @@ class RawATR(BaseRaw):
         Default is None (i.e all the data).
     """
 
+    __default_modes = ["PIM", "PIMn", "TAT", "TATn", "ZCM", "ZCMn"]
+
     def __init__(
         self,
         input_fname,
@@ -60,14 +62,6 @@ class RawATR(BaseRaw):
                 "contain a header.\n Aborting."
             )
 
-        # Check requested sampling mode is available:
-        if mode not in header['MODE'][0].split('/'):
-            raise ValueError(
-                "The requested mode ({}) is not available".format(mode) +
-                " for this recording.\n" +
-                "Available modes are {}.".format(header['MODE'][0])
-            )
-
         # extract informations from the header
         uuid = header['DEVICE_ID'][0]
         name = header['SUBJECT_NAME'][0]
@@ -83,6 +77,37 @@ class RawATR(BaseRaw):
             dayfirst=True,
             index_col=[0]
         ).resample(freq).sum()
+
+        self.__available_modes = sorted(list(
+            set(index_data.columns.values).intersection(
+                set(self.__default_modes))))
+
+        # Check requested sampling mode is available:
+        if mode not in self.__available_modes:  # header['MODE'][0].split('/'):
+            raise ValueError(
+                "The requested mode ({}) is not available".format(mode) +
+                " for this recording.\n" +
+                "Available modes are {}.".format(
+                    self.__available_modes  # header['MODE'][0]
+                )
+            )
+
+        if start_time is not None:
+            start_time = pd.to_datetime(start_time)
+        else:
+            start_time = index_data.index[0]
+
+        if period is not None:
+            period = pd.Timedelta(period)
+            stop_time = start_time+period
+        else:
+            stop_time = index_data.index[-1]
+            period = stop_time - start_time
+
+        index_data = index_data[start_time:stop_time]
+
+        # ACTIVITY
+        self.__activity = index_data[self.__available_modes]
 
         # TEMP
         self.__temperature = self.__extract_from_data(
@@ -105,25 +130,11 @@ class RawATR(BaseRaw):
         self.__uva_light = self.__extract_from_data(index_data, 'UVA LIGHT')
         self.__uvb_light = self.__extract_from_data(index_data, 'UVB LIGHT')
 
-        if start_time is not None:
-            start_time = pd.to_datetime(start_time)
-        else:
-            start_time = index_data.index[0]
-
-        if period is not None:
-            period = pd.Timedelta(period)
-            stop_time = start_time+period
-        else:
-            stop_time = index_data.index[-1]
-            period = stop_time - start_time
-
-        index_data = index_data[start_time:stop_time]
-
         # call __init__ function of the base class
         super().__init__(
             name=name,
             uuid=uuid,
-            format='ART',
+            format='ATR',
             axial_mode='tri-axial',
             start_time=start_time,
             period=period,
@@ -131,6 +142,41 @@ class RawATR(BaseRaw):
             data=index_data[mode],
             light=self.__extract_from_data(index_data, 'LIGHT')
         )
+
+    @property
+    def available_modes(self):
+        r"""Available acquistion modes (PIM, ZCM, etc)"""
+        return self.__available_modes
+
+    @property
+    def PIM(self):
+        r"""Activity (in PIM mode)."""
+        return self.__extract_from_data(self.__activity, 'PIM')
+
+    @property
+    def PIMn(self):
+        r"""Activity (in normalized PIM mode)."""
+        return self.__extract_from_data(self.__activity, 'PIMn')
+
+    @property
+    def TAT(self):
+        r"""Activity (in TAT mode)."""
+        return self.__extract_from_data(self.__activity, 'TAT')
+
+    @property
+    def TATn(self):
+        r"""Activity (in normalized PIM mode)."""
+        return self.__extract_from_data(self.__activity, 'TATn')
+
+    @property
+    def ZCM(self):
+        r"""Activity (in ZCM mode)."""
+        return self.__extract_from_data(self.__activity, 'ZCM')
+
+    @property
+    def ZCMn(self):
+        r"""Activity (in normalized ZCM mode)."""
+        return self.__extract_from_data(self.__activity, 'ZCMn')
 
     @property
     def temperature(self):
