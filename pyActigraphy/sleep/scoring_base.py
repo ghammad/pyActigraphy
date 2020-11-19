@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import re
-from .scoring import roenneberg, sleep_midpoint, sri
+from .scoring import csm, roenneberg, sleep_midpoint, sri
 from .scoring.utils import rescore
 from scipy.ndimage import binary_closing, binary_opening
 from ..filters import _create_inactivity_mask
@@ -865,6 +865,41 @@ class ScoringMixin(object):
             )
 
         return _oakley(self.data, window, threshold)
+
+    def CSM(
+        self,
+        wa=np.array([34.5, 133, 529, 375, 408, 400.5, 1074, 2048.5, 2424.5]),
+        wp=np.array([1920, 149.5, 257.5, 125, 111.5, 120, 69, 40.5]),
+        ps=0.000464,  # p for sleep detection
+        pr=0.00005,  # p for resting detection
+        prs=1,  # positive rescorring for sleep detection
+        nrs=0,  # negative rescorring for sleep detection
+        prr=0,  # positive rescorring for resting detection
+        nrr=0,  # negative rescorring for resting detection
+        rest_score=2,
+        sleep_score=1,
+        binarize=False
+    ):
+        # This algorithm has been developed for ActTrust devices from
+        # Condor Instrument. Verify if the reader has the appropriate type:
+        if self.format != 'ATR':
+            raise ValueError(
+                "The CSM has been developed for ActTrust devices."
+            )
+        # The CSM uses the ZCMn as input
+        data = self.ZCMn
+
+        states = csm(
+            data,
+            wa=wa, wp=wp,
+            ps=ps, pr=pr,
+            prs=prs, nrs=nrs,
+            prr=prr, nrr=nrr,
+            rest_score=rest_score,
+            sleep_score=sleep_score
+        )
+
+        return (states == sleep_score).astype(int) if binarize else states
 
     def SoD(
         self,
