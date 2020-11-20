@@ -5,7 +5,7 @@ import warnings
 from pandas.tseries.frequencies import to_offset
 from ..filters import FiltersMixin
 from ..metrics import MetricsMixin
-from ..reports import ActivityReport
+from ..reports import ActivityReport, create_sleep_report
 from ..sleep import SleepDiary, ScoringMixin, SleepBoutMixin
 
 
@@ -337,8 +337,6 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
 
         Parameters
         ----------
-        input_fname: str
-            Path to the sleep diary file.
         cut_points: array
             Activity cut-points. If all the values are below 1, they are
             interpreted as percentiles of the activity counts. Lower
@@ -361,3 +359,73 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
         r"""Activity report accessor"""
         self.__activity_report.results.name = self.name
         return self.__activity_report.pretty_results()
+
+    def create_sleep_report(
+        self,
+        states=['NIGHT'],
+        state_scoring={'NIGHT': 1},
+        convert_td_to_num_min=True,
+        verbose=False,
+        scoring_algo='Scripps',
+        *args,
+        **kwargs
+    ):
+        r"""Sleep report.
+
+        Create an sleep report using the periods reported in the sleep diary as
+        periods of interest.
+
+        Parameters
+        ----------
+        states: list
+            List of types of periods of interest. Should match the types
+            reported in the sleep diary file.
+        state_scoring: dict
+            Expected scores from the sleep algorithm for the states of
+            interest.
+        convert_dt_to_num_min: bool, optional
+            If set to True, all durations are reported in minutes instead of
+            pd.Timedelta.
+        verbose: bool, optional
+            If set to True, print out info about periods found in the sleep
+            diary.
+            Default is False.
+        scoring_algo: str, optional
+            Sleep/wake scoring algorithm to use.
+            Default is 'Scripps'.
+        *args
+            Variable length argument list passed to the scoring algorithm.
+        **kwargs
+            Arbitrary keyword arguments passed to the scoring algorithm.
+        """
+
+        # Check if sleep diary is available
+        if self.sleep_diary is None:
+            warning_msg = (
+                'The sleep diary is None. '
+                'Please run the "read_sleep_diary" function.'
+            )
+            print(warning_msg)
+            return None
+
+        # Retrieve sleep scoring function dynamically by name
+        sleep_algo = getattr(self, scoring_algo)
+
+        # Sleep scoring
+        scoring = sleep_algo(*args, **kwargs)
+
+        # Create sleep report
+        self.__sleep_report = create_sleep_report(
+            self.sleep_diary,
+            scoring,
+            states=states,
+            state_scoring=state_scoring,
+            convert_td_to_num_min=convert_td_to_num_min,
+            verbose=verbose,
+        )
+
+    @property
+    def sleep_report(self):
+        r"""Sleep report accessor"""
+        self.__sleep_report.name = self.name
+        return self.__sleep_report
