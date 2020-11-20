@@ -5,13 +5,14 @@
 # License: BSD (3-clause)
 
 # from . import filters
-from .report import Reports, ActivityReports
-from .report_sleep import SleepReports
+from .report import Report
+from .report_activity import ActivityReport
+from .report_sleep import SleepReport
 from .utils import ScoringDescriptor
 
 __all__ = [
-    "Reports",
-    "ActivityReports",
-    "SleepReports",
+    "Report",
+    "ActivityReport",
+    "SleepReport",
     "ScoringDescriptor"
 ]
