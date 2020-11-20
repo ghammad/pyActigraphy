@@ -7,12 +7,12 @@
 # from . import filters
 from .report import Report
 from .report_activity import ActivityReport
-from .report_sleep import SleepReport
+from .report_sleep import SleepReport, create_sleep_report
 from .utils import ScoringDescriptor
 
 __all__ = [
     "Report",
     "ActivityReport",
-    "SleepReport",
+    "SleepReport", "create_sleep_report",
     "ScoringDescriptor"
 ]

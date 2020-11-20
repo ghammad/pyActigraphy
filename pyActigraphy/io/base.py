@@ -5,7 +5,7 @@ import warnings
 from pandas.tseries.frequencies import to_offset
 from ..filters import FiltersMixin
 from ..metrics import MetricsMixin
-from ..reports import ActivityReports
+from ..reports import ActivityReport
 from ..sleep import SleepDiary, ScoringMixin, SleepBoutMixin
 
 
@@ -352,7 +352,7 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
             Default is False.
         """
         # Create activity report
-        self.__activity_report = ActivityReports(self.data, cut_points, labels)
+        self.__activity_report = ActivityReport(self.data, cut_points, labels)
         # Fill the activity report
         self.__activity_report.fit(verbose=verbose)
 
