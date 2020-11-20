@@ -141,24 +141,13 @@ class SleepReport(Report):
 
 
 def create_sleep_report(
-    raw,
+    sleep_diary,
+    scoring,
     states=['NIGHT'],
     state_scoring={'NIGHT': 1},
-    scoring_algo='Scripps',
-    convert_dt_to_num_min=True,
+    convert_td_to_num_min=True,
     verbose=False,
-    *args,
-    **kwargs
 ):
-
-    # Check if sleep diary is available
-    if raw.sleep_diary is None:
-        warning_msg = (
-            'Could not find a sleep diary. '
-            'Please run the "read_sleep_diary" function.'
-        )
-        print(warning_msg)
-        return None
 
     # Check all states have an associated score
     if states != list(state_scoring.keys()):
@@ -171,16 +160,10 @@ def create_sleep_report(
         print(warning_msg)
         return None
 
-    # Retrieve sleep scoring function dynamically by name
-    sleep_algo = getattr(raw, scoring_algo)
-
-    # Sleep scoring
-    scoring = sleep_algo(*args, **kwargs)
-
     # Extract periods reported in the sleep diary
     reported_periods = {k: [] for k in states}  # initialize with empty lists
 
-    for idx, row in raw.sleep_diary.diary.iterrows():
+    for idx, row in sleep_diary.diary.iterrows():
         # Skip periods if type is not in the requested list of states
         if row['TYPE'] not in states:
             if verbose:
@@ -189,7 +172,7 @@ def create_sleep_report(
             continue
         else:
             # Extract chunk
-            chunk = raw.sleep_diary.raw_data.loc[row['START']:row['END']]
+            chunk = sleep_diary.raw_data.loc[row['START']:row['END']]
             if verbose:
                 print(
                     "Found reported period nr {} of type: {}.".format(
@@ -215,11 +198,11 @@ def create_sleep_report(
         sleep_report = SleepReport(
             sleep_periods=reported_periods[state],
             scoring=scoring,
-            sleep_score=raw.sleep_diary.state_index[state],
+            sleep_score=sleep_diary.state_index[state],
             target_score=state_scoring[state],
             labels=[state]*len(reported_periods[state]))
         # Fit the current sleep report
-        sleep_report.fit(convert_to_num_min=convert_dt_to_num_min)
+        sleep_report.fit(convert_to_num_min=convert_td_to_num_min)
 
         # Append results
         sleep_reports.append(sleep_report.pretty_results())
