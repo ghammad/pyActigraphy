@@ -54,3 +54,21 @@ class ScoringDescriptor():
         d = pos - self.truth.index[0]
 
         return d.total_seconds()/60 if convert_to_num_min else d
+
+    def surroundings(self, n_epochs):
+
+        # Define start and end indices for the truth
+        boundaries = [0, len(self.scoring.index)]
+
+        if self.truth.index[0] >= self.scoring.index[0]:
+            boundaries[0] = self.scoring.index.get_loc(self.truth.index[0])
+
+        if self.truth.index[-1] <= self.scoring.index[-1]:
+            boundaries[1] = self.scoring.index.get_loc(self.truth.index[-1])
+
+        before = self.scoring.iloc[
+            max(boundaries[0]-n_epochs, 0):boundaries[0]]
+        after = self.scoring.iloc[
+            boundaries[1]+1:n_epochs+boundaries[1]+1]
+
+        return (before, after)
