@@ -20,7 +20,7 @@ def _calculate_score(activity, wa, wp, p):
 
 
 def _calculate_state(
-    activity,
+    data,
     istate,
     wa,
     wp,
@@ -32,25 +32,42 @@ def _calculate_state(
 
     """Sleep (re)scoring rules for the Condor Sleep Model
 
-    Keyword arguments:
-    activity -- activity used for the score calculation
-    istate -- initial state
-    wa -- weights for the epochs before the one being evaluated and for the
-    current epoch (current epoch is the last index of the array)
-    wp -- weights for the epochs after the one being evaluated
-    p -- scaling for the weighted moving average
-    positive_rescoring -- number of consecutive indexes of the score array that
-    need to be below 1 to change the state to positive state
-    negative_rescoring -- number of consecutive indexes of the score array that
-    need to be above 1 to do not change the state
-    positive_state -- the state that a give index will be changed to if the
-    calculated score is below 1
+    These rules are applied to a series of initial states (wake, rest or sleep)
+    and modify them as a function of their scoring.
+
+    Parameters
+    ----------
+    data : pandas.Series
+        Input activity data.
+    istate: array_like
+        Array of initial states.
+    wa: array_like
+        Array of weights for the epochs before the one being evaluated and for
+        the current epoch (current epoch is the last index of the array).
+    wp: array_like
+        Array of weights for the epochs after the one being evaluated.
+    p: float
+        Overall scaling for the weighted moving average used for the scoring.
+    positive_rescoring: int
+        Number of consecutive indexes of the score array that need to be below
+        1 to change the state to the "positive" state.
+    negative_rescoring: int
+        Number of consecutive indexes of the score array that need to be above
+        1 to keep the initial state.
+    positive_state: int
+        Index of the state that an initial state is changed to when it is
+        rescored.
+
+    Returns
+    -------
+    state : array_like
+        Array of states.
     """
     # create a local copy of the state
     state = istate.copy()
 
     # calculate the score
-    scores = _calculate_score(activity, wa, wp, p)
+    scores = _calculate_score(data, wa, wp, p)
 
     # replace NaN produced by the convolution with default scores
     scores.iloc[:len(wa)-1] = 0
@@ -94,20 +111,74 @@ def csm(
     data,
     wa=np.array([34.5, 133, 529, 375, 408, 400.5, 1074, 2048.5, 2424.5]),
     wp=np.array([1920, 149.5, 257.5, 125, 111.5, 120, 69, 40.5]),
-    ps=0.000464,  # p for sleep detection
-    pr=0.00005,  # p for resting detection
-    prs=1,  # positive rescorring for sleep detection
-    nrs=0,  # negative rescorring for sleep detection
-    prr=0,  # positive rescorring for resting detection
-    nrr=0,  # negative rescorring for resting detection
-    rest_score=2,
-    sleep_score=1
+    p_rest=0.00005,
+    p_sleep=0.000464,
+    pr_rest=0,
+    nr_rest=0,
+    pr_sleep=1,
+    nr_sleep=0,
+    score_rest=2,
+    score_sleep=1
 ):
+    """Condor Sleep Model
+
+    Sleep-wake scoring algorithm developed by Condor Instrument for their
+    ActTrust devices.
+
+    This algorithm works in a two-step fashion. First, it classifies all epochs
+    as wake or rest, as function of each epoch's score. Second, using a more
+    stringent scoring threshold, "rest" epoch are re-classified as "sleep". A
+    relabelling mechanism using the labels of the surrounding epochs is also
+    applied to consolidate periods of epochs labelled as rest or sleep.
+
+    Parameters
+    ----------
+    data : pandas.Series
+        Input activity data.
+    istate: array_like
+        Array of initial states.
+    wa: array_like
+        Array of weights for the epochs before the one being evaluated and for
+        the current epoch (current epoch is the last index of the array).
+    wp: array_like
+        Array of weights for the epochs after the one being evaluated.
+    p_rest: float
+        Overall scaling for the weighted moving average used for the scoring
+        during the detection of "rest" epochs.
+    p_sleep: float
+        Overall scaling for the weighted moving average used for the scoring
+        during the detection of "sleep" epochs.
+    pr_rest: int
+        Number of consecutive indexes of the score array that need to be below
+        1 to change the state to the "rest" state.
+    nr_rest: int
+        Number of consecutive indexes of the score array that need to be above
+        1 to keep the initial state during the detection of "rest" epochs.
+    pr_sleep: int
+        Number of consecutive indexes of the score array that need to be below
+        1 to change the state to the "sleep" state.
+    nr_sleep: int
+        Number of consecutive indexes of the score array that need to be above
+        1 to keep the initial state during the detection of "sleep" epochs.
+    score_rest: int
+        State index for epochs labelled as "rest".
+    score_sleep: int
+        State index for epochs labelled as "sleep".
+
+    Returns
+    -------
+    csm : pandas.Series
+        Series of state indices.
+    """
 
     # start with all states awake
     state0 = np.zeros(len(data))
 
-    stateR = _calculate_state(data, state0, wa, wp, pr, prr, nrr, rest_score)
-    stateF = _calculate_state(data, stateR, wa, wp, ps, prs, nrs, sleep_score)
+    stateR = _calculate_state(
+        data, state0, wa, wp, p_rest, pr_rest, nr_rest, score_rest
+    )
+    stateF = _calculate_state(
+        data, stateR, wa, wp, p_sleep, pr_sleep, nr_sleep, score_sleep
+    )
 
     return pd.Series(index=data.index, data=stateF)
