@@ -868,7 +868,7 @@ class ScoringMixin(object):
 
     def CSM(
         self,
-        settings,
+        settings="auto",
         score_rest=2,
         score_sleep=1,
         binarize=False
@@ -887,12 +887,15 @@ class ScoringMixin(object):
 
         Parameters
         ----------
-        settings: str,
+        settings: str, optional
             Parameter settings for the CSM algorithm. Refers to the data
             acquisition frequency. Available values are:
             * "auto": use input data frequency.
+            * "30s": set parameters to optimal values obtained for a 30s data
+              acquisition frequency.
             * "60s": set parameters to optimal values obtained for a 60s data
               acquisition frequency.
+             Default is 'auto'.
         score_rest: int, optional
             State index for epochs labelled as "rest".
             Default is 2.
