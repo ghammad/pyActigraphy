@@ -21,6 +21,7 @@ Currently, the supported formats are:
 * ActTrust 2, Condor Instruments (.txt);
 * Daqtometer, Daqtix (.csv);
 * Actiwatch 2 and Actiwatch Spectrum Plus, Philips Respironics (.csv)
+* Tempatilumi (CE Brasil)
 
 Associated functions:
 
@@ -36,6 +37,7 @@ Associated functions:
    read_raw_dqt
    read_raw_mtn
    read_raw_rpx
+   read_raw_tal
 
 These functions return a `BaseRaw` object. which is the main class in
 pyActigraphy: :class:`pyActigraphy.io.BaseRaw`

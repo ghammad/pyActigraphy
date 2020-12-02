@@ -60,7 +60,7 @@ setup(
     #
     # This field corresponds to the "Home-Page" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    url='http://github.com/ghammad/pyActigraphy',
+    url='https://github.com/ghammad/pyActigraphy',
 
     author='Grégory Hammad',
     author_email='gregory.hammad@hotmail.fr',
