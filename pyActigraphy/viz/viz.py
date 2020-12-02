@@ -199,3 +199,153 @@ def _profile_plot(
     )
 
     return fig
+
+
+def _scoring_plot(
+    data,
+    scoring,
+    title,
+    labels={'data': 'Activity', 'scoring': 'Scores'},
+    nticks=48,
+    font_size=20,
+    showlegend=False,
+    height=900,
+    width=1600
+):
+    r"""Scoring plot
+
+    Custom vizualisation of scoring plots.
+
+    Parameters
+    ----------
+    data: pd.Series
+        Activity time series.
+    scoring: pd.Series
+        Scoring time series.
+    title: str
+        Plot title
+    labels: dict, optional
+        Dictionary of labels for the data and the scoring.
+    nticks: int, optional
+        Number of X axis ticks.
+        Default is 48.
+    font_size: int, optional
+        Font size.
+        Default is 20.
+    showlegend: bool, optional
+        If set to True, display legend.
+        Default is False.
+    height: int, optional
+        Plot height
+    width: int, optional
+        Plot width
+
+    Returns
+    -------
+    fig : Instance of plotly.graph_objects.Figure
+        Figure containing the profile plot
+    """
+
+    layout = go.Layout(
+        title=title,
+        title_font=dict(size=font_size+4),
+        xaxis=dict(
+            title="Date time",
+            title_font=dict(size=font_size),
+            nticks=nticks,
+            ticks="outside",
+            tickwidth=2,
+            tickcolor='crimson',
+            tickfont=dict(
+                # family='Rockwell', color='crimson',
+                size=font_size-4
+            )
+        ),
+        yaxis=dict(
+            title="Counts/period",
+            title_font=dict(size=font_size)
+        ),
+        yaxis2=dict(
+            title='Classification',
+            title_font=dict(size=font_size),
+            nticks=2,
+            overlaying='y',
+            side='right'
+        ),
+        showlegend=showlegend,
+        height=height,
+        width=width
+    )
+
+    fig = go.Figure(
+        data=[
+            go.Scatter(
+                x=data.index.astype(str),
+                y=data,
+                name=labels["data"],
+                line_width=3
+            ),
+            go.Scatter(
+                x=scoring.index.astype(str),
+                y=scoring,
+                yaxis='y2',
+                name=labels["scoring"],
+                line_width=3,
+                line_dash='dash'
+            )
+        ],
+        layout=layout
+    )
+
+    return fig
+
+
+def scoring_plot(raw, scoring, freq='15min', binarize=False, threshold=0):
+    """Scoring plot
+
+    Create a plot where activity counts and scoring are superimposed. If the
+    resampling frequency is different from the original scoring frequency, the
+    mean scores are calculated for each resampled period.
+
+    Parameters
+    ----------
+    raw: Instance of BaseRaw (or derived class)
+        Raw object containing the actigraphy data
+    scoring: pandas.Series
+        Scoring
+    freq: str, optional
+        Data resampling frequency.
+        Cf. #timeseries-offset-aliases in
+        <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+        Default is '15min'.
+    binarize: bool, optional
+        If set to True, the data are binarized.
+        Default is False.
+    threshold: int, optional
+        If binarize is set to True, data above this threshold are set to 1
+        and to 0 otherwise.
+        Default is 0.
+    Returns
+    -------
+    fig : Instance of plotly.graph_objects.Figure
+        Figure containing the double plot
+
+    """
+    # Define scoring label
+    labels = {'data': 'Activity', 'scoring': 'Scores'}
+    if scoring.index.freq != pd.Timedelta(freq):
+        labels['scoring'] = 'Mean scores'
+
+    # Input data
+    data = raw.resampled_data(
+        freq=freq, binarize=binarize, threshold=threshold
+    )
+    scoring = scoring.resample(freq).mean()
+
+    return _scoring_plot(
+        data,
+        scoring,
+        title="Rest-activity scoring",
+        labels=labels,
+        showlegend=True
+    )
