@@ -58,60 +58,65 @@ def _lids_pmf(x_lids, mu_lids):
     return poisson.cdf(k=k1, mu=mu) - poisson.cdf(k=k2, mu=mu)
 
 
-def _cosine(x, params):
-    r'''1-harmonic cosine function'''
+# def _cosine(x, params):
+#     r'''1-harmonic cosine function'''
+#
+#     A = params['amp']
+#     phi = params['phase']
+#     T = params['period']
+#     offset = params['offset']
+#
+#     return A*np.cos(2*np.pi/T*x+phi) + offset
+#
+#
+def _sinusoid(x, a, b, T):
+    r'''1-harmonic sinusoidal function'''
 
-    A = params['amp']
-    phi = params['phase']
+    return a*np.cos(2*np.pi/T*x) + b*np.sin(2*np.pi/T*x)
+
+
+def _lids_cosine(x, params):
+    r'''LIDS cosine fit function'''
+
+    alpha = params['alpha']
+    beta = params['beta']
     T = params['period']
     offset = params['offset']
 
-    return A*np.cos(2*np.pi/T*x+phi) + offset
+    return _sinusoid(x, alpha, beta, T) + offset
 
 
-def _lfm(x, params):
-    r'''Linear frequency modulated cosine function'''
+def _lids_lfm(x, params):
+    r'''LIDS cosine fit function with linear frequency modulation and
+    linear decay'''
 
-    A = params['amp']
+    alpha = params['alpha']
+    beta = params['beta']
     k = params['k']
-    phi = params['phase']
     T = params['period']
     offset = params['offset']
     slope = params['slope']
 
-    return A*np.cos(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
+    x_p = x + k*T*x*x
+
+    return _sinusoid(x_p, alpha, beta, T) + offset + slope*x
 
 
-def _lfam(x, params):
-    r'''Linear frequency and amplitude modulated cosine function'''
+def _lids_lfam(x, params):
+    r'''LIDS cosine fit function with linear frequency and amplitude modulation
+    and linear decay'''
 
-    A = params['amp']
-    b = params['mod']
+    alpha = params['alpha']
+    beta = params['beta']
+    mod = params['mod']
     k = params['k']
-    phi = params['phase']
     T = params['period']
     offset = params['offset']
     slope = params['slope']
 
-    return (A + b*x)*np.cos(2*np.pi*(x/T+k*x*x)+phi) + offset + slope*x
+    x_p = x + k*T*x*x
 
-
-def _lfamd(x, params):
-    r'''Linear frequency and amplitude modulated cosine function, associated
-    with an exponential decay'''
-
-    A = params['amp']
-    b = params['mod']
-    k = params['k']
-    phi = params['phase']
-    T = params['period']
-    offset = params['offset']
-    amp_exp = params['amp_exp']
-    tau = params['tau']
-
-    return (A + b*x)*np.cos(
-            2*np.pi*(x/T+k*x*x)+phi
-        ) + offset + amp_exp*np.exp(-x/tau)
+    return _sinusoid(x_p, alpha, beta, T)*(1+mod*x) + offset + slope*x
 
 
 def _residual(params, x, data, fit_func):
@@ -175,8 +180,10 @@ class LIDS():
 
     """
 
-    lids_func_list = ['lids']
-    fit_func_list = ['cosine', 'chirp', 'modchirp', 'modchirp_exp']
+    # lids_func_list = ['lids']
+    # fit_func_list = [
+    #     'cosine', 'chirp', 'modchirp', 'modchirp_exp'
+    # ]
 
     def __init__(
         self,
@@ -196,10 +203,9 @@ class LIDS():
 
         # Fit functions
         fit_funcs = {
-            'cosine': _cosine,
-            'chirp': _lfm,
-            'modchirp': _lfam,
-            'modchirp_exp': _lfamd
+            'cosine': _lids_cosine,
+            'chirp': _lids_lfm,
+            'modchirp': _lids_lfam
         }
         if fit_func not in fit_funcs.keys():
             raise ValueError(
@@ -232,12 +238,15 @@ class LIDS():
         if fit_params is None:
             fit_params = Parameters()
             # Default parameters for the cosine fit function
-            fit_params.add('amp', value=50, min=0, max=100)
-            fit_params.add('phase', value=np.pi/2, min=0, max=2*np.pi)
-            fit_params.add('period', value=9, min=0)  # Dummy value
+            fit_params.add('alpha', value=10, min=-100, max=100)
+            fit_params.add('beta', value=10, min=-100, max=100)
             # Introduce inequality amp+offset < 100
             fit_params.add('delta', value=60, min=0, max=100, vary=True)
-            fit_params.add('offset', expr='delta-amp')
+            fit_params.add(
+                'offset',
+                expr='delta-sqrt(alpha*alpha+beta*beta)'
+            )
+            fit_params.add('period', value=9, min=0)  # Dummy value
             # Additional parameters for the chirp fit function
             if fit_func == 'chirp':
                 fit_params.add('k', value=-.0001, min=-1, max=1)
@@ -247,12 +256,6 @@ class LIDS():
                 fit_params.add('k', value=-.0001, min=-1, max=1)
                 fit_params.add('slope', value=-0.5)
                 fit_params.add('mod', value=0.0001, min=-10, max=10)
-            # Additional parameters for the modchirp_exp fit function
-            if fit_func == 'modchirp_exp':
-                fit_params.add('k', value=-.0001, min=-1, max=1)
-                fit_params.add('mod', value=0.0001, min=-10, max=10)
-                fit_params.add('tau', value=0.5)
-                fit_params.add('amp_exp', value=10, min=0, max=100)
 
         self.__fit_initial_params = fit_params
         # self.__fit_params = None
@@ -786,14 +789,12 @@ class LIDS():
         mri: numpy.float64
             Munich Rhythmicity Index
         '''
-        if params is None:
-            params = self.lids_fit_results.params
 
         # Pearson's r
         pearson_r = self.lids_pearson_r(lids, params)[0]
 
         # Oscillation range = [-A,+A] => 2*A
-        oscillation_range = 2*params['amp'].value
+        oscillation_range = 2*self.lids_amplitude(params)
 
         # MRI
         mri = pearson_r*oscillation_range
@@ -846,6 +847,92 @@ class LIDS():
                 unit='s'
             )
         return lids_period.astype('timedelta64[{}]'.format(freq))
+
+    def lids_amplitude(self, params=None):
+        r'''Amplitude of the LIDS cosine fit function
+
+        The amplitude is derived from the amplitudes of the cosine and sine
+        components of the LIDS fit function.
+
+        Parameters
+        ----------
+        params: lmfit.Parameters, optional
+            Parameters for the fit function.
+            If None, self.lids_fit_params is used instead.
+            Default is None.
+
+        Returns
+        -------
+        amp: numpy.float64
+        '''
+
+        # Access fit parameters
+        if params is None:
+            if self.lids_fit_results is None:
+                warnings.warn(
+                    'The LIDS fit results are not available.\n'
+                    'Run lids_fit() before accessing this method.\n'
+                    'Returning None.',
+                    UserWarning
+                )
+                # TODO: evaluate if raise ValueError('') more appropriate
+                return None
+            else:
+                params = self.lids_fit_results.params
+
+        # Phase at sleep onset (t=0)
+        amp = np.sqrt(
+            params['alpha'].value*params['alpha'].value +
+            params['beta'].value*params['beta'].value
+        )
+
+        return amp
+
+    def lids_phase(self, params=None, radians=False):
+        r'''Phase of the LIDS cosine fit function
+
+        The phase is derived from the amplitude of the cosine and sine
+        components of the LIDS fit function. Its value ranges from
+        :math:`[-\pi;+\pi]`.
+
+
+        Parameters
+        ----------
+        params: lmfit.Parameters, optional
+            Parameters for the fit function.
+            If None, self.lids_fit_params is used instead.
+            Default is None.
+        radians: bool, optional
+            If set to True, the phase is calculated in radians instead of
+            degrees.
+            Default is False.
+
+        Returns
+        -------
+        phase: numpy.float64
+        '''
+
+        # Access fit parameters
+        if params is None:
+            if self.lids_fit_results is None:
+                warnings.warn(
+                    'The LIDS fit results are not available.\n'
+                    'Run lids_fit() before accessing this method.\n'
+                    'Returning None.',
+                    UserWarning
+                )
+                # TODO: evaluate if raise ValueError('') more appropriate
+                return None
+            else:
+                params = self.lids_fit_results.params
+
+        # Phase at sleep onset (t=0)
+        phase = -1*np.arctan2(params['beta'].value, params['alpha'].value)
+
+        if not radians:
+            phase *= 180/np.pi
+
+        return phase
 
     def lids_phases(self, params=None, radians=False):
         r'''LIDS onset and offset phases
@@ -1136,12 +1223,9 @@ class LIDS():
             fit_params['bic'] = self.lids_fit_results.bic
             fit_params['redchisq'] = self.lids_fit_results.redchi
 
-            # Calculate phase at sleep onset and offset
-            lids_onset_phase, lids_offset_phase = self.lids_phases()
-
-            # Add phases to fit parameters
-            fit_params['phase_onset'] = lids_onset_phase
-            fit_params['phase_offset'] = lids_offset_phase
+            # Add phase to fit parameters
+            fit_params['phase'] = self.lids_phase
+            # fit_params['phase_offset'] = lids_offset_phase
 
             # Add sleep bout start time, duration and prior wake (in minutes)
             fit_params['start_time'] = lids.index[0]
