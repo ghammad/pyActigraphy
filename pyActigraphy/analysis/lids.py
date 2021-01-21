@@ -1223,8 +1223,11 @@ class LIDS():
             fit_params['bic'] = self.lids_fit_results.bic
             fit_params['redchisq'] = self.lids_fit_results.redchi
 
+            # Add amplitude to fit parameters
+            fit_params['amp'] = self.lids_amplitude()
+
             # Add phase to fit parameters
-            fit_params['phase'] = self.lids_phase
+            fit_params['phase'] = self.lids_phase()
             # fit_params['phase_offset'] = lids_offset_phase
 
             # Add sleep bout start time, duration and prior wake (in minutes)
