@@ -30,7 +30,8 @@ class RawMESA(BaseRaw):
         input_fname,
         time_origin='2000-01-01',
         start_time=None,
-        period=None
+        period=None,
+        intervals={'EXCLUDED': -1, 'ACTIVE': 1, 'REST': 0.5, 'REST-S': 0}
     ):
 
         # get absolute file path
@@ -84,6 +85,12 @@ class RawMESA(BaseRaw):
         # no wear indicator
         self.__nowear = data['offwrist']
 
+        # intervals
+        if intervals is not None:
+            self.__intervals = data['interval'].map(intervals)
+        else:
+            self.__intervals = None
+
         # call __init__ function of the base class
         super().__init__(
             name=name,
@@ -106,6 +113,11 @@ class RawMESA(BaseRaw):
     def nowear(self):
         r"""Off-wrist indicator."""
         return self.__nowear
+
+    @property
+    def intervals(self):
+        r"""Interval type (manual rest-activty scoring)."""
+        return self.__intervals
 
     @property
     def red_light(self):
