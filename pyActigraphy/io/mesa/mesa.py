@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import warnings
 
 from ..base import BaseRaw
 
@@ -23,6 +24,10 @@ class RawMESA(BaseRaw):
         Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
         Default is None (i.e all the data).
+    intervals: dict, optional
+        Map manually annotated periods to specific scores.
+        If set to None, the names of the annotated periods is returned instead.
+        Default is {'EXCLUDED': -1, 'ACTIVE': 1, 'REST': 0.5, 'REST-S': 0}.
     """
 
     def __init__(
@@ -31,7 +36,8 @@ class RawMESA(BaseRaw):
         time_origin='2000-01-01',
         start_time=None,
         period=None,
-        intervals={'EXCLUDED': -1, 'ACTIVE': 1, 'REST': 0.5, 'REST-S': 0}
+        intervals={'EXCLUDED': -1, 'ACTIVE': 1, 'REST': 0.5, 'REST-S': 0},
+        check_dayofweek=False
     ):
 
         # get absolute file path
@@ -47,6 +53,9 @@ class RawMESA(BaseRaw):
         uuid = None
         freq = pd.Timedelta(30, unit='s')
 
+        # day of the week
+        self.__dayofweek = data['dayofweek']
+
         # reconstruct MESA datetime index
         date = pd.to_datetime(
             data['daybymidnight'] - 1 + data.loc[1, 'dayofweek'],
@@ -58,6 +67,16 @@ class RawMESA(BaseRaw):
         index = pd.DatetimeIndex(date + ' ' + time, freq='infer')
 
         data.set_index(index, inplace=True)
+
+        if check_dayofweek:
+            # Shift day of the week to match Pandas' convention (0=Monday, etc)
+            dw = self.__dayofweek - 2
+            if (data.index.dayofweek - dw.where(dw >= 0, dw + 7)).sum() != 0:
+                warnings.warn((
+                    "Specified time_origin is such that the day of the week in"
+                    " the reconstructed time index is *not* aligned with the"
+                    " day of the week reported in the recording."
+                ))
 
         # set start and stop times
         if start_time is not None:
@@ -74,6 +93,12 @@ class RawMESA(BaseRaw):
 
         data = data[start_time:stop_time]
 
+        # no wear indicator
+        self.__nowear = data['offwrist']
+
+        # event marker indicator
+        self.__marker = data['marker']
+
         # LIGHT
         self.__red_light = data['redlight']
         self.__green_light = data['greenlight']
@@ -82,14 +107,11 @@ class RawMESA(BaseRaw):
         # wake indicator
         self.__wake = data['wake']
 
-        # no wear indicator
-        self.__nowear = data['offwrist']
-
         # intervals
         if intervals is not None:
             self.__intervals = data['interval'].map(intervals)
         else:
-            self.__intervals = None
+            self.__intervals = data['interval']
 
         # call __init__ function of the base class
         super().__init__(
@@ -105,6 +127,11 @@ class RawMESA(BaseRaw):
         )
 
     @property
+    def marker(self):
+        r"""Event marker indicator."""
+        return self.__marker
+
+    @property
     def wake(self):
         r"""Awake indicator."""
         return self.__wake
@@ -118,6 +145,11 @@ class RawMESA(BaseRaw):
     def intervals(self):
         r"""Interval type (manual rest-activty scoring)."""
         return self.__intervals
+
+    @property
+    def dayofweek(self):
+        r"""Day of the week (1=Sunday, 2=Monday, etc)."""
+        return self.__dayofweek
 
     @property
     def red_light(self):
