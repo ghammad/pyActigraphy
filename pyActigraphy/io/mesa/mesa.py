@@ -28,6 +28,10 @@ class RawMESA(BaseRaw):
         Map manually annotated periods to specific scores.
         If set to None, the names of the annotated periods is returned instead.
         Default is {'EXCLUDED': -1, 'ACTIVE': 1, 'REST': 0.5, 'REST-S': 0}.
+    check_dayofweek: bool, optional
+        If set to True, check if the day of the week reported in the original
+        recoring is aligned with the reconstructed index.
+        Default is False.
     """
 
     def __init__(
@@ -171,7 +175,9 @@ def read_raw_mesa(
     input_fname,
     time_origin='2000-01-01',
     start_time=None,
-    period=None
+    period=None,
+    intervals={'EXCLUDED': -1, 'ACTIVE': 1, 'REST': 0.5, 'REST-S': 0},
+    check_dayofweek=False
 ):
     r"""Reader function for MESA files
 
@@ -191,6 +197,14 @@ def read_raw_mesa(
         Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
         Default is None (i.e all the data).
+    intervals: dict, optional
+        Map manually annotated periods to specific scores.
+        If set to None, the names of the annotated periods is returned instead.
+        Default is {'EXCLUDED': -1, 'ACTIVE': 1, 'REST': 0.5, 'REST-S': 0}.
+    check_dayofweek: bool, optional
+        If set to True, check if the day of the week reported in the original
+        recoring is aligned with the reconstructed index.
+        Default is False.
 
     Returns
     -------
@@ -202,5 +216,7 @@ def read_raw_mesa(
         input_fname=input_fname,
         time_origin=time_origin,
         start_time=start_time,
-        period=period
+        period=period,
+        intervals=intervals,
+        check_dayofweek=check_dayofweek
     )
