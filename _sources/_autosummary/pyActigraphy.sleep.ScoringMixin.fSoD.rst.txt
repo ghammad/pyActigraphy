@@ -1,4 +1,4 @@
-pyActigraphy.sleep.ScoringMixin.fSoD
+﻿pyActigraphy.sleep.ScoringMixin.fSoD
 ====================================
 
 .. currentmodule:: pyActigraphy.sleep

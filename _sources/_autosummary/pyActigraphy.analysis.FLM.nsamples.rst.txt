@@ -1,4 +1,4 @@
-pyActigraphy.analysis.FLM.nsamples
+﻿pyActigraphy.analysis.FLM.nsamples
 ==================================
 
 .. currentmodule:: pyActigraphy.analysis

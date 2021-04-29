@@ -1,4 +1,4 @@
-pyActigraphy.analysis.Fractal.generalized\_hurst\_exponent
+﻿pyActigraphy.analysis.Fractal.generalized\_hurst\_exponent
 ==========================================================
 
 .. currentmodule:: pyActigraphy.analysis

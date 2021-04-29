@@ -1,4 +1,4 @@
-pyActigraphy.filters.FiltersMixin.add\_mask\_period
+﻿pyActigraphy.filters.FiltersMixin.add\_mask\_period
 ===================================================
 
 .. currentmodule:: pyActigraphy.filters

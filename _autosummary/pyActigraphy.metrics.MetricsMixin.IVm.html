@@ -3,27 +3,26 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pyActigraphy.metrics.MetricsMixin.IVm &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
     <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script src="../_static/js/jquery-1.11.0.min.js"></script>
-    <script src="../_static/js/jquery-fix.js"></script>
-    <script src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script src="../_static/bootstrap-sphinx.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js "></script>
 
   </head><body>
 
@@ -88,13 +87,13 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+    <div class="body col-md-12 content" role="main">
       
   <div class="section" id="pyactigraphy-metrics-metricsmixin-ivm">
 <h1>pyActigraphy.metrics.MetricsMixin.IVm<a class="headerlink" href="#pyactigraphy-metrics-metricsmixin-ivm" title="Permalink to this headline">¶</a></h1>
 <dl class="py method">
 <dt id="pyActigraphy.metrics.MetricsMixin.IVm">
-<code class="sig-prename descclassname">MetricsMixin.</code><code class="sig-name descname">IVm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">freqs</span><span class="o">=</span><span class="default_value">['1T', '2T', '3T', '4T', '5T', '6T', '8T', '9T', '10T', '12T', '15T', '16T', '18T', '20T', '24T', '30T', '32T', '36T', '40T', '45T', '48T', '60T']</span></em>, <em class="sig-param"><span class="n">binarize</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">4</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/metrics/metrics.html#MetricsMixin.IVm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyActigraphy.metrics.MetricsMixin.IVm" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">MetricsMixin.</span></code><code class="sig-name descname"><span class="pre">IVm</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['1T',</span> <span class="pre">'2T',</span> <span class="pre">'3T',</span> <span class="pre">'4T',</span> <span class="pre">'5T',</span> <span class="pre">'6T',</span> <span class="pre">'8T',</span> <span class="pre">'9T',</span> <span class="pre">'10T',</span> <span class="pre">'12T',</span> <span class="pre">'15T',</span> <span class="pre">'16T',</span> <span class="pre">'18T',</span> <span class="pre">'20T',</span> <span class="pre">'24T',</span> <span class="pre">'30T',</span> <span class="pre">'32T',</span> <span class="pre">'36T',</span> <span class="pre">'40T',</span> <span class="pre">'45T',</span> <span class="pre">'48T',</span> <span class="pre">'60T']</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binarize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/metrics/metrics.html#MetricsMixin.IVm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.metrics.MetricsMixin.IVm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Average intradaily variability</p>
 <p>IVm <a class="reference internal" href="#r89b6c36a3617-1" id="id1">[1]</a> is the average of the IV values obtained with resampling
 periods divisors of 1440 between 1 and 60 min.</p>
@@ -155,8 +154,8 @@ actigraphy: An update. Sleep science (Sao Paulo, Brazil), 7(3),
       
     </p>
     <p>
-        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+        &copy; Copyright 2018-2021, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br/>
     </p>
   </div>
 </footer>

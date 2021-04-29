@@ -1,4 +1,4 @@
-pyActigraphy.analysis.LIDS.filter
+﻿pyActigraphy.analysis.LIDS.filter
 =================================
 
 .. currentmodule:: pyActigraphy.analysis

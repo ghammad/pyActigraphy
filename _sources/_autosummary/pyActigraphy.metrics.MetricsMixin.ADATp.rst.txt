@@ -1,4 +1,4 @@
-pyActigraphy.metrics.MetricsMixin.ADATp
+﻿pyActigraphy.metrics.MetricsMixin.ADATp
 =======================================
 
 .. currentmodule:: pyActigraphy.metrics

@@ -1,4 +1,4 @@
-pyActigraphy.sleep.SleepDiary.total\_bed\_time
+﻿pyActigraphy.sleep.SleepDiary.total\_bed\_time
 ==============================================
 
 .. currentmodule:: pyActigraphy.sleep

@@ -1,4 +1,4 @@
-pyActigraphy.analysis.SSA.w\_correlation\_matrix
+﻿pyActigraphy.analysis.SSA.w\_correlation\_matrix
 ================================================
 
 .. currentmodule:: pyActigraphy.analysis

@@ -1,4 +1,4 @@
-pyActigraphy.sleep.ScoringMixin.Oakley
+﻿pyActigraphy.sleep.ScoringMixin.Oakley
 ======================================
 
 .. currentmodule:: pyActigraphy.sleep

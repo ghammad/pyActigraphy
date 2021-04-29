@@ -1,4 +1,4 @@
-pyActigraphy.analysis.LIDS.lids\_convert\_to\_internal\_time
+﻿pyActigraphy.analysis.LIDS.lids\_convert\_to\_internal\_time
 ============================================================
 
 .. currentmodule:: pyActigraphy.analysis

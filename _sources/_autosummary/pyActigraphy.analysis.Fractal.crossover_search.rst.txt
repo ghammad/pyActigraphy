@@ -1,4 +1,4 @@
-pyActigraphy.analysis.Fractal.crossover\_search
+﻿pyActigraphy.analysis.Fractal.crossover\_search
 ===============================================
 
 .. currentmodule:: pyActigraphy.analysis

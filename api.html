@@ -3,27 +3,26 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Python API Reference &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script src="_static/js/jquery-1.11.0.min.js"></script>
-    <script src="_static/js/jquery-fix.js"></script>
-    <script src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script src="_static/bootstrap-sphinx.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
 
   </head><body>
 
@@ -88,12 +87,12 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+    <div class="body col-md-12 content" role="main">
       
   <div class="section" id="python-api-reference">
 <h1>Python API Reference<a class="headerlink" href="#python-api-reference" title="Permalink to this headline">¶</a></h1>
 <div class="contents local topic" id="table-of-contents">
-<p class="topic-title first">Table of Contents</p>
+<p class="topic-title">Table of Contents</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#reading-raw-data" id="id1">Reading raw data</a></p>
 <ul>
@@ -120,6 +119,7 @@ Currently, the supported formats are:</p>
 <li><p>ActTrust 2, Condor Instruments (.txt);</p></li>
 <li><p>Daqtometer, Daqtix (.csv);</p></li>
 <li><p>Actiwatch 2 and Actiwatch Spectrum Plus, Philips Respironics (.csv)</p></li>
+<li><p>Tempatilumi (CE Brasil)</p></li>
 </ul>
 <p>Associated functions:</p>
 <table class="longtable docutils align-default">
@@ -145,6 +145,9 @@ Currently, the supported formats are:</p>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.io.read_raw_rpx.html#pyActigraphy.io.read_raw_rpx" title="pyActigraphy.io.read_raw_rpx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_raw_rpx</span></code></a>(input_fname[, language, …])</p></td>
 <td><p>Reader function for raw Respironics file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.io.read_raw_tal.html#pyActigraphy.io.read_raw_tal" title="pyActigraphy.io.read_raw_tal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_raw_tal</span></code></a>(input_fname[, name, sep, …])</p></td>
+<td><p>Raw object from .txt file recorded by Tempatilumi (CE Brasil)</p></td>
 </tr>
 </tbody>
 </table>
@@ -219,8 +222,8 @@ pyActigraphy: <a class="reference internal" href="BaseRaw.html#pyActigraphy.io.B
       
     </p>
     <p>
-        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+        &copy; Copyright 2018-2021, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br/>
     </p>
   </div>
 </footer>

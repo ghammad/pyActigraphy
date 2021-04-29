@@ -1,4 +1,4 @@
-pyActigraphy.io.read_raw_dqt
+﻿pyActigraphy.io.read_raw_dqt
 ============================
 
 .. currentmodule:: pyActigraphy.io

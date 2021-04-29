@@ -1,4 +1,4 @@
-pyActigraphy.sleep.ScoringMixin.SleepMidPoint
+﻿pyActigraphy.sleep.ScoringMixin.SleepMidPoint
 =============================================
 
 .. currentmodule:: pyActigraphy.sleep

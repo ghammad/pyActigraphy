@@ -1,4 +1,4 @@
-pyActigraphy.analysis.FLM.fit\_reader
+﻿pyActigraphy.analysis.FLM.fit\_reader
 =====================================
 
 .. currentmodule:: pyActigraphy.analysis

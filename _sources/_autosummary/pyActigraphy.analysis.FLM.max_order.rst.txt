@@ -1,4 +1,4 @@
-pyActigraphy.analysis.FLM.max\_order
+﻿pyActigraphy.analysis.FLM.max\_order
 ====================================
 
 .. currentmodule:: pyActigraphy.analysis

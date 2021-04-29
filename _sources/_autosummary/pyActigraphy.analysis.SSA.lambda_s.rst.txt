@@ -1,4 +1,4 @@
-pyActigraphy.analysis.SSA.lambda\_s
+﻿pyActigraphy.analysis.SSA.lambda\_s
 ===================================
 
 .. currentmodule:: pyActigraphy.analysis

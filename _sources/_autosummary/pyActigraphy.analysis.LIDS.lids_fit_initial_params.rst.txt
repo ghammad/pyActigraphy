@@ -1,4 +1,4 @@
-pyActigraphy.analysis.LIDS.lids\_fit\_initial\_params
+﻿pyActigraphy.analysis.LIDS.lids\_fit\_initial\_params
 =====================================================
 
 .. currentmodule:: pyActigraphy.analysis

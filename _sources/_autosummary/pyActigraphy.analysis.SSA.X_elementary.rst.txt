@@ -1,4 +1,4 @@
-pyActigraphy.analysis.SSA.X\_elementary
+﻿pyActigraphy.analysis.SSA.X\_elementary
 =======================================
 
 .. currentmodule:: pyActigraphy.analysis

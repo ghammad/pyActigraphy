@@ -1,4 +1,4 @@
-pyActigraphy.analysis.Cosinor.fit\_func
+﻿pyActigraphy.analysis.Cosinor.fit\_func
 =======================================
 
 .. currentmodule:: pyActigraphy.analysis

@@ -1,4 +1,4 @@
-pyActigraphy.metrics.MetricsMixin.pAR
+﻿pyActigraphy.metrics.MetricsMixin.pAR
 =====================================
 
 .. currentmodule:: pyActigraphy.metrics

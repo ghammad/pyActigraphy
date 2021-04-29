@@ -1,0 +1,10 @@
+﻿pyActigraphy.io.read_raw_tal
+============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. autofunction:: read_raw_tal
+
+.. raw:: html
+
+    <div style='clear:both'></div>

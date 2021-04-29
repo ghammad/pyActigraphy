@@ -1,4 +1,4 @@
-pyActigraphy.sleep.ScoringMixin.Scripps
+﻿pyActigraphy.sleep.ScoringMixin.Scripps
 =======================================
 
 .. currentmodule:: pyActigraphy.sleep

@@ -3,27 +3,26 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>How to discard invalid sequences in actigraphy recordings before analysis &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script src="_static/js/jquery-1.11.0.min.js"></script>
-    <script src="_static/js/jquery-fix.js"></script>
-    <script src="_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script src="_static/bootstrap-sphinx.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
+<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
 
   </head><body>
 
@@ -88,38 +87,52 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+    <div class="body col-md-12 content" role="main">
       
   
 <style>
 /* CSS for nbsphinx extension */
 
 /* remove conflicting styling from Sphinx themes */
-div.nbinput,
-div.nbinput div.prompt,
-div.nbinput div.input_area,
-div.nbinput div[class*=highlight],
-div.nbinput div[class*=highlight] pre,
-div.nboutput,
-div.nbinput div.prompt,
-div.nbinput div.output_area,
-div.nboutput div[class*=highlight],
-div.nboutput div[class*=highlight] pre {
-    background: none;
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
     border: none;
-    padding: 0 0;
+    padding: 0;
     margin: 0;
     box-shadow: none;
 }
 
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
 /* avoid gaps between output lines */
-div.nboutput div[class*=highlight] pre {
+div.nboutput.container div[class*=highlight] pre {
     line-height: normal;
 }
 
 /* input/output containers */
-div.nbinput,
-div.nboutput {
+div.nbinput.container,
+div.nboutput.container {
     display: -webkit-flex;
     display: flex;
     align-items: flex-start;
@@ -127,92 +140,104 @@ div.nboutput {
     width: 100%;
 }
 @media (max-width: 540px) {
-    div.nbinput,
-    div.nboutput {
+    div.nbinput.container,
+    div.nboutput.container {
         flex-direction: column;
     }
 }
 
 /* input container */
-div.nbinput {
+div.nbinput.container {
     padding-top: 5px;
 }
 
 /* last container */
-div.nblast {
+div.nblast.container {
     padding-bottom: 5px;
 }
 
 /* input prompt */
-div.nbinput div.prompt pre {
-    color: #303F9F;
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
 }
 
 /* output prompt */
-div.nboutput div.prompt pre {
-    color: #D84315;
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
 }
 
 /* all prompts */
-div.nbinput div.prompt,
-div.nboutput div.prompt {
-    min-width: 9ex;
-    padding-top: 0.4em;
-    padding-right: 0.4em;
-    text-align: right;
-    flex: 0;
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
 }
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
 @media (max-width: 540px) {
-    div.nbinput div.prompt,
-    div.nboutput div.prompt {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
         text-align: left;
         padding: 0.4em;
     }
-    div.nboutput div.prompt.empty {
+    div.nboutput.container div.prompt.empty {
         padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
     }
 }
 
 /* disable scrollbars on prompts */
-div.nbinput div.prompt pre,
-div.nboutput div.prompt pre {
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
     overflow: hidden;
 }
 
 /* input/output area */
-div.nbinput div.input_area,
-div.nboutput div.output_area {
-    padding: 0.4em;
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
     -webkit-flex: 1;
     flex: 1;
     overflow: auto;
 }
 @media (max-width: 540px) {
-    div.nbinput div.input_area,
-    div.nboutput div.output_area {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
         width: 100%;
     }
 }
 
 /* input area */
-div.nbinput div.input_area {
-    border: 1px solid #cfcfcf;
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
     border-radius: 2px;
-    background: #f7f7f7;
+    /*background: #f5f5f5;*/
 }
 
 /* override MathJax center alignment in output cells */
-div.nboutput div[class*=MathJax] {
+div.nboutput.container div[class*=MathJax] {
     text-align: left !important;
 }
 
-/* override sphinx.ext.pngmath center alignment in output cells */
-div.nboutput div.math p {
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
     text-align: left;
 }
 
 /* standard error */
-div.nboutput div.output_area.stderr {
+div.nboutput.container div.output_area.stderr {
     background: #fdd;
 }
 
@@ -255,31 +280,76 @@ div.nboutput div.output_area.stderr {
 
 .ansi-bold { font-weight: bold; }
 .ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt a.copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
 </style>
 <h1><p>Table of Contents</p>
-</h1><div class="toc docutils container">
-<ul class="toc-item"><li><p>1  Cleaning files individually</p>
+</h1><div class="toc"><ul class="toc-item"><li><p>1  Cleaning files individually</p>
 </li><li><p>2  Cleaning files by batch</p>
 <ul class="toc-item"><li><p>2.1  Start/stop-time log file</p>
 </li><li><p>2.2  Reading SST log files with the Reader class</p>
 </li></ul></li><li><p>3  Test with real data</p>
-</li></ul></div>
-<div class="section" id="How-to-discard-invalid-sequences-in-actigraphy-recordings-before-analysis">
+</li></ul></div><div class="section" id="How-to-discard-invalid-sequences-in-actigraphy-recordings-before-analysis">
 <h1>How to discard invalid sequences in actigraphy recordings before analysis<a class="headerlink" href="#How-to-discard-invalid-sequences-in-actigraphy-recordings-before-analysis" title="Permalink to this headline">¶</a></h1>
-<p>Quite frequently, actigraphy recordings contain sequences that do not
-correspond to the participant’s activities but rather to artefacts, such
-as bringing the actimeter to the participant’s home or removing the
-actimeter from the participant to read the acquired data. Such
-meaningless data happen either at the beginning, when the record starts
-before the actimeter is actually worn by the participant or at the end,
-when the actimeter is removed by the participants before the end of the
-data acquisition. Or even at both ends…</p>
-<p>In any case, it is necessary, before any analysis of the data, to
-discard these invalid sequences of activity counts and <em>pyActigraphy</em>
-provides the adequate tools for that.</p>
+<p>Quite frequently, actigraphy recordings contain sequences that do not correspond to the participant’s activities but rather to artefacts, such as bringing the actimeter to the participant’s home or removing the actimeter from the participant to read the acquired data. Such meaningless data happen either at the beginning, when the record starts before the actimeter is actually worn by the participant or at the end, when the actimeter is removed by the participants before the end of the data
+acquisition. Or even at both ends…</p>
+<p>In any case, it is necessary, before any analysis of the data, to discard these invalid sequences of activity counts and <em>pyActigraphy</em> provides the adequate tools for that.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -289,8 +359,7 @@ provides the adequate tools for that.</p>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -299,8 +368,7 @@ provides the adequate tools for that.</p>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -310,8 +378,7 @@ provides the adequate tools for that.</p>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -321,8 +388,7 @@ provides the adequate tools for that.</p>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -332,18 +398,16 @@ provides the adequate tools for that.</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Timestamp(&#39;1918-01-23 13:58:00&#39;)
-</pre></div>
-</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Timestamp(&#39;1918-01-23 13:58:00&#39;)
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -353,18 +417,16 @@ provides the adequate tools for that.</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Timedelta(&#39;12 days 18:41:00&#39;)
-</pre></div>
-</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Timedelta(&#39;12 days 18:41:00&#39;)
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -375,7 +437,7 @@ provides the adequate tools for that.</p>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area rendered_html docutils container">
 <div>
 
 
@@ -420,25 +482,14 @@ if (outputEl) {{
             </script>
         </div></div>
 </div>
-<p>The initial recording starts the 23rd of January, around 13:00 and lasts
-for 12 days, 18 hours and 41 minutes. Both at the beginning and at the
-end of the recording, the recorded activity does not seem to be valid: -
-at the beginning, this mixture of zero and non-zero activity counts with
-no cyclic pattern is most likely due to the fact the acquisition started
-before the participant actually wore the actimeter but the actimeter was
-nontheless manipulated for demonstration purposes - towards the end of
-the recording, the activity counts suddenly fall to zero, when the
-participant removed the actimeter, until the last epochs, when the
-actimeter was most likely manipulated for reading the acquired data.</p>
+<p>The initial recording starts the 23rd of January, around 13:00 and lasts for 12 days, 18 hours and 41 minutes. Both at the beginning and at the end of the recording, the recorded activity does not seem to be valid: - at the beginning, this mixture of zero and non-zero activity counts with no cyclic pattern is most likely due to the fact the acquisition started before the participant actually wore the actimeter but the actimeter was nontheless manipulated for demonstration purposes - towards the
+end of the recording, the activity counts suddenly fall to zero, when the participant removed the actimeter, until the last epochs, when the actimeter was most likely manipulated for reading the acquired data.</p>
 <div class="section" id="Cleaning-files-individually">
 <h2>Cleaning files individually<a class="headerlink" href="#Cleaning-files-individually" title="Permalink to this headline">¶</a></h2>
-<p>With <em>pyActigraphy</em>, it is quite easy to mask these invalid sequences by
-specifiying a start and stop times for the analysis of the recordings.</p>
-<p>In our example above, to discard the first hour of data acquisition and
-keep only 9 days of recordings:</p>
+<p>With <em>pyActigraphy</em>, it is quite easy to mask these invalid sequences by specifiying a start and stop times for the analysis of the recordings.</p>
+<p>In our example above, to discard the first hour of data acquisition and keep only 9 days of recordings:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -450,8 +501,7 @@ keep only 9 days of recordings:</p>
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -460,18 +510,16 @@ keep only 9 days of recordings:</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Timestamp(&#39;1918-01-24 08:00:00&#39;)
-</pre></div>
-</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Timestamp(&#39;1918-01-24 08:00:00&#39;)
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -480,18 +528,16 @@ keep only 9 days of recordings:</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Timedelta(&#39;9 days 00:01:00&#39;)
-</pre></div>
-</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Timedelta(&#39;9 days 00:01:00&#39;)
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -502,7 +548,7 @@ keep only 9 days of recordings:</p>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area rendered_html docutils container">
 <div>
 
 
@@ -547,11 +593,9 @@ if (outputEl) {{
             </script>
         </div></div>
 </div>
-<p>Let us now verify the impact of discarding invalid activity counts on
-the usual rest-activity rhythm variables:</p>
+<p>Let us now verify the impact of discarding invalid activity counts on the usual rest-activity rhythm variables:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -560,18 +604,16 @@ the usual rest-activity rhythm variables:</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>0.5261668298837823
-</pre></div>
-</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.5261668298837823
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -580,29 +622,21 @@ the usual rest-activity rhythm variables:</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>0.8290854646594275
-</pre></div>
-</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+0.8290854646594275
+</pre></div></div>
 </div>
 <p>The difference is quite substantial, isn’t it?</p>
 </div>
 <div class="section" id="Cleaning-files-by-batch">
 <h2>Cleaning files by batch<a class="headerlink" href="#Cleaning-files-by-batch" title="Permalink to this headline">¶</a></h2>
-<p>It is certainly managable to invalidate activity sequences in a few
-files by specifying a start and a stop time. However, it is less so when
-one wants to apply this procedure to hundreds or thousands of
-recordings. Fortunately, <em>pyActigraphy</em> allows users to specify a start
-and a stop time to actigraphy recordings by batch.</p>
+<p>It is certainly managable to invalidate activity sequences in a few files by specifying a start and a stop time. However, it is less so when one wants to apply this procedure to hundreds or thousands of recordings. Fortunately, <em>pyActigraphy</em> allows users to specify a start and a stop time to actigraphy recordings by batch.</p>
 <p>All it needs is a start/stop-time (SST) log file.</p>
-<p>A Start/stop-time log file consists in a list of participant’s ID
-associated with two datetimes corresponding to the requested start and
-end of the actigraphy recording, respectively. These datetimes will
-overwrite the actual start and stop times of the recordings.</p>
+<p>A Start/stop-time log file consists in a list of participant’s ID associated with two datetimes corresponding to the requested start and end of the actigraphy recording, respectively. These datetimes will overwrite the actual start and stop times of the recordings.</p>
 <hr class="docutils" />
 <p>Start/stop-time log file <em>must</em> be formatted as the following:</p>
 <table class="docutils align-default">
@@ -629,21 +663,18 @@ overwrite the actual start and stop times of the recordings.</p>
 </table>
 <div class="section" id="Start/stop-time-log-file">
 <h3>Start/stop-time log file<a class="headerlink" href="#Start/stop-time-log-file" title="Permalink to this headline">¶</a></h3>
-<p>As an example, let us first create an SSTLog object in order to inspect
-it:</p>
+<p>As an example, let us first create an SSTLog object in order to inspect it:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyActigraphy.log</span> <span class="k">import</span> <span class="n">SSTLog</span>
+<span></span><span class="kn">from</span> <span class="nn">pyActigraphy.log</span> <span class="kn">import</span> <span class="n">SSTLog</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -652,8 +683,7 @@ it:</p>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -662,8 +692,7 @@ it:</p>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -673,8 +702,7 @@ it:</p>
 </div>
 <p>To access to the data contained in the log file:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -683,11 +711,10 @@ it:</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
-<div class="output_area docutils container">
+<div class="output_area rendered_html docutils container">
 <div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -741,8 +768,7 @@ it:</p>
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -751,11 +777,10 @@ it:</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
-<div class="output_area docutils container">
+<div class="output_area rendered_html docutils container">
 <div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -809,8 +834,7 @@ it:</p>
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -819,11 +843,10 @@ it:</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
-<div class="output_area docutils container">
+<div class="output_area rendered_html docutils container">
 <div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -876,14 +899,10 @@ it:</p>
 </table>
 </div></div>
 </div>
-<p>Please, notice that the duration of the time interval between the start
-and stop times is automatically calculated and therefore does not need
-to be entered in the log file.</p>
-<p>A <code class="docutils literal notranslate"><span class="pre">summary</span></code> function is available. It returns the min/max/median/mean
-of the durations found in the log file:</p>
+<p>Please, notice that the duration of the time interval between the start and stop times is automatically calculated and therefore does not need to be entered in the log file.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">summary</span></code> function is available. It returns the min/max/median/mean of the durations found in the log file:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -892,12 +911,12 @@ of the durations found in the log file:</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>count                          3
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+count                          3
 mean            16 days 16:00:00
 std      12 days 10:09:15.560846
 min              9 days 00:00:00
@@ -906,12 +925,10 @@ min              9 days 00:00:00
 75%             20 days 12:00:00
 max             31 days 00:00:00
 Name: Duration, dtype: object
-</pre></div>
-</div>
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -920,12 +937,12 @@ Name: Duration, dtype: object
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>count                          3
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+count                          3
 mean            16 days 16:00:00
 std      12 days 10:09:15.560846
 min              9 days 00:00:00
@@ -934,12 +951,10 @@ min              9 days 00:00:00
 75%             20 days 12:00:00
 max             31 days 00:00:00
 Name: Duration, dtype: object
-</pre></div>
-</div>
+</pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -948,12 +963,12 @@ Name: Duration, dtype: object
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>count                          3
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+count                          3
 mean            16 days 16:00:00
 std      12 days 10:09:15.560846
 min              9 days 00:00:00
@@ -962,18 +977,15 @@ min              9 days 00:00:00
 75%             20 days 12:00:00
 max             31 days 00:00:00
 Name: Duration, dtype: object
-</pre></div>
-</div>
+</pre></div></div>
 </div>
 </div>
 <div class="section" id="Reading-SST-log-files-with-the-Reader-class">
 <h3>Reading SST log files with the Reader class<a class="headerlink" href="#Reading-SST-log-files-with-the-Reader-class" title="Permalink to this headline">¶</a></h3>
-<p>As it is possible to read actigraphy files by batch with the <code class="docutils literal notranslate"><span class="pre">Reader</span></code>
-class, this class has been extended to read a SST log file.</p>
+<p>As it is possible to read actigraphy files by batch with the <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class, this class has been extended to read a SST log file.</p>
 <p>As an illustration, let us first read a small batch of files:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -983,8 +995,7 @@ class, this class has been extended to read a SST log file.</p>
 </div>
 <p>Check how many files were found and read:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -993,20 +1004,17 @@ class, this class has been extended to read a SST log file.</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>4
-</pre></div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+4
+</pre></div></div>
 </div>
-</div>
-<p>To read a SST log files containing the start and stop times for these
-recordings:</p>
+<p>To read a SST log files containing the start and stop times for these recordings:</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1014,11 +1022,9 @@ recordings:</p>
 </pre></div>
 </div>
 </div>
-<p>Now, verify the data found in this log file by accessing and displaying
-the log associated to the reader object:</p>
+<p>Now, verify the data found in this log file by accessing and displaying the log associated to the reader object:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1027,11 +1033,10 @@ the log associated to the reader object:</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
-<div class="output_area docutils container">
+<div class="output_area rendered_html docutils container">
 <div>
 <style scoped>
     .dataframe tbody tr th:only-of-type {
@@ -1086,8 +1091,7 @@ the log associated to the reader object:</p>
 </div>
 <p>Then, let us check the IS values of these recordings:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [43]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1096,25 +1100,21 @@ the log associated to the reader object:</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[43]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>{&#39;example_01&#39;: 0.5261668298837823,
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;example_01&#39;: 0.5261668298837823,
  &#39;example_01_mask&#39;: 0.4453375595033997,
  &#39;example_02&#39;: 0.5188779301789207,
  &#39;example_03&#39;: 0.3717308344487576}
-</pre></div>
+</pre></div></div>
 </div>
-</div>
-<p>There are quite low. Indeed, the SST log has been read by the reader
-object but the start and stop times have not been applied to the
-actigraphy recordings yet.</p>
+<p>There are quite low. Indeed, the SST log has been read by the reader object but the start and stop times have not been applied to the actigraphy recordings yet.</p>
 <p>To do so:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [44]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1133,13 +1133,10 @@ Could not find an entry in SST log file for example_02
 Found an entry in SST log file for example_03
 </pre></div></div>
 </div>
-<p>By using the <code class="docutils literal notranslate"><span class="pre">verbose</span></code> option, one can easily check if there is an
-entry in the SST log file for each actigraphy recording.</p>
-<p>Now, the IS values display a significant change for the recordings found
-in the SST log file:</p>
+<p>By using the <code class="docutils literal notranslate"><span class="pre">verbose</span></code> option, one can easily check if there is an entry in the SST log file for each actigraphy recording.</p>
+<p>Now, the IS values display a significant change for the recordings found in the SST log file:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>In [45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -1148,20 +1145,18 @@ in the SST log file:</p>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre>
-<span></span>Out[45]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
 </pre></div>
 </div>
-<div class="output_area highlight-none notranslate"><div class="highlight"><pre>
-<span></span>{&#39;example_01&#39;: 0.8290854646594275,
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{&#39;example_01&#39;: 0.8290854646594275,
  &#39;example_01_mask&#39;: 0.4453375595033997,
  &#39;example_02&#39;: 0.5188779301789207,
  &#39;example_03&#39;: 0.8859478918803972}
-</pre></div>
+</pre></div></div>
 </div>
-</div>
-<p>The actigraphy recordings have been truncated according to the start and
-stop times specified in the SST log file.</p>
+<p>The actigraphy recordings have been truncated according to the start and stop times specified in the SST log file.</p>
 <p>Et voilà! Easy, isn’t it?</p>
 </div>
 </div>
@@ -1179,8 +1174,8 @@ stop times specified in the SST log file.</p>
       
     </p>
     <p>
-        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+        &copy; Copyright 2018-2021, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br/>
     </p>
   </div>
 </footer>

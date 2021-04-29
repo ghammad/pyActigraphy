@@ -1,4 +1,4 @@
-pyActigraphy.analysis.SSA.X\_tilde
+﻿pyActigraphy.analysis.SSA.X\_tilde
 ==================================
 
 .. currentmodule:: pyActigraphy.analysis

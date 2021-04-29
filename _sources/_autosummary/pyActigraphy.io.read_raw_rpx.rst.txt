@@ -1,4 +1,4 @@
-pyActigraphy.io.read_raw_rpx
+﻿pyActigraphy.io.read_raw_rpx
 ============================
 
 .. currentmodule:: pyActigraphy.io

@@ -1,4 +1,4 @@
-pyActigraphy.analysis.Fractal.local\_msq\_residuals
+﻿pyActigraphy.analysis.Fractal.local\_msq\_residuals
 ===================================================
 
 .. currentmodule:: pyActigraphy.analysis

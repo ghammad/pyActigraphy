@@ -1,4 +1,4 @@
-pyActigraphy.metrics.MetricsMixin.ISm
+﻿pyActigraphy.metrics.MetricsMixin.ISm
 =====================================
 
 .. currentmodule:: pyActigraphy.metrics

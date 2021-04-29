@@ -1,4 +1,4 @@
-pyActigraphy.sleep.SleepBoutMixin.active\_bouts
+﻿pyActigraphy.sleep.SleepBoutMixin.active\_bouts
 ===============================================
 
 .. currentmodule:: pyActigraphy.sleep

@@ -1,4 +1,4 @@
-pyActigraphy.analysis.FLM.smooth
+﻿pyActigraphy.analysis.FLM.smooth
 ================================
 
 .. currentmodule:: pyActigraphy.analysis

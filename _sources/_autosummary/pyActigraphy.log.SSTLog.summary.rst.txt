@@ -1,4 +1,4 @@
-pyActigraphy.log.SSTLog.summary
+﻿pyActigraphy.log.SSTLog.summary
 ===============================
 
 .. currentmodule:: pyActigraphy.log

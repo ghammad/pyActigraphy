@@ -1,4 +1,4 @@
-pyActigraphy.analysis.Fractal.segmentation
+﻿pyActigraphy.analysis.Fractal.segmentation
 ==========================================
 
 .. currentmodule:: pyActigraphy.analysis

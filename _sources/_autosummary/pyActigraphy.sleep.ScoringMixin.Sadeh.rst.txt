@@ -1,4 +1,4 @@
-pyActigraphy.sleep.ScoringMixin.Sadeh
+﻿pyActigraphy.sleep.ScoringMixin.Sadeh
 =====================================
 
 .. currentmodule:: pyActigraphy.sleep
