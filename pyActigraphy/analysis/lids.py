@@ -5,6 +5,7 @@ import warnings
 from lmfit import fit_report, minimize, Parameters
 from scipy.signal import find_peaks
 from scipy.stats import pearsonr, poisson
+from pyActigraphy.sleep.scoring.smp import sleep_midpoint
 
 
 def _zero_crossing_points(x):
@@ -1241,6 +1242,8 @@ class LIDS():
                 fit_params['prior_wake'] = (
                     lids.index[0] - lids_bouts[idx-1].index[-1]
                 )/pd.Timedelta('1min')
+
+            fit_params['sleep_midpoint'] = sleep_midpoint(lids, threshold=-1)
 
             # Create a DF with the fit parameters
             df_params = pd.DataFrame(fit_params, index=[idx])
