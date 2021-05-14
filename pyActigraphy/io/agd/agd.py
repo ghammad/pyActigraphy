@@ -59,36 +59,44 @@ class RawAGD(BaseRaw):
         )
 
         # extract proximity (wear/no-wear) informations
-        capsense = pd.read_sql_query(
-            "SELECT state, timeStamp FROM capsense",
-            connection,
-            index_col='timeStamp'
-        ).squeeze()
-        # convert index to a date time
-        capsense.index = self.__to_timestamps(capsense.index)
-        # set index frequency
-        if 'proximityIntervalInSeconds' in settings.index:
-            self.capsense = capsense.asfreq(
-                pd.to_timedelta(
-                    int(
-                        settings.at[
-                            'proximityIntervalInSeconds',
-                            'settingValue'
-                        ]
-                    ),
-                    unit='s'
+        try:
+            capsense = pd.read_sql_query(
+                "SELECT state, timeStamp FROM capsense",
+                connection,
+                index_col='timeStamp'
+            ).squeeze()
+            # convert index to a date time
+            capsense.index = self.__to_timestamps(capsense.index)
+            # set index frequency
+            if 'proximityIntervalInSeconds' in settings.index:
+                self.capsense = capsense.asfreq(
+                    pd.to_timedelta(
+                        int(
+                            settings.at[
+                                'proximityIntervalInSeconds',
+                                'settingValue'
+                            ]
+                        ),
+                        unit='s'
+                    )
                 )
-            )
-        elif capsense.index.inferred_freq is not None:
-            self.capsense = capsense.asfreq(capsense.index.inferred_freq)
-        else:
+            elif capsense.index.inferred_freq is not None:
+                self.capsense = capsense.asfreq(capsense.index.inferred_freq)
+            else:
+                warnings.warn(
+                    'Acquisition frequency for the wearing sensor data ' +
+                    '(capsense) could neither be retrieved nor inferred from ' +
+                    'the data.\n Use this information at your own risk',
+                    UserWarning
+                )
+                self.capsense = capsense
+        except Exception as err:
+            # TODO: specialize exception (eg;sqlite3.OperationalError)
             warnings.warn(
-                'Acquisition frequency for the wearing sensor data ' +
-                '(capsense) could neither be retrieved nor inferred from ' +
-                'the data.\n Use this information at your own risk',
+                'Could not find wearing sensor data (capsense): {}'.format(err),
                 UserWarning
             )
-            self.capsense = capsense
+            self.capsense = None
 
         # extract acceleration and light data
         data = pd.read_sql_query(
