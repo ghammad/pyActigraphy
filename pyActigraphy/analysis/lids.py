@@ -312,10 +312,10 @@ class LIDS():
         '''
         if len(ts_list) < 2:
             warnings.warn(
-                'The number of time series to concatenate must be greater' +
-                ' than 2.\n' +
-                'Actual number of time series: {}.\n'.format(len(ts_list)) +
-                'Returning empty lists.',
+                'The number of time series to concatenate must be greater'
+                + ' than 2.\n'
+                + 'Actual number of time series: {}.\n'.format(len(ts_list))
+                + 'Returning empty lists.',
                 UserWarning
             )
             return [], []
@@ -883,8 +883,8 @@ class LIDS():
 
         # Phase at sleep onset (t=0)
         amp = np.sqrt(
-            params['alpha'].value*params['alpha'].value +
-            params['beta'].value*params['beta'].value
+            params['alpha'].value*params['alpha'].value
+            + params['beta'].value*params['beta'].value
         )
 
         return amp
