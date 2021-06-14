@@ -17,20 +17,60 @@ def _profile(X):
     return prof
 
 
+@njit
+def _rolling_window(x, n):
+    r'''Split input array in an array of window-sized arrays, shifted by one
+    element. Emulate rolling function of pandas.Series.
+
+    Parameters
+    ----------
+    x : (N,) array_like
+        Input
+    n : int
+        Size of the rolling window
+    Returns
+    -------
+    roll : (N,n) array_like
+        Array containing the successive windows.
+    '''
+
+    shape = x.shape[:-1] + (x.shape[-1] - n + 1, n)
+    strides = x.strides + (x.strides[-1],)
+    return np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
+
+
 @njit  # (float64[:,:](float64[:],int64,boolean))
-def _segmentation(x, n, backward=False):
+def _segmentation(x, n, backward=False, overlap=False):
+    r'''Split input array in an array of window-sized arrays, shifted by one
+    element. Emulate rolling function of pandas.Series.
 
-    # Number of elements
-    N = len(x)
+    Parameters
+    ----------
+    x : (N,) array_like
+        Input.
+    n : int
+        Window size
+    backward: bool, optional.
+        If set to True, runs the segmentation from the end of the input array.
+    overlap: bool, optional
+        If set to True, consecutive windows overlap by 50%.
+    Returns
+    -------
+    seg : (N,n) array_like
+        Array containing the successive windows.
+    '''
 
-    # Number of segments of length n (and remainder r)
-    nseg, r = divmod(N, n)
+    # Compute consecutive windows, shifted by one element
+    windows = _rolling_window(x, n)
+
+    # Compute distance between the center of two consecutive windows
+    stride = n//2 if overlap else n
 
     # Non-overlapping segments
     if backward:
-        segments = x[r:].reshape(nseg, n)
+        segments = windows[::stride]
     else:
-        segments = x[:N-r].reshape(nseg, n)
+        segments = windows[::-stride]
 
     return segments
 
