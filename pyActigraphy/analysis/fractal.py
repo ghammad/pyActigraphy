@@ -52,8 +52,10 @@ def _segmentation(x, n, backward=False, overlap=False):
         Window size
     backward: bool, optional.
         If set to True, runs the segmentation from the end of the input array.
+        Default is False.
     overlap: bool, optional
         If set to True, consecutive windows overlap by 50%.
+        Default is False.
     Returns
     -------
     seg : (N,n) array_like
@@ -166,7 +168,7 @@ class Fractal():
         return _profile(X)
 
     @classmethod
-    def segmentation(cls, x, n, backward=False):
+    def segmentation(cls, x, n, backward=False, overlap=False):
         r'''Segmentation function
 
         Segment the signal into non-overlapping windows of equal size.
@@ -177,8 +179,11 @@ class Fractal():
             Input array.
         n: int
             Window size.
-        backward: bool
-            If set to True, start segmentation for the end of the signal.
+        backward: bool, optional
+            If set to True, start segmentation from the end of the signal.
+            Default is False.
+        overlap: bool, optional
+            If set to True, consecutive windows overlap by 50%.
             Default is False.
 
         Returns
@@ -186,7 +191,7 @@ class Fractal():
         segments: numpy.array
             Non-overlappping windows of size n.
         '''
-        return _segmentation(x, n, backward)
+        return _segmentation(x, n, backward, overlap)
 
     @classmethod
     def local_msq_residuals(cls, segment, deg):
@@ -220,7 +225,7 @@ class Fractal():
         return fit_result[0][0]/n if fit_result[0].size != 0 else np.nan
 
     @classmethod
-    def fluctuations(cls, X, n, deg):
+    def fluctuations(cls, X, n, deg, overlap=False):
         r'''Fluctuation function
 
         The fluctuations are defined as the mean squared residuals
@@ -234,6 +239,9 @@ class Fractal():
             Window size.
         deg: int
             Degree(s) of the fitting polynomials.
+        overlap: bool, optional
+            If set to True, consecutive windows during segmentation
+            overlap by 50%. Default is False.
 
         Returns
         -------
@@ -245,8 +253,8 @@ class Fractal():
         Y = cls.profile(X)
 
         # Define non-overlapping segments
-        segments_fwd = cls.segmentation(Y, n, backward=False)
-        segments_bwd = cls.segmentation(Y, n, backward=True)
+        segments_fwd = cls.segmentation(Y, n, backward=False, overlap=overlap)
+        segments_bwd = cls.segmentation(Y, n, backward=True, overlap=overlap)
 
         # Assert equal numbers of segments
         assert(segments_fwd.shape == segments_bwd.shape)
@@ -286,7 +294,7 @@ class Fractal():
         return qth_msq
 
     @classmethod
-    def dfa(cls, ts, n_array, deg=1, log=False):
+    def dfa(cls, ts, n_array, deg=1, overlap=False, log=False):
         r'''Detrended Fluctuation Analysis function
 
         Compute the q-th order mean squared fluctuations for different segment
@@ -301,6 +309,9 @@ class Fractal():
         deg: int, optional
             Degree(s) of the fitting polynomials.
             Default is 1.
+        overlap: bool, optional
+            If set to True, consecutive windows during segmentation
+            overlap by 50%. Default is False.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -324,14 +335,19 @@ class Fractal():
 
         iterable = (
             cls.q_th_order_mean_square(
-                cls.fluctuations(ts.values, n=int(n), deg=deg),
+                cls.fluctuations(
+                    ts.values,
+                    n=int(n),
+                    deg=deg,
+                    overlap=overlap
+                ),
                 q=2
             ) for n in factor*n_array
         )
 
         q_th_order_msq_fluc = np.fromiter(
             iterable,
-            dtype=np.float,
+            dtype='float',
             count=len(n_array)
         )
 
@@ -342,7 +358,15 @@ class Fractal():
 
     @classmethod
     def dfa_parallel(
-        cls, ts, n_array, deg=1, log=False, n_jobs=2, prefer=None, verbose=0
+        cls,
+        ts,
+        n_array,
+        deg=1,
+        overlap=False,
+        log=False,
+        n_jobs=2,
+        prefer=None,
+        verbose=0
     ):
         r'''Detrended Fluctuation Analysis function
 
@@ -358,6 +382,9 @@ class Fractal():
         deg: int, optional
             Degree(s) of the fitting polynomials.
             Default is 1.
+        overlap: bool, optional
+            If set to True, consecutive windows during segmentation
+            overlap by 50%. Default is False.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -397,12 +424,13 @@ class Fractal():
         )(delayed(cls.fluctuations)(
             ts.values,
             n=int(n),
-            deg=deg
+            deg=deg,
+            overlap=overlap
         ) for n in factor*n_array)
 
         q_th_order_msq_fluc = np.fromiter(
             (cls.q_th_order_mean_square(fluct, q=2) for fluct in flucts),
-            dtype=np.float,
+            dtype='float',
             count=len(flucts)
         )
 
@@ -539,7 +567,7 @@ class Fractal():
         return h_ratios, h_ratios_err, n_x
 
     @classmethod
-    def mfdfa(cls, ts, n_array, q_array, deg=1, log=False):
+    def mfdfa(cls, ts, n_array, q_array, deg=1, overlap=False, log=False):
         r'''Multifractal Detrended Fluctuation Analysis function
 
         Compute the q-th order mean squared fluctuations for different segment
@@ -556,6 +584,9 @@ class Fractal():
         deg: int, optional
             Degree(s) of the fitting polynomials.
             Default is 1.
+        overlap: bool, optional
+            If set to True, consecutive windows during segmentation
+            overlap by 50%. Default is False.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -579,11 +610,16 @@ class Fractal():
 
         q_th_order_msq_fluctuations = np.empty(
             (len(n_array), len(q_array)),
-            dtype=np.float
+            dtype='float'
         )
         for idx, n in enumerate(factor*n_array):
 
-            fluct = cls.fluctuations(ts.values, n=int(n), deg=deg)
+            fluct = cls.fluctuations(
+                ts.values,
+                n=int(n),
+                deg=deg,
+                overlap=overlap
+            )
             q_th_order_msq_fluctuations[idx] = [
                 cls.q_th_order_mean_square(fluct, q=q) for q in q_array
             ]
@@ -600,6 +636,7 @@ class Fractal():
         n_array,
         q_array,
         deg=1,
+        overlap=False,
         log=False,
         n_jobs=2,
         prefer=None,
@@ -621,6 +658,9 @@ class Fractal():
         deg: int, optional
             Degree(s) of the fitting polynomials.
             Default is 1.
+        overlap: bool, optional
+            If set to True, consecutive windows during segmentation
+            overlap by 50%. Default is False.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -660,7 +700,8 @@ class Fractal():
         )(delayed(cls.fluctuations)(
             ts.values,
             n=int(n),
-            deg=deg
+            deg=deg,
+            overlap=overlap
         ) for n in factor*n_array)
 
         q_th_order_msq_fluctuations = np.array([
