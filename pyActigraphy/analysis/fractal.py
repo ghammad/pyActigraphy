@@ -557,8 +557,8 @@ class Fractal():
                 n_x[t-n_min] = n_array[t]
                 h_ratios[t-n_min] = ratio
                 h_ratios_err[t-n_min] = ratio*np.sqrt(
-                    alpha_1_rel_err*alpha_1_rel_err +
-                    alpha_2_rel_err*alpha_2_rel_err
+                    alpha_1_rel_err*alpha_1_rel_err
+                    + alpha_2_rel_err*alpha_2_rel_err
                 )
 
             if log:
@@ -567,7 +567,7 @@ class Fractal():
         return h_ratios, h_ratios_err, n_x
 
     @classmethod
-    def local_slopes(cls, F_n, n_array, s=2, log=False):
+    def local_slopes(cls, F_n, n_array, s=2, log=False, verbose=False):
         r'''Local slopes of log(F(n)) versus log(n).
 
         The local slope of the curve log(F(n)) is calculated at each point by
@@ -588,14 +588,19 @@ class Fractal():
             If set to True, assume that the input values have already been
             log-transformed.
             Default is False.
+        verbose: bool, optional
+            If set to True, display informations about the calculations.
+            Default is False.
 
         Returns
         -------
-        local_slopes, local_slopes_err, n_x: arrays of floats
+        alpha_loc, alpha_loc_err, n_x: arrays of floats
             Local slopes (alpha_loc), and associated uncertainties, obtained
             for various time scales n_x.
 
         '''
+        # Check if inputs have the same dimension
+        assert len(F_n) == len(n_array)
 
         # Window size: 2*s + 1
         win_size = 2*s + 1
@@ -611,21 +616,30 @@ class Fractal():
                 ("Total number of points to fit is less than (2*s+1).")
             )
 
-        n_x = np.empty(len(n_array)-2)
-        local_slopes = np.empty(len(n_array)-2)
-        local_slopes_err = np.empty(len(n_array)-2)
+        n_x = np.empty(len(n_array)-2*s)
+        alpha_loc = np.empty(len(n_array)-2*s)
+        alpha_loc_err = np.empty(len(n_array)-2*s)
 
-        for t in np.arange(s, len(n_array)-s+1):
+        for t in np.arange(0, len(n_array)-win_size+1):
             # Fit the series of points (F(n) vs n) up to point n_x
-            local_slopes[t], local_slopes_err[t] = cls.generalized_hurst_exponent(
-                    F_n[t-s:t+s], n_array[t-s:t+s], log
+            if verbose:
+                print("-"*50)
+                print("Fit info:")
+                print("- t: {}".format(t))
+                print("- current point: {}".format(t+s))
+                print("- F_n[t-s:t+s]: {}".format(F_n[t:t+win_size]))
+                print("- n_array[t-s:t+s]: {}".format(n_array[t:t+win_size]))
+                print("- array center: {}".format(n_array[t+s]))
+
+            alpha_loc[t], alpha_loc_err[t] = cls.generalized_hurst_exponent(
+                    F_n[t:t+win_size], n_array[t:t+win_size], log
             )
-            n_x[t] = n_array[t]
+            n_x[t] = n_array[t+s]
 
             if log:
                 n_x = np.exp(n_x)
 
-        return local_slopes, local_slopes_err, n_x
+        return alpha_loc, alpha_loc_err, n_x
 
     @classmethod
     def mfdfa(cls, ts, n_array, q_array, deg=1, overlap=False, log=False):
