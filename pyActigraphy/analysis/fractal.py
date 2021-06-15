@@ -788,3 +788,37 @@ class Fractal():
             q_th_order_msq_fluctuations = np.log(q_th_order_msq_fluctuations)
 
         return q_th_order_msq_fluctuations
+
+    @staticmethod
+    def equally_spaced_logscale_range(n, start=1, stop=1440):
+        """Equally spaced numbers in log-scale
+
+        Construct a series of equally spaced numbers in log scale
+
+        Parameters
+        ----------
+        n: int
+            Time scales (i.e window sizes). In minutes.
+        start: int, optional
+            Starting number.
+            Default is 1.
+        stop: int, optional
+            End number.
+            Default is 1440.
+
+        Returns
+        -------
+        n_array: numpy.array of int
+            Array of equally spaced numbers.
+        """
+
+        # Create series of exponentiated numbers evenly spaced in log-space.
+        units = np.geomspace(start, stop, num=n, endpoint=True, dtype=int)
+
+        # Cast as int and remove duplicates
+        n_array = np.unique(units)
+
+        # Filter out numbers < start
+        n_array = n_array[np.where(n_array >= start)]
+
+        return n_array
