@@ -567,6 +567,67 @@ class Fractal():
         return h_ratios, h_ratios_err, n_x
 
     @classmethod
+    def local_slopes(cls, F_n, n_array, s=2, log=False):
+        r'''Local slopes of log(F(n)) versus log(n).
+
+        The local slope of the curve log(F(n)) is calculated at each point by
+        fitting polynomial of degree 1, using the 2*s surrounding points.
+        At the boundaries of {F(n)}, the local slope is calculated with a
+        reduced number of points (min. 3).
+
+        Parameters
+        ----------
+        F_n : array
+            Array of fluctuations.
+        n_array: array of int
+            Time scales (i.e window sizes). In minutes.
+        s: int, optional
+            Half size of the window used to estimate the local slope.
+            The total window size is (2*s+1). Default is 2.
+        log: bool, optional
+            If set to True, assume that the input values have already been
+            log-transformed.
+            Default is False.
+
+        Returns
+        -------
+        local_slopes, local_slopes_err, n_x: arrays of floats
+            Local slopes (alpha_loc), and associated uncertainties, obtained
+            for various time scales n_x.
+
+        '''
+
+        # Window size: 2*s + 1
+        win_size = 2*s + 1
+        # Check if the number of points for a single linear fit is at least 3
+        if(win_size < 3):
+            raise ValueError(
+                ("Cannot perform a linear fit on series of less than"
+                 " 3 points; `s` must be greater or equal to 1.")
+            )
+        # Check if the number of points to fit is less than 2*n_min
+        if(len(n_array) < win_size):
+            raise ValueError(
+                ("Total number of points to fit is less than (2*s+1).")
+            )
+
+        n_x = np.empty(len(n_array)-2)
+        local_slopes = np.empty(len(n_array)-2)
+        local_slopes_err = np.empty(len(n_array)-2)
+
+        for t in np.arange(s, len(n_array)-s+1):
+            # Fit the series of points (F(n) vs n) up to point n_x
+            local_slopes[t], local_slopes_err[t] = cls.generalized_hurst_exponent(
+                    F_n[t-s:t+s], n_array[t-s:t+s], log
+            )
+            n_x[t] = n_array[t]
+
+            if log:
+                n_x = np.exp(n_x)
+
+        return local_slopes, local_slopes_err, n_x
+
+    @classmethod
     def mfdfa(cls, ts, n_array, q_array, deg=1, overlap=False, log=False):
         r'''Multifractal Detrended Fluctuation Analysis function
 
