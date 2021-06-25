@@ -10,9 +10,9 @@ from scipy.stats import linregress
 @njit
 def _profile(X):
 
-    trend = np.mean(X)
+    trend = np.nanmean(X)
 
-    prof = np.cumsum(X - trend)
+    prof = np.nancumsum(X - trend)
 
     return prof
 
