@@ -26,10 +26,22 @@ fields_eng = {
     'Period': 'Epoch Length'
 }
 
+# In German
+fields_ger = {
+    'Name': 'Identität',
+    'Device': 'Actiwatch-Typ',
+    'Device_id': 'Actiwatch-Seriennummer',
+    'Data': 'Daten nach Epochen',
+    'Start_date': 'Startdatum der Datenerfassung',
+    'Start_time': 'Startzeit der Datenerfassung',
+    'Period': 'Epochenlänge'
+}
+
 fields = {
     'ENG_UK': fields_eng,
     'ENG_US': fields_eng,
-    'FR': fields_fr
+    'FR': fields_fr,
+    'GER': fields_ger
 }
 
 # Dictionary of the required columns in the data 'section' of the input file
@@ -52,10 +64,20 @@ columns_eng = {
     'White_light': 'White Light'
 }
 
+# In English
+columns_ger = {
+    'Date': 'Datum',
+    'Time': 'Zeit',
+    'Activity': 'Aktivität',
+    'Marker': 'Markierung',
+    'White_light': 'Weißes Licht'
+}
+
 columns = {
     'ENG_UK': columns_eng,
     'ENG_US': columns_eng,
-    'FR': columns_fr
+    'FR': columns_fr,
+    'GER': columns_ger
 }
 
-day_first = {'ENG_UK': True, 'ENG_US': False, 'FR': True}
+day_first = {'ENG_UK': True, 'ENG_US': False, 'FR': True, 'GER': True}
