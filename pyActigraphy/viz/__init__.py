@@ -6,6 +6,6 @@
 
 # from . import scoring
 
-from .viz import double_plot
+from .viz import double_plot, daily_profile_plot, scoring_plot
 
-__all__ = ['double_plot']
+__all__ = ['double_plot', 'daily_profile_plot', 'scoring_plot']
