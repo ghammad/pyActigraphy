@@ -4,7 +4,30 @@ from plotly.subplots import make_subplots
 from pyActigraphy.io import BaseRaw
 
 
-def double_plot(raw, freq='15min', binarize=False, threshold=0, span='48h'):
+def strfdelta(tdelta, fmt):
+    d = {"days": tdelta.days}
+    d["hours"], rem = divmod(tdelta.seconds, 3600)
+    d["minutes"], d["seconds"] = divmod(rem, 60)
+    return fmt.format(**d)
+
+
+def format_timedelta(td):
+    if td < pd.Timedelta(0):
+        return '-' + format_timedelta(-td)
+    else:
+        # Format positive timedeltas
+        return strfdelta(td, "{hours:02}:{minutes:02}")  # ":{seconds:02}")
+
+
+def double_plot(
+    raw, freq='15min',
+    binarize=False,
+    threshold=0,
+    span='48h',
+    max_activity=None,
+    bar_color="Blue",
+    height=1000
+):
     """Double plot
 
     Create a stack plot where each line displays a specified time range
@@ -31,6 +54,21 @@ def double_plot(raw, freq='15min', binarize=False, threshold=0, span='48h'):
         Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
         Default is '48h' (i.e 2 days).
+    max_activity: float, optional
+        If set to a value between 0 and 1, set the y-axis range to the maximal
+        activity value multiplied by max_activity.
+        Otherwise, set the y-axis range to the specified max_activity value.
+        If set to None, the y-axis range is scaled between 0 and the maximal
+        activity value found in the recording.
+        Default is None.
+    bar_color: str, optional
+        Set bar colour. Available colours are listed in
+        https://developer.mozilla.org/en-US/docs/Web/CSS/color_value
+        Default is "Blue".
+    height: int, optional
+        Plot height.
+        Default is 1000.
+
     Returns
     -------
     fig : Instance of plotly.graph_objects.Figure
@@ -50,40 +88,96 @@ def double_plot(raw, freq='15min', binarize=False, threshold=0, span='48h'):
     n_periods = raw.duration() // (td/2)
 
     # If the recording does not contain N full periods,
-    # then pad the recording with 0.
-    padding_index = pd.date_range(
-        start=data.index[-1]+data.index.freq,
-        periods=((n_periods+1)*(td/2)-raw.duration())/raw.data.index.freq,
-        freq=freq
-    )
-    padding_series = pd.Series(
-        index=padding_index, data=[0]*len(padding_index)
+    # starting from midnight, then pad the recording with 0.
+
+    # Timestamp set at midnight on the first day of the recording
+    start = data.index.normalize()[0]
+
+    # Pad data backwards with zero up to midnigth
+    padding_series_prepend = pd.Series(
+        index=pd.date_range(
+            start=start,
+            periods=(data.index[0]-start)/data.index.freq,
+            freq=freq
+        ),
+        data=0
     )
 
-    padded_data = pd.concat([data, padding_series])
+    # Pad data forwards with zero up to midnigth
+    padding_series_append = pd.Series(
+        index=pd.date_range(
+            start=data.index[-1]+data.index.freq,
+            periods=(
+                (n_periods+1)*(td/2)
+                - raw.duration()
+                - pd.to_timedelta(padding_series_prepend.index.values.ptp())
+            )/data.index.freq,
+            freq=freq
+        ),
+        data=0
+    )
+
+    padded_data = pd.concat(
+        [padding_series_prepend, data, padding_series_append]
+    )
 
     # Create figure
     fig = make_subplots(
         rows=n_periods, cols=1,
-        vertical_spacing=0.4/n_periods,
-        x_title='Date time',
-        y_title='Counts/epoch',
+        vertical_spacing=0.08125/n_periods,
+        x_title='Time of day [HH:MM]'
     )
 
+    # Fill in subplots
     for n in range(n_periods):
         start = padded_data.index[0] + n*(td//2)
         end = start + td
         fig.append_trace(
             go.Bar(
-                x=padded_data[start:end].index.astype(str),
+                x=padded_data[start:end].index,
                 y=padded_data[start:end],
-                marker=dict(color="Blue"),
+                marker=dict(color=bar_color, line=dict(width=0)),
+                name="Days {} & {}".format(n+1, n+2)
             ),
             row=n+1,
             col=1
         )
-    fig.update_yaxes(range=[0, data.max()])
-    fig.update_layout(title='Actigraphy data', height=1000, showlegend=False)
+        # Set title for th y-axis of each subplot
+        fig.update_yaxes(
+            title_text=padded_data[start:end].index[0].strftime("%Y-%m-%d"),
+            title_font=dict(size=12),
+            row=n+1, col=1
+        )
+
+    # Format plot layout
+    fig.update_layout(
+        title='Actigraphy data', height=height, showlegend=False, bargap=0,
+    )
+    fig.update_xaxes(showticklabels=False)  # hide xticks for all subplots
+    fig.update_xaxes(
+        ticks="outside", tickwidth=2, tickcolor='crimson',
+        ticklen=10, nticks=12, showticklabels=True,
+        row=n_periods, col=1,  # show xticks on last subplot
+    )
+    fig.update_xaxes(
+        tickvals=padded_data[start:end].index[::12],
+        ticktext=list(
+            pd.timedelta_range(
+                start='0h',
+                end=span,
+                periods=len(padded_data[start:end].index[::12])
+            ).map(format_timedelta)
+        )
+    )
+
+    # Format Y axis
+    if max_activity is not None:
+        if max_activity < 1:
+            max_activity = data.max()*max_activity
+    else:
+        max_activity = data.max()
+    fig.update_yaxes(range=[0, max_activity])
+
     return fig
 
 
