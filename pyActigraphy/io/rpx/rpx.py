@@ -43,6 +43,9 @@ class RawRPX(BaseRaw):
         Default is 'float'.
     delimiter: str, optional
         Delimiter to use when reading the input file.
+        Default is ','
+    decimal: str, optional
+        Decimal character to use when reading the input file.
         Default is '.'
     """
 
@@ -55,7 +58,8 @@ class RawRPX(BaseRaw):
         period=None,
         data_dtype='float',
         light_dtype='float',
-        delimiter=','
+        delimiter=',',
+        decimal='.'
     ):
 
         # get absolute file path
@@ -149,6 +153,7 @@ class RawRPX(BaseRaw):
             dayfirst=dayfirst,  # (self.language in day_first),
             usecols=list(columns[self.language].values()),
             na_values=fields[self.language]['NAN'],
+            decimal=decimal,
             dtype={
                 columns[self.language]['Activity']: data_dtype,
                 columns[self.language]['White_light']: light_dtype
