@@ -265,7 +265,8 @@ def read_raw_rpx(
     period=None,
     data_dtype='float',
     light_dtype='float',
-    delimiter=','
+    delimiter=',',
+    decimal='.'
 ):
     """Reader function for raw Respironics file.
 
@@ -299,6 +300,9 @@ def read_raw_rpx(
         Default is 'float'.
     delimiter: str, optional
         Delimiter to use when reading the input file.
+        Default is ','
+    decimal: str, optional
+        Decimal character to use when reading the input file.
         Default is '.'
 
     Returns
@@ -315,5 +319,6 @@ def read_raw_rpx(
         period=period,
         data_dtype=data_dtype,
         light_dtype=light_dtype,
-        delimiter=delimiter
+        delimiter=delimiter,
+        decimal=decimal
     )
