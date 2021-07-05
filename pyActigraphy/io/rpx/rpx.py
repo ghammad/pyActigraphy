@@ -148,7 +148,7 @@ class RawRPX(BaseRaw):
             },
             dayfirst=dayfirst,  # (self.language in day_first),
             usecols=list(columns[self.language].values()),
-            na_values='NAN',
+            na_values=fields[self.language]['NAN'],
             dtype={
                 columns[self.language]['Activity']: data_dtype,
                 columns[self.language]['White_light']: light_dtype

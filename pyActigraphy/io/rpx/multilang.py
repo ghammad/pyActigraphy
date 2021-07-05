@@ -8,7 +8,8 @@ fields_fr = {
     'Data': 'Données période par période',
     'Start_date': 'Date de début de la collecte des données',
     'Start_time': 'Heure de début de la collecte des données',
-    'Period': 'Longueur de la période'
+    'Period': 'Longueur de la période',
+    'NAN': 'NAN'
 }
 
 # In English
@@ -23,7 +24,8 @@ fields_eng = {
     'Data': 'Epoch-by-Epoch Data',
     'Start_date': 'Data Collection Start Date',
     'Start_time': 'Data Collection Start Time',
-    'Period': 'Epoch Length'
+    'Period': 'Epoch Length',
+    'NAN': 'NaN'
 }
 
 # In German
@@ -34,7 +36,8 @@ fields_ger = {
     'Data': 'Daten nach Epochen',
     'Start_date': 'Startdatum der Datenerfassung',
     'Start_time': 'Startzeit der Datenerfassung',
-    'Period': 'Epochenlänge'
+    'Period': 'Epochenlänge',
+    'NAN': 'kZ'
 }
 
 fields = {
