@@ -19,13 +19,13 @@ class RawRPX(BaseRaw):
         Path to the rpx file.
     language: str, optional
         Language of the input csv file.
-        Available options are: 'ENG_UK', 'ENG_US', 'FR'.
+        Available options are: 'ENG_UK', 'ENG_US', 'FR', 'GER'.
         Default is 'ENG_US'.
     dayfirst: bool, optional
         Whether to interpret the first value of a date as the day.
         If None, rely on the laguage:
         * ENG_US: False
-        * ENG_UK or FR: True
+        * ENG_UK or FR or GER: True
         Default is None.
     start_time: datetime-like, optional
         Read data from this time.
@@ -270,7 +270,7 @@ def read_raw_rpx(
         Path to the rpx file.
     language: str, optional
         Language of the input csv file.
-        Available options are: 'ENG_UK', 'ENG_US', 'FR'.
+        Available options are: 'ENG_UK', 'ENG_US', 'FR', 'GER'.
         Default is 'ENG_US'.
     dayfirst: bool, optional
         Whether to interpret the first value of a date as the day.
