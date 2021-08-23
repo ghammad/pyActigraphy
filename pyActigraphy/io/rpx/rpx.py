@@ -83,26 +83,12 @@ class RawRPX(BaseRaw):
         header_offset, data_offset, header, data_available_cols = \
             self.__extract_rpx_header_info(input_fname, delimiter)
 
-        # Unless specified otherwise,
-        # set dayfirst as a function of the language
-        if dayfirst is None:
-            dayfirst = day_first[language]
-
-        # Verify that the input file contains the needed informations
-        if (
-            set(data_available_cols[2:])
-            <= set(columns[self.language].values())
-        ):
-            raise ValueError(
-                'The data section of the input file {} '.format(input_fname)
-                + 'does not contain the required columns.\n'
-                + 'Required columns: {}.\n'.format('", "'.join(
-                    columns[self.language].values())
-                )
-                + 'Available columns: {}.\n'.format('", "'.join(
-                    data_available_cols[2:])
-                )
-            )
+        # Verify that the input file contains the needed information
+        self.__check_rpx_header(
+            input_fname,
+            data_available_cols[2:],
+            [columns[self.language][k] for k in ['Date', 'Time', 'Activity']]
+        )
 
         # extract informations from the header
         name = self.__extract_rpx_name(header, delimiter)
@@ -110,6 +96,11 @@ class RawRPX(BaseRaw):
         start = self.__extract_rpx_start_time(header, delimiter, dayfirst)
         frequency = self.__extract_rpx_frequency(header, delimiter)
         axial_mode = 'Unknown'
+
+        # Unless specified otherwise,
+        # set dayfirst as a function of the language
+        if dayfirst is None:
+            dayfirst = day_first[language]
 
         # read actigraphy data
         with open(input_fname, mode='rb') as file:
@@ -249,6 +240,22 @@ class RawRPX(BaseRaw):
                 )
                 break
         return frequency
+
+    def __check_rpx_header(self, fname, cols_available, cols_required):
+        if (
+            set(cols_available)
+            <= set(cols_required)
+        ):
+            raise ValueError(
+                'The data section of the input file {} '.format(fname)
+                + 'does not contain the required columns.\n'
+                + 'Required columns: {}.\n'.format('", "'.join(
+                    cols_required)
+                )
+                + 'Available columns: {}.\n'.format('", "'.join(
+                    cols_available)
+                )
+            )
 
     def __check_rpx_start_time(
         self, data, start_time, tolerance=datetime.timedelta(minutes=1)
