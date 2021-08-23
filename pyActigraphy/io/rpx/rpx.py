@@ -103,7 +103,7 @@ class RawRPX(BaseRaw):
                 data_available_cols.append(
                     line_clean.decode(
                         'utf-8'
-                    ).split(',')[0].strip('"').rstrip(':')
+                    ).split(delimiter)[0].strip('"').rstrip(':')
                 )
         # Verify that the input file contains the needed informations
         try:
