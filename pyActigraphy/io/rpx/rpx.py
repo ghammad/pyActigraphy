@@ -107,8 +107,8 @@ class RawRPX(BaseRaw):
                 )
         # Verify that the input file contains the needed informations
         if (
-            set(columns[self.language].values())
-            <= set(data_available_cols[2:])
+            set(data_available_cols[2:])
+            <= set(columns[self.language].values())
         ):
             raise ValueError(
                 'The data section of the input file {} '.format(input_fname)
