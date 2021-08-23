@@ -47,6 +47,9 @@ class RawRPX(BaseRaw):
     decimal: str, optional
         Decimal character to use when reading the input file.
         Default is '.'
+    drop_na: bool, optional
+        If set to True, drop epochs where activity is NaN.
+        Default is True.
     """
 
     def __init__(
@@ -59,7 +62,8 @@ class RawRPX(BaseRaw):
         data_dtype='float',
         light_dtype='float',
         delimiter=',',
-        decimal='.'
+        decimal='.',
+        drop_na=True
     ):
 
         # get absolute file path
@@ -131,7 +135,7 @@ class RawRPX(BaseRaw):
                 # columns[self.language]['White_light']: light_dtype
                 # columns[self.language]['Marker']: light_dtype
             }
-        )  # .dropna(subset=[columns[self.language]['Activity']])
+        )
 
         # verify that the start time and the first date index matches
         self.__check_rpx_start_time(index_data, start)
@@ -150,6 +154,13 @@ class RawRPX(BaseRaw):
 
         # restrict data to start_time+period (if required)
         index_data = index_data[start_time:stop_time]
+
+        # drop NaN (if required)
+        if drop_na:
+            index_data.dropna(
+                subset=[columns[self.language]['Activity']],
+                inplace=True
+            )
 
         # resample the data
         index_data = index_data.asfreq(freq=pd.Timedelta(frequency))
@@ -282,7 +293,7 @@ class RawRPX(BaseRaw):
         else:
             col_name = None
 
-        return data.loc[col_name] if col_name in data.columns else None
+        return data.loc[:, col_name] if col_name in data.columns else None
 
     def __check_rpx_header(self, fname, cols_available, cols_required):
         if (
@@ -324,7 +335,8 @@ def read_raw_rpx(
     data_dtype='float',
     light_dtype='float',
     delimiter=',',
-    decimal='.'
+    decimal='.',
+    drop_na=True
 ):
     """Reader function for raw Respironics file.
 
@@ -362,6 +374,9 @@ def read_raw_rpx(
     decimal: str, optional
         Decimal character to use when reading the input file.
         Default is '.'
+    drop_na: bool, optional
+        If set to True, drop epochs where activity is NaN.
+        Default is True.
 
     Returns
     -------
@@ -378,5 +393,6 @@ def read_raw_rpx(
         data_dtype=data_dtype,
         light_dtype=light_dtype,
         delimiter=delimiter,
-        decimal=decimal
+        decimal=decimal,
+        drop_na=drop_na
     )
