@@ -246,7 +246,7 @@ class RawRPX(BaseRaw):
         self, data, start_time, tolerance=datetime.timedelta(minutes=1)
     ):
         warning_msg = """
-- Start time extracted from the header_size: {0}
+- Start time extracted from the header: {0}
 - Datetime index of the first data points : {1}
 do not match.
 Please verify your input file.
@@ -282,7 +282,7 @@ def read_raw_rpx(
         Whether to interpret the first value of a date as the day.
         If None, rely on the laguage:
         * ENG_US: False
-        * ENG_UK or FR: True
+        * ENG_UK or FR or GER: True
         Default is None.
     start_time: datetime-like, optional
         Read data from this time.
