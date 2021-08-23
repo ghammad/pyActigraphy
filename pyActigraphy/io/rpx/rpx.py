@@ -90,17 +90,17 @@ class RawRPX(BaseRaw):
             [columns[self.language][k] for k in ['Date', 'Time', 'Activity']]
         )
 
+        # Unless specified otherwise,
+        # set dayfirst as a function of the language
+        if dayfirst is None:
+            dayfirst = day_first[language]
+
         # extract informations from the header
         name = self.__extract_rpx_name(header, delimiter)
         uuid = self.__extract_rpx_uuid(header, delimiter)
         start = self.__extract_rpx_start_time(header, delimiter, dayfirst)
         frequency = self.__extract_rpx_frequency(header, delimiter)
         axial_mode = 'Unknown'
-
-        # Unless specified otherwise,
-        # set dayfirst as a function of the language
-        if dayfirst is None:
-            dayfirst = day_first[language]
 
         # read actigraphy data
         with open(input_fname, mode='rb') as file:
@@ -122,16 +122,16 @@ class RawRPX(BaseRaw):
                     columns[self.language]['Time']
                 ]
             },
-            dayfirst=dayfirst,  # (self.language in day_first),
-            usecols=list(columns[self.language].values()),
+            dayfirst=dayfirst,
+            usecols=data_available_cols[2:],
             na_values=fields[self.language]['NAN'],
             decimal=decimal,
             dtype={
                 columns[self.language]['Activity']: data_dtype,
-                columns[self.language]['White_light']: light_dtype
+                # columns[self.language]['White_light']: light_dtype
                 # columns[self.language]['Marker']: light_dtype
             }
-        ).dropna(subset=[columns[self.language]['Activity']])
+        )  # .dropna(subset=[columns[self.language]['Activity']])
 
         # verify that the start time and the first date index matches
         self.__check_rpx_start_time(index_data, start)
@@ -148,7 +148,29 @@ class RawRPX(BaseRaw):
             stop_time = index_data.index[-1]
             period = stop_time - start_time
 
+        # restrict data to start_time+period (if required)
         index_data = index_data[start_time:stop_time]
+
+        # resample the data
+        index_data = index_data.asfreq(freq=pd.Timedelta(frequency))
+
+        # Sleep/Wake scoring
+        self.__sleep_wake = self.__extract_rpx_data(index_data, 'Sleep/Wake')
+
+        # Mobility
+        self.__mobility = self.__extract_rpx_data(index_data, 'Mobility')
+
+        # Interval Status
+        self.__interval_status = self.__extract_rpx_data(
+            index_data,
+            'Interval Status'
+        )
+
+        # Sleep/Wake status
+        self.__sleep_wake_status = self.__extract_rpx_data(
+            index_data,
+            'S/W Status'
+        )
 
         # call __init__ function of the base class
         super().__init__(
@@ -159,17 +181,29 @@ class RawRPX(BaseRaw):
             start_time=start_time,
             period=period,
             frequency=pd.Timedelta(frequency),
-            data=index_data[columns[self.language]['Activity']].asfreq(
-                freq=pd.Timedelta(frequency)
-            ),
-            light=index_data[columns[self.language]['White_light']].asfreq(
-                freq=pd.Timedelta(frequency)
-            )
+            data=index_data[columns[self.language]['Activity']],
+            light=self.__extract_rpx_data(index_data, 'White_light')
         )
 
     @property
     def language(self):
         return self.__language
+
+    @property
+    def sleep_wake(self):
+        return self.__sleep_wake
+
+    @property
+    def mobility(self):
+        return self.__mobility
+
+    @property
+    def interval_status(self):
+        return self.__interval_status
+
+    @property
+    def sleep_wake_status(self):
+        return self.__sleep_wake_status
 
     def __extract_rpx_header_info(self, fname, delimiter):
         # extract file header and data header
@@ -240,6 +274,15 @@ class RawRPX(BaseRaw):
                 )
                 break
         return frequency
+
+    def __extract_rpx_data(self, data, column):
+
+        if column in columns[self.language].keys():
+            col_name = columns[self.language][column]
+        else:
+            col_name = None
+
+        return data.loc[col_name] if col_name in data.columns else None
 
     def __check_rpx_header(self, fname, cols_available, cols_required):
         if (

@@ -51,29 +51,44 @@ fields = {
 
 # In French
 columns_fr = {
+    'Line': 'Ligne',
     'Date': 'Date',
     'Time': 'Heure',
     'Activity': 'Activité',
     'Marker': 'Marqueur',
-    'White_light': 'Lumière blanche'
+    'White_light': 'Lumière blanche',
+    'Sleep/Wake': 'Sommeil/Éveil',
+    'Mobility': 'Mobilité',
+    'Interval Status': 'Statut de l’intervalle',
+    'S/W Status': 'Statut Sommeil/Éveil'
 }
 
 # In English
 columns_eng = {
+    'Line': 'Line',
     'Date': 'Date',
     'Time': 'Time',
     'Activity': 'Activity',
     'Marker': 'Marker',
-    'White_light': 'White Light'
+    'White_light': 'White Light',
+    'Sleep/Wake': 'Sleep/Wake',
+    'Mobility': 'Mobility',
+    'Interval Status': 'Interval Status',
+    'S/W Status': 'S/W Status'
 }
 
-# In English
+# In German
 columns_ger = {
+    'Line': 'Zeile',
     'Date': 'Datum',
     'Time': 'Zeit',
     'Activity': 'Aktivität',
     'Marker': 'Markierung',
-    'White_light': 'Weißes Licht'
+    'White_light': 'Weißes Licht',
+    'Sleep/Wake': 'Schlaf/Wach',
+    # 'Mobility': '??',
+    'Interval Status': 'Intervallstatus',
+    # 'S/W Status': '??'
 }
 
 columns = {
