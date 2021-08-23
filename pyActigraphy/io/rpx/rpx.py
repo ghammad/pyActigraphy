@@ -108,17 +108,17 @@ class RawRPX(BaseRaw):
         # Verify that the input file contains the needed informations
         try:
             assert (
-                set(columns[self.language].values()) <=
-                set(data_available_cols[2:])
+                set(columns[self.language].values())
+                <= set(data_available_cols[2:])
             )
         except AssertionError:
             print(
-                'The data section of the input file {}'.format(input_fname) +
-                'does not contain the required columns.\n' +
-                'Required columns: {}'.format('" or "'.join(
+                'The data section of the input file {} '.format(input_fname)
+                + 'does not contain the required columns.\n'
+                + 'Required columns: {}.\n'.format('", "'.join(
                     columns[self.language].values())
-                ) +
-                'Available columns: {}'.format('" or "'.join(
+                )
+                + 'Available columns: {}\n.'.format('", "'.join(
                     data_available_cols[2:])
                 )
             )
