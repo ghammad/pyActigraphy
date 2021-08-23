@@ -64,8 +64,11 @@ class RawRPX(BaseRaw):
 
         # get absolute file path
         input_fname = os.path.abspath(input_fname)
-        # [TO-DO] check if file exists
-        # [TO-DO] check it is has the right file extension .rpx
+        # check if file exists
+        if not os.path.exists(input_fname):
+            raise FileNotFoundError(
+                "File does not exist: {}.\n Please check.".format(input_fname)
+            )
 
         if language not in fields.keys():
             raise ValueError(
@@ -75,36 +78,16 @@ class RawRPX(BaseRaw):
             )
         else:
             self.__language = language
-        # [TO-DO] check language is supported
+
+        # read file header info
+        header_offset, data_offset, header, data_available_cols = \
+            self.__extract_rpx_header_info(input_fname, delimiter)
 
         # Unless specified otherwise,
         # set dayfirst as a function of the language
         if dayfirst is None:
             dayfirst = day_first[language]
 
-        # extract file header and data header
-        header = []
-        data_available_cols = []
-        with open(input_fname, mode='rb') as file:
-            data = file.readlines()
-        for header_offset, line in enumerate(data, 1):
-            if fields[self.language]['Data'] in line.decode('utf-8'):
-                break
-            else:
-                header.append(line.decode('utf-8'))
-        # Read file until the next blank line
-        # First, skip blank line after section title
-        # next(file)
-        for data_offset, line in enumerate(data[header_offset+1:]):
-            line_clean = line.replace(b'\r\r\n', b'\r\n')
-            if line_clean == b'\r\n':
-                break
-            else:
-                data_available_cols.append(
-                    line_clean.decode(
-                        'utf-8'
-                    ).split(delimiter)[0].strip('"').rstrip(':')
-                )
         # Verify that the input file contains the needed informations
         if (
             set(data_available_cols[2:])
@@ -196,6 +179,33 @@ class RawRPX(BaseRaw):
     @property
     def language(self):
         return self.__language
+
+    def __extract_rpx_header_info(self, fname, delimiter):
+        # extract file header and data header
+        header = []
+        data_available_cols = []
+        with open(fname, mode='rb') as file:
+            data = file.readlines()
+        for header_offset, line in enumerate(data, 1):
+            if fields[self.language]['Data'] in line.decode('utf-8'):
+                break
+            else:
+                header.append(line.decode('utf-8'))
+        # Read file until the next blank line
+        # First, skip blank line after section title
+        # next(file)
+        for data_offset, line in enumerate(data[header_offset+1:]):
+            line_clean = line.replace(b'\r\r\n', b'\r\n')
+            if line_clean == b'\r\n':
+                break
+            else:
+                data_available_cols.append(
+                    line_clean.decode(
+                        'utf-8'
+                    ).split(delimiter)[0].strip('"').rstrip(':')
+                )
+
+        return header_offset, data_offset, header, data_available_cols
 
     def __extract_rpx_name(self, header, delimiter):
         for line in header:
