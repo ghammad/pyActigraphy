@@ -198,22 +198,27 @@ class RawRPX(BaseRaw):
 
     @property
     def language(self):
+        r"""Language (ENG_UK, FR, GER, etc) used to set up the device"""
         return self.__language
 
     @property
     def sleep_wake(self):
+        r"""Sleep/Wake score (0:sleep, 1:wake)."""
         return self.__sleep_wake
 
     @property
     def mobility(self):
+        r"""Mobility score (0:immobile, 1:mobile)."""
         return self.__mobility
 
     @property
     def interval_status(self):
+        r"""Interval status (ACTIVE, REST, REST-S or Excluded)."""
         return self.__interval_status
 
     @property
     def sleep_wake_status(self):
+        r"""Manually set status (Forced wake, Forced sleep or Excluded)."""
         return self.__sleep_wake_status
 
     def __extract_rpx_header_info(self, fname, delimiter):
