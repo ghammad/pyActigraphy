@@ -37,8 +37,8 @@ class Report():
 
         if self.results is None:
             print(
-                "Results are empty." +
-                " Please run the fit method before accessing the resuls."
+                "Results are empty."
+                + " Please run the fit method before accessing the resuls."
             )
         else:
             pretty_results = pd.DataFrame(self.results)

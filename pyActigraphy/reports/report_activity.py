@@ -15,10 +15,10 @@ class ActivityReport(Report):
         if (cut_points is not None) and (labels is not None):
             if len(labels) != len(cut_points)+1:
                 raise ValueError(
-                    "The number of labels should match the number of (N+1)" +
-                    " intervals defined by the N specified cut points.\n" +
-                    "Number of labels: {}\n".format(len(labels)) +
-                    "Number of cut points: {}\n".format(len(cut_points))
+                    "The number of labels should match the number of (N+1)"
+                    + " intervals defined by the N specified cut points.\n"
+                    + "Number of labels: {}\n".format(len(labels))
+                    + "Number of cut points: {}\n".format(len(cut_points))
                 )
         # call __init__ function of the base class
         super(ActivityReport, self).__init__(data=data)

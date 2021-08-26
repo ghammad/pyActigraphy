@@ -113,16 +113,13 @@ class SleepReport(Report):
                 )
                 # Remove first and last fragments if the start/stop coincide
                 # with the onset/offet times
-                if (
-                    len(fragments) > 0 and
-                    fragments[0].index[0] == sleep_period.index[0]
-                ):
-                    del fragments[0]
-                if (
-                    len(fragments) > 0 and
-                    fragments[-1].index[-1] == sleep_period.index[-1]
-                ):
-                    del fragments[-1]
+                if (len(fragments) > 0):
+
+                    if (fragments[0].index[0] == sleep_period.index[0]):
+                        del fragments[0]
+
+                    if (fragments[-1].index[-1] == sleep_period.index[-1]):
+                        del fragments[-1]
 
                 report['SOL'] = sd.distance_to_overlap(convert_to_num_min)
                 report['WASO_PCT'] = 1 - sd.overlap_pct(inner=True)
@@ -177,8 +174,8 @@ def create_sleep_report(
                 print(
                     "Found reported period nr {} of type: {}.".format(
                         idx, row['TYPE']
-                    ) +
-                    " START:{} / END:{}".format(
+                    )
+                    + " START:{} / END:{}".format(
                         row['START'], row['END']
                     )
                 )
