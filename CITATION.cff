@@ -1,0 +1,64 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Hammad"
+  given-names: "Grégory"
+  orcid: "https://orcid.org/0000-0003-1083-3869"
+- family-names: "Reyt"
+  given-names: "Mathilde"
+  orcid: "https://orcid.org/0000-0001-5501-5216"
+- family-names: "Beliy"
+  given-names: "Nikita"
+- family-names: "Baillet"
+  given-names: "Marion"
+  orcid: "https://orcid.org/0000-0002-1003-4787"
+- family-names: "Deantoni"
+  given-names: "Michele"
+  orcid: "https://orcid.org/0000-0002-7629-4645"
+- family-names: "Lesoinne"
+  given-names: "Alexia"
+- family-names: "Muto"
+  given-names: "Vincenzo"
+  orcid: "https://orcid.org/0000-0001-5100-9927"
+- family-names: "Schmidt"
+  given-names: "Christina"
+  orcid: "https://orcid.org/0000-0002-9867-012X"
+title: "pyActigraphy: Open-source python package for actigraphy data visualization and analysis"
+version: 1.0.0
+doi: 10.5281/zenodo.3973012 
+date-released: 2020-08-05
+url: "https://github.com/ghammad/pyActigraphy"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Hammad"
+    given-names: "Grégory"
+    orcid: "https://orcid.org/0000-0003-1083-3869"
+  - family-names: "Reyt"
+    given-names: "Mathilde"
+    orcid: "https://orcid.org/0000-0001-5501-5216"
+  - family-names: "Beliy"
+    given-names: "Nikita"
+  - family-names: "Baillet"
+    given-names: "Marion"
+    orcid: "https://orcid.org/0000-0002-1003-4787"
+  - family-names: "Deantoni"
+    given-names: "Michele"
+    orcid: "https://orcid.org/0000-0002-7629-4645"
+  - family-names: "Lesoinne"
+    given-names: "Alexia"
+  - family-names: "Muto"
+    given-names: "Vincenzo"
+    orcid: "https://orcid.org/0000-0001-5100-9927"
+  - family-names: "Schmidt"
+    given-names: "Christina"
+    orcid: "https://orcid.org/0000-0002-9867-012X"
+  doi: "10.1371/journal.pcbi.1009514"
+  journal: "PLoS Computational Biology"
+  month: 10
+  start: 1009514 # First page number
+  end: 1009535 # Last page number
+  title: "pyActigraphy: Open-source python package for actigraphy data visualization and analysis"
+  issue: 10
+  volume: 17
+  year: 2021
