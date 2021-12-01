@@ -52,6 +52,13 @@ This package is meant to provide a comprehensive set of tools to:
   * Singular Spectrum Analysis (SSA)
   * and much more...
 
+Citation
+========
+
+We are very pleased to announce that the `v1.0 <https://github.com/ghammad/pyActigraphy/releases/tag/v1.0>`_ version of the pyActigraphy package has been published. So, if you find this package useful in your research, please consider citing:
+
+  Hammad G, Reyt M, Beliy N, Baillet M, Deantoni M, Lesoinne A, et al. (2021) pyActigraphy: Open-source python package for actigraphy data visualization and    analysis. PLoS Comput Biol 17(10): e1009514. https://doi.org/10.1371/journal.pcbi.1009514
+
 Code and documentation
 ======================
 
