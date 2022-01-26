@@ -1437,6 +1437,12 @@ class ScoringMixin(object):
             Time series containing the estimated periods of rest (1) and
             activity (0).
 
+        Notes
+        -----
+
+        .. warning:: The performance of this algorithm has been evaluated for
+                     actigraphy data aggregated in 10-min bins [2]_.
+
         References
         ----------
 
@@ -1444,6 +1450,12 @@ class ScoringMixin(object):
                Vetter, C., & Winnebeck, E. C. (2015). Human Activity and Rest
                In Situ. In Methods in Enzymology (Vol. 552, pp. 257-283).
                http://doi.org/10.1016/bs.mie.2014.11.028
+        .. [2] Loock, A., Khan Sullivan, A., Reis, C., Paiva, T., Ghotbi, N.,
+               Pilz, L. K., Biller, A. M., Molenda, C., Vuori‐Brodowski, M. T.,
+               Roenneberg, T., & Winnebeck, E. C. (2021). Validation of the
+               Munich Actimetry Sleep Detection Algorithm for estimating
+               sleep–wake patterns from activity recordings. Journal of Sleep
+               Research, April, 1–12. https://doi.org/10.1111/jsr.13371
 
         Examples
         --------
@@ -1506,6 +1518,12 @@ class ScoringMixin(object):
             Arrays containing the estimated activity onset and offset times,
             respectively.
 
+        Notes
+        -----
+
+        .. warning:: The performance of this algorithm has been evaluated for
+                     actigraphy data aggregated in 10-min bins [2]_.
+
         References
         ----------
 
@@ -1513,6 +1531,12 @@ class ScoringMixin(object):
                Vetter, C., & Winnebeck, E. C. (2015). Human Activity and Rest
                In Situ. In Methods in Enzymology (Vol. 552, pp. 257-283).
                http://doi.org/10.1016/bs.mie.2014.11.028
+        .. [2] Loock, A., Khan Sullivan, A., Reis, C., Paiva, T., Ghotbi, N.,
+               Pilz, L. K., Biller, A. M., Molenda, C., Vuori‐Brodowski, M. T.,
+               Roenneberg, T., & Winnebeck, E. C. (2021). Validation of the
+               Munich Actimetry Sleep Detection Algorithm for estimating
+               sleep–wake patterns from activity recordings. Journal of Sleep
+               Research, April, 1–12. https://doi.org/10.1111/jsr.13371
 
         Examples
         --------
