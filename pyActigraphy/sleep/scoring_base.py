@@ -117,7 +117,6 @@ def _window_convolution(x, scale, window, offset=0.0):
 
 
 def _cole_kripke(data, scale, window, threshold):
-
     """Automatic scoring methods from Cole and Kripke"""
 
     ck = data.rolling(
@@ -128,7 +127,6 @@ def _cole_kripke(data, scale, window, threshold):
 
 
 def _sadeh(data, offset, weights, threshold):
-
     """Activity-Based Sleep-Wake Identification"""
 
     r = data.rolling(11, center=True)
@@ -155,7 +153,6 @@ def _sadeh(data, offset, weights, threshold):
 
 
 def _scripps(data, scale, window, threshold):
-
     """Scripps Clinic algorithm for sleep-wake scoring."""
 
     scripps = data.rolling(
@@ -166,7 +163,6 @@ def _scripps(data, scale, window, threshold):
 
 
 def _oakley(data, window, threshold):
-
     """Oakley's algorithm for sleep-wake scoring."""
     if threshold == 'automatic':
         threshold = _actiware_automatic_threshold(data)
@@ -319,7 +315,6 @@ class ScoringMixin(object):
         threshold=1.0,
         rescoring=True
     ):
-
         r"""Cole&Kripke algorithm for sleep-wake identification.
 
         Algorithm for automatic sleep scoring based on wrist activity,
@@ -421,21 +416,21 @@ class ScoringMixin(object):
         ]
 
         if settings not in available_settings:
-            raise ValueError("CK sleep/wake identification:\n" +
-                             "Required settings: {}\n".format(settings) +
-                             "Available settings are:\n" +
-                             "\n".join(available_settings))
+            raise ValueError("CK sleep/wake identification:\n"
+                             + "Required settings: {}\n".format(settings)
+                             + "Available settings are:\n"
+                             + "\n".join(available_settings))
 
         ck = None
 
         if settings == "mean":
             if pd.Timedelta(self.data.index.freq) > pd.Timedelta('60s'):
                 raise ValueError((
-                    "The sampling frequency of the input data does not allow" +
-                    " the use of the requested settings ({}).\n".format(
-                        settings) +
-                    "For such settings, the sampling frequency should less" +
-                    " than 60 seconds."
+                    "The sampling frequency of the input data does not allow"
+                    + " the use of the requested settings ({}).\n".format(
+                        settings)
+                    + "For such settings, the sampling frequency should less"
+                    + " than 60 seconds."
                     ))
             else:
                 # Compute the resampling factor as the original weights are
@@ -457,11 +452,11 @@ class ScoringMixin(object):
         elif settings == "10sec_max_overlap":
             if pd.Timedelta(self.data.index.freq) > pd.Timedelta('5s'):
                 raise ValueError((
-                    "The sampling frequency of the input data does not allow" +
-                    " the use of the requested settings ({}).\n".format(
-                        settings) +
-                    "For such settings, the sampling frequency should less" +
-                    " than 5 seconds."
+                    "The sampling frequency of the input data does not allow"
+                    + " the use of the requested settings ({}).\n".format(
+                        settings)
+                    + "For such settings, the sampling frequency should less"
+                    + " than 5 seconds."
                     ))
             else:
                 # Resample to 10/2 sec and then sum over a sliding window
@@ -481,11 +476,11 @@ class ScoringMixin(object):
         elif settings == "10sec_max_non_overlap":
             if pd.Timedelta(self.data.index.freq) > pd.Timedelta('10s'):
                 raise ValueError((
-                    "The sampling frequency of the input data does not allow" +
-                    " the use of the requested settings ({}).\n".format(
-                        settings) +
-                    "For such settings, the sampling frequency should less" +
-                    " or equal to 10 seconds."
+                    "The sampling frequency of the input data does not allow"
+                    + " the use of the requested settings ({}).\n".format(
+                        settings)
+                    + "For such settings, the sampling frequency should less"
+                    + " or equal to 10 seconds."
                     ))
             else:
                 # Resample to 10 sec and then sum
@@ -505,11 +500,11 @@ class ScoringMixin(object):
         elif settings == "30sec_max_non_overlap":
             if pd.Timedelta(self.data.index.freq) > pd.Timedelta('30s'):
                 raise ValueError((
-                    "The sampling frequency of the input data does not allow" +
-                    " the use of the requested settings ({}).\n".format(
-                        settings) +
-                    "For such settings, the sampling frequency should less" +
-                    " or equal to 30 seconds."
+                    "The sampling frequency of the input data does not allow"
+                    + " the use of the requested settings ({}).\n".format(
+                        settings)
+                    + "For such settings, the sampling frequency should less"
+                    + " or equal to 30 seconds."
                     ))
             else:
                 # Resample to 30 sec and then sum
@@ -539,7 +534,6 @@ class ScoringMixin(object):
         weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
         threshold=0.0
     ):
-
         r"""Sadeh algorithm for sleep identification
 
         Algorithm for automatic sleep scoring based on wrist activity,
@@ -631,7 +625,6 @@ class ScoringMixin(object):
             ], np.float),
         threshold=1.0
     ):
-
         r"""Scripps Clinic algorithm for sleep-wake identification.
 
         Algorithm for automatic sleep scoring based on wrist activity,
@@ -698,7 +691,6 @@ class ScoringMixin(object):
         self,
         threshold=40
     ):
-
         r"""Oakley's algorithm for sleep/wake scoring.
 
         Algorithm for automatic sleep/wake scoring based on wrist activity,
@@ -857,9 +849,9 @@ class ScoringMixin(object):
             ], np.float)
         else:
             raise ValueError(
-                'Oakley\'s algorithm is not defined for data' +
-                'acquired with a sampling frequency of {}.'.format(freq) +
-                'Accepted frequencies are: {}'.format(
+                'Oakley\'s algorithm is not defined for data '
+                + 'acquired with a sampling frequency of {}. '.format(freq)
+                + 'Accepted frequencies are: {}'.format(
                     ', '.join(['15sec', '30sec', '60sec', '120sec'])
                 )
             )
@@ -878,7 +870,6 @@ class ScoringMixin(object):
         *args,
         **kwargs
     ):
-
         r"""Sleep over Daytime
 
         Quantify the volume of epochs identified as sleep over daytime (SoD),
@@ -988,7 +979,6 @@ class ScoringMixin(object):
         *args,
         **kwargs
     ):
-
         r"""Fraction of Sleep over Daytime
 
         Fractional volume of epochs identified as sleep over daytime (SoD),
@@ -1089,7 +1079,6 @@ class ScoringMixin(object):
         estimate_zeta=False, seq_length_max=100,
         verbose=False
     ):
-
         r"""Crespo algorithm for activity/rest identification
 
         Algorithm for automatic identification of activity-rest periods based
@@ -1332,7 +1321,6 @@ class ScoringMixin(object):
         estimate_zeta=False, seq_length_max=100,
         verbose=False
     ):
-
         """Automatic identification of activity onset/offset times, based on
         the Crespo algorithm.
 
@@ -1412,7 +1400,7 @@ class ScoringMixin(object):
         threshold=0.15,
         min_seed_period='30Min',
         max_test_period='12h',
-        n_succ=3
+        r_consec_below='30Min'
     ):
         """Automatic sleep detection.
 
@@ -1438,9 +1426,10 @@ class ScoringMixin(object):
         max_test_period : str, optional
             Maximal period of the test series.
             Default is '12h'
-        n_succ : int, optional
-            Number of successive elements to consider when searching for the
-            maximum correlation peak.
+        r_consec_below : str, optional
+            Time range to consider, past the potential correlation peak when
+            searching for the maximum correlation peak.
+            Default is '30Min'.
 
         Returns
         -------
@@ -1468,7 +1457,7 @@ class ScoringMixin(object):
             threshold=threshold,
             min_seed_period=min_seed_period,
             max_test_period=max_test_period,
-            n_succ=n_succ
+            r_consec_below=r_consec_below
         )
         return rbg
 
