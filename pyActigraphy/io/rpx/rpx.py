@@ -165,6 +165,8 @@ class RawRPX(BaseRaw):
         # resample the data
         index_data = index_data.asfreq(freq=pd.Timedelta(frequency))
 
+        # Off-wrist status
+        self.__off_wrist = self.__extract_rpx_data(index_data, "Off_Wrist")
         # Sleep/Wake scoring
         self.__sleep_wake = self.__extract_rpx_data(index_data, 'Sleep/Wake')
 
@@ -193,13 +195,39 @@ class RawRPX(BaseRaw):
             period=period,
             frequency=pd.Timedelta(frequency),
             data=index_data[columns[self.language]['Activity']],
-            light=self.__extract_rpx_data(index_data, 'White_light')
+            light=self.__extract_rpx_light(index_data)
+            # self.__extract_rpx_data(index_data, 'White_light')
         )
 
     @property
     def language(self):
         r"""Language (ENG_UK, FR, GER, etc) used to set up the device"""
         return self.__language
+
+    @property
+    def white_light(self):
+        r"""White light levels (in lux.)"""
+        return self.__extract_rpx_data(self.light, "White_light")
+
+    @property
+    def red_light(self):
+        r"""Red light levels (in microwatt per cm2.)"""
+        return self.__extract_rpx_data(self.light, "Red_light")
+
+    @property
+    def green_light(self):
+        r"""Green light levels (in microwatt per cm2.)"""
+        return self.__extract_rpx_data(self.light, "Green_light")
+
+    @property
+    def blue_light(self):
+        r"""Blue light levels (in microwatt per cm2.)"""
+        return self.__extract_rpx_data(self.light, "Blue_light")
+
+    @property
+    def off_wrist(self):
+        r"""Off-wrist status (1 : device not wrist-worn)"""
+        return self.__off_wrist
 
     @property
     def sleep_wake(self):
@@ -299,6 +327,22 @@ class RawRPX(BaseRaw):
             col_name = None
 
         return data.loc[:, col_name] if col_name in data.columns else None
+
+    def __extract_rpx_light(self, data):
+
+        # List available light columns
+        light_cols = [
+            v for k, v in columns[self.language].items() if 'light' in k
+        ]
+        available_light_cols = list(
+            set(data.columns).intersection(light_cols)
+        )
+
+        # If list not empty:
+        if available_light_cols:
+            return data.loc[:, available_light_cols]
+        else:
+            return None
 
     def __check_rpx_header(self, fname, cols_available, cols_required):
         if (
