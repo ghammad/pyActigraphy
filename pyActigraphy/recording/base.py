@@ -23,6 +23,9 @@ class BaseRecording():
         uuid,
         data,
         frequency,
+        start_time=None,
+        stop_time=None,
+        period=None,
         mask=None
     ):
 
@@ -35,9 +38,9 @@ class BaseRecording():
 
         # Optional fields
         # User-specified start/stop/period
-        self.__start_time = None
-        self.__stop_time = None
-        self.__period = None
+        self.__start_time = start_time
+        self.__stop_time = stop_time
+        self.__period = period
 
         # Mask-related fields
         self.__mask = mask
