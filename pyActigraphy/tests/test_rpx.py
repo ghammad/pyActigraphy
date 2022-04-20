@@ -10,6 +10,9 @@ data_dir = op.join(op.dirname(op.abspath(FILE)), 'data')
 rpx_path_eng = op.join(data_dir, 'test_sample_rpx_eng.csv')
 rpx_path_fr = op.join(data_dir, 'test_sample_rpx_fr.csv')
 rpx_path_ger = op.join(data_dir, 'test_sample_rpx_ger_no_light.csv')
+rpx_path_ger_with_light = op.join(
+    data_dir, 'test_sample_rpx_ger_with_light.csv'
+)
 
 # read RPX ENG with default parameters
 rawRPX_ENG = pyActigraphy.io.read_raw_rpx(
@@ -26,6 +29,8 @@ rawRPX_FR_NaN = pyActigraphy.io.read_raw_rpx(
 # read RPX GER with default parameters
 rawRPX_GER = pyActigraphy.io.read_raw_rpx(
     rpx_path_ger, language='GER', drop_na=False)
+rawRPX_GER_with_light = pyActigraphy.io.read_raw_rpx(
+    rpx_path_ger_with_light, language='GER', drop_na=False)
 
 
 def test_read_raw_rpx_eng_name():
@@ -127,3 +132,16 @@ def test_read_raw_rpx_ger_data():
 def test_read_raw_rpx_ger_no_light():
 
     assert rawRPX_GER.light is None
+
+
+def test_read_raw_rpx_ger_with_light_shape():
+
+    assert rawRPX_GER_with_light.light.shape == (20160, 4)
+
+
+def test_read_raw_rpx_ger_with_light():
+
+    assert rawRPX_GER_with_light.white_light.shape == \
+           rawRPX_GER_with_light.red_light.shape == \
+           rawRPX_GER_with_light.blue_light.shape == \
+           rawRPX_GER_with_light.green_light.shape
