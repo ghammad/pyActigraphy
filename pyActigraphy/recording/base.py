@@ -188,7 +188,7 @@ class BaseRecording():
         if rsfreq is None:
             rsdata = self.data
         else:
-            rsdata = _resampled_data(self.data, freq=rsfreq, agg=agg)
+            rsdata = _resampled_data(self.data, rsfreq=rsfreq, agg=agg)
 
         return _binarized_data(rsdata, threshold)
 
