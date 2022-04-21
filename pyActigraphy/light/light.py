@@ -55,11 +55,3 @@ class LightRecording(LightMetricsMixin, BaseRecording):
             )
 
         return self.data.loc[:, channel]
-
-    # def resampled_light(self, channel, freq, binarize, threshold):
-    #
-    #     rdata = self.resampled_data(freq, agg='sum')
-    #     if binarize:
-    #         rdata = self.binarized_data(threshold=threshold)
-    #     else:
-    #         rdata = self.data
