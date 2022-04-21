@@ -11,7 +11,7 @@ def _binarized_data(data, threshold=0):
 
     Parameters
     ----------
-    data: pd.Series
+    data: pd.DataFrame
         The data to binarize.
     threshold: int, optional
         Threshold used to binarize the data. Set output value to 1 if initial
@@ -19,13 +19,11 @@ def _binarized_data(data, threshold=0):
 
     Returns
     -------
-    bin : pd.Series
+    bin : pd.DataFrame
         Binarized time series
     """
-    return pd.Series(
-        np.where(data > threshold, 1, 0),
-        index=data.index
-    ).where(data.notna(), np.nan)
+
+    return (data > threshold).where(data.notna(), np.nan)
 
 
 def _resampled_data(data, rsfreq, agg='sum'):
