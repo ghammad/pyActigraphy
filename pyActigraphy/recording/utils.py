@@ -23,7 +23,7 @@ def _binarized_data(data, threshold=0):
         Binarized time series
     """
 
-    return (data > threshold).where(data.notna(), np.nan)
+    return (data > threshold).where(data.notna(), np.nan).astype(float)
 
 
 def _resampled_data(data, rsfreq, agg='sum'):
