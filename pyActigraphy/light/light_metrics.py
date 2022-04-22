@@ -37,8 +37,8 @@ class LightMetricsMixin(object):
         channel,
         rsfreq='5min',
         cyclic=False,
-        binarize=True,
-        threshold=4,
+        binarize=False,
+        threshold=None,
         time_origin=None
     ):
         r"""Average daily light profile
@@ -60,10 +60,11 @@ class LightMetricsMixin(object):
             Default is False.
         binarize: bool, optional
             If set to True, the data are binarized.
-            Default is True.
+            Default is False.
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
+            Default is None.
         time_origin: str or pd.Timedelta, optional
             If not None, origin of the time axis for the daily profile.
             Original time bins are translated as time delta with respect to
@@ -146,8 +147,8 @@ class LightMetricsMixin(object):
         channel=None,
         start_time=None,
         stop_time=None,
-        binarize=True,
-        threshold=4,
+        binarize=False,
+        threshold=None,
         time_origin=None
     ):
         r"""AUC of the average daily light profile
@@ -169,10 +170,11 @@ class LightMetricsMixin(object):
             Default is None.
         binarize: bool, optional
             If set to True, the data are binarized.
-            Default is True.
+            Default is False.
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
+            Default is None.
         time_origin: str or pd.Timedelta, optional
             If not None, origin of the time axis for the daily profile.
             Original time bins are translated as time delta with respect to
@@ -288,7 +290,7 @@ class LightMetricsMixin(object):
             )
         else:
             return data_mask.between_time(
-                start_time=start_time, end_time=stop_time, inclusive='left'
+                start_time=start_time, end_time=stop_time, include_end=False
             )
 
     def light_exposure_level(
