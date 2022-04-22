@@ -23,9 +23,6 @@ class BaseRecording():
         uuid,
         data,
         frequency,
-        start_time=None,
-        stop_time=None,
-        period=None,
         mask=None
     ):
 
@@ -38,9 +35,9 @@ class BaseRecording():
 
         # Optional fields
         # User-specified start/stop/period
-        self.__start_time = start_time
-        self.__stop_time = stop_time
-        self.__period = period
+        self.__start_time = None
+        self.__stop_time = None
+        self.__period = None
 
         # Mask-related fields
         self.__mask = mask
@@ -119,9 +116,9 @@ class BaseRecording():
         self.__period = pd.Timedelta(value)
         # Optionally compute start or stop time
         if self.__start_time is not None:
-            self.stop_time = self.__start_time + self.__period
+            self.__stop_time = self.__start_time + self.__period
         elif self.__stop_time is not None:
-            self.start_time = self.__stop_time - self.__period
+            self.__start_time = self.__stop_time - self.__period
 
     def reset_times(self):
         r"""Reset start and stop times, as well as the period of the recording.
@@ -129,17 +126,6 @@ class BaseRecording():
         self.__start_time = None
         self.__stop_time = None
         self.__period = None
-
-    # def check_times(self):
-    #     r"""Check the start time, the stop time and the period of the
-    #     recording.
-    #     If, at least, two out of the three parameters are present,
-    #     it calculates the third one and returns True. False otherwise.
-    #     """
-    #     if (self.__start_time is not None) and ()
-    #     self.__start_time = None
-    #     self.__stop_time = None
-    #     self.__period = None
 
     @property
     def frequency(self):
@@ -179,10 +165,12 @@ class BaseRecording():
             data = self.raw_data
         return data[self.start_time:self.stop_time]
 
+    # TODO: @lru_cache(maxsize=6) ???
     def resampled_data(self, rsfreq, agg='sum'):
 
         return _resampled_data(self.data, rsfreq=rsfreq, agg=agg)
 
+    # TODO: @lru_cache(maxsize=6) ???
     def binarized_data(self, threshold, rsfreq=None, agg='sum'):
 
         if rsfreq is None:
@@ -191,45 +179,3 @@ class BaseRecording():
             rsdata = _resampled_data(self.data, rsfreq=rsfreq, agg=agg)
 
         return _binarized_data(rsdata, threshold)
-
-    # TODO: @lru_cache(maxsize=6) ???
-    # def resampled_data(self, freq, binarize=False, threshold=0):
-    #     r"""Data resampled at the specified frequency.
-    #     If mask_inactivity is True, the `mask` is used to filter inactive data.
-    #     """
-    #     if binarize is False:
-    #         data = self.data
-    #     else:
-    #         data = self.binarized_data(threshold)
-    #
-    #     if freq is None:
-    #         return data
-    #     elif to_offset(freq).delta < self.frequency:
-    #         warnings.warn(
-    #             'Resampling frequency lower than the acquisition'
-    #             + ' frequency. Returning original data.',
-    #             UserWarning
-    #         )
-    #         return data
-    #     elif to_offset(freq).delta == self.frequency:
-    #         return data
-    #
-    #     resampled_data = data.resample(freq).sum()
-    #     if self.mask_inactivity is True:
-    #         if self.mask is None:
-    #             warnings.warn(
-    #                 (
-    #                     'Mask inactivity set to True but no mask could be'
-    #                     ' found.\n Please create a mask by using the '
-    #                     '"create_inactivity_mask" function.'
-    #                 ),
-    #                 UserWarning
-    #             )
-    #             return resampled_data
-    #         elif self.exclude_if_mask:
-    #             resampled_mask = self.mask.resample(freq).min()
-    #         else:
-    #             resampled_mask = self.mask.resample(freq).max()
-    #         return resampled_data.where(resampled_mask > 0)
-    #     else:
-    #         return resampled_data
