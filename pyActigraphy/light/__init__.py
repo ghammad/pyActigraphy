@@ -22,10 +22,13 @@
 """IO module for light data."""
 
 from .light import LightRecording
+from .gendevice import GenLightDevice
+from .gendevice import read_raw_gld
 # from .light_metrics import LightMetricsMixin
 
 
 __all__ = [
     "LightRecording",
-    #    "LightMetricsMixin"
+    "GenLightDevice",
+    "read_raw_gld"
 ]
