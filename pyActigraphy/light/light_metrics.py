@@ -93,7 +93,7 @@ class LightMetricsMixin(object):
                 agg='sum'
             )
         elif rsfreq is not None:
-            data = self.resampled_data(rsfreq=rsfreq)
+            data = self.resampled_data(rsfreq=rsfreq, agg='sum')
         else:
             data = self.data
 
