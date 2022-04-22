@@ -11,6 +11,10 @@ class GenLightDevice(LightRecording):
     ----------
     input_fname: str
         Path to the file.
+    channels: list of str, optional
+        Select channels to read from the input file.
+        If the list is empty, all channels are read.
+        Default is [].
     rsfreq: str, optional
         Resampling frequency. Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
@@ -33,6 +37,7 @@ class GenLightDevice(LightRecording):
     def __init__(
         self,
         input_fname,
+        channels=[],
         rsfreq=None,
         agg='mean',
         start_time=None,
@@ -117,14 +122,14 @@ class GenLightDevice(LightRecording):
             uuid=uuid,
             data=data[[
                 col for col in data.columns
-                if col not in [
+                if (col not in [
                     'CCT in K', 'Duv', 'Tilt in °', 'TriggeredByUser'
-                ]
+                ]) and ((col in channels) if channels else True)
             ]],
             frequency=data.index.freq.delta,
-            start_time=start_time,
-            period=period
         )
+        self.start_time = start_time
+        self.period = period
 
     @classmethod
     def __extract_from_data(cls, data, key):
@@ -156,11 +161,14 @@ class GenLightDevice(LightRecording):
 
 def read_raw_gld(
     input_fname,
+    channels=[],
     rsfreq=None,
     agg='mean',
     start_time=None,
     period=None,
     dayfirst=True
+
+
 ):
     r"""Reader function for generic light device file.
 
@@ -168,6 +176,10 @@ def read_raw_gld(
     ----------
     input_fname: str
         Path to the file.
+    channels: list of str, optional
+        Select channels to read from the input file.
+        If the list is empty, all channels are read.
+        Default is [].
     rsfreq: str, optional
         Resampling frequency. Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
@@ -194,6 +206,7 @@ def read_raw_gld(
 
     return GenLightDevice(
         input_fname,
+        channels=channels,
         rsfreq=rsfreq,
         agg=agg,
         start_time=start_time,
