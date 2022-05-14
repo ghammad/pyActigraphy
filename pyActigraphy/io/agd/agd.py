@@ -84,16 +84,17 @@ class RawAGD(BaseRaw):
                 self.capsense = capsense.asfreq(capsense.index.inferred_freq)
             else:
                 warnings.warn(
-                    'Acquisition frequency for the wearing sensor data ' +
-                    '(capsense) could neither be retrieved nor inferred from ' +
-                    'the data.\n Use this information at your own risk',
+                    'Acquisition frequency for the wearing sensor data '
+                    + '(capsense) could neither be retrieved nor inferred from'
+                    + ' the data.\n Use this information at your own risk',
                     UserWarning
                 )
                 self.capsense = capsense
         except Exception as err:
             # TODO: specialize exception (eg;sqlite3.OperationalError)
             warnings.warn(
-                'Could not find wearing sensor data (capsense): {}'.format(err),
+                'Could not find wearing sensor data (capsense): {}'.format(
+                    err),
                 UserWarning
             )
             self.capsense = None
@@ -111,9 +112,9 @@ class RawAGD(BaseRaw):
 
         # calculate the magnitude of the acceleration vector.
         data['mag'] = np.sqrt(
-            data['axis1']*data['axis1'] +
-            data['axis2']*data['axis2'] +
-            data['axis3']*data['axis3']
+            data['axis1']*data['axis1']
+            + data['axis2']*data['axis2']
+            + data['axis3']*data['axis3']
         )
 
         if start_time is not None:
@@ -129,6 +130,9 @@ class RawAGD(BaseRaw):
             period = stop_time - start_time
 
         data = data.loc[start_time:stop_time]
+
+        # Extract position info:
+        self.__position = data.filter(regex='incline*', axis='columns')
 
         # call __init__ function of the base class
         super().__init__(
@@ -146,12 +150,70 @@ class RawAGD(BaseRaw):
         # Close sqlite3 connection
         connection.close()
 
+    def __extract_position(self, column):
+        if column in self.__position.columns:
+            return self.__position.loc[:, column]
+        else:
+            return None
+
     @staticmethod
     def __to_timestamps(ticks):
         return pd.to_datetime(
             (ticks/10000000) - 62135596800,
             unit='s'
         )
+
+    @property
+    def inclineOff(self):
+        r"""Hourly positional information: inclineOff """
+        return self.__extract_position(self, 'inclineOff')
+
+    @property
+    def inclineStanding(self):
+        r"""Hourly positional information: inclineStanding """
+        return self.__extract_position(self, 'inclineStanding')
+
+    @property
+    def inclineSitting(self):
+        r"""Hourly positional information: inclineSitting """
+        return self.__extract_position(self, 'inclineSitting')
+
+    @property
+    def inclineLying(self):
+        r"""Hourly positional information: inclineLying """
+        return self.__extract_position(self, 'inclineLying')
+
+    def inclinePosition(
+        self,
+        pos_map={
+            'inclineOff': -1,
+            'inclineLying': 0,
+            'inclineSitting': 1,
+            'inclineStanding': 2
+        }
+    ):
+        r"""Reader function for raw AWD file.
+
+        Parameters
+        ----------
+        pos_map: dict, optional
+            Positional information map.
+            Can be used to turn positional info (str) into int, for example.
+            Set to None to keep original information.
+            Default mapping is:
+            * 'inclineOff': -1
+            * 'inclineLying': 0
+            * 'inclineSitting': 1
+            * 'inclineStanding': 2
+
+        Returns
+        -------
+        pos : Pandas.Series
+            Time series with positional information.
+        """
+        pos = self.__position.idxmax(axis=1)
+
+        return pos.map(pos_map) if pos_map is not None else pos
 
 
 def read_raw_agd(
