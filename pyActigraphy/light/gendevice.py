@@ -22,6 +22,9 @@ class GenLightDevice(LightRecording):
     agg: str, optional
         Aggregation function to use when resampling.
         Default is 'mean'.
+    log10_transform: bool, optional
+        If set to True, data are log10-transformed.
+        Default is True.
     start_time: datetime-like, optional
         Read data from this time.
         Default is None.
@@ -40,6 +43,7 @@ class GenLightDevice(LightRecording):
         channels=[],
         rsfreq=None,
         agg='mean',
+        log10_transform=True,
         start_time=None,
         period=None,
         dayfirst=True
@@ -116,16 +120,21 @@ class GenLightDevice(LightRecording):
             data, 'TriggeredByUser'
         )
 
+        # Drop metadata
+        data.drop(
+            columns=['CCT in K', 'Duv', 'Tilt in °', 'TriggeredByUser'],
+            inplace=True,
+            errors='raise'  # Might change to ignore if input file have optional columns
+        )
+
         # call __init__ function of the base class
         super().__init__(
             name=os.path.basename(input_fname),
             uuid=uuid,
-            data=data[[
-                col for col in data.columns
-                if (col not in [
-                    'CCT in K', 'Duv', 'Tilt in °', 'TriggeredByUser'
-                ]) and ((col in channels) if channels else True)
-            ]],
+            data=data[
+                [col for col in data.columns
+                 if ((col in channels) if channels else True)]
+            ],
             frequency=data.index.freq.delta,
         )
         self.start_time = start_time
@@ -164,6 +173,7 @@ def read_raw_gld(
     channels=[],
     rsfreq=None,
     agg='mean',
+    log10_transform=True,
     start_time=None,
     period=None,
     dayfirst=True
@@ -175,33 +185,33 @@ def read_raw_gld(
     Parameters
     ----------
     input_fname: str
-        Path to the file.
+    Path to the file.
     channels: list of str, optional
-        Select channels to read from the input file.
-        If the list is empty, all channels are read.
-        Default is [].
+    Select channels to read from the input file.
+    If the list is empty, all channels are read.
+    Default is [].
     rsfreq: str, optional
-        Resampling frequency. Cf. #timeseries-offset-aliases in
-        <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
-        Default is None.
+    Resampling frequency. Cf. #timeseries-offset-aliases in
+    <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+    Default is None.
     agg: str, optional
-        Aggregation function to use when resampling.
-        Default is 'mean'.
+    Aggregation function to use when resampling.
+    Default is 'mean'.
     start_time: datetime-like, optional
-        Read data from this time.
-        Default is None.
+    Read data from this time.
+    Default is None.
     period: str, optional
-        Length of the read data.
-        Cf. #timeseries-offset-aliases in
-        <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
-        Default is None (i.e all the data).
+    Length of the read data.
+    Cf. #timeseries-offset-aliases in
+    <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+    Default is None (i.e all the data).
     dayfirst: bool, optional
-        If set to True, the timestamps are parsed as DD/MM/YYYY
+    If set to True, the timestamps are parsed as DD/MM/YYYY
 
     Returns
     -------
     raw : Instance of GenLightDevice
-        An object containing raw GLD data
+    An object containing raw GLD data
     """
 
     return GenLightDevice(
@@ -209,6 +219,7 @@ def read_raw_gld(
         channels=channels,
         rsfreq=rsfreq,
         agg=agg,
+        log10_transform=log10_transform,
         start_time=start_time,
         period=period,
         dayfirst=dayfirst
