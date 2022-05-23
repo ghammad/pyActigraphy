@@ -336,12 +336,66 @@ class LightMetricsMixin(object):
 
         return levels()
 
-    def light_exposure_time(
+    def summary_statistics_per_time_bin(
+        self,
+        bins='24h',
+        agg_func=['mean', 'median', 'sum', 'std', 'min', 'max']
+    ):
+        r"""Summary statistics.
+
+        Calculate summary statistics (ex: mean, median, etc) according to a
+        user-defined (regular or arbitrary) binning.
+
+        Parameters
+        ----------
+        bins: str or list of tuples, optional
+            If set to a string, bins is used to define a regular binning where
+            every bin is of length "bins". Ex: "2h".
+            Otherwise, the list of 2-tuples is used to define an arbitrary
+            binning. Ex: [('2000-01-01 00:00:00','2000-01-01 11:59:00'),
+                          ('2000-01-01 12:00:00','2000-01-02 23:59:00')]
+            Default is '24h'.
+        agg_func: list, optional
+            List of aggregation functions to be used on every bin.
+            Default is ['mean', 'median', 'sum', 'std', 'min', 'max'].
+
+        Returns
+        -------
+        ss : pd.DataFrame
+            A pandas DataFrame with summary statistics per channel.
+        """
+        if isinstance(bins, str):
+            summary_stats = self.data.resample(bins).agg(agg_func)
+        elif isinstance(bins, list):
+            df_col = []
+            for idx, (start, end) in enumerate(bins):
+                df_bins = self.data.loc[start:end, :].apply(
+                    agg_func
+                ).pivot_table(columns=agg_func)
+                channels = {}
+                for ch in df_bins.index:
+                    channels[ch] = df_bins.loc[df_bins.index == ch]
+                    channels[ch] = channels[ch].rename(
+                        index={ch: idx},
+                        inplace=False
+                    )
+                    channels[ch] = channels[ch].loc[:, agg_func]
+                df_col.append(
+                    pd.concat(
+                        channels,
+                        axis=1
+                    )
+                )
+            summary_stats = pd.concat(df_col)
+
+        return summary_stats
+
+    def TAT(
         self, threshold=None, start_time=None, stop_time=None, oformat=None
     ):
-        r"""Light exposure time
+        r"""Time above light threshold.
 
-        Calculate the total light exposure time.
+        Calculate the total light exposure time above the threshold.
 
         Parameters
         ----------
@@ -367,7 +421,7 @@ class LightMetricsMixin(object):
 
         Returns
         -------
-        levels : pd.Series
+        tat : pd.Series
             A pandas Series with aggreagted light exposure levels per channel
         """
         available_formats = [None, 'minute', 'timedelta']
@@ -384,11 +438,74 @@ class LightMetricsMixin(object):
         ).count()
 
         if oformat == 'minute':
-            results = light_exposure_counts * \
+            tat = light_exposure_counts * \
                 self.data.index.freq.delta/pd.Timedelta('1min')
         elif oformat == 'timedelta':
-            results = light_exposure_counts * self.data.index.freq.delta
+            tat = light_exposure_counts * self.data.index.freq.delta
         else:
-            results = light_exposure_counts
+            tat = light_exposure_counts
 
-        return results
+        return tat
+
+    def VAT(self, threshold=None):
+        r"""Values above light threshold.
+
+        Returns the light exposure values above the threshold.
+
+        Parameters
+        ----------
+        threshold: float, optional
+            If not set to None, discard data below threshold before computing
+            exposure levels.
+            Default is None.
+
+        Returns
+        -------
+        vat : pd.Series
+            A pandas Series with light exposure levels per channel
+        """
+
+        return self._light_exposure(
+            threshold=threshold,
+            start_time=None,
+            stop_time=None
+        )
+
+    def get_light_extremum(self, extremum):
+        r"""Light extremum.
+
+        Return the index and the value of the requested extremum (min or max).
+
+        Parameters
+        ----------
+        extremum: str
+            Name of the extremum.
+            Available: 'min' or 'max'.
+
+        Returns
+        -------
+        ext : pd.DataFrame
+            A pandas DataFrame with extremum info per channel.
+        """
+        extremum_list = ['min', 'max']
+        if extremum not in extremum_list:
+            raise ValueError(
+                'Requested extremum ({}) not available.'.format(extremum)
+                + ' Available options are:\n- min\n- max'
+            )
+        extremum_att = 'idxmax' if extremum == 'max' else 'idxmin'
+
+        extremum_per_ch = []
+        for ch in self.data.columns:
+            index_ext = getattr(self.data.loc[:, ch], extremum_att)()
+            extremum_per_ch.append(
+                pd.Series(
+                    {
+                        'channel': ch,
+                        'index': index_ext,
+                        'value': self.data.loc[index_ext, ch]
+                    }
+                )
+            )
+
+        return pd.concat(extremum_per_ch, axis=1).T
