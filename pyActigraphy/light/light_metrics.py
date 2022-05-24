@@ -21,6 +21,7 @@
 ############################################################################
 import pandas as pd
 import re
+from ..metrics.metrics import _lmx
 from ..utils.utils import _average_daily_activity
 from ..utils.utils import _shift_time_axis
 
@@ -471,6 +472,57 @@ class LightMetricsMixin(object):
             stop_time=None
         )
 
+    def MLiT(self, threshold):
+        r"""Mean light timing.
+
+        Mean light timing above threshold, MLiT^C.
+
+
+        Parameters
+        ----------
+        threshold: float
+            Threshold value.
+
+        Returns
+        -------
+        MLiT : pd.DataFrame
+            A pandas DataFrame with MLiT^C per channel.
+
+        Notes
+        -----
+
+        The MLiT variable is defined in ref [1]_:
+
+        .. math::
+
+            MLiT^C = \frac{\sum_{j}^{m}\sum_{k}^{n} j\times I^{C}_{jk}}{\sum_{j}^{m}\sum_{k}^{n} I^{C}_{jk}}
+
+        where :math:`I^{C}_{jk}` is equal to 1 if the light level is higher
+        than the threshold C, m is the total number of epochs per day and n is
+        the number of days covered by the data.
+
+        References
+        ----------
+
+        .. [1] Reid K.J., Santostasi G., Baron K.G., Wilson J., Kang J.,
+               Zee P.C., Timing and Intensity of Light Correlate with Body
+               Weight in Adults. PLoS ONE 9(4): e92251.
+               https://doi.org/10.1371/journal.pone.0092251
+
+        """
+
+        # Binarized data and convert to float in order to handle 'DivideByZero'
+        I_jk = self.binarized_data(threshold=threshold).astype('float64')
+
+        # Normalize each epoch to midnight.
+        Y_j = self.data.index-self.data.index.normalize()
+        # Convert to indices.
+        Y_j /= pd.Timedelta(I_jk.index.freq)
+
+        MLiT = I_jk.multiply(Y_j, axis=0).sum() / I_jk.sum()
+
+        return MLiT
+
     def get_light_extremum(self, extremum):
         r"""Light extremum.
 
@@ -509,3 +561,58 @@ class LightMetricsMixin(object):
             )
 
         return pd.concat(extremum_per_ch, axis=1).T
+
+    def LMX(self, length='5h', lowest=True):
+        r"""Least or Most light period of length X
+
+        Onsert and mean hourly light exposure levels during the X least or most
+        bright hours of the day.
+
+        Parameters
+        ----------
+        length: str, optional
+            Period length.
+            Default is '5h'.
+        lowest: bool, optional
+            If lowest is set to True, the period of least light exposure is
+            considered. Otherwise, consider the period of most light exposure.
+            Default is True.
+
+        Returns
+        -------
+        lmx_t, lmx: (pd.Timedelta, float)
+            Onset and mean hourly light exposure level.
+
+        Notes
+        -----
+
+        The LMX variable is derived from the L5 and M10 defined in [1]_ as the
+        mean hourly activity levels during the 5/10 least/most active hours.
+
+        References
+        ----------
+
+        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.
+               (1997). Long-Term Fitness Training Improves the Circadian
+               Rest-Activity Rhythm in Healthy Elderly Males.
+               Journal of Biological Rhythms, 12(2), 146–156.
+               http://doi.org/10.1177/074873049701200206
+
+        """
+
+        epoch_per_hour = pd.Timedelta('1h')/self.data.index.freq
+
+        lmx_per_ch = []
+        for ch in self.data.columns:
+            lmx_ts, lmx = _lmx(self.data.loc[:, ch], length, lowest=lowest)
+            lmx_per_ch.append(
+                pd.Series(
+                    {
+                        'channel': ch,
+                        'index': lmx_ts,
+                        'value': lmx*epoch_per_hour
+                    }
+                )
+            )
+
+        return pd.concat(lmx_per_ch, axis=1).T
