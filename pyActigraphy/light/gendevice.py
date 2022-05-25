@@ -14,7 +14,7 @@ class GenLightDevice(LightRecording):
     channels: list of str, optional
         Select channels to read from the input file.
         If the list is empty, all channels are read.
-        Default is [].
+        Default is \[\].
     rsfreq: str, optional
         Resampling frequency. Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
@@ -124,7 +124,7 @@ class GenLightDevice(LightRecording):
         data.drop(
             columns=['CCT in K', 'Duv', 'Tilt in °', 'TriggeredByUser'],
             inplace=True,
-            errors='raise'  # Might change to ignore if input file have optional columns
+            errors='raise'  # Change to ignore optional columns
         )
 
         # call __init__ function of the base class
@@ -189,7 +189,7 @@ def read_raw_gld(
     channels: list of str, optional
     Select channels to read from the input file.
     If the list is empty, all channels are read.
-    Default is [].
+    Default is \[\].
     rsfreq: str, optional
     Resampling frequency. Cf. #timeseries-offset-aliases in
     <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
