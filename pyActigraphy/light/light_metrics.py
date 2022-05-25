@@ -22,6 +22,8 @@
 import pandas as pd
 import re
 from ..metrics.metrics import _lmx
+from ..metrics.metrics import _interdaily_stability
+from ..metrics.metrics import _intradaily_variability
 from ..utils.utils import _average_daily_activity
 from ..utils.utils import _shift_time_axis
 
@@ -353,12 +355,11 @@ class LightMetricsMixin(object):
             If set to a string, bins is used to define a regular binning where
             every bin is of length "bins". Ex: "2h".
             Otherwise, the list of 2-tuples is used to define an arbitrary
-            binning. Ex: [('2000-01-01 00:00:00','2000-01-01 11:59:00'),
-                          ('2000-01-01 12:00:00','2000-01-02 23:59:00')]
+            binning. Ex: \[('2000-01-01 00:00:00','2000-01-01 11:59:00')\].
             Default is '24h'.
         agg_func: list, optional
             List of aggregation functions to be used on every bin.
-            Default is ['mean', 'median', 'sum', 'std', 'min', 'max'].
+            Default is \['mean', 'median', 'sum', 'std', 'min', 'max'\].
 
         Returns
         -------
@@ -495,7 +496,7 @@ class LightMetricsMixin(object):
 
         .. math::
 
-            MLiT^C = \frac{\sum_{j}^{m}\sum_{k}^{n} j\times I^{C}_{jk}}{\sum_{j}^{m}\sum_{k}^{n} I^{C}_{jk}}
+            MLiT^C = \frac{\sum_{j}^{m}\sum_{k}^{n} j\times I^{C}_{jk}}{\sum_{j}^{m}\sum_{k}^{n} I^{C}_{jk}} # noqa
 
         where :math:`I^{C}_{jk}` is equal to 1 if the light level is higher
         than the threshold C, m is the total number of epochs per day and n is
@@ -616,3 +617,163 @@ class LightMetricsMixin(object):
             )
 
         return pd.concat(lmx_per_ch, axis=1).T
+
+    def _RAR(self, rar_func, rar_name, binarize=False, threshold=0):
+        r""" Generic RAR function
+
+        Apply a generic RAR function to the light data, per channel.
+        """
+        if binarize:
+            data = self.binarized_data(threshold=threshold)
+        else:
+            data = self.data
+
+        rar_per_ch = []
+        for ch in self.data.columns:
+            rar = rar_func(data.loc[:, ch])
+            rar_per_ch.append(
+                pd.Series(
+                    {
+                        'channel': ch,
+                        rar_name: rar
+                    }
+                )
+            )
+
+        return pd.concat(rar_per_ch, axis=1).T
+
+    def IS(self, binarize=False, threshold=0):
+        r"""Interdaily stability
+
+        The Interdaily stability (IS) quantifies the repeatibilty of the
+        daily light exposure pattern over each day contained in the activity
+        recording.
+
+        Parameters
+        ----------
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is False.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 0.
+
+        Returns
+        -------
+        is : pd.DataFrame
+            A pandas DataFrame with IS per channel.
+
+
+        Notes
+        -----
+
+        This variable is derived from the original IS variable defined in
+        ref [1]_ as:
+
+        .. math::
+
+            IS = \frac{d^{24h}}{d^{1h}}
+
+        with:
+
+        .. math::
+
+            d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}
+
+        where :math:`x_{i}` is the number of active (counts higher than a
+        predefined threshold) minutes during the :math:`i^{th}` period,
+        :math:`\bar{x}` is the mean of all data and :math:`n` is the number of
+        periods covered by the actigraphy data and with:
+
+        .. math::
+
+            d^{24h} = \sum_{i}^{p} \frac{
+                      \left( \bar{x}_{h,i} - \bar{x} \right)^{2}
+                      }{p}
+
+        where :math:`\bar{x}^{h,i}` is the average number of active minutes
+        over the :math:`i^{th}` period and :math:`p` is the number of periods
+        per day. The average runs over all the days.
+
+        For the record, this is the 24h value from the chi-square periodogram
+        (Sokolove and Bushel, 1978).
+
+        References
+        ----------
+
+        .. [1] Witting W., Kwa I.H., Eikelenboom P., Mirmiran M., Swaab D.F.
+               Alterations in the circadian rest–activity rhythm in aging and
+               Alzheimer׳s disease. Biol Psychiatry. 1990;27:563–572.
+        """
+
+        return self._RAR(
+            _interdaily_stability,
+            'IS',
+            binarize=binarize,
+            threshold=threshold
+        )
+
+    def IV(self, binarize=False, threshold=0):
+        r"""Intradaily variability
+
+        The Intradaily Variability (IV) quantifies the variability of the
+        light exposure pattern.
+
+        Parameters
+        ----------
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+            Default is 4.
+
+        Returns
+        -------
+        iv: pd.DataFrame
+            A pandas DataFrame with IV per channel.
+
+        Notes
+        -----
+
+        It is defined in ref [1]_:
+
+        .. math::
+
+            IV = \frac{c^{1h}}{d^{1h}}
+
+        with:
+
+        .. math::
+
+            d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}
+
+        where :math:`x_{i}` is the number of active (counts higher than a
+        predefined threshold) minutes during the :math:`i^{th}` period,
+        :math:`\bar{x}` is the mean of all data and :math:`n` is the number of
+        periods covered by the actigraphy data,
+
+        and with:
+
+        .. math::
+
+            c^{1h} = \sum_{i}^{n-1} \frac{
+                        \left( x_{i+1} - x_{i} \right)^{2}
+                     }{n-1}
+
+        References
+        ----------
+
+        .. [1] Witting W., Kwa I.H., Eikelenboom P., Mirmiran M., Swaab D.F.
+               Alterations in the circadian rest–activity rhythm in aging and
+               Alzheimer׳s disease. Biol Psychiatry. 1990;27:563–572.
+
+        """
+        return self._RAR(
+            _intradaily_variability,
+            'IV',
+            binarize=binarize,
+            threshold=threshold
+        )
