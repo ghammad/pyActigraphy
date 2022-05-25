@@ -49,6 +49,14 @@ class Cosinor():
             fit_params.add('Mesor', value=50, min=0)
         self.__fit_initial_params = fit_params
 
+    @staticmethod
+    def _convert_timestamp_to_index(ts):
+        r'''Convert timestamps'''
+        # Define the x range by converting timestamps to indices, in order to
+        # deal with time series with irregular index.
+        x = ((ts.index - ts.index[0])/ts.index.freq).values
+        return x
+
     @property
     def fit_func(self):
         r'''Cosinor fit function'''
@@ -63,19 +71,21 @@ class Cosinor():
     def fit_initial_params(self, params):
         self.__fit_initial_params = params
 
-    def fit(self,
-            raw,
-            params=None,
-            method='leastsq',
-            nan_policy='raise',
-            reduce_fcn=None,
-            verbose=False):
-        """Fit the actigraphy data using a cosinor function.
+    def fit(
+        self,
+        ts,
+        params=None,
+        method='leastsq',
+        nan_policy='raise',
+        reduce_fcn=None,
+        verbose=False
+    ):
+        r'''Fit the actigraphy data using a cosinor function.
 
         Parameters
         ----------
-        raw : instance of BaseRaw or its child classes
-            Raw measurements to be fitted.
+        ts : pandas.Series
+            Input time series.
         params: instance of Parameters [1]_, optional.
             Initial fit parameters. If None, use the default parameters.
             Default is None.
@@ -94,9 +104,11 @@ class Cosinor():
         reduce_fcn: str, optional
             Function to convert a residual array to a scalar value for the
             scalar minimizers. Optional values are:
-            * None : sum of squares of residual
-            * negentropy : neg entropy, using normal distribution
-            * neglogcauchy: neg log likelihood, using Cauchy distribution
+
+            * 'None' : sum of squares of residual
+            * 'negentropy' : neg entropy, using normal distribution
+            * 'neglogcauchy': neg log likelihood, using Cauchy distribution
+
             Default is None.
         verbose: bool, optional
             If set to True, display fit informations.
@@ -114,18 +126,18 @@ class Cosinor():
                Python.
                https://lmfit.github.io/lmfit-py/index.html
 
-        """
+        '''
 
         # Define the x range by converting timestamps to indices, in order to
         # deal with time series with irregular index.
-        x = ((raw.data.index - raw.data.index[0])/raw.frequency).values
+        x = self._convert_timestamp_to_index(ts)
 
         # Minimize residuals
         fit_results = minimize(
             self.__fit_obj_func,
             self.fit_initial_params if params is None else params,
             method=method,
-            args=(x,  raw.data.values, self.fit_func),
+            args=(x,  ts.values, self.fit_func),
             nan_policy=nan_policy,
             reduce_fcn=reduce_fcn
         )
@@ -135,13 +147,13 @@ class Cosinor():
 
         return fit_results
 
-    def best_fit(self, raw, params):
+    def best_fit(self, ts, params):
         """Best fit function of the data.
 
         Parameters
         ----------
-        raw : instance of BaseRaw or its child classes
-            Raw measurements to be fitted.
+        ts : pandas.Series
+            Originally fitted time series.
         params: instance of Parameters [1]_
             Best fit parameters.
 
@@ -161,10 +173,10 @@ class Cosinor():
 
         # Define the x range by converting timestamps to indices, in order to
         # deal with time series with irregular index.
-        x = ((raw.data.index - raw.data.index[0])/raw.frequency).values
+        x = self._convert_timestamp_to_index(ts)
         y = self.fit_func(x, params)
 
-        return pd.Series(index=raw.data.index, data=y)
+        return pd.Series(index=ts.index, data=y)
 
     def fit_reader(
         self,
@@ -178,8 +190,9 @@ class Cosinor():
         prefer=None,
         verbose_parallel=0
     ):
-        """Fit the actigraphy data contained in a reader using a cosinor
-        function.
+        r'''Batch cosinor fit
+
+        Fit the actigraphy data contained in a reader using a cosinor function.
 
         Parameters
         ----------
@@ -223,14 +236,21 @@ class Cosinor():
             Display a progress meter if set to a value > 0.
             Default is 0.
 
-        """
+        References
+        ----------
+
+        .. [1] Non-Linear Least-Squares Minimization and Curve-Fitting for
+               Python.
+               https://lmfit.github.io/lmfit-py/index.html
+
+        '''
         # avoid Parallel overhead if n_job == 1
         if(n_jobs == 1):
             results = [
                 (
                     raw.name,
                     self.fit(
-                        raw=raw,
+                        ts=raw.data,
                         params=params,
                         method=method,
                         nan_policy=nan_policy,
@@ -245,7 +265,7 @@ class Cosinor():
                 raw, params, method, nan_policy, reduce_fcn, verbose
             ):
                 fit_result = self.fit(
-                    raw=raw,
+                    ts=raw.data,
                     params=params,
                     method=method,
                     nan_policy=nan_policy,
