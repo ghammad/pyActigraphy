@@ -48,6 +48,33 @@ def test_read_raw_agd_data_frequency():
     assert pd.Timedelta(rawAGD.data.index.freq) == rawAGD.frequency
 
 
-# def test_mixin():
-#
-#     assert rawAWD.length() == 11718
+def test_agd_incline_off():
+
+    assert rawAGD.inclineOff.sum() == 12710
+
+
+def test_agd_incline_lying():
+
+    assert rawAGD.inclineLying.sum() == 11106
+
+
+def test_agd_incline_sitting():
+
+    assert rawAGD.inclineSitting.sum() == 7669
+
+
+def test_agd_incline_standing():
+
+    assert rawAGD.inclineStanding.sum() == 22455
+
+
+def test_agd_inclineposition():
+
+    assert rawAGD.length() == rawAGD.inclinePosition(
+        pos_map={
+            'inclineOff': 1,
+            'inclineLying': 1,
+            'inclineSitting': 1,
+            'inclineStanding': 1
+        }
+    ).sum()
