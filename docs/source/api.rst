@@ -7,8 +7,8 @@ Python API Reference
     :depth: 2
 
 
-Reading raw data
-================
+Reading actigraphy data
+=======================
 
 Raw file reader
 ---------------
@@ -85,6 +85,14 @@ Rest-activity scoring and sleep diary
 * Sleep diary: :mod:`pyActigraphy.sleep.SleepDiary`
 
 * Sleep bout identification: :mod:`pyActigraphy.sleep.SleepBoutMixin`
+
+
+Light-specific modules
+=====================================
+
+* Generic light class: :mod:`pyActigraphy.light.GenLightDevice`
+
+* Metrics: :mod:`pyActigraphy.light.LightMetricsMixin`
 
 
 Analysis
