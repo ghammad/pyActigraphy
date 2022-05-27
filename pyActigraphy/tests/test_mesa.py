@@ -73,7 +73,7 @@ def test_mesa_intervals():
 
 def test_mesa_white_light():
 
-    cmp = (rawMESA.light.dropna() == pd.Series(
+    cmp = (rawMESA.white_light.dropna() == pd.Series(
         index=index,
         data=[2*li for li in light_intensities]).dropna()
     )

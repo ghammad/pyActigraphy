@@ -104,6 +104,7 @@ class RawMESA(BaseRaw):
         self.__marker = data['marker']
 
         # LIGHT
+        self.__white_light = data['whitelight']
         self.__red_light = data['redlight']
         self.__green_light = data['greenlight']
         self.__blue_light = data['bluelight']
@@ -154,6 +155,11 @@ class RawMESA(BaseRaw):
     def dayofweek(self):
         r"""Day of the week (1=Sunday, 2=Monday, etc)."""
         return self.__dayofweek
+
+    @property
+    def white_light(self):
+        r"""Value of the white light illuminance in lux."""
+        return self.__white_light
 
     @property
     def red_light(self):
