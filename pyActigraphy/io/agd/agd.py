@@ -166,22 +166,22 @@ class RawAGD(BaseRaw):
     @property
     def inclineOff(self):
         r"""Hourly positional information: inclineOff """
-        return self.__extract_position(self, 'inclineOff')
+        return self.__extract_position('inclineOff')
 
     @property
     def inclineStanding(self):
         r"""Hourly positional information: inclineStanding """
-        return self.__extract_position(self, 'inclineStanding')
+        return self.__extract_position('inclineStanding')
 
     @property
     def inclineSitting(self):
         r"""Hourly positional information: inclineSitting """
-        return self.__extract_position(self, 'inclineSitting')
+        return self.__extract_position('inclineSitting')
 
     @property
     def inclineLying(self):
         r"""Hourly positional information: inclineLying """
-        return self.__extract_position(self, 'inclineLying')
+        return self.__extract_position('inclineLying')
 
     def inclinePosition(
         self,
