@@ -1,0 +1,5 @@
+mesaid,line,linetime,offwrist,activity,marker,whitelight,redlight,greenlight,bluelight,wake,interval,dayofweek,daybymidnight,daybynoon
+X,1,00:00:00,1,,,,,,,1,EXCLUDED,5,1,1
+X,2,00:00:30,0,100.00,0,10.0,5.0,5.0,5.0,1,ACTIVE,5,1,1
+X,3,00:01:00,0,040.00,0,05.0,2.5,2.5,2.5,1,REST,5,1,1
+X,4,00:01:30,0,000.00,0,01.0,0.5,0.5,0.5,1,REST-S,5,1,1
