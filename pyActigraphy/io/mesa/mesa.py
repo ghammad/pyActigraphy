@@ -3,6 +3,7 @@ import os
 import warnings
 
 from ..base import BaseRaw
+from pyActigraphy.light import LightRecording
 
 
 class RawMESA(BaseRaw):
@@ -128,7 +129,15 @@ class RawMESA(BaseRaw):
             period=period,
             frequency=freq,
             data=data['activity'],
-            light=data['whitelight']
+            light=LightRecording(
+                name=name,
+                uuid=uuid,
+                data=data.loc[:, [
+                    'whitelight', 'redlight', 'greenlight', 'bluelight'
+                    ]
+                ],
+                frequency=data.index.freq
+            )
         )
 
     @property
