@@ -8,6 +8,9 @@
   :target: https://pypi.org/project/pyActigraphy
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg
   :target: https://doi.org/10.5281/zenodo.2537920
+.. image:: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg
+  :target: CODE_OF_CONDUCT.md
+
 
 **pyActigraphy**
 ================
