@@ -449,6 +449,65 @@ class LightMetricsMixin(object):
 
         return tat
 
+    def TATp(
+        self, threshold=None, start_time=None, stop_time=None, oformat=None
+    ):
+        r"""Time above light threshold (per day).
+
+        Calculate the total light exposure time above the threshold,
+        per calendar day.
+
+        Parameters
+        ----------
+        threshold: float, optional
+            If not set to None, discard data below threshold before computing
+            exposure levels.
+            Default is None.
+        start_time: str, optional
+            If not set to None, discard data before start time,
+            on a daily basis.
+            Supported time string: 'HH:MM:SS'
+            Default is None.
+        stop_time: str, optional
+            If not set to None, discard data after stop time, on a daily basis.
+            Supported time string: 'HH:MM:SS'
+            Default is None.
+        oformat: str, optional
+            Output format. Available formats: 'minute' or 'timedelta'.
+            If set to 'minute', the result is in number of minutes.
+            If set to 'timedelta', the result is a pd.Timedelta.
+            If set to None, the result is in number of epochs.
+            Default is None.
+
+        Returns
+        -------
+        tatp : pd.DataFrame
+            A pandas DataFrame with aggreagted light exposure levels
+            per channel and per day.
+        """
+        available_formats = [None, 'minute', 'timedelta']
+        if oformat not in available_formats:
+            raise ValueError(
+                'Specified output format ({}) not supported. '.format(oformat)
+                + 'Available formats are: {}'.format(str(available_formats))
+            )
+
+        light_exposure_counts_per_day = self._light_exposure(
+            threshold=threshold,
+            start_time=start_time,
+            stop_time=stop_time
+        ).groupby(self.data.index.day).count()
+
+        if oformat == 'minute':
+            tatp = light_exposure_counts_per_day * \
+                self.data.index.freq.delta/pd.Timedelta('1min')
+        elif oformat == 'timedelta':
+            tatp = light_exposure_counts_per_day * self.data.index.freq.delta
+        else:
+            tatp = light_exposure_counts_per_day
+
+        return tatp
+
     def VAT(self, threshold=None):
         r"""Values above light threshold.
 
