@@ -532,6 +532,17 @@ class LightMetricsMixin(object):
             stop_time=None
         )
 
+    @classmethod
+    def get_time_barycentre(cls, data):
+        # Normalize each epoch to midnight.
+        Y_j = data.index-data.index.normalize()
+        # Convert to indices.
+        Y_j /= pd.Timedelta(data.index.freq)
+        # Compute barycentre
+        bc = data.multiply(Y_j, axis=0).sum() / data.sum()
+
+        return bc
+
     def MLiT(self, threshold):
         r"""Mean light timing.
 
@@ -574,14 +585,70 @@ class LightMetricsMixin(object):
         # Binarized data and convert to float in order to handle 'DivideByZero'
         I_jk = self.binarized_data(threshold=threshold).astype('float64')
 
-        # Normalize each epoch to midnight.
-        Y_j = self.data.index-self.data.index.normalize()
-        # Convert to indices.
-        Y_j /= pd.Timedelta(I_jk.index.freq)
+        MLiT = self.get_time_barycentre(I_jk)
 
-        MLiT = I_jk.multiply(Y_j, axis=0).sum() / I_jk.sum()
+        # # Normalize each epoch to midnight.
+        # Y_j = self.data.index-self.data.index.normalize()
+        # # Convert to indices.
+        # Y_j /= pd.Timedelta(I_jk.index.freq)
+        #
+        # MLiT = I_jk.multiply(Y_j, axis=0).sum() / I_jk.sum()
 
         return MLiT
+
+    def MLiTp(self, threshold):
+        r"""Mean light timing per day.
+
+        Mean light timing above threshold, MLiT^C, per calendar day.
+
+
+        Parameters
+        ----------
+        threshold: float
+            Threshold value.
+
+        Returns
+        -------
+        MLiTp : pd.DataFrame
+            A pandas DataFrame with MLiT^C per channel and per day.
+
+        Notes
+        -----
+
+        The MLiT variable is defined in ref [1]_:
+
+        .. math::
+
+            MLiT^C = \frac{\sum_{j}^{m}\sum_{k}^{n} j\times I^{C}_{jk}}{\sum_{j}^{m}\sum_{k}^{n} I^{C}_{jk}} # noqa
+
+        where :math:`I^{C}_{jk}` is equal to 1 if the light level is higher
+        than the threshold C, m is the total number of epochs per day and n is
+        the number of days covered by the data.
+
+        References
+        ----------
+
+        .. [1] Reid K.J., Santostasi G., Baron K.G., Wilson J., Kang J.,
+               Zee P.C., Timing and Intensity of Light Correlate with Body
+               Weight in Adults. PLoS ONE 9(4): e92251.
+               https://doi.org/10.1371/journal.pone.0092251
+
+        """
+
+        # Binarized data and convert to float in order to handle 'DivideByZero'
+        I_jk = self.binarized_data(threshold=threshold).astype('float64')
+
+        # Group data per day:
+        MLiTp = I_jk.groupby(I_jk.index.day).apply(self.get_time_barycentre)
+
+        # # Normalize each epoch to midnight.
+        # Y_j = self.data.index-self.data.index.normalize()
+        # # Convert to indices.
+        # Y_j /= pd.Timedelta(I_jk.index.freq)
+        #
+        # MLiT = I_jk.multiply(Y_j, axis=0).sum() / I_jk.sum()
+
+        return MLiTp
 
     def get_light_extremum(self, extremum):
         r"""Light extremum.
