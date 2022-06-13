@@ -4,6 +4,7 @@ import os
 
 from lxml import etree
 from ..base import BaseRaw
+from pyActigraphy.light import LightRecording
 
 
 class RawMTN(BaseRaw):
@@ -96,7 +97,10 @@ class RawMTN(BaseRaw):
 
         index_data = index_data[start_time:stop_time]
         if index_light is not None:
-            index_light[start_time:stop_time]
+            index_light = index_light[start_time:stop_time]
+
+        # LIGHT
+        self.white_light = index_light
 
         # call __init__ function of the base class
         super().__init__(
@@ -108,7 +112,12 @@ class RawMTN(BaseRaw):
             period=period,
             frequency=pd.Timedelta(frequency),
             data=index_data,
-            light=index_light
+            light=LightRecording(
+                name=name,
+                uuid=uuid,
+                data=index_light.to_frame(name='whitelight'),
+                frequency=frequency
+            )
         )
 
     def __reading_and_parsing_file(self, input_fname):
