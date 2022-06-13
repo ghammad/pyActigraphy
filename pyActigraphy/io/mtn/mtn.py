@@ -52,8 +52,9 @@ class RawMTN(BaseRaw):
         name = self.__extract_mtn_name(raw_data)
         uuid = self.__extract_mtn_uuid(raw_data)
         start = self.__extract_mtn_start_time(raw_data)
-        frequency = self.__extract_frequency(raw_data)
         axial_mode = self.__extract_axial_mode(raw_data)
+        frequency = self.__extract_frequency(raw_data)
+        frequency_light = self.__extract_frequency_light(raw_data)
 
         motion = self.__extract_motion(raw_data, data_dtype)
         light = self.__extract_light(raw_data, light_dtype)
@@ -76,10 +77,10 @@ class RawMTN(BaseRaw):
                 index=pd.date_range(
                     start=start,
                     periods=len(light),
-                    freq=frequency
+                    freq=frequency_light
                     ),
                 dtype=light_dtype
-                )
+            )
         else:
             index_light = None
 
@@ -116,8 +117,8 @@ class RawMTN(BaseRaw):
                 name=name,
                 uuid=uuid,
                 data=index_light.to_frame(name='whitelight'),
-                frequency=frequency
-            )
+                frequency=frequency_light
+            ) if index_light is not None else None
         )
 
     def __reading_and_parsing_file(self, input_fname):
