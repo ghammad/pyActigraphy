@@ -587,12 +587,8 @@ class LightMetricsMixin(object):
 
         MLiT = self.get_time_barycentre(I_jk)
 
-        # # Normalize each epoch to midnight.
-        # Y_j = self.data.index-self.data.index.normalize()
-        # # Convert to indices.
-        # Y_j /= pd.Timedelta(I_jk.index.freq)
-        #
-        # MLiT = I_jk.multiply(Y_j, axis=0).sum() / I_jk.sum()
+        # Scaling factor: MLiT is now expressed in minutes since midnight.
+        MLiT /= (pd.Timedelta('1min')/I_jk.index.freq)
 
         return MLiT
 
@@ -641,12 +637,8 @@ class LightMetricsMixin(object):
         # Group data per day:
         MLiTp = I_jk.groupby(I_jk.index.day).apply(self.get_time_barycentre)
 
-        # # Normalize each epoch to midnight.
-        # Y_j = self.data.index-self.data.index.normalize()
-        # # Convert to indices.
-        # Y_j /= pd.Timedelta(I_jk.index.freq)
-        #
-        # MLiT = I_jk.multiply(Y_j, axis=0).sum() / I_jk.sum()
+        # Scaling factor: MLiT is now expressed in minutes since midnight.
+        MLiTp /= (pd.Timedelta('1min')/I_jk.index.freq)
 
         return MLiTp
 
