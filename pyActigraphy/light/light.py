@@ -20,6 +20,7 @@
 # GNU General Public License for more details.
 ############################################################################
 # import pandas as pd
+import warnings
 from ..recording import BaseRecording
 from .light_metrics import LightMetricsMixin
 
@@ -55,3 +56,47 @@ class LightRecording(LightMetricsMixin, BaseRecording):
             )
 
         return self.data.loc[:, channel]
+
+    def get_channels(self, channels=None):
+        r"""Light channel accessor
+
+        Get access of the requested channels.
+
+        Parameters
+        ----------
+        channels: list of str, optional.
+            Channel list. If set to None, use all available channels.
+            Default is None.
+
+        Returns
+        -------
+        light: pd.DataFrame
+            Dataframe with the requested channels.
+
+        """
+
+        # Select channels of interest
+        if channels is None:
+            channels_sel = self.data.columns
+        else:
+            # Check if some required channels are not available:
+            channels_unavail = set(channels)-set(self.data.columns)
+            if channels_unavail == set(channels):
+                raise ValueError(
+                    'None of the requested channels ({}) is available.'.format(
+                        ', '.join(channels)
+                    )
+                )
+            elif len(channels_unavail) > 0:
+                warnings.warn(
+                    'Required but unavailable channel(s): {}'.format(
+                        ', '.join(channels_unavail)
+                    )
+                )
+            channels_sel = [ch for ch in self.data.columns if ch in channels]
+
+        return self.data.loc[:, channels_sel]
+
+    def get_channel_list(self):
+        r"""List of light channels"""
+        return self.data.columns
