@@ -21,6 +21,7 @@
 ############################################################################
 import pandas as pd
 import re
+from scipy import signal
 from ..metrics.metrics import _lmx
 from ..metrics.metrics import _interdaily_stability
 from ..metrics.metrics import _intradaily_variability
@@ -684,7 +685,7 @@ class LightMetricsMixin(object):
     def LMX(self, length='5h', lowest=True):
         r"""Least or Most light period of length X
 
-        Onsert and mean hourly light exposure levels during the X least or most
+        Onset and mean hourly light exposure levels during the X least or most
         bright hours of the day.
 
         Parameters
@@ -842,7 +843,7 @@ class LightMetricsMixin(object):
         ----------
         binarize: bool, optional
             If set to True, the data are binarized.
-            Default is True.
+            Default is False.
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
@@ -895,3 +896,84 @@ class LightMetricsMixin(object):
             binarize=binarize,
             threshold=threshold
         )
+
+    @staticmethod
+    def _filter_butterworth(data, fs, fc_low, fc_high, N):
+        # Filter order (Attenuation: -20*N dB/decade)
+        # See https://dsp.stackexchange.com/questions/60455/
+        # how-to-choose-order-and-cut-off-frequency-for-low-pass-butterworth-filter)
+
+        # Create Butterworth filter (order: N)
+        # whose type (highpass, lowpass, bandpass)
+        # depends on the input arguments
+        if (fc_low is None) and (fc_high is not None):
+            # Set a lowpass filter
+            Wn = fc_high
+            btype = 'lowpass'
+        elif (fc_low is not None) and (fc_high is None):
+            # Set a highpass filter
+            Wn = fc_low
+            btype = 'highpass'
+        elif (fc_low is not None) and (fc_high is not None):
+            # Set a bandpass filter
+            Wn = [fc_low, fc_high]
+            btype = 'bandpass'
+        else:
+            raise ValueError(
+                "Both high and low critical frequencies were set to None."
+            )
+
+        sos = signal.butter(
+            N//2, Wn=Wn, btype=btype, fs=fs, output='sos'
+        )
+
+        data_smooth = signal.sosfiltfilt(sos, data)
+
+        return data_smooth
+
+    def filter_butterworth(self, fc_low, fc_high, N, channels=None):
+        r"""Butterworth filtering
+
+        Forward-backward digital filtering using a Nth order Butterworth filter
+
+        Parameters
+        ----------
+        fc_low: float
+            Critical frequency (lower).
+        fc_high: float
+            Critical fequency (higher).
+        N: int
+            Order of the filter
+        channels: list of str, optional.
+            Channel list. If set to None, use all available channels.
+            Default is None.
+
+        Returns
+        -------
+        filt: pd.DataFrame
+            Filtered signal, per channel.
+
+        Notes
+        -----
+
+        This function is essentially a wrapper to the scipy.signal.butter
+        function. For more information, see [1]_.
+
+        References
+        ----------
+
+        .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html  # noqa
+
+        """
+
+        # Select channels of interest and
+        # apply filtering to all available channels
+        filt = self.get_channels(channels).apply(
+            self._filter_butterworth,
+            axis=0,
+            raw=True,
+            fs=1/self.data.index.freq.delta.total_seconds(),
+            fc_low=fc_low, fc_high=fc_high, N=N
+        )
+
+        return filt
