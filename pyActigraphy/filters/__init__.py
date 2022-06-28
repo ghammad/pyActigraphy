@@ -6,6 +6,7 @@
 
 # from . import filters
 
-from .filters import FiltersMixin, _create_inactivity_mask
+from .filters import FiltersMixin
+from .utils import _create_inactivity_mask
 
 __all__ = ["FiltersMixin", "_create_inactivity_mask"]
