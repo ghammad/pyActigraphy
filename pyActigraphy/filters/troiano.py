@@ -133,6 +133,13 @@ def choi(
            Med Sci Sports Exerc. 2011 Feb;43(2):357-64.
            Doi: 10.1249/MSS.0b013e3181ed61a3. PMID: 20581716; PMCID: PMC3184184
     '''
+    # Excerpt from Choi et al.:
+    # The recommended elements in the new algorithm are as follows:
+    # 1) zero-count threshold during a nonwear time interval,
+    # 2) 90-min time window for consecutive zero or nonzero counts, and
+    # 3) allowance of a 2-min interval of nonzero counts with upstream or
+    # downstream 30-min consecutive zero-count windows for artifactual movement
+    # detection.
 
     # Transform the data to do the following:
     # Create 0's when the data is <= activity_threshold and > spike_stoplevel
