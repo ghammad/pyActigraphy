@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import warnings
 # from pandas.tseries.frequencies import to_offset
@@ -23,6 +24,7 @@ class BaseRecording():
         uuid,
         data,
         frequency,
+        log10_transform=True,
         mask=None
     ):
 
@@ -30,7 +32,7 @@ class BaseRecording():
         self.__name = name
         self.__display_name = name
         self.__uuid = uuid
-        self.__data = data
+        self.__data = np.log10(data+1) if log10_transform else data
         self.__frequency = frequency
 
         # Optional fields
