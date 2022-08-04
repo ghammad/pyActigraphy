@@ -23,7 +23,7 @@ class GenLightDevice(LightRecording):
         Aggregation function to use when resampling.
         Default is 'mean'.
     log10_transform: bool, optional
-        If set to True, data are log10-transformed.
+        If set to True, data are (log10\+1)-transformed.
         Default is True.
     start_time: datetime-like, optional
         Read data from this time.
@@ -136,6 +136,7 @@ class GenLightDevice(LightRecording):
                  if ((col in channels) if channels else True)]
             ],
             frequency=data.index.freq.delta,
+            log10_transform=log10_transform
         )
         self.start_time = start_time
         self.period = period
