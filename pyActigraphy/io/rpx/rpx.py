@@ -8,6 +8,7 @@ import warnings
 
 from .multilang import fields, columns, day_first
 from ..base import BaseRaw
+from pyActigraphy.light import LightRecording
 
 
 class RawRPX(BaseRaw):
@@ -165,6 +166,9 @@ class RawRPX(BaseRaw):
         # resample the data
         index_data = index_data.asfreq(freq=pd.Timedelta(frequency))
 
+        # Light
+        index_light = self.__extract_rpx_light(index_data)
+
         # Off-wrist status
         self.__off_wrist = self.__extract_rpx_data(index_data, "Off_Wrist")
         # Sleep/Wake scoring
@@ -195,7 +199,12 @@ class RawRPX(BaseRaw):
             period=period,
             frequency=pd.Timedelta(frequency),
             data=index_data[columns[self.language]['Activity']],
-            light=self.__extract_rpx_light(index_data)
+            light=LightRecording(
+                name=name,
+                uuid=uuid,
+                data=index_light,
+                frequency=index_light.index.freq
+            ) if index_light is not None else None
             # self.__extract_rpx_data(index_data, 'White_light')
         )
 
