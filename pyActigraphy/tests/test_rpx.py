@@ -28,9 +28,17 @@ rawRPX_FR_NaN = pyActigraphy.io.read_raw_rpx(
 
 # read RPX GER with default parameters
 rawRPX_GER = pyActigraphy.io.read_raw_rpx(
-    rpx_path_ger, language='GER', drop_na=False)
+    rpx_path_ger,
+    language='GER',
+    drop_na=False
+)
 rawRPX_GER_with_light = pyActigraphy.io.read_raw_rpx(
-    rpx_path_ger_with_light, language='GER', drop_na=False)
+    rpx_path_ger_with_light,
+    language='GER',
+    delimiter=',',
+    decimal=',',
+    drop_na=False
+)
 
 
 def test_read_raw_rpx_eng_name():
@@ -136,7 +144,7 @@ def test_read_raw_rpx_ger_no_light():
 
 def test_read_raw_rpx_ger_with_light_shape():
 
-    assert rawRPX_GER_with_light.light.shape == (20160, 4)
+    assert rawRPX_GER_with_light.light.data.shape == (20160, 4)
 
 
 def test_read_raw_rpx_ger_with_light():
