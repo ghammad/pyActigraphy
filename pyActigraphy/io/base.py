@@ -10,6 +10,7 @@ from ..sleep import SleepDiary, ScoringMixin, SleepBoutMixin
 
 class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
     """Base class for raw data."""
+
     def __init__(
         self,
         name,
@@ -136,18 +137,8 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
     # TODO: @lru_cache(maxsize=6) ???
     @property
     def light(self):
-        r"""Indexed light extracted from the raw file.
-        If mask_inactivity is set to true, the `mask` is used
-        to filter out inactive data.
-        """
-        if self.__light is None:
-            return self.__light
-
-        if self.mask_inactivity is True:
-            light = self.raw_light.where(self.mask > 0)
-        else:
-            light = self.raw_light
-        return light[self.start_time:self.start_time+self.period]
+        r"""Light measurement performed by the device"""
+        return self.__light
 
     @property
     def mask_inactivity(self):
@@ -237,8 +228,8 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
             return data
         elif to_offset(freq).delta < self.frequency:
             warnings.warn(
-                'Resampling frequency lower than the acquisition' +
-                ' frequency. Returning original data.',
+                'Resampling frequency lower than the acquisition'
+                + ' frequency. Returning original data.',
                 UserWarning
             )
             return data
@@ -273,8 +264,8 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
 
         if to_offset(freq).delta <= self.frequency:
             warnings.warn(
-                'Resampling frequency equal to or lower than the acquisition' +
-                ' frequency. Returning original data.',
+                'Resampling frequency equal to or lower than the acquisition'
+                + ' frequency. Returning original data.',
                 UserWarning
             )
             return light
