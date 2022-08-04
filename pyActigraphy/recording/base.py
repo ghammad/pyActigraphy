@@ -165,7 +165,7 @@ class BaseRecording():
                 data = self.raw_data
         else:
             data = self.raw_data
-        return data[self.start_time:self.stop_time]
+        return data.loc[self.start_time:self.stop_time]
 
     # TODO: @lru_cache(maxsize=6) ???
     def resampled_data(self, rsfreq, agg='sum'):

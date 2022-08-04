@@ -127,7 +127,7 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
                 data = self.raw_data
         else:
             data = self.raw_data
-        return data[self.start_time:self.start_time+self.period]
+        return data.loc[self.start_time:self.start_time+self.period]
 
     @property
     def raw_light(self):
