@@ -47,3 +47,13 @@ def test_read_raw_tal_duration():
 def test_read_raw_tal_length():
 
     assert rawTAL.length() == 10080
+
+
+def test_read_raw_tal_light():
+
+    assert rawTAL.length() == len(rawTAL.light.get_channel('whitelight'))
+
+
+def test_read_raw_tal_whitelight():
+
+    assert rawTAL.length() == len(rawTAL.white_light)
