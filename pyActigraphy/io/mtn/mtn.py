@@ -100,9 +100,6 @@ class RawMTN(BaseRaw):
         if index_light is not None:
             index_light = index_light[start_time:stop_time]
 
-        # LIGHT
-        self.white_light = index_light
-
         # call __init__ function of the base class
         super().__init__(
             name=name,
@@ -120,6 +117,14 @@ class RawMTN(BaseRaw):
                 frequency=frequency_light
             ) if index_light is not None else None
         )
+
+    @property
+    def white_light(self):
+        r"""Value of the light intensity in µw/cm²."""
+        if self.light is None:
+            return None
+        else:
+            return self.light.get_channel("whitelight")
 
     def __reading_and_parsing_file(self, input_fname):
         return etree.parse(input_fname).getroot()
