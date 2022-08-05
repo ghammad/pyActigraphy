@@ -49,6 +49,13 @@ def test_read_raw_mtn_data():
     assert len(rawMTN.data) == 5978
 
 
-# def test_mixin():
-#
-#     assert rawMTN.length() == 11718
+def test_read_raw_mtn_light():
+    """Is the length of the data equal to the length of the light data?
+    if true continue, else AssertionError"""
+    assert len(rawMTN.data) == len(rawMTN.light.data)
+
+
+def test_read_raw_mtn_white_light():
+    """Is the length of the data equal to the length of the white light data?
+    if true continue, else AssertionError"""
+    assert len(rawMTN.data) == len(rawMTN.white_light)
