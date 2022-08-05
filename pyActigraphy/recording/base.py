@@ -117,10 +117,14 @@ class BaseRecording():
             )
         self.__period = pd.Timedelta(value)
         # Optionally compute start or stop time
+        # NB one epoch has to be suppressed as accessing data with .loc[]
+        # includes the last epoch.
         if self.__start_time is not None:
-            self.__stop_time = self.__start_time + self.__period
+            self.__stop_time = self.__start_time + \
+                (self.__period - self.frequency)
         elif self.__stop_time is not None:
-            self.__start_time = self.__stop_time - self.__period
+            self.__start_time = self.__stop_time - \
+                (self.__period - self.frequency)
 
     def reset_times(self):
         r"""Reset start and stop times, as well as the period of the recording.
