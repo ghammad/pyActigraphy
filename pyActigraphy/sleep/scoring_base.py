@@ -1400,7 +1400,8 @@ class ScoringMixin(object):
         threshold=0.15,
         min_seed_period='30Min',
         max_test_period='12h',
-        r_consec_below='30Min'
+        r_consec_below='30Min',
+        rsfreq=None
     ):
         """Automatic sleep detection.
 
@@ -1430,6 +1431,12 @@ class ScoringMixin(object):
             Time range to consider, past the potential correlation peak when
             searching for the maximum correlation peak.
             Default is '30Min'.
+        rsfreq: str, optional
+            Resampling frequency used to evaluate the sleep periods. The final
+            time series with rest/activity scores is returned with a frequency
+            equal to one of the input data. If set to None, no resampling is
+            performed.
+            Default is None.
 
         Returns
         -------
@@ -1461,9 +1468,13 @@ class ScoringMixin(object):
         --------
 
         """
+        if rsfreq is not None:
+            rsdata = self.resampled_data(freq=rsfreq)
+        else:
+            rsdata = self.data
 
         rbg = roenneberg(
-            self.data,
+            rsdata,
             trend_period=trend_period,
             min_trend_period=min_trend_period,
             threshold=threshold,
@@ -1471,6 +1482,10 @@ class ScoringMixin(object):
             max_test_period=max_test_period,
             r_consec_below=r_consec_below
         )
+
+        if rsfreq is not None:
+            rbg = rbg.asfreq(self.data.index.freq, method='pad')
+
         return rbg
 
     def Roenneberg_AoT(
@@ -1480,7 +1495,8 @@ class ScoringMixin(object):
         threshold=0.15,
         min_seed_period='30Min',
         max_test_period='12h',
-        n_succ=3
+        r_consec_below='30Min',
+        rsfreq=None
     ):
         """Automatic identification of activity onset/offset times, based on
         Roenneberg's algorithm.
@@ -1507,10 +1523,17 @@ class ScoringMixin(object):
             Default is '30Min'.
         max_test_period : str, optional
             Maximal period of the test series.
-            Default is '12h'.
-        n_succ : int, optional
-            Number of successive elements to consider when searching for the
-            maximum correlation peak.
+            Default is '12h'
+        r_consec_below : str, optional
+            Time range to consider, past the potential correlation peak when
+            searching for the maximum correlation peak.
+            Default is '30Min'.
+        rsfreq: str, optional
+            Resampling frequency used to evaluate the sleep periods. The final
+            time series with rest/activity scores is returned with a frequency
+            equal to one of the input data. If set to None, no resampling is
+            performed.
+            Default is None.
 
         Returns
         -------
@@ -1543,14 +1566,14 @@ class ScoringMixin(object):
 
         """
 
-        rbg = roenneberg(
-            self.data,
+        rbg = self.Roenneberg(
             trend_period=trend_period,
             min_trend_period=min_trend_period,
             threshold=threshold,
             min_seed_period=min_seed_period,
             max_test_period=max_test_period,
-            n_succ=n_succ
+            r_consec_below=r_consec_below,
+            rsfreq=rsfreq
         )
 
         diff = rbg.diff(1)
