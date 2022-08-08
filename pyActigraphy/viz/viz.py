@@ -304,10 +304,11 @@ def _scoring_plot(
     scoring,
     title,
     labels={'data': 'Activity', 'scoring': 'Scores'},
+    fillarea=True,
     nticks=48,
     font_size=20,
     showlegend=False,
-    height=900,
+    height=800,
     width=1600
 ):
     r"""Scoring plot
@@ -324,6 +325,9 @@ def _scoring_plot(
         Plot title
     labels: dict, optional
         Dictionary of labels for the data and the scoring.
+    fillarea: bool, optional
+        If set to True, color the fill area below the scoring curve.
+        Default is True.
     nticks: int, optional
         Number of X axis ticks.
         Default is 48.
@@ -388,17 +392,23 @@ def _scoring_plot(
                 y=scoring,
                 yaxis='y2',
                 name=labels["scoring"],
-                line_width=3,
-                line_dash='dash'
+                line_width=1,
+                line_dash='dash',
+                fill='tozeroy' if fillarea else None
             )
         ],
         layout=layout
     )
 
+    # Make both y axes coincide at zero.
+    fig.update_yaxes(rangemode='tozero')
+
     return fig
 
 
-def scoring_plot(raw, scoring, freq='15min', binarize=False, threshold=0):
+def scoring_plot(
+    raw, scoring, freq='15min', binarize=False, threshold=0, fillarea=True
+):
     """Scoring plot
 
     Create a plot where activity counts and scoring are superimposed. If the
@@ -423,6 +433,9 @@ def scoring_plot(raw, scoring, freq='15min', binarize=False, threshold=0):
         If binarize is set to True, data above this threshold are set to 1
         and to 0 otherwise.
         Default is 0.
+    fillarea: bool, optional
+        If set to True, color the fill area below the scoring curve.
+        Default is True.
     Returns
     -------
     fig : Instance of plotly.graph_objects.Figure
@@ -445,5 +458,6 @@ def scoring_plot(raw, scoring, freq='15min', binarize=False, threshold=0):
         scoring,
         title="Rest-activity scoring",
         labels=labels,
+        fillarea=fillarea,
         showlegend=True
     )
