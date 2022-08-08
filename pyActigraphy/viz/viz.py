@@ -75,51 +75,38 @@ def double_plot(
         Figure containing the double plot
 
     """
+    # Time span for the double plot. Usually, 48h.
+    td = pd.Timedelta(span)
 
     # Input data
     data = raw.resampled_data(
         freq=freq, binarize=binarize, threshold=threshold
     )
 
-    # Time span for the double plot. Usually, 48h.
-    td = pd.Timedelta(span)
-
-    # Number of stacked periods (depends on the span)
-    n_periods = raw.duration() // (td/2)
-
     # If the recording does not contain N full periods,
-    # starting from midnight, then pad the recording with 0.
+    # starting from midnight, then pad the recording with NaN.
 
     # Timestamp set at midnight on the first day of the recording
-    start = data.index.normalize()[0]
+    start = data.index[0].floor(freq='D')
+    # start = data.index.normalize()[0]
 
-    # Pad data backwards with zero up to midnigth
-    padding_series_prepend = pd.Series(
-        index=pd.date_range(
+    # timestamp set at midnight on the last day of the recording
+    # NB: add an extra day for the last row of the double plot.
+    end = data.index[-1].ceil(freq='D') + (td/2)
+
+    # Pad data backwards/forwards with NaN up to midnigth by reindexing
+    padded_data = data.reindex(
+        pd.date_range(
             start=start,
-            periods=(data.index[0]-start)/data.index.freq,
-            freq=freq
+            end=end,
+            freq='15min'
         ),
-        data=0
+        fill_value=pd.NA
     )
 
-    # Pad data forwards with zero up to midnigth
-    padding_series_append = pd.Series(
-        index=pd.date_range(
-            start=data.index[-1]+data.index.freq,
-            periods=(
-                (n_periods+1)*(td/2)
-                - raw.duration()
-                - pd.to_timedelta(padding_series_prepend.index.values.ptp())
-            )/data.index.freq,
-            freq=freq
-        ),
-        data=0
-    )
-
-    padded_data = pd.concat(
-        [padding_series_prepend, data, padding_series_append]
-    )
+    # Number of stacked periods (depends on the span)
+    # NB: remove the extra day added for the last row of the double plot
+    n_periods = (padded_data.index.values.ptp() // (td/2)) - 1
 
     # Create figure
     fig = make_subplots(
@@ -142,12 +129,29 @@ def double_plot(
             row=n+1,
             col=1
         )
+
         # Set title for th y-axis of each subplot
         fig.update_yaxes(
             title_text=padded_data[start:end].index[0].strftime("%Y-%m-%d"),
-            title_font=dict(size=12),
+            title_font=dict(size=height/110),
+            # title_font=dict(size=12),
             row=n+1, col=1
         )
+
+    # Add shading
+    fig.add_vrect(
+        row=1, col=1,
+        x0=padded_data.index[0], x1=data.index[0],
+        fillcolor="LightGrey", opacity=0.5,
+        layer="below", line_width=0,
+    )
+
+    fig.add_vrect(
+        row=n_periods, col=1,
+        x0=data.index[-1], x1=padded_data.index[-1],
+        fillcolor="LightGrey", opacity=0.5,
+        layer="below", line_width=0,
+    )
 
     # Format plot layout
     fig.update_layout(
