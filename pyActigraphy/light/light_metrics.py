@@ -95,10 +95,10 @@ class LightMetricsMixin(object):
             data = self.binarized_data(
                 threshold,
                 rsfreq=rsfreq,
-                agg='sum'
+                agg='mean'
             )
         elif rsfreq is not None:
-            data = self.resampled_data(rsfreq=rsfreq, agg='sum')
+            data = self.resampled_data(rsfreq=rsfreq, agg='mean')
         else:
             data = self.data
 
