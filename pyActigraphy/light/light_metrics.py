@@ -497,7 +497,7 @@ class LightMetricsMixin(object):
             threshold=threshold,
             start_time=start_time,
             stop_time=stop_time
-        ).groupby(self.data.index.day).count()
+        ).groupby(self.data.index.date).count()
 
         if oformat == 'minute':
             tatp = light_exposure_counts_per_day * \
@@ -636,7 +636,7 @@ class LightMetricsMixin(object):
         I_jk = self.binarized_data(threshold=threshold).astype('float64')
 
         # Group data per day:
-        MLiTp = I_jk.groupby(I_jk.index.day).apply(self.get_time_barycentre)
+        MLiTp = I_jk.groupby(I_jk.index.date).apply(self.get_time_barycentre)
 
         # Scaling factor: MLiT is now expressed in minutes since midnight.
         MLiTp /= (pd.Timedelta('1min')/I_jk.index.freq)
