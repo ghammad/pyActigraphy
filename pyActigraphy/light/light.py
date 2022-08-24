@@ -21,11 +21,12 @@
 ############################################################################
 # import pandas as pd
 import warnings
+from ..filters import FiltersMixin
 from ..recording import BaseRecording
 from .light_metrics import LightMetricsMixin
 
 
-class LightRecording(LightMetricsMixin, BaseRecording):
+class LightRecording(LightMetricsMixin, FiltersMixin, BaseRecording):
     """ Base class for log files containing time stamps.
 
     Parameters
