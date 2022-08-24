@@ -185,3 +185,30 @@ class BaseRecording():
             rsdata = _resampled_data(self.data, rsfreq=rsfreq, agg=agg)
 
         return _binarized_data(rsdata, threshold)
+
+    @property
+    def mask(self):
+        r"""Mask used to filter out inactive data."""
+        if self.__mask is None:
+            # Create a mask if it does not exist
+            if self.inactivity_length is not None:
+                self.create_inactivity_mask(self.inactivity_length)
+            else:
+                warnings.warn(
+                    'Inactivity length set to None. Could not create a mask.',
+                    UserWarning
+                )
+
+        return self.__mask
+
+    @mask.setter
+    def mask(self, value):
+        self.__mask = value
+
+    @property
+    def inactivity_length(self):
+        return self.__inactivity_length
+
+    @inactivity_length.setter
+    def inactivity_length(self, value):
+        self.__inactivity_length = value
