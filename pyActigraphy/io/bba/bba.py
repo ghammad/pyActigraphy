@@ -4,7 +4,7 @@ import os
 from ..base import BaseRaw
 
 
-class RawBAA(BaseRaw):
+class RawBBA(BaseRaw):
     r"""Raw object from files produced by the
     [biobankanalysis](
         https://biobankaccanalysis.readthedocs.io/en/latest/index.html
@@ -157,7 +157,7 @@ class RawBAA(BaseRaw):
         return data.loc[:, column] if column in data.columns else None
 
 
-def read_raw_baa(
+def read_raw_bba(
     input_fname,
     name=None,
     uuid=None,
@@ -196,11 +196,11 @@ def read_raw_baa(
 
     Returns
     -------
-    raw : Instance of RawBAA
+    raw : Instance of RawBBA
         An object containing preprocessed data from raw accelerometers.
     """
 
-    return RawBAA(
+    return RawBBA(
         input_fname=input_fname,
         name=name,
         uuid=uuid,

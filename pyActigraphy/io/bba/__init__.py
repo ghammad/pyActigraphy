@@ -8,8 +8,8 @@
 #
 # License: BSD (3-clause)
 
-from .baa import RawBAA
+from .bba import RawBBA
 
-from .baa import read_raw_baa
+from .bba import read_raw_bba
 
-__all__ = ["RawBAA", "read_raw_baa"]
+__all__ = ["RawBBA", "read_raw_bba"]
