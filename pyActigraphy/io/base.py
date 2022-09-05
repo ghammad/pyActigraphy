@@ -176,7 +176,7 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
                     UserWarning
                 )
 
-        return self.__mask
+        return self.__mask.loc[self.start_time:self.start_time+self.period]
 
     @mask.setter
     def mask(self, value):
