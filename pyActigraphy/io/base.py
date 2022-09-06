@@ -4,7 +4,7 @@ import warnings
 
 from pandas.tseries.frequencies import to_offset
 from ..filters import FiltersMixin
-from ..metrics import MetricsMixin
+from ..metrics import MetricsMixin, _interval_maker
 from ..sleep import SleepDiary, ScoringMixin, SleepBoutMixin
 
 
@@ -191,9 +191,23 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
     def exclude_if_mask(self, value):
         self.__exclude_if_mask = value
 
-    def mask_fraction(self):
+    def mask_fraction(self, start=None, stop=None):
         r"""Fraction of masked data"""
-        return 1.-(self.mask.sum()/len(self.mask))
+        return 1.-(
+            self.mask.loc[start:stop].sum()/len(self.mask.loc[start:stop])
+        )
+
+    def mask_fraction_period(self, period='7D', verbose=False):
+        r"""Mask fraction per consecutive periods"""
+
+        # Compute consecutive intervals
+        intervals = _interval_maker(self.data.index, period, verbose)
+
+        results = [
+            self.mask_fraction(start=time[0], stop=time[1])
+            for time in intervals
+        ]
+        return results
 
     def length(self):
         r"""Number of data acquisition points"""

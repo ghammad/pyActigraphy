@@ -81,3 +81,16 @@ def test_mask_fraction_restricted():
         (pd.Timedelta('4h')/pd.Timedelta('2days2h')),
         0.01
     )
+
+
+def test_mask_fraction_period():
+
+    # Test if mask fraction per period is correctly calculated.
+    # Restrict recording to 3 days. Starting at 8h00.
+    # The first day, there is no mask. Mask_frac == 0.
+    # The second day, the last 2h are masked. Mask_frac == 2/24.
+    # The third (and last) day, there is 6h of masking. Mask_frac == 6/24.
+    raw_sinewave_mask.period = pd.Timedelta('3days')
+    assert raw_sinewave_mask.mask_fraction_period(period='1D') == approx(
+        [0, 2/24, 6/24], 0.01
+    )
