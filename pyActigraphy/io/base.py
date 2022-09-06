@@ -250,7 +250,7 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
         elif to_offset(freq).delta == self.frequency:
             return data
 
-        resampled_data = data.resample(freq).sum()
+        resampled_data = data.resample(freq, origin='start').sum()
         if self.mask_inactivity is True:
             if self.mask is None:
                 warnings.warn(

@@ -24,6 +24,7 @@ from . import recording
 from . import sleep
 from . import utils
 from . import tests
+from . import viz
 
 __all__ = [
     "analysis",
@@ -34,7 +35,8 @@ __all__ = [
     "recording",
     "sleep",
     "tests",
-    "utils"
+    "utils",
+    "viz"
 ]
 
 __version__ = '1.0'
