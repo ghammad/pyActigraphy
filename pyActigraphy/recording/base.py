@@ -46,8 +46,7 @@ class BaseRecording():
 
         # Mask-related fields
         self.__mask = mask
-        self.__mask_inactivity = False
-        self.__inactivity_length = None
+        self.__apply_mask = False
         self.__exclude_if_mask = True
 
     @property
@@ -70,13 +69,13 @@ class BaseRecording():
         return self.__uuid
 
     @property
-    def mask_inactivity(self):
-        r"""Inactivity mask indicator."""
-        return self.__mask_inactivity
+    def apply_mask(self):
+        r"""Mask indicator."""
+        return self.__apply_mask
 
-    @mask_inactivity.setter
-    def mask_inactivity(self, value):
-        self.__mask_inactivity = value
+    @apply_mask.setter
+    def apply_mask(self, value):
+        self.__apply_mask = value
 
     @property
     def start_time(self):
@@ -151,21 +150,21 @@ class BaseRecording():
     def data(self):
         r"""Data of the recording.
 
-        If mask_inactivity is set to true, the `mask` is used
+        If apply_mask is set to true, the `mask` is used
         to filter out data.
         """
         if self.__data is None:
             return self.__data
 
-        if self.mask_inactivity is True:
+        if self.apply_mask is True:
             if self.mask is not None:
                 data = self.raw_data.where(self.mask > 0)
             else:
                 warnings.warn(
                     (
-                        'Mask inactivity set to True but no mask could be'
-                        ' found.\n Please create a mask by using the '
-                        '"create_inactivity_mask" function.'
+                        'Apply_mask set to True but no mask could be'
+                        ' found.\n Please create a mask by using the'
+                        ' appropriate "create_mask" function.'
                     ),
                     UserWarning
                 )
@@ -191,27 +190,9 @@ class BaseRecording():
 
     @property
     def mask(self):
-        r"""Mask used to filter out inactive data."""
-        if self.__mask is None:
-            # Create a mask if it does not exist
-            if self.inactivity_length is not None:
-                self.create_inactivity_mask(self.inactivity_length)
-            else:
-                warnings.warn(
-                    'Inactivity length set to None. Could not create a mask.',
-                    UserWarning
-                )
-
+        r"""Mask used to filter out data."""
         return self.__mask
 
     @mask.setter
     def mask(self, value):
         self.__mask = value
-
-    @property
-    def inactivity_length(self):
-        return self.__inactivity_length
-
-    @inactivity_length.setter
-    def inactivity_length(self, value):
-        self.__inactivity_length = value
