@@ -19,14 +19,15 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 ############################################################################
-# import pandas as pd
 import warnings
-from ..filters import FiltersMixin
+from ..mask import _create_dummy_mask
+from ..mask import _add_mask_period
+from ..mask import _add_mask_periods
 from ..recording import BaseRecording
 from .light_metrics import LightMetricsMixin
 
 
-class LightRecording(LightMetricsMixin, FiltersMixin, BaseRecording):
+class LightRecording(LightMetricsMixin, BaseRecording):
     """ Base class for log files containing time stamps.
 
     Parameters
@@ -52,7 +53,7 @@ class LightRecording(LightMetricsMixin, FiltersMixin, BaseRecording):
             raise ValueError(
                 'The light channel you tried to access ({}) '.format(channel)
                 + 'is not available.\n Available channels:{}'.format(
-                    '\n- {}'.join(self.data.columns)
+                    '\n- {}'.format('\n- '.join(self.data.columns))
                 )
             )
 
@@ -101,3 +102,102 @@ class LightRecording(LightMetricsMixin, FiltersMixin, BaseRecording):
     def get_channel_list(self):
         r"""List of light channels"""
         return self.data.columns
+
+    def _check_light_mask(self):
+        """ Check if mask is not None"""
+        if self.mask is None:
+            raise ValueError(
+                "No light mask available. Please create one with the function"
+                + " 'create_light_mask' before adding mask periods."
+            )
+
+    def create_light_mask(self):
+        """Create a blank mask for all light channels.
+
+        This mask has the same length as its underlying data and can be used
+        to offuscate meaningless periods.
+
+        The mask is empty (filled with 1s) and is meant to be edited by adding
+        mask periods manually.
+
+        """
+
+        # Create a mask filled with ones by default.
+        self.mask = _create_dummy_mask(self.data)
+
+    def add_light_mask_period(self, start, stop, channel=None):
+        """Add a masking period.
+
+        This period extends between the specified start and stop times.
+        It is possible to target a specific channel. If None is used, the
+        masking period is set on all channels.
+
+        Parameters
+        ----------
+        start: str
+            Start time (YYYY-MM-DD HH:MM:SS) of the masking period.
+        stop: str
+            Stop time (YYYY-MM-DD HH:MM:SS) of the masking period.
+        channel: str, optional
+            Set masking period to a specific channel (i.e. column).
+            If set to None, the period is set on all channels.
+            Default is None.
+        """
+
+        # Check if mask is not None
+        self._check_light_mask()
+
+        # Define correct channel
+        if channel is not None:
+            current_channel = channel
+        else:
+            current_channel = self.get_channel_list()
+
+        # Add specified period
+        _add_mask_period(
+            self.mask,
+            start=start,
+            stop=stop,
+            channel=current_channel
+        )
+
+    def add_light_mask_periods(
+        self, input_fname, channel=None, *args, **kwargs
+    ):
+        """Add masking periods from a file.
+
+        Function to read masking periods (start and stop times) from a Mask log
+        file. Supports different file format (.ods, .xls(x), .csv).
+
+        Parameters
+        ----------
+        input_fname: str
+            Path to the log file.
+        channel: str, optional
+            Set masking period to a specific channel (i.e. column).
+            If set to None, the period is set on all channels.
+            Default is None.
+        *args
+            Variable length argument list passed to the subsequent reader
+            function.
+        **kwargs
+            Arbitrary keyword arguments passed to the subsequent reader
+            function.
+        """
+
+        # Check if mask is not None
+        self._check_light_mask()
+
+        # Define correct channel
+        if channel is not None:
+            current_channel = channel
+        else:
+            current_channel = self.get_channel_list()
+
+        # Add specified period
+        _add_mask_periods(
+            input_fname=input_fname,
+            mask=self.mask,
+            channel=current_channel,
+            *args, **kwargs
+        )
