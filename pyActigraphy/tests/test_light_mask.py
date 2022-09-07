@@ -13,9 +13,13 @@ x = np.linspace(0, nperiods-1, nperiods)
 
 # Synthetic data
 f_ch1 = nperiods*[A]
+f_ch2 = nperiods*[10*A]
 
 data_df = pd.DataFrame(
-    data={'channel_1': f_ch1},
+    data={
+        'channel_1': f_ch1,
+        'channel_2': f_ch2
+    },
     index=pd.date_range(
         start='01/01/2000 00:00:00',
         periods=nperiods,
@@ -23,21 +27,29 @@ data_df = pd.DataFrame(
     )
 )
 
+# Set abnormal data points
+abnval = 10000000
+abnval_start = pd.to_datetime('01/01/2000 00:02:00')
+abnval_stop = pd.to_datetime('01/01/2000 00:04:00')
+abnval_nperiods = ((abnval_stop-abnval_start)/pd.Timedelta(sf)) + 1
+data_df.loc[abnval_start:abnval_stop] = abnval
+
 # Data mask
-data_mask = pd.Series(
-    data=nperiods*[1],
+data_dummy_mask = pd.DataFrame(
+    data={
+        'channel_1': nperiods*[1],
+        'channel_2': nperiods*[1]
+    },
     index=pd.date_range(
         start='01/01/2000 00:00:00',
         periods=nperiods,
         freq=sf
     ),
-    dtype=pd.Int16Dtype
+    dtype='int'
 )
 
-# Set abnormal data points
-abnval = 10000000
-data_df.iloc[4:5] = abnval
-data_mask.iloc[4:5] = 0
+data_mask = data_dummy_mask.copy(deep=True)
+data_mask.loc[abnval_start:abnval_stop, 'channel_1'] = 0
 
 # LightRecording instanciation
 myLightRecording = LightRecording(
@@ -48,20 +60,42 @@ myLightRecording = LightRecording(
     log10_transform=False
 )
 
-# Set up data mask
-myLightRecording.mask = data_mask
+# # Set up data mask
+# myLightRecording.mask = data_mask
+
+
+def test_light_mask_creation():
+
+    myLightRecording.create_light_mask()
+    assert myLightRecording.mask.equals(data_dummy_mask)
+
+
+def test_light_mask_add_period():
+
+    myLightRecording.add_light_mask_period(
+        abnval_start, abnval_stop, channel='channel_1'
+    )
+    assert myLightRecording.mask.equals(data_mask)
 
 
 def test_light_mask():
 
-    myLightRecording.mask_inactivity = True
-
-    assert myLightRecording.get_channel('channel_1').mean() == approx(1.0)
+    myLightRecording.create_light_mask()
+    myLightRecording.add_light_mask_period(
+        abnval_start, abnval_stop, channel='channel_1'
+    )
+    myLightRecording.apply_mask = True
+    assert (
+        myLightRecording.get_channel('channel_1').mean() == approx(1.0)
+        and myLightRecording.get_channel('channel_2').mean() == approx(
+            abnval_nperiods*abnval/nperiods
+        )
+    )
 
 
 def test_light_unmask():
 
-    myLightRecording.mask_inactivity = False
+    myLightRecording.apply_mask = False
 
     assert myLightRecording.get_channel(
-        'channel_1').mean() == approx(abnval/nperiods)
+        'channel_1').mean() == approx(abnval_nperiods*abnval/nperiods)
