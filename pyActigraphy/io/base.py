@@ -263,9 +263,9 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
                 )
                 return resampled_data
             elif self.exclude_if_mask:
-                resampled_mask = self.mask.resample(freq).min()
+                resampled_mask = self.mask.resample(freq, origin='start').min()
             else:
-                resampled_mask = self.mask.resample(freq).max()
+                resampled_mask = self.mask.resample(freq, origin='start').max()
             return resampled_data.where(resampled_mask > 0)
         else:
             return resampled_data
@@ -284,7 +284,7 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
             )
             return light
         else:
-            return light.resample(freq).sum()
+            return light.resample(freq, origin='start').sum()
 
     def read_sleep_diary(
             self,
