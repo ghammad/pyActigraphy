@@ -99,7 +99,7 @@ def double_plot(
         pd.date_range(
             start=start,
             end=end,
-            freq='15min'
+            freq=freq
         ),
         fill_value=pd.NA
     )
@@ -142,20 +142,20 @@ def double_plot(
     fig.add_vrect(
         row=1, col=1,
         x0=padded_data.index[0], x1=data.index[0],
-        fillcolor="LightGrey", opacity=0.5,
+        fillcolor="DarkGrey", opacity=0.7,
         layer="below", line_width=0,
     )
 
     fig.add_vrect(
         row=n_periods, col=1,
         x0=data.index[-1], x1=padded_data.index[-1],
-        fillcolor="LightGrey", opacity=0.5,
+        fillcolor="DarkGrey", opacity=0.7,
         layer="below", line_width=0,
     )
 
     # Format plot layout
     fig.update_layout(
-        title='Actigraphy data', height=height, showlegend=False, bargap=0,
+        title='Actigraphy data', height=height, showlegend=False, bargap=0.0,
     )
     fig.update_xaxes(showticklabels=False)  # hide xticks for all subplots
     fig.update_xaxes(
