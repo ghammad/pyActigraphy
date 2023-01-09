@@ -8,6 +8,7 @@ import warnings
 
 from .multilang import fields, columns, day_first
 from ..base import BaseRaw
+from pyActigraphy.light import LightRecording
 
 
 class RawRPX(BaseRaw):
@@ -165,6 +166,9 @@ class RawRPX(BaseRaw):
         # resample the data
         index_data = index_data.asfreq(freq=pd.Timedelta(frequency))
 
+        # Light
+        index_light = self.__extract_rpx_light(index_data)
+
         # Off-wrist status
         self.__off_wrist = self.__extract_rpx_data(index_data, "Off_Wrist")
         # Sleep/Wake scoring
@@ -195,8 +199,12 @@ class RawRPX(BaseRaw):
             period=period,
             frequency=pd.Timedelta(frequency),
             data=index_data[columns[self.language]['Activity']],
-            light=self.__extract_rpx_light(index_data)
-            # self.__extract_rpx_data(index_data, 'White_light')
+            light=LightRecording(
+                name=name,
+                uuid=uuid,
+                data=index_light,
+                frequency=index_light.index.freq
+            ) if index_light is not None else None
         )
 
     @property
@@ -207,22 +215,22 @@ class RawRPX(BaseRaw):
     @property
     def white_light(self):
         r"""White light levels (in lux.)"""
-        return self.__extract_rpx_data(self.light, "White_light")
+        return self.__extract_light_channel("White_light")
 
     @property
     def red_light(self):
         r"""Red light levels (in microwatt per cm2.)"""
-        return self.__extract_rpx_data(self.light, "Red_light")
+        return self.__extract_light_channel("Red_light")
 
     @property
     def green_light(self):
         r"""Green light levels (in microwatt per cm2.)"""
-        return self.__extract_rpx_data(self.light, "Green_light")
+        return self.__extract_light_channel("Green_light")
 
     @property
     def blue_light(self):
         r"""Blue light levels (in microwatt per cm2.)"""
-        return self.__extract_rpx_data(self.light, "Blue_light")
+        return self.__extract_light_channel("Blue_light")
 
     @property
     def off_wrist(self):
@@ -343,6 +351,12 @@ class RawRPX(BaseRaw):
             return data.loc[:, available_light_cols]
         else:
             return None
+
+    def __extract_light_channel(self, channel):
+        if self.light is None:
+            return None
+        else:
+            return self.light.get_channel(columns[self.language][channel])
 
     def __check_rpx_header(self, fname, cols_available, cols_required):
         if (

@@ -127,17 +127,17 @@ class FiltersMixin(object):
         # Check if start and stop are within the index range
         if (pd.Timestamp(start) < self.mask.index[0]):
             raise ValueError((
-                "Attempting to set the start time of a mask period before " +
-                "the actual start time of the data.\n" +
-                "Mask start time: {}".format(start) +
-                "Data start time: {}".format(self.mask.index[0])
+                "Attempting to set the start time of a mask period before "
+                + "the actual start time of the data.\n"
+                + "Mask start time: {}".format(start)
+                + "Data start time: {}".format(self.mask.index[0])
             ))
         if (pd.Timestamp(stop) > self.mask.index[-1]):
             raise ValueError((
-                "Attempting to set the stop time of a mask period after " +
-                "the actual stop time of the data.\n" +
-                "Mask stop time: {}".format(stop) +
-                "Data stop time: {}".format(self.mask.index[-1])
+                "Attempting to set the stop time of a mask period after "
+                + "the actual stop time of the data.\n"
+                + "Mask stop time: {}".format(stop)
+                + "Data stop time: {}".format(self.mask.index[-1])
             ))
 
         # Set mask values between start and stop to zeros

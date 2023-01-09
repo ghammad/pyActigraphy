@@ -306,8 +306,8 @@ class MetricsMixin(object):
                     raise ValueError(
                         'Time origin format ({}) not supported.\n'.format(
                             time_origin
-                        ) +
-                        'Supported format: {}.'.format('HH:MM:SS')
+                        )
+                        + 'Supported format: {}.'.format('HH:MM:SS')
                     )
 
             elif not isinstance(time_origin, pd.Timedelta):

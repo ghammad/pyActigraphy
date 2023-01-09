@@ -4,6 +4,7 @@ import os
 
 from lxml import etree
 from ..base import BaseRaw
+from pyActigraphy.light import LightRecording
 
 
 class RawMTN(BaseRaw):
@@ -51,8 +52,9 @@ class RawMTN(BaseRaw):
         name = self.__extract_mtn_name(raw_data)
         uuid = self.__extract_mtn_uuid(raw_data)
         start = self.__extract_mtn_start_time(raw_data)
-        frequency = self.__extract_frequency(raw_data)
         axial_mode = self.__extract_axial_mode(raw_data)
+        frequency = self.__extract_frequency(raw_data)
+        frequency_light = self.__extract_frequency_light(raw_data)
 
         motion = self.__extract_motion(raw_data, data_dtype)
         light = self.__extract_light(raw_data, light_dtype)
@@ -75,10 +77,10 @@ class RawMTN(BaseRaw):
                 index=pd.date_range(
                     start=start,
                     periods=len(light),
-                    freq=frequency
+                    freq=frequency_light
                     ),
                 dtype=light_dtype
-                )
+            )
         else:
             index_light = None
 
@@ -96,7 +98,7 @@ class RawMTN(BaseRaw):
 
         index_data = index_data[start_time:stop_time]
         if index_light is not None:
-            index_light[start_time:stop_time]
+            index_light = index_light[start_time:stop_time]
 
         # call __init__ function of the base class
         super().__init__(
@@ -108,8 +110,21 @@ class RawMTN(BaseRaw):
             period=period,
             frequency=pd.Timedelta(frequency),
             data=index_data,
-            light=index_light
+            light=LightRecording(
+                name=name,
+                uuid=uuid,
+                data=index_light.to_frame(name='whitelight'),
+                frequency=frequency_light
+            ) if index_light is not None else None
         )
+
+    @property
+    def white_light(self):
+        r"""Value of the light intensity in µw/cm²."""
+        if self.light is None:
+            return None
+        else:
+            return self.light.get_channel("whitelight")
 
     def __reading_and_parsing_file(self, input_fname):
         return etree.parse(input_fname).getroot()

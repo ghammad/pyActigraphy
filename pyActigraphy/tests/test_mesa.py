@@ -19,12 +19,12 @@ warn_msg = (
 rawMESA = pyActigraphy.io.read_raw_mesa(mesa_path)
 
 # time indices
-index = [
+index = pd.to_datetime([
     '2000-01-06 00:00:00',
     '2000-01-06 00:00:30',
     '2000-01-06 00:01:00',
     '2000-01-06 00:01:30'
-]
+])
 
 # light intensities
 light_intensities = [pd.NA, 5.00, 2.50, 0.50]
