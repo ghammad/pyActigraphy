@@ -90,9 +90,11 @@ Rest-activity scoring and sleep diary
 Light-specific modules
 =====================================
 
-* Generic light class: :mod:`pyActigraphy.light.GenLightDevice`
+* Light recording class: :mod:`pyActigraphy.light.LightRecording`
 
-* Metrics: :mod:`pyActigraphy.light.LightMetricsMixin`
+* Light exposure metrics: :mod:`pyActigraphy.light.LightMetricsMixin`
+
+* Generic light class example: :mod:`pyActigraphy.light.GenLightDevice`
 
 
 Analysis
