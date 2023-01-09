@@ -1,3 +1,28 @@
+#############################################################################
+# Copyright (c) 2022, Daylight Academy
+# Author: Grégory Hammad
+# Owner: Daylight Academy (https://daylight.academy)
+# Maintainer: Grégory Hammad
+# Email: gregory.hammad@uliege.be
+# Status: development
+#############################################################################
+# The development of a module for analysing light exposure
+# data was led and financially supported by members of the Daylight Academy
+# Project “The role of daylight for humans” (led by Mirjam Münch, Manuel
+# Spitschan). The module is part of the Human Light Exposure Database. For
+# more information about the project, please see
+# https://daylight.academy/projects/state-of-light-in-humans/.
+#
+# This module is also part of the pyActigraphy software.
+# pyActigraphy is a free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# pyActigraphy is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+############################################################################
 import pandas as pd
 import os
 
@@ -155,7 +180,7 @@ class GenLightDevice(LightRecording):
 
     @property
     def duv(self):
-        r"""Value of the ZZZ (in YYY)."""
+        r"""Value of the delta u,v."""
         return self.__duv
 
     @property
@@ -186,33 +211,36 @@ def read_raw_gld(
     Parameters
     ----------
     input_fname: str
-    Path to the file.
+        Path to the file.
     channels: list of str, optional
-    Select channels to read from the input file.
-    If the list is empty, all channels are read.
-    Default is \[\].
+        Select channels to read from the input file.
+        If the list is empty, all channels are read.
+        Default is \[\].
     rsfreq: str, optional
-    Resampling frequency. Cf. #timeseries-offset-aliases in
-    <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
-    Default is None.
+        Resampling frequency. Cf. #timeseries-offset-aliases in
+        <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+        Default is None.
     agg: str, optional
-    Aggregation function to use when resampling.
-    Default is 'mean'.
+        Aggregation function to use when resampling.
+        Default is 'mean'.
+    log10_transform: bool, optional
+        If set to True, data are (log10\+1)-transformed.
+        Default is True.
     start_time: datetime-like, optional
-    Read data from this time.
-    Default is None.
+        Read data from this time.
+        Default is None.
     period: str, optional
-    Length of the read data.
-    Cf. #timeseries-offset-aliases in
-    <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
-    Default is None (i.e all the data).
+        Length of the read data.
+        Cf. #timeseries-offset-aliases in
+        <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+        Default is None (i.e all the data).
     dayfirst: bool, optional
-    If set to True, the timestamps are parsed as DD/MM/YYYY
+        If set to True, the timestamps are parsed as DD/MM/YYYY
 
     Returns
     -------
     raw : Instance of GenLightDevice
-    An object containing raw GLD data
+        An object containing raw GLD data
     """
 
     return GenLightDevice(

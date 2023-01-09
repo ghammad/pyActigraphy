@@ -1,15 +1,19 @@
 #############################################################################
-# Copyright (c) 2022, DLA
+# Copyright (c) 2022, Daylight Academy
 # Author: Grégory Hammad
 # Owner: Daylight Academy (https://daylight.academy)
 # Maintainer: Grégory Hammad
-# Email: gregory.hammad@uliege.be
-# Status: developpement
+# Email: gregory.hammad@uliege.be
+# Status: development
 #############################################################################
-# The development of the light module has been initially funded by the
-# Daylight Academy under the supervision of Prof. Mirjam Münch and
-# Prof. Manuel Spitschan.
-# This module is part of the pyActigraphy software.
+# The development of a module for analysing light exposure
+# data was led and financially supported by members of the Daylight Academy
+# Project “The role of daylight for humans” (led by Mirjam Münch, Manuel
+# Spitschan). The module is part of the Human Light Exposure Database. For
+# more information about the project, please see
+# https://daylight.academy/projects/state-of-light-in-humans/.
+#
+# This module is also part of the pyActigraphy software.
 # pyActigraphy is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -277,7 +281,7 @@ class LightMetricsMixin(object):
 
         Returns
         -------
-        mask : pandas.DataFrame
+        masked_data : pandas.DataFrame
             A DataFrame where the original data are set to Nan if below
             threshold and/or outside time window.
         """
@@ -567,7 +571,8 @@ class LightMetricsMixin(object):
 
         .. math::
 
-            MLiT^C = \frac{\sum_{j}^{m}\sum_{k}^{n} j\times I^{C}_{jk}}{\sum_{j}^{m}\sum_{k}^{n} I^{C}_{jk}} # noqa
+            MLiT^C = \frac{\sum_{j}^{m}\sum_{k}^{n} j\times I^{C}_{jk}}{
+            \sum_{j}^{m}\sum_{k}^{n} I^{C}_{jk}}
 
         where :math:`I^{C}_{jk}` is equal to 1 if the light level is higher
         than the threshold C, m is the total number of epochs per day and n is
@@ -616,7 +621,8 @@ class LightMetricsMixin(object):
 
         .. math::
 
-            MLiT^C = \frac{\sum_{j}^{m}\sum_{k}^{n} j\times I^{C}_{jk}}{\sum_{j}^{m}\sum_{k}^{n} I^{C}_{jk}} # noqa
+            MLiT^C = \frac{\sum_{j}^{m}\sum_{k}^{n} j\times I^{C}_{jk}}{
+            \sum_{j}^{m}\sum_{k}^{n} I^{C}_{jk}}
 
         where :math:`I^{C}_{jk}` is equal to 1 if the light level is higher
         than the threshold C, m is the total number of epochs per day and n is
@@ -962,9 +968,9 @@ class LightMetricsMixin(object):
         References
         ----------
 
-        .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html  # noqa
+        .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html
 
-        """
+        """  # noqa
 
         # Select channels of interest and
         # apply filtering to all available channels

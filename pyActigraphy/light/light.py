@@ -1,15 +1,19 @@
 #############################################################################
-# Copyright (c) 2022, DLA
+# Copyright (c) 2022, Daylight Academy
 # Author: Grégory Hammad
 # Owner: Daylight Academy (https://daylight.academy)
 # Maintainer: Grégory Hammad
-# Email: gregory.hammad@uliege.be
-# Status: developpement
+# Email: gregory.hammad@uliege.be
+# Status: development
 #############################################################################
-# The development of the light module has been initially funded by the
-# Daylight Academy under the supervision of Prof. Mirjam Münch and
-# Prof. Manuel Spitschan.
-# This module is part of the pyActigraphy software.
+# The development of a module for analysing light exposure
+# data was led and financially supported by members of the Daylight Academy
+# Project “The role of daylight for humans” (led by Mirjam Münch, Manuel
+# Spitschan). The module is part of the Human Light Exposure Database. For
+# more information about the project, please see
+# https://daylight.academy/projects/state-of-light-in-humans/.
+#
+# This module is also part of the pyActigraphy software.
 # pyActigraphy is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -28,7 +32,8 @@ from .light_metrics import LightMetricsMixin
 
 
 class LightRecording(LightMetricsMixin, BaseRecording):
-    """ Base class for log files containing time stamps.
+    """ Base class for light recordings. Derives from
+    :mod:`pyActigraphy.recording.BaseRecording`.
 
     Parameters
     ----------
@@ -48,7 +53,21 @@ class LightRecording(LightMetricsMixin, BaseRecording):
         return self.__name
 
     def get_channel(self, channel):
-        r"""Light channel accessor"""
+        r"""Light channel accessor
+
+        Get access to the requested channel.
+
+        Parameters
+        ----------
+        channel: str.
+            Channel to access.
+
+        Returns
+        -------
+        light: pd.Series
+            Series with the requested channel.
+
+        """
         if channel not in self.data.columns:
             raise ValueError(
                 'The light channel you tried to access ({}) '.format(channel)
@@ -62,7 +81,7 @@ class LightRecording(LightMetricsMixin, BaseRecording):
     def get_channels(self, channels=None):
         r"""Light channel accessor
 
-        Get access of the requested channels.
+        Get access to the requested channels.
 
         Parameters
         ----------
