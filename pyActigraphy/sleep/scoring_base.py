@@ -334,11 +334,10 @@ class ScoringMixin(object):
               per minute
             * "30sec_max_non_overlap": maximum 30-second nonoverlapping epoch
               per minute
-            Default is "max30sec_non_overlap".
 
+            Default is "max30sec_non_overlap".
         threshold: float, optional
             Threshold value for scoring sleep/wake. Default is 1.0.
-
         rescoring: bool, optional
             If set to True, Webster's rescoring rules are applied [2]_.
             Default is True.
@@ -1003,17 +1002,17 @@ class ScoringMixin(object):
             Default is 4
         start: str, optional
             Start time of the period of interest.
-            Default: '12:00:00'
-            Supported times: 'AonT', 'AoffT', any 'HH:MM:SS'
+            Supported times: 'AonT', 'AoffT', any 'HH:MM:SS'.
+            Default: '12:00:00'.
         period: str, optional
             Period length.
-            Default is '10h'
+            Default is '10h'.
         algo: str, optional
             Sleep scoring algorithm to use.
             Default is 'Roenneberg'.
-        *args
+        args
             Variable length argument list passed to the scoring algorithm.
-        **kwargs
+        kwargs
             Arbitrary keyword arguements passed to the scoring algorithm.
 
         Returns
@@ -1025,11 +1024,12 @@ class ScoringMixin(object):
         .. warning:: The value of this variable depends on the convention used
                      by the underlying sleep scoring algorithm. The expected
                      convention is the following:
-                    * epochs scored as 1 refer to inactivity/sleep
 
-                    Otherwise, this variable will actually return the fraction
-                    of epochs scored as activity. The fraction of sleep can
-                    simply be recovered by calculating (1-fSOD).
+                     * epochs scored as 1 refer to inactivity/sleep
+
+                     Otherwise, this variable will actually return the fraction
+                     of epochs scored as activity. The fraction of sleep can
+                     simply be recovered by calculating (1-fSOD).
 
 
         Examples
@@ -1743,9 +1743,9 @@ class ScoringMixin(object):
         algo: str, optional
             Sleep scoring algorithm to use.
             Default is 'Roenneberg'.
-        *args
+        \*args
             Variable length argument list passed to the scoring algorithm.
-        **kwargs
+        \*\*kwargs
             Arbitrary keyword arguements passed to the scoring algorithm.
 
         Returns
@@ -1766,10 +1766,11 @@ class ScoringMixin(object):
                   \sum_{j=1}^M\sum_{i=1}^N
                   s_{i,j} \times cos\left(\frac{2\pi t_i}{1440}\right)
                   \right)
+
         with:
-            :math:`t_j`, time of day in minutes at epoch j,
-            :math:`\delta(s_{i,j}, s_{i+1,j}) = 1` if
-            :math:`s_{i,j} = s_{i+1,j}` and 0 otherwise.
+            * :math:`t_j`, time of day in minutes at epoch j,
+            * :math:`\delta(s_{i,j}, s_{i+1,j}) = 1` if
+              :math:`s_{i,j} = s_{i+1,j}` and 0 otherwise.
 
         References
         ----------
