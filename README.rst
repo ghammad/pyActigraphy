@@ -67,7 +67,7 @@ pyLight
 =======
 
 In the context of the Daylight Academy Project, `The role of daylight for humans <https://daylight.academy/projects/state-of-light-in-humans>`_ and
-thanks to the support of its members, Profs Mirjam Münch and `Manuel Spitschan <https://github.com/spitschan>`_,
+thanks to the support of its members, Dr. Mirjam Münch and Prof. `Manuel Spitschan <https://github.com/spitschan>`_,
 a pyActigraphy module for analysing light exposure data has been developed, **pyLight**.
 This module is part of the Human Light Exposure Database and is included in pyActigraphy version `v1.1 <https://github.com/ghammad/pyActigraphy/releases/tag/v1.1>`_ and higher.
 
