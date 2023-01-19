@@ -8,6 +8,8 @@
   :target: https://pypi.org/project/pyActigraphy
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg
   :target: https://doi.org/10.5281/zenodo.2537920
+.. image:: https://bestpractices.coreinfrastructure.org/projects/6933/badge
+  :target: https://bestpractices.coreinfrastructure.org/projects/6933
 
 **pyActigraphy**
 ================
