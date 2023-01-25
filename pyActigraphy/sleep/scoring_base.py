@@ -311,7 +311,7 @@ class ScoringMixin(object):
 
     def CK(
         self,
-        settings='10sec_max_overlap',
+        settings='30sec_max_non_overlap',
         threshold=1.0,
         rescoring=True
     ):
@@ -335,7 +335,7 @@ class ScoringMixin(object):
             * "30sec_max_non_overlap": maximum 30-second nonoverlapping epoch
               per minute
 
-            Default is "max30sec_non_overlap".
+            Default is "30sec_max_non_overlap".
         threshold: float, optional
             Threshold value for scoring sleep/wake. Default is 1.0.
         rescoring: bool, optional
