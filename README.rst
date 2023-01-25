@@ -10,6 +10,9 @@
   :target: https://doi.org/10.5281/zenodo.2537920
 .. image:: https://bestpractices.coreinfrastructure.org/projects/6933/badge
   :target: https://bestpractices.coreinfrastructure.org/projects/6933
+.. image:: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg
+  :target: CODE_OF_CONDUCT.md
+
 
 **pyActigraphy**
 ================
