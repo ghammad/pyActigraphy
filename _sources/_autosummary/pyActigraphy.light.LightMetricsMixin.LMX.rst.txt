@@ -1,0 +1,6 @@
+﻿pyActigraphy.light.LightMetricsMixin.LMX
+========================================
+
+.. currentmodule:: pyActigraphy.light
+
+.. automethod:: LightMetricsMixin.LMX

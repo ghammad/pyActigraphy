@@ -1,4 +1,4 @@
-﻿pyActigraphy.sleep.SleepDiary.summary
+pyActigraphy.sleep.SleepDiary.summary
 =====================================
 
 .. currentmodule:: pyActigraphy.sleep

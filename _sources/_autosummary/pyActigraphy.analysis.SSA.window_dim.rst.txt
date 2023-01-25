@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.SSA.window\_dim
+pyActigraphy.analysis.SSA.window\_dim
 =====================================
 
 .. currentmodule:: pyActigraphy.analysis

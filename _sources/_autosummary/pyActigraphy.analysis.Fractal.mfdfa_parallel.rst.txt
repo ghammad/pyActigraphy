@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.Fractal.mfdfa\_parallel
+pyActigraphy.analysis.Fractal.mfdfa\_parallel
 =============================================
 
 .. currentmodule:: pyActigraphy.analysis

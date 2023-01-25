@@ -23,13 +23,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 1,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:10.798153Z",
-     "start_time": "2020-06-23T22:24:10.631155Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "import numpy as np"
@@ -37,13 +32,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 2,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:11.171840Z",
-     "start_time": "2020-06-23T22:24:10.800956Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "import pandas as pd"
@@ -51,23 +41,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 3,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.398984Z",
-     "start_time": "2020-06-23T22:24:11.174162Z"
-    }
-   },
-   "outputs": [
-    {
-     "name": "stderr",
-     "output_type": "stream",
-     "text": [
-      "/usr/local/lib/python3.7/site-packages/statsmodels/tools/_testing.py:19: FutureWarning: pandas.util.testing is deprecated. Use the functions in the public API at pandas.testing instead.\n",
-      "  import pandas.util.testing as tm\n"
-     ]
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "import pyActigraphy"
    ]
@@ -88,13 +64,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 4,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.404795Z",
-     "start_time": "2020-06-23T22:24:13.401792Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "N = 1440*7 # 7 days of acquisition at a frequency of 60s."
@@ -102,13 +73,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 5,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.411085Z",
-     "start_time": "2020-06-23T22:24:13.407117Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "activity = np.random.normal(10,1,N)\n",
@@ -117,13 +83,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 6,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.416342Z",
-     "start_time": "2020-06-23T22:24:13.413009Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "non_wear = np.empty(N)"
@@ -131,13 +92,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 7,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.421775Z",
-     "start_time": "2020-06-23T22:24:13.418473Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "# Set up a segment of  spurious inactivity\n",
@@ -147,13 +103,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 8,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.426912Z",
-     "start_time": "2020-06-23T22:24:13.423872Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "d = {'Activity': activity, 'Light': light, 'Non-wear': non_wear}"
@@ -161,13 +112,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 9,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.434797Z",
-     "start_time": "2020-06-23T22:24:13.430419Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "index = pd.date_range(start='01-01-2020',freq='60s',periods=N)"
@@ -175,13 +121,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 10,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.443014Z",
-     "start_time": "2020-06-23T22:24:13.436982Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "data = pd.DataFrame(index=index,data=d)"
@@ -189,134 +130,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 11,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.465185Z",
-     "start_time": "2020-06-23T22:24:13.445369Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/html": [
-       "<div>\n",
-       "<style scoped>\n",
-       "    .dataframe tbody tr th:only-of-type {\n",
-       "        vertical-align: middle;\n",
-       "    }\n",
-       "\n",
-       "    .dataframe tbody tr th {\n",
-       "        vertical-align: top;\n",
-       "    }\n",
-       "\n",
-       "    .dataframe thead th {\n",
-       "        text-align: right;\n",
-       "    }\n",
-       "</style>\n",
-       "<table border=\"1\" class=\"dataframe\">\n",
-       "  <thead>\n",
-       "    <tr style=\"text-align: right;\">\n",
-       "      <th></th>\n",
-       "      <th>Activity</th>\n",
-       "      <th>Light</th>\n",
-       "      <th>Non-wear</th>\n",
-       "    </tr>\n",
-       "  </thead>\n",
-       "  <tbody>\n",
-       "    <tr>\n",
-       "      <th>2020-01-01 00:00:00</th>\n",
-       "      <td>10.161639</td>\n",
-       "      <td>87.219188</td>\n",
-       "      <td>0.0</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2020-01-01 00:01:00</th>\n",
-       "      <td>10.016515</td>\n",
-       "      <td>104.312417</td>\n",
-       "      <td>0.0</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2020-01-01 00:02:00</th>\n",
-       "      <td>10.356472</td>\n",
-       "      <td>107.568331</td>\n",
-       "      <td>0.0</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2020-01-01 00:03:00</th>\n",
-       "      <td>9.496464</td>\n",
-       "      <td>95.080364</td>\n",
-       "      <td>0.0</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2020-01-01 00:04:00</th>\n",
-       "      <td>9.450826</td>\n",
-       "      <td>111.420042</td>\n",
-       "      <td>0.0</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>...</th>\n",
-       "      <td>...</td>\n",
-       "      <td>...</td>\n",
-       "      <td>...</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2020-01-07 23:55:00</th>\n",
-       "      <td>10.674776</td>\n",
-       "      <td>107.970748</td>\n",
-       "      <td>0.0</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2020-01-07 23:56:00</th>\n",
-       "      <td>10.426524</td>\n",
-       "      <td>117.168763</td>\n",
-       "      <td>0.0</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2020-01-07 23:57:00</th>\n",
-       "      <td>9.467549</td>\n",
-       "      <td>100.109809</td>\n",
-       "      <td>0.0</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2020-01-07 23:58:00</th>\n",
-       "      <td>9.751687</td>\n",
-       "      <td>104.764560</td>\n",
-       "      <td>0.0</td>\n",
-       "    </tr>\n",
-       "    <tr>\n",
-       "      <th>2020-01-07 23:59:00</th>\n",
-       "      <td>11.440382</td>\n",
-       "      <td>97.947009</td>\n",
-       "      <td>0.0</td>\n",
-       "    </tr>\n",
-       "  </tbody>\n",
-       "</table>\n",
-       "<p>10080 rows × 3 columns</p>\n",
-       "</div>"
-      ],
-      "text/plain": [
-       "                      Activity       Light  Non-wear\n",
-       "2020-01-01 00:00:00  10.161639   87.219188       0.0\n",
-       "2020-01-01 00:01:00  10.016515  104.312417       0.0\n",
-       "2020-01-01 00:02:00  10.356472  107.568331       0.0\n",
-       "2020-01-01 00:03:00   9.496464   95.080364       0.0\n",
-       "2020-01-01 00:04:00   9.450826  111.420042       0.0\n",
-       "...                        ...         ...       ...\n",
-       "2020-01-07 23:55:00  10.674776  107.970748       0.0\n",
-       "2020-01-07 23:56:00  10.426524  117.168763       0.0\n",
-       "2020-01-07 23:57:00   9.467549  100.109809       0.0\n",
-       "2020-01-07 23:58:00   9.751687  104.764560       0.0\n",
-       "2020-01-07 23:59:00  11.440382   97.947009       0.0\n",
-       "\n",
-       "[10080 rows x 3 columns]"
-      ]
-     },
-     "execution_count": 11,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "data"
    ]
@@ -330,13 +146,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 12,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.470098Z",
-     "start_time": "2020-06-23T22:24:13.467645Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "from pyActigraphy.io import BaseRaw"
@@ -344,12 +155,7 @@
   },
   {
    "cell_type": "markdown",
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T17:32:17.102397Z",
-     "start_time": "2020-06-23T17:32:17.079433Z"
-    }
-   },
+   "metadata": {},
    "source": [
     "help(BaseRaw)"
    ]
@@ -363,13 +169,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 13,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.478395Z",
-     "start_time": "2020-06-23T22:24:13.472434Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "raw = BaseRaw(\n",
@@ -387,36 +188,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 14,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.488752Z",
-     "start_time": "2020-06-23T22:24:13.480782Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "2020-01-01 00:00:00    10.161639\n",
-       "2020-01-01 00:01:00    10.016515\n",
-       "2020-01-01 00:02:00    10.356472\n",
-       "2020-01-01 00:03:00     9.496464\n",
-       "2020-01-01 00:04:00     9.450826\n",
-       "                         ...    \n",
-       "2020-01-07 23:55:00    10.674776\n",
-       "2020-01-07 23:56:00    10.426524\n",
-       "2020-01-07 23:57:00     9.467549\n",
-       "2020-01-07 23:58:00     9.751687\n",
-       "2020-01-07 23:59:00    11.440382\n",
-       "Freq: 60S, Name: Activity, Length: 10080, dtype: float64"
-      ]
-     },
-     "execution_count": 14,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.data"
    ]
@@ -438,13 +212,8 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 15,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.497401Z",
-     "start_time": "2020-06-23T22:24:13.491196Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "# Here, I assume that 0: the device is worn, 1: device not worn. \n",
@@ -461,113 +230,44 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 16,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.504846Z",
-     "start_time": "2020-06-23T22:24:13.499669Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "<604800 * Seconds>"
-      ]
-     },
-     "execution_count": 16,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.duration()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 17,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.511587Z",
-     "start_time": "2020-06-23T22:24:13.506957Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "10080"
-      ]
-     },
-     "execution_count": 17,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.length()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 18,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.526781Z",
-     "start_time": "2020-06-23T22:24:13.513469Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "14257.019160492273"
-      ]
-     },
-     "execution_count": 18,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.ADAT(binarize=False)"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 19,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.538199Z",
-     "start_time": "2020-06-23T22:24:13.528786Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "1.0786515197769488"
-      ]
-     },
-     "execution_count": 19,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "raw.IV(binarize=False)"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 20,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.542657Z",
-     "start_time": "2020-06-23T22:24:13.540036Z"
-    }
-   },
+   "execution_count": null,
+   "metadata": {},
    "outputs": [],
    "source": [
     "# If you want to mask the data\n",
@@ -576,25 +276,9 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 21,
-   "metadata": {
-    "ExecuteTime": {
-     "end_time": "2020-06-23T22:24:13.560801Z",
-     "start_time": "2020-06-23T22:24:13.544941Z"
-    }
-   },
-   "outputs": [
-    {
-     "data": {
-      "text/plain": [
-       "1.929526935116606"
-      ]
-     },
-     "execution_count": 21,
-     "metadata": {},
-     "output_type": "execute_result"
-    }
-   ],
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
    "source": [
     "# For a gaussian noise, IV should be close to 2.\n",
     "raw.IV(binarize=False)"
@@ -617,9 +301,9 @@
  ],
  "metadata": {
   "kernelspec": {
-   "display_name": "Python3 (pyActi)",
+   "display_name": "pyActi37",
    "language": "python",
-   "name": "pyactigraphy_py3"
+   "name": "pyacti37"
   },
   "language_info": {
    "codemirror_mode": {
@@ -631,7 +315,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.7.0"
+   "version": "3.7.12"
   }
  },
  "nbformat": 4,

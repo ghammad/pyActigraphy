@@ -1,4 +1,4 @@
-﻿pyActigraphy.io.read_raw_atr
+pyActigraphy.io.read_raw_atr
 ============================
 
 .. currentmodule:: pyActigraphy.io

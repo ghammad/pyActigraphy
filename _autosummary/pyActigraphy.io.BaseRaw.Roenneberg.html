@@ -3,27 +3,27 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pyActigraphy.io.BaseRaw.Roenneberg &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pyActigraphy.io.BaseRaw.Roenneberg &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/language_data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script src="../_static/js/jquery-1.11.0.min.js"></script>
-    <script src="../_static/js/jquery-fix.js"></script>
-    <script src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script src="../_static/bootstrap-sphinx.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -38,7 +38,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -46,6 +46,7 @@
             
                 <li><a href="../tutorials.html">Tutorials</a></li>
                 <li><a href="../api.html">API</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -88,13 +89,13 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+    <div class="body col-md-12 content" role="main">
       
-  <div class="section" id="pyactigraphy-io-baseraw-roenneberg">
+  <section id="pyactigraphy-io-baseraw-roenneberg">
 <h1>pyActigraphy.io.BaseRaw.Roenneberg<a class="headerlink" href="#pyactigraphy-io-baseraw-roenneberg" title="Permalink to this headline">¶</a></h1>
 <dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.Roenneberg">
-<code class="sig-prename descclassname">BaseRaw.</code><code class="sig-name descname">Roenneberg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">trend_period</span><span class="o">=</span><span class="default_value">'24h'</span></em>, <em class="sig-param"><span class="n">min_trend_period</span><span class="o">=</span><span class="default_value">'12h'</span></em>, <em class="sig-param"><span class="n">threshold</span><span class="o">=</span><span class="default_value">0.15</span></em>, <em class="sig-param"><span class="n">min_seed_period</span><span class="o">=</span><span class="default_value">'30Min'</span></em>, <em class="sig-param"><span class="n">max_test_period</span><span class="o">=</span><span class="default_value">'12h'</span></em>, <em class="sig-param"><span class="n">n_succ</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.Roenneberg" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.Roenneberg">
+<span class="sig-prename descclassname"><span class="pre">BaseRaw.</span></span><span class="sig-name descname"><span class="pre">Roenneberg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trend_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'24h'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_trend_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'12h'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_seed_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'30Min'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_test_period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'12h'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_consec_below</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'30Min'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rsfreq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.Roenneberg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Automatic sleep detection.</p>
 <p>Identification of consolidated sleep episodes using the
 algorithm developped by Roenneberg et al. <a class="reference internal" href="#r9aa8a3ceddee-1" id="id1">[1]</a>.</p>
@@ -113,8 +114,14 @@ Default is ‘0.15’</p></li>
 Default is ‘30Min’.</p></li>
 <li><p><strong>max_test_period</strong> (<em>str</em><em>, </em><em>optional</em>) – Maximal period of the test series.
 Default is ‘12h’</p></li>
-<li><p><strong>n_succ</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of successive elements to consider when searching for the
-maximum correlation peak.</p></li>
+<li><p><strong>r_consec_below</strong> (<em>str</em><em>, </em><em>optional</em>) – Time range to consider, past the potential correlation peak when
+searching for the maximum correlation peak.
+Default is ‘30Min’.</p></li>
+<li><p><strong>rsfreq</strong> (<em>str</em><em>, </em><em>optional</em>) – Resampling frequency used to evaluate the sleep periods. The final
+time series with rest/activity scores is returned with a frequency
+equal to one of the input data. If set to None, no resampling is
+performed.
+Default is None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -125,6 +132,12 @@ activity (0).</p>
 <dd class="field-odd"><p>pandas.core.Series</p>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The performance of this algorithm has been evaluated for
+actigraphy data aggregated in 10-min bins <a class="reference internal" href="#r9aa8a3ceddee-2" id="id2">[2]</a>.</p>
+</div>
 <p class="rubric">References</p>
 <dl class="citation">
 <dt class="label" id="r9aa8a3ceddee-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
@@ -133,11 +146,19 @@ Vetter, C., &amp; Winnebeck, E. C. (2015). Human Activity and Rest
 In Situ. In Methods in Enzymology (Vol. 552, pp. 257-283).
 <a class="reference external" href="http://doi.org/10.1016/bs.mie.2014.11.028">http://doi.org/10.1016/bs.mie.2014.11.028</a></p>
 </dd>
+<dt class="label" id="r9aa8a3ceddee-2"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Loock, A., Khan Sullivan, A., Reis, C., Paiva, T., Ghotbi, N.,
+Pilz, L. K., Biller, A. M., Molenda, C., Vuori‐Brodowski, M. T.,
+Roenneberg, T., &amp; Winnebeck, E. C. (2021). Validation of the
+Munich Actimetry Sleep Detection Algorithm for estimating
+sleep–wake patterns from activity recordings. Journal of Sleep
+Research, April, 1–12. <a class="reference external" href="https://doi.org/10.1111/jsr.13371">https://doi.org/10.1111/jsr.13371</a></p>
+</dd>
 </dl>
 <p class="rubric">Examples</p>
 </dd></dl>
 
-</div>
+</section>
 
 
     </div>
@@ -151,8 +172,8 @@ In Situ. In Methods in Enzymology (Vol. 552, pp. 257-283).
       
     </p>
     <p>
-        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

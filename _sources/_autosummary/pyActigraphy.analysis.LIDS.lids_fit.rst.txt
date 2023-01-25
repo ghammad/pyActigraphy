@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.LIDS.lids\_fit
+pyActigraphy.analysis.LIDS.lids\_fit
 ====================================
 
 .. currentmodule:: pyActigraphy.analysis

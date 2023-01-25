@@ -1,4 +1,4 @@
-﻿pyActigraphy.filters.FiltersMixin.create\_inactivity\_mask
+pyActigraphy.filters.FiltersMixin.create\_inactivity\_mask
 ==========================================================
 
 .. currentmodule:: pyActigraphy.filters

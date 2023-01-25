@@ -1,0 +1,6 @@
+﻿pyActigraphy.light.LightMetricsMixin.TATp
+=========================================
+
+.. currentmodule:: pyActigraphy.light
+
+.. automethod:: LightMetricsMixin.TATp

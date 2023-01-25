@@ -3,11 +3,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyActigraphy.analysis.Cosinor.fit_reader &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pyActigraphy.analysis.Cosinor.fit_reader &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -19,10 +20,10 @@
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js "></script>
-<script type="text/javascript" src="../_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
-<script type="text/javascript" src="../_static/bootstrap-sphinx.js "></script>
+<script type="text/javascript" src="../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -37,7 +38,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -45,6 +46,7 @@
             
                 <li><a href="../tutorials.html">Tutorials</a></li>
                 <li><a href="../api.html">API</a></li>
+                <li><a href="../changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -89,20 +91,20 @@
   <div class="row">
     <div class="body col-md-12 content" role="main">
       
-  <div class="section" id="pyactigraphy-analysis-cosinor-fit-reader">
+  <section id="pyactigraphy-analysis-cosinor-fit-reader">
 <h1>pyActigraphy.analysis.Cosinor.fit_reader<a class="headerlink" href="#pyactigraphy-analysis-cosinor-fit-reader" title="Permalink to this headline">¶</a></h1>
 <dl class="py method">
-<dt id="pyActigraphy.analysis.Cosinor.fit_reader">
-<code class="sig-prename descclassname"><span class="pre">Cosinor.</span></code><code class="sig-name descname"><span class="pre">fit_reader</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'leastsq'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'raise'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce_fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/analysis/cosinor.html#Cosinor.fit_reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.analysis.Cosinor.fit_reader" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fit the actigraphy data contained in a reader using a cosinor
-function.</p>
+<dt class="sig sig-object py" id="pyActigraphy.analysis.Cosinor.fit_reader">
+<span class="sig-prename descclassname"><span class="pre">Cosinor.</span></span><span class="sig-name descname"><span class="pre">fit_reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'leastsq'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'raise'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce_fcn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose_parallel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/analysis/cosinor.html#Cosinor.fit_reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.analysis.Cosinor.fit_reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Batch cosinor fit</p>
+<p>Fit the actigraphy data contained in a reader using a cosinor function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>reader</strong> (<em>instance of RawReader</em>) – Raw measurements to be fitted.</p></li>
-<li><p><strong>params</strong> (instance of Parameters <a href="#id3"><span class="problematic" id="id1">[1]_</span></a>, optional.) – Initial fit parameters. If None, use the default parameters.
+<li><p><strong>params</strong> (instance of Parameters <a class="reference internal" href="#r27df975371e2-1" id="id1">[1]</a>, optional.) – Initial fit parameters. If None, use the default parameters.
 Default is None.</p></li>
-<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the fitting method to use <a href="#id4"><span class="problematic" id="id2">[1]_</span></a>.
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the fitting method to use <a class="reference internal" href="#r27df975371e2-1" id="id2">[1]</a>.
 Default is ‘leastsq’.</p></li>
 <li><p><strong>nan_policy</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>Specifies action if the objective function returns NaN values.
 One of:</p>
@@ -134,9 +136,17 @@ Default is 0.</p></li>
 </ul>
 </dd>
 </dl>
+<p class="rubric">References</p>
+<dl class="citation">
+<dt class="label" id="r27df975371e2-1"><span class="brackets">1</span><span class="fn-backref">(<a href="#id1">1</a>,<a href="#id2">2</a>)</span></dt>
+<dd><p>Non-Linear Least-Squares Minimization and Curve-Fitting for
+Python.
+<a class="reference external" href="https://lmfit.github.io/lmfit-py/index.html">https://lmfit.github.io/lmfit-py/index.html</a></p>
+</dd>
+</dl>
 </dd></dl>
 
-</div>
+</section>
 
 
     </div>
@@ -150,8 +160,8 @@ Default is 0.</p></li>
       
     </p>
     <p>
-        &copy; Copyright 2018-2021, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

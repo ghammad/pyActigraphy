@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.FLM.basis\_functions
+pyActigraphy.analysis.FLM.basis\_functions
 ==========================================
 
 .. currentmodule:: pyActigraphy.analysis

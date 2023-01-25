@@ -1,4 +1,4 @@
-﻿pyActigraphy.io.read_raw_agd
+pyActigraphy.io.read_raw_agd
 ============================
 
 .. currentmodule:: pyActigraphy.io

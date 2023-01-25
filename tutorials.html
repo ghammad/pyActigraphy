@@ -3,11 +3,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyActigraphy tutorials &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pyActigraphy tutorials &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
@@ -19,10 +20,10 @@
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
-<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
-<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -37,7 +38,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -45,6 +46,7 @@
             
                 <li><a href="#">Tutorials</a></li>
                 <li><a href="api.html">API</a></li>
+                <li><a href="changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -89,18 +91,18 @@
   <div class="row">
     <div class="body col-md-12 content" role="main">
       
-  <div class="section" id="pyactigraphy-tutorials">
+  <section id="pyactigraphy-tutorials">
 <h1>pyActigraphy tutorials<a class="headerlink" href="#pyactigraphy-tutorials" title="Permalink to this headline">¶</a></h1>
 <p>This series of notebooks are meant to illustrate the different features of the
 <em>pyActigraphy</em> package.</p>
-<div class="section" id="introduction">
+<section id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>A gentle introduction to the basic functionalities: <a class="reference internal" href="pyActigraphy-Intro.html"><span class="doc">intro</span></a></p></li>
 <li><p>How to read files by batch: <a class="reference internal" href="pyActigraphy-Batch.html"><span class="doc">batch</span></a></p></li>
 </ul>
-</div>
-<div class="section" id="feature-examples">
+</section>
+<section id="feature-examples">
 <h2>Feature examples<a class="headerlink" href="#feature-examples" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>How to discard invalid sequences in actigraphy recordings before analysis:</p>
@@ -116,8 +118,8 @@
 <li><p><a class="reference internal" href="pyActigraphy-Sleep-Algorithms.html"><span class="doc">How to detect rest periods automatically</span></a></p></li>
 <li><p><a class="reference internal" href="pyActigraphy-StateTransitionProb.html"><span class="doc">How to quantify sleep fragmentation using state transition probabilities</span></a></p></li>
 </ul>
-</div>
-<div class="section" id="analysis-examples">
+</section>
+<section id="analysis-examples">
 <h2>Analysis examples<a class="headerlink" href="#analysis-examples" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>How to perform a Cosinor analysis with pyActigraphy: <a class="reference internal" href="pyActigraphy-Cosinor.html"><span class="doc">cosinor</span></a></p></li>
@@ -125,8 +127,19 @@
 <li><p>How to perform a (Multifractal) Detrended fluctuation analysis (MF-DFA) with pyActigraphy: <a class="reference internal" href="pyActigraphy-MFDFA.html"><span class="doc">mfdfa</span></a></p></li>
 <li><p>How to perform a Singular spectrum analysis (SSA) with pyActigraphy: <a class="reference internal" href="pyActigraphy-SSA.html"><span class="doc">ssa</span></a></p></li>
 </ul>
-</div>
-<div class="section" id="work-in-progress">
+</section>
+<section id="pylight-examples">
+<h2>pyLight examples<a class="headerlink" href="#pylight-examples" title="Permalink to this headline">¶</a></h2>
+<p>The <em>pyActigraphy</em> package contains a module dedicated to the analysis of light
+exposure data, named <em>pyLight</em>. The following tutorials specifically illustrate
+its functionalities:</p>
+<ul class="simple">
+<li><p>A gentle introduction to the basics of <em>pyLight</em>: <a class="reference internal" href="pyLight-Intro.html"><span class="doc">pylight_intro</span></a></p></li>
+<li><p>How to process light exposure data with <em>pyLight</em>: <a class="reference internal" href="pyLight-DataManip.html"><span class="doc">pylight_manip</span></a></p></li>
+<li><p>How to calculate various light exposure metrics with <em>pyLight</em>: <a class="reference internal" href="pyLight-Metrics.html"><span class="doc">pylight_metrics</span></a></p></li>
+</ul>
+</section>
+<section id="work-in-progress">
 <h2>Work-in-progress<a class="headerlink" href="#work-in-progress" title="Permalink to this headline">¶</a></h2>
 <p>The features illustrated in this section have to be considered as work-in-progress;
 most likely, they will be turned into full-fledged features in a next release.
@@ -134,15 +147,15 @@ However, for impatient and brave users, it provides a starting point for testing
 <ul class="simple">
 <li><p>How to read actigraphy data stored in a pandas.DataFrame with pyActigraphy: <a class="reference internal" href="pyActigraphy-Pandas.html"><span class="doc">pandas</span></a></p></li>
 </ul>
-</div>
-<div class="section" id="suggestions-requests">
+</section>
+<section id="suggestions-requests">
 <h2>Suggestions &amp; Requests<a class="headerlink" href="#suggestions-requests" title="Permalink to this headline">¶</a></h2>
 <p>If a feature of the <em>pyActigraphy</em> package is not illustrated here, do not
 hesitate to suggest it by fill an issue.</p>
 <p>Or, even better, contribute to this section by providing us with your favourite
 notebook where you illustrate how this feature is relevant for your analysis.</p>
-</div>
-</div>
+</section>
+</section>
 
 
     </div>
@@ -156,8 +169,8 @@ notebook where you illustrate how this feature is relevant for your analysis.</p
       
     </p>
     <p>
-        &copy; Copyright 2018-2021, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

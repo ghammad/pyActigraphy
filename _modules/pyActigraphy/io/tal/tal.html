@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyActigraphy.io.tal.tal &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../../tutorials.html">Tutorials</a></li>
+                <li><a href="../../../../api.html">API</a></li>
+                <li><a href="../../../../changelog.html">What's new</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <h1>Source code for pyActigraphy.io.tal.tal</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">BaseRaw</span>
+<span class="kn">from</span> <span class="nn">pyActigraphy.light</span> <span class="kn">import</span> <span class="n">LightRecording</span>
+
+
+<span class="k">class</span> <span class="nc">RawTAL</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Raw object from .txt file recorded by Tempatilumi (CE Brasil)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_fname: str</span>
+<span class="sd">        Path to the Tempatilumi file.</span>
+<span class="sd">    name: str, optional</span>
+<span class="sd">        Name of the recording. If None, the device UUID is used instead.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    sep: str, optional</span>
+<span class="sd">        Delimiter to use.</span>
+<span class="sd">        Default is &quot;;&quot;.</span>
+<span class="sd">    frequency: str, optional</span>
+<span class="sd">        Sampling frequency.</span>
+<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        If None, the sampling frequency is inferred from the data. Otherwise,</span>
+<span class="sd">        the data are resampled to the specified frequency.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    start_time: datetime-like, optional</span>
+<span class="sd">        Read data from this time.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    period: str, optional</span>
+<span class="sd">        Length of the read data.</span>
+<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        Default is None (i.e all the data).</span>
+<span class="sd">    encoding: str, optional</span>
+<span class="sd">        Encoding to use for UTF when reading the file.</span>
+<span class="sd">        Default is &quot;latin-1&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_fname</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;latin-1&#39;</span>
+    <span class="p">):</span>
+
+        <span class="c1"># get absolute file path</span>
+        <span class="n">input_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span>
+        <span class="c1"># [TO-DO] check if file exists</span>
+        <span class="c1"># [TO-DO] check it is has the right file extension .awd</span>
+
+        <span class="c1"># extract header and data</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_fname</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">cur_line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">cur_line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;Data&quot;</span><span class="p">,</span> <span class="s2">&quot; Hora&quot;</span><span class="p">])):</span>
+                <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cur_line</span><span class="p">)</span>
+                <span class="n">pos</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+                <span class="n">cur_line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+            <span class="n">index_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                <span class="n">filepath_or_buffer</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
+                <span class="c1"># encoding=encoding,</span>
+                <span class="n">skipinitialspace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">,</span>
+                <span class="n">infer_datetime_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">index_col</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">parse_dates</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s1">&#39;Date_Time&#39;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="s1">&#39;Data&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Hora&#39;</span>
+                    <span class="p">]</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+        <span class="n">index_data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Date_Time&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># extract informations from the header</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_tal_uuid</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">uuid</span>
+
+        <span class="c1"># Check column names</span>
+        <span class="c1"># Evento	 Temperatura	 Luminosidade	 Atividade</span>
+        <span class="k">if</span> <span class="s1">&#39;Atividade&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">index_data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;The activity counts cannot be found in the data.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;Column name in file header should be &quot;Atividade&quot;.&#39;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span>
+            <span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;Temperatura&#39;</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__events</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span>
+            <span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;Evento&#39;</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">index_data</span> <span class="o">=</span> <span class="n">index_data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="n">freq</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">index_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">inferred_freq</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;The sampling frequency:</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;- cannot be inferred from the data</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;AND</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;- is NOT explicity passed to the reader function.</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">index_data</span> <span class="o">=</span> <span class="n">index_data</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="n">index_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">inferred_freq</span><span class="p">)</span>
+            <span class="n">freq</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">index_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_time</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">index_data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">period</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+            <span class="n">stop_time</span> <span class="o">=</span> <span class="n">start_time</span><span class="o">+</span><span class="n">period</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stop_time</span> <span class="o">=</span> <span class="n">index_data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">period</span> <span class="o">=</span> <span class="n">stop_time</span> <span class="o">-</span> <span class="n">start_time</span>
+
+        <span class="n">index_data</span> <span class="o">=</span> <span class="n">index_data</span><span class="p">[</span><span class="n">start_time</span><span class="p">:</span><span class="n">stop_time</span><span class="p">]</span>
+
+        <span class="c1"># Light</span>
+        <span class="n">index_light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;Luminosidade&#39;</span><span class="p">)</span>
+
+        <span class="c1"># call __init__ function of the base class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
+            <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;TAL&#39;</span><span class="p">,</span>
+            <span class="n">axial_mode</span><span class="o">=</span><span class="s1">&#39;tri-axial&#39;</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+            <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+            <span class="n">frequency</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">index_data</span><span class="p">[</span><span class="s1">&#39;Atividade&#39;</span><span class="p">],</span>
+            <span class="n">light</span><span class="o">=</span><span class="n">LightRecording</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">index_light</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;whitelight&#39;</span><span class="p">),</span>
+                <span class="n">frequency</span><span class="o">=</span><span class="n">freq</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">white_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the light intensity in µw/cm².&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">light</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">light</span><span class="o">.</span><span class="n">get_channel</span><span class="p">(</span><span class="s2">&quot;whitelight&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the temperature (in ° C).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__temperature</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">events</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Event markers.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__events</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__extract_tal_uuid</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">header</span><span class="p">):</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Série: (\d+)&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">header</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;UUID cannot be extracted from the file header.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__extract_from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="read_raw_tal"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_tal.html#pyActigraphy.io.read_raw_tal">[docs]</a><span class="k">def</span> <span class="nf">read_raw_tal</span><span class="p">(</span>
+    <span class="n">input_fname</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">,</span>
+    <span class="n">frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;latin-1&#39;</span>
+<span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Raw object from .txt file recorded by Tempatilumi (CE Brasil)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_fname: str</span>
+<span class="sd">        Path to the Tempatilumi file.</span>
+<span class="sd">    name: str, optional</span>
+<span class="sd">        Name of the recording. If None, the device UUID is used instead.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    sep: str, optional</span>
+<span class="sd">        Delimiter to use.</span>
+<span class="sd">        Default is &#39;;&#39;.</span>
+<span class="sd">    frequency: str, optional</span>
+<span class="sd">        Sampling frequency.</span>
+<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        If None, the sampling frequency is inferred from the data. Otherwise,</span>
+<span class="sd">        the data are resampled to the specified frequency.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    start_time: datetime-like, optional</span>
+<span class="sd">        Read data from this time.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    period: str, optional</span>
+<span class="sd">        Length of the read data.</span>
+<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        Default is None (i.e all the data).</span>
+<span class="sd">    encoding: str, optional</span>
+<span class="sd">        Encoding to use for UTF when reading the file.</span>
+<span class="sd">        Default is &#39;latin-1&#39;.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    raw : Instance of RawTAL</span>
+<span class="sd">        An object containing raw TAL data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">RawTAL</span><span class="p">(</span>
+        <span class="n">input_fname</span><span class="o">=</span><span class="n">input_fname</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">sep</span><span class="o">=</span><span class="n">sep</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="o">=</span><span class="n">frequency</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+        <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+        <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

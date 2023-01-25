@@ -3,26 +3,29 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Non-parametric variables with pyActigraphy &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Non-parametric variables with pyActigraphy &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
-<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
-<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -37,7 +40,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -45,6 +48,7 @@
             
                 <li><a href="tutorials.html">Tutorials</a></li>
                 <li><a href="api.html">API</a></li>
+                <li><a href="changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -299,7 +303,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -345,7 +349,7 @@ div.rendered_html tbody tr:hover {
 </li></ul></li><li><p>2  Relative amplitude</p>
 </li><li><p>3  Mean IS and IV</p>
 </li><li><p>4  IS, IV and RA per period</p>
-</li></ul></div><div class="section" id="Non-parametric-variables-with-pyActigraphy">
+</li></ul></div><section id="Non-parametric-variables-with-pyActigraphy">
 <h1>Non-parametric variables with pyActigraphy<a class="headerlink" href="#Non-parametric-variables-with-pyActigraphy" title="Permalink to this headline">¶</a></h1>
 <p>Non-parametric variables such as:</p>
 <ul class="simple">
@@ -355,30 +359,19 @@ div.rendered_html tbody tr:hover {
 </ul>
 <p>can easily be calculated with the pyActigraphy package.</p>
 <p>First import the pyActigraphy package and read your favorite actigraphy data file:</p>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/usr/local/lib/python3.7/site-packages/statsmodels/tools/_testing.py:19: FutureWarning: pandas.util.testing is deprecated. Use the functions in the public API at pandas.testing instead.
-  import pandas.util.testing as tm
-</pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">pyActigraphy</span><span class="o">.</span><span class="vm">__file__</span><span class="p">),</span><span class="s1">&#39;tests/data/&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -387,13 +380,12 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Read test file</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read test file</span>
 <span class="n">raw</span> <span class="o">=</span> <span class="n">pyActigraphy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw_awd</span><span class="p">(</span><span class="n">fpath</span><span class="o">+</span><span class="s1">&#39;example_01.AWD&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="Interdaily-stability-&amp;-intradaily-variability">
+<section id="Interdaily-stability-&amp;-intradaily-variability">
 <h2>Interdaily stability &amp; intradaily variability<a class="headerlink" href="#Interdaily-stability-&-intradaily-variability" title="Permalink to this headline">¶</a></h2>
 <p>For both variables, the default parameters are:</p>
 <ul class="simple">
@@ -405,8 +397,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -416,15 +407,14 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.5261668298837823
+0.527656245354158
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -434,19 +424,18 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.33812394847433414
+0.32913524895082263
 </pre></div></div>
 </div>
 <p>However, it is possible to change these parameters.</p>
-<div class="section" id="Changing-the-resampling-frequency">
+<section id="Changing-the-resampling-frequency">
 <h3>Changing the resampling frequency<a class="headerlink" href="#Changing-the-resampling-frequency" title="Permalink to this headline">¶</a></h3>
 <p>To calculate the IS&amp;IV with a resampling frequency of 30 minutes, for example:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;30min&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;30min&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -456,15 +445,14 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.49549211802917276
+0.49538299172546324
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;30min&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;30min&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -474,19 +462,18 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.31782089428547217
+0.314973337080311
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Changing-the-threshold">
+</section>
+<section id="Changing-the-threshold">
 <h3>Changing the threshold<a class="headerlink" href="#Changing-the-threshold" title="Permalink to this headline">¶</a></h3>
 <p>To calculate IS&amp;IV with a different threshold on the activity count when binarizing the data:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -496,15 +483,14 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.5402476676892598
+0.5418567121727559
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -514,19 +500,18 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.3466013318045289
+0.33654319292100576
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Without-binarizing-the-data">
+</section>
+<section id="Without-binarizing-the-data">
 <h3>Without binarizing the data<a class="headerlink" href="#Without-binarizing-the-data" title="Permalink to this headline">¶</a></h3>
 <p>It is also possible to calculate these variables without binarizing the data:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -536,15 +521,14 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.470359109153365
+0.46561431150973936
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -554,12 +538,12 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.707705747927084
+0.7095292983583361
 </pre></div></div>
 </div>
-</div>
-</div>
-<div class="section" id="Relative-amplitude">
+</section>
+</section>
+<section id="Relative-amplitude">
 <h2>Relative amplitude<a class="headerlink" href="#Relative-amplitude" title="Permalink to this headline">¶</a></h2>
 <p>Similarly, the default parameters for the relative amplitude (RA) are:</p>
 <ul class="simple">
@@ -571,8 +555,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">RA</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">RA</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -582,15 +565,14 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.7576503909857776
+0.7576503909857768
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">RA</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">RA</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -603,8 +585,8 @@ div.rendered_html tbody tr:hover {
 0.9168632026873167
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Mean-IS-and-IV">
+</section>
+<section id="Mean-IS-and-IV">
 <h2>Mean IS and IV<a class="headerlink" href="#Mean-IS-and-IV" title="Permalink to this headline">¶</a></h2>
 <p>In <em>Nonparametric methods in actigraphy: An update</em>, Gonçalves et al. introduced two new variables, ISm and IVm, as the mean of the IS and IV (respectively) values calculated as different resampling frequencies.</p>
 <p>These two additional variables are also available in the <strong>pyActigraphy</strong> package. For both variables, the default parameters are:</p>
@@ -617,8 +599,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">ISm</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">ISm</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -628,15 +609,14 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.4699905751376329
+0.47064337220625074
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IVm</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">IVm</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -646,7 +626,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.2752694644232893
+0.2706746158264432
 </pre></div></div>
 </div>
 <p>To change the resampling frequencies:</p>
@@ -654,8 +634,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">new_resampling_frequencies</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span><span class="s1">&#39;30min&#39;</span><span class="p">,</span><span class="s1">&#39;1H&#39;</span><span class="p">]</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">new_resampling_frequencies</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span><span class="s1">&#39;30min&#39;</span><span class="p">,</span><span class="s1">&#39;1H&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
 </div>
@@ -663,8 +642,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">ISm</span><span class="p">(</span><span class="n">freqs</span><span class="o">=</span><span class="n">new_resampling_frequencies</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">ISm</span><span class="p">(</span><span class="n">freqs</span><span class="o">=</span><span class="n">new_resampling_frequencies</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -674,11 +652,11 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-0.48726920799573065
+0.48841431777142963
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="IS,-IV-and-RA-per-period">
+</section>
+<section id="IS,-IV-and-RA-per-period">
 <h2>IS, IV and RA per period<a class="headerlink" href="#IS,-IV-and-RA-per-period" title="Permalink to this headline">¶</a></h2>
 <p><strong>pyActigraphy</strong> introduces a new concept concerning the calculation of the non-parametric variables: it is now possible to calculate them per period.</p>
 <p>The acquisition period is split in consecutive periods with the required length (if possible) and the non-parametric variable is then calculated for each period:</p>
@@ -686,8 +664,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">ISp</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">ISp</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -697,7 +674,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[0.6738043708951869]
+[0.6876777827182482]
 </pre></div></div>
 </div>
 <p>By default, the period length is 7 days. But this parameter can easily be changed:</p>
@@ -705,8 +682,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Period of 4 days for example</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Period of 4 days for example</span>
 <span class="n">raw</span><span class="o">.</span><span class="n">ISp</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="s1">&#39;4D&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -717,7 +693,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[0.607089927030551, 0.8861147568529785, 0.4628772933666266]
+[0.629359516562714, 0.8780603587977001, 0.43948376768341835]
 </pre></div></div>
 </div>
 <p>In order to find out how many periods were found in the actigraphy record:</p>
@@ -725,8 +701,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">ISp</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="s1">&#39;4D&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">ISp</span><span class="p">(</span><span class="n">period</span><span class="o">=</span><span class="s1">&#39;4D&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -736,7 +711,7 @@ div.rendered_html tbody tr:hover {
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Number of periods: 3
- Time unaccounted for: 0 days, 19h, 0m, 0s
+ Time unaccounted for: 0 days, 18h, 0m, 0s
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -745,12 +720,12 @@ Number of periods: 3
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[0.607089927030551, 0.8861147568529785, 0.4628772933666266]
+[0.629359516562714, 0.8780603587977001, 0.43948376768341835]
 </pre></div></div>
 </div>
 <p>Et voilà!</p>
-</div>
-</div>
+</section>
+</section>
 
 
     </div>
@@ -764,8 +739,8 @@ Number of periods: 3
       
     </p>
     <p>
-        &copy; Copyright 2018-2021, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

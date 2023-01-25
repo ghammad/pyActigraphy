@@ -3,27 +3,26 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pyActigraphy.io.awd.awd &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyActigraphy.io.awd.awd &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/language_data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script src="../../../../_static/js/jquery-1.11.0.min.js"></script>
-    <script src="../../../../_static/js/jquery-fix.js"></script>
-    <script src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script src="../../../../_static/bootstrap-sphinx.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -38,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -46,6 +45,7 @@
             
                 <li><a href="../../../../tutorials.html">Tutorials</a></li>
                 <li><a href="../../../../api.html">API</a></li>
+                <li><a href="../../../../changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -84,13 +84,13 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+    <div class="body col-md-12 content" role="main">
       
   <h1>Source code for pyActigraphy.io.awd.awd</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">BaseRaw</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">BaseRaw</span>
 
 
 <span class="k">class</span> <span class="nc">RawAWD</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
@@ -100,13 +100,13 @@
 <span class="sd">    ----------</span>
 <span class="sd">    input_fname: str</span>
 <span class="sd">        Path to the AWD file.</span>
-<span class="sd">    header_size: int</span>
+<span class="sd">    header_size: int, optional</span>
 <span class="sd">        Header size (i.e. number of lines) of the raw data file. Default is 7.</span>
-<span class="sd">    frequency: str</span>
-<span class="sd">        Data acquisition frequency.</span>
-<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">    frequency: str, optional</span>
+<span class="sd">        Data acquisition frequency to use if it cannot be infered from the</span>
+<span class="sd">        header. Cf. #timeseries-offset-aliases in</span>
 <span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
-<span class="sd">        Default is &#39;1T&#39;.</span>
+<span class="sd">        Default is None.</span>
 <span class="sd">    start_time: datetime-like, optional</span>
 <span class="sd">        Read data from this time.</span>
 <span class="sd">        Default is None.</span>
@@ -119,11 +119,22 @@
 <span class="sd">        The dtype of the raw data. Default is np.int.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="n">frequency_code</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="s1">&#39;15s&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="s1">&#39;30s&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;4&#39;</span><span class="p">:</span> <span class="s1">&#39;60s&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;8&#39;</span><span class="p">:</span> <span class="s1">&#39;2min&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;20&#39;</span><span class="p">:</span> <span class="s1">&#39;5min&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;81&#39;</span><span class="p">:</span> <span class="s1">&#39;2s&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C1&#39;</span><span class="p">:</span> <span class="s1">&#39;5s&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;C2&#39;</span><span class="p">:</span> <span class="s1">&#39;10s&#39;</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_fname</span><span class="p">,</span>
         <span class="n">header_size</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-        <span class="n">frequency</span><span class="o">=</span><span class="s1">&#39;1min&#39;</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">period</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
@@ -140,15 +151,27 @@
 
         <span class="c1"># extract informations from the header</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">__extract_awd_name</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">__extract_awd_frequency</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
         <span class="n">uuid</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">__extract_awd_uuid</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">__extract_awd_start_time</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">freq</span> <span class="o">=</span> <span class="n">frequency</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;The acquisition frequency could not be retrieved from the&quot;</span>
+                    <span class="s2">&quot; header and was not provided by the user. Please specify&quot;</span>
+                    <span class="s2">&quot; the input parameter &#39;frequency&#39; in order to overcome&quot;</span>
+                    <span class="s2">&quot; this issue.&quot;</span>
+                <span class="p">)</span>
 
         <span class="n">index_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
             <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span>
                 <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
                 <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-                <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1min&#39;</span>
+                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span>
             <span class="p">)</span>
         <span class="p">)</span>
 
@@ -174,7 +197,7 @@
             <span class="n">axial_mode</span><span class="o">=</span><span class="s1">&#39;mono-axial&#39;</span><span class="p">,</span>
             <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
             <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
-            <span class="n">frequency</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">frequency</span><span class="p">),</span>
+            <span class="n">frequency</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">freq</span><span class="p">),</span>
             <span class="n">data</span><span class="o">=</span><span class="n">index_data</span><span class="p">,</span>
             <span class="n">light</span><span class="o">=</span><span class="kc">None</span>
         <span class="p">)</span>
@@ -182,6 +205,15 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__extract_awd_name</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__extract_awd_frequency</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
+        <span class="n">freq</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">freq</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">frequency_code</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Could not find acquisition frequency in header info.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">frequency_code</span><span class="p">[</span><span class="n">freq</span><span class="p">]</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__extract_awd_uuid</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
@@ -195,7 +227,7 @@
 <div class="viewcode-block" id="read_raw_awd"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_awd.html#pyActigraphy.io.read_raw_awd">[docs]</a><span class="k">def</span> <span class="nf">read_raw_awd</span><span class="p">(</span>
     <span class="n">input_fname</span><span class="p">,</span>
     <span class="n">header_size</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
-    <span class="n">frequency</span><span class="o">=</span><span class="s1">&#39;1min&#39;</span><span class="p">,</span>
+    <span class="n">frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">period</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
@@ -205,13 +237,13 @@
 <span class="sd">    ----------</span>
 <span class="sd">    input_fname: str</span>
 <span class="sd">        Path to the AWD file.</span>
-<span class="sd">    header_size: int</span>
+<span class="sd">    header_size: int, optional</span>
 <span class="sd">        Header size (i.e. number of lines) of the raw data file. Default is 7.</span>
-<span class="sd">    frequency: str</span>
-<span class="sd">        Data acquisition frequency.</span>
-<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">    frequency: str, optional</span>
+<span class="sd">        Data acquisition frequency to use if it cannot be infered from the</span>
+<span class="sd">        header. Cf. #timeseries-offset-aliases in</span>
 <span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
-<span class="sd">        Default is &#39;1T&#39;.</span>
+<span class="sd">        Default is None.</span>
 <span class="sd">    start_time: datetime-like, optional</span>
 <span class="sd">        Read data from this time.</span>
 <span class="sd">        Default is None.</span>
@@ -247,8 +279,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.LIDS.lids\_period
+pyActigraphy.analysis.LIDS.lids\_period
 =======================================
 
 .. currentmodule:: pyActigraphy.analysis

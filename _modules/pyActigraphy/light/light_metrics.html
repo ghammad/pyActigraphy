@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyActigraphy.light.light_metrics &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../tutorials.html">Tutorials</a></li>
+                <li><a href="../../../api.html">API</a></li>
+                <li><a href="../../../changelog.html">What's new</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <h1>Source code for pyActigraphy.light.light_metrics</h1><div class="highlight"><pre>
+<span></span><span class="c1">#############################################################################</span>
+<span class="c1"># Copyright (c) 2022, Daylight Academy</span>
+<span class="c1"># Author: Grégory Hammad</span>
+<span class="c1"># Owner: Daylight Academy (https://daylight.academy)</span>
+<span class="c1"># Maintainer: Grégory Hammad</span>
+<span class="c1"># Email: gregory.hammad@uliege.be</span>
+<span class="c1"># Status: development</span>
+<span class="c1">#############################################################################</span>
+<span class="c1"># The development of a module for analysing light exposure</span>
+<span class="c1"># data was led and financially supported by members of the Daylight Academy</span>
+<span class="c1"># Project “The role of daylight for humans” (led by Mirjam Münch, Manuel</span>
+<span class="c1"># Spitschan). The module is part of the Human Light Exposure Database. For</span>
+<span class="c1"># more information about the project, please see</span>
+<span class="c1"># https://daylight.academy/projects/state-of-light-in-humans/.</span>
+<span class="c1">#</span>
+<span class="c1"># This module is also part of the pyActigraphy software.</span>
+<span class="c1"># pyActigraphy is a free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1"># pyActigraphy is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+<span class="c1">############################################################################</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">signal</span>
+<span class="kn">from</span> <span class="nn">..metrics.metrics</span> <span class="kn">import</span> <span class="n">_lmx</span>
+<span class="kn">from</span> <span class="nn">..metrics.metrics</span> <span class="kn">import</span> <span class="n">_interdaily_stability</span>
+<span class="kn">from</span> <span class="nn">..metrics.metrics</span> <span class="kn">import</span> <span class="n">_intradaily_variability</span>
+<span class="kn">from</span> <span class="nn">..utils.utils</span> <span class="kn">import</span> <span class="n">_average_daily_activity</span>
+<span class="kn">from</span> <span class="nn">..utils.utils</span> <span class="kn">import</span> <span class="n">_shift_time_axis</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;LightMetricsMixin&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="LightMetricsMixin"><a class="viewcode-back" href="../../../LightMetricsMixin.html#pyActigraphy.light.LightMetricsMixin">[docs]</a><span class="k">class</span> <span class="nc">LightMetricsMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LightMetricsMixin.average_daily_profile"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.average_daily_profile.html#pyActigraphy.light.LightMetricsMixin.average_daily_profile">[docs]</a>    <span class="k">def</span> <span class="nf">average_daily_profile</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">channel</span><span class="p">,</span>
+        <span class="n">rsfreq</span><span class="o">=</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span>
+        <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_origin</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average daily light profile</span>
+
+<span class="sd">        Calculate the daily profile of light exposure. Data are averaged over</span>
+<span class="sd">        all the days.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        channel: str,</span>
+<span class="sd">            Channel to be used (i.e column of the input data).</span>
+<span class="sd">        rsfreq: str, optional</span>
+<span class="sd">            Data resampling frequency.</span>
+<span class="sd">            Cf. #timeseries-offset-aliases in</span>
+<span class="sd">            &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        cyclic: bool, optional</span>
+<span class="sd">            If set to True, two daily profiles are concatenated to ensure</span>
+<span class="sd">            continuity between the last point of the day and the first one.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        time_origin: str or pd.Timedelta, optional</span>
+<span class="sd">            If not None, origin of the time axis for the daily profile.</span>
+<span class="sd">            Original time bins are translated as time delta with respect to</span>
+<span class="sd">            this new origin.</span>
+<span class="sd">            Default is None</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        raw : pandas.Series</span>
+<span class="sd">            A Series containing the daily light profile with a 24h/48h index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if requested channel is available</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;The light channel you tried to access (</span><span class="si">{}</span><span class="s1">) &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s1">&#39;is not available.</span><span class="se">\n</span><span class="s1">Available channels:</span><span class="se">\n</span><span class="s1">-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">- &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Binarize (+resample) data, if required.</span>
+        <span class="k">if</span> <span class="n">binarize</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span>
+                <span class="n">threshold</span><span class="p">,</span>
+                <span class="n">rsfreq</span><span class="o">=</span><span class="n">rsfreq</span><span class="p">,</span>
+                <span class="n">agg</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">rsfreq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resampled_data</span><span class="p">(</span><span class="n">rsfreq</span><span class="o">=</span><span class="n">rsfreq</span><span class="p">,</span> <span class="n">agg</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="c1"># Select requested channel</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">channel</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">time_origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="k">return</span> <span class="n">_average_daily_activity</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="n">cyclic</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cyclic</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="s1">&#39;Setting a time origin while cyclic option is True is not &#39;</span>
+                    <span class="s1">&#39;implemented yet.&#39;</span>
+                <span class="p">)</span>
+
+            <span class="n">avgdaily</span> <span class="o">=</span> <span class="n">_average_daily_activity</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time_origin</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="c1"># Regex pattern for HH:MM:SS time string</span>
+                <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s2">&quot;^([0-1]\d|2[0-3])(?::([0-5]\d))(?::([0-5]\d))$&quot;</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">time_origin</span><span class="p">):</span>
+                    <span class="n">time_origin</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">time_origin</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;Time origin format (</span><span class="si">{}</span><span class="s1">) not supported.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">time_origin</span>
+                        <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Supported format: HH:MM:SS.&#39;</span>
+                    <span class="p">)</span>
+
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time_origin</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;Time origin is neither a time string with a supported &#39;</span>
+                    <span class="s1">&#39;format, nor a pd.Timedelta.&#39;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Round time origin to the required frequency</span>
+            <span class="n">time_origin</span> <span class="o">=</span> <span class="n">time_origin</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+
+            <span class="n">shift</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;12h&#39;</span><span class="p">)</span><span class="o">-</span><span class="n">time_origin</span><span class="p">)</span><span class="o">/</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">_shift_time_axis</span><span class="p">(</span><span class="n">avgdaily</span><span class="p">,</span> <span class="n">shift</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LightMetricsMixin.average_daily_profile_auc"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.average_daily_profile_auc.html#pyActigraphy.light.LightMetricsMixin.average_daily_profile_auc">[docs]</a>    <span class="k">def</span> <span class="nf">average_daily_profile_auc</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">stop_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">time_origin</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;AUC of the average daily light profile</span>
+
+<span class="sd">        Calculate the area under the curve of the daily profile of light</span>
+<span class="sd">        exposure. Data are averaged over all the days.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        channel: str,</span>
+<span class="sd">            Channel to be used (i.e column of the input data).</span>
+<span class="sd">        start_time: str, optional</span>
+<span class="sd">            If not set to None, compute AUC from start time.</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        stop_time: str, optional</span>
+<span class="sd">            If not set to None, compute AUC until stop time.</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        time_origin: str or pd.Timedelta, optional</span>
+<span class="sd">            If not None, origin of the time axis for the daily profile.</span>
+<span class="sd">            Original time bins are translated as time delta with respect to</span>
+<span class="sd">            this new origin.</span>
+<span class="sd">            Default is None</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        auc : float</span>
+<span class="sd">            Area under the curve.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if requested channel is available</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;The light channel you tried to access (</span><span class="si">{}</span><span class="s1">) &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s1">&#39;is not available.</span><span class="se">\n</span><span class="s1">Available channels:</span><span class="se">\n</span><span class="s1">-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">- &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Binarize (+resample) data, if required.</span>
+        <span class="k">if</span> <span class="n">binarize</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span>
+                <span class="n">threshold</span><span class="p">,</span>
+                <span class="n">rsfreq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">agg</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="c1"># Select requested channel</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">channel</span><span class="p">]</span>
+
+        <span class="c1"># Compute average daily profile</span>
+        <span class="n">avgdaily</span> <span class="o">=</span> <span class="n">_average_daily_activity</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">time_origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time_origin</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="c1"># Regex pattern for HH:MM:SS time string</span>
+                <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+                    <span class="sa">r</span><span class="s2">&quot;^([0-1]\d|2[0-3])(?::([0-5]\d))(?::([0-5]\d))$&quot;</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">time_origin</span><span class="p">):</span>
+                    <span class="n">time_origin</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">time_origin</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s1">&#39;Time origin format (</span><span class="si">{}</span><span class="s1">) not supported.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">time_origin</span>
+                        <span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Supported format: HH:MM:SS.&#39;</span>
+                    <span class="p">)</span>
+
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time_origin</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;Time origin is neither a time string with a supported &#39;</span>
+                    <span class="s1">&#39;format, nor a pd.Timedelta.&#39;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Round time origin to the required frequency</span>
+            <span class="n">time_origin</span> <span class="o">=</span> <span class="n">time_origin</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+
+            <span class="n">shift</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;12h&#39;</span><span class="p">)</span><span class="o">-</span><span class="n">time_origin</span><span class="p">)</span><span class="o">/</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+
+            <span class="n">avgdaily</span> <span class="o">=</span> <span class="n">_shift_time_axis</span><span class="p">(</span><span class="n">avgdaily</span><span class="p">,</span> <span class="n">shift</span><span class="p">)</span>
+
+        <span class="c1"># Restrict profile to start/stop times</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">start_time</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stop_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">stop_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">stop_time</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">avgdaily</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_time</span><span class="p">:</span><span class="n">stop_time</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_light_exposure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light exposure</span>
+
+<span class="sd">        Calculate the light exposure level and time</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold: float, optional</span>
+<span class="sd">            If not set to None, discard data below threshold before computing</span>
+<span class="sd">            exposure levels.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        start_time: str, optional</span>
+<span class="sd">            If not set to None, discard data before start time,</span>
+<span class="sd">            on a daily basis.</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        stop_time: str, optional</span>
+<span class="sd">            If not set to None, discard data after stop time, on a daily basis.</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        masked_data : pandas.DataFrame</span>
+<span class="sd">            A DataFrame where the original data are set to Nan if below</span>
+<span class="sd">            threshold and/or outside time window.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">threshold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="n">stop_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data_mask</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">start_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">stop_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Both start and stop times have to be specified, if any.&#39;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data_mask</span><span class="o">.</span><span class="n">between_time</span><span class="p">(</span>
+                <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="n">stop_time</span><span class="p">,</span> <span class="n">include_end</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="LightMetricsMixin.light_exposure_level"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.light_exposure_level.html#pyActigraphy.light.LightMetricsMixin.light_exposure_level">[docs]</a>    <span class="k">def</span> <span class="nf">light_exposure_level</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">agg</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light exposure level</span>
+
+<span class="sd">        Calculate the aggregated (mean, median, etc) light exposure level</span>
+<span class="sd">        per epoch.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold: float, optional</span>
+<span class="sd">            If not set to None, discard data below threshold before computing</span>
+<span class="sd">            exposure levels.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        start_time: str, optional</span>
+<span class="sd">            If not set to None, discard data before start time,</span>
+<span class="sd">            on a daily basis.</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        stop_time: str, optional</span>
+<span class="sd">            If not set to None, discard data after stop time, on a daily basis.</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        agg: str, optional</span>
+<span class="sd">            Aggregating function used to summarize exposure levels.</span>
+<span class="sd">            Available functions: &#39;mean&#39;, &#39;median&#39;, &#39;std&#39;, etc.</span>
+<span class="sd">            Default is &#39;mean&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        levels : pd.Series</span>
+<span class="sd">            A pandas Series with aggreagted light exposure levels per channel</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">light_exposure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_exposure</span><span class="p">(</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+            <span class="n">stop_time</span><span class="o">=</span><span class="n">stop_time</span>
+        <span class="p">)</span>
+
+        <span class="n">levels</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">light_exposure</span><span class="p">,</span> <span class="n">agg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">levels</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="LightMetricsMixin.summary_statistics_per_time_bin"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.summary_statistics_per_time_bin.html#pyActigraphy.light.LightMetricsMixin.summary_statistics_per_time_bin">[docs]</a>    <span class="k">def</span> <span class="nf">summary_statistics_per_time_bin</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">bins</span><span class="o">=</span><span class="s1">&#39;24h&#39;</span><span class="p">,</span>
+        <span class="n">agg_func</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;median&#39;</span><span class="p">,</span> <span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Summary statistics.</span>
+
+<span class="sd">        Calculate summary statistics (ex: mean, median, etc) according to a</span>
+<span class="sd">        user-defined (regular or arbitrary) binning.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        bins: str or list of tuples, optional</span>
+<span class="sd">            If set to a string, bins is used to define a regular binning where</span>
+<span class="sd">            every bin is of length &quot;bins&quot;. Ex: &quot;2h&quot;.</span>
+<span class="sd">            Otherwise, the list of 2-tuples is used to define an arbitrary</span>
+<span class="sd">            binning. Ex: \[(&#39;2000-01-01 00:00:00&#39;,&#39;2000-01-01 11:59:00&#39;)\].</span>
+<span class="sd">            Default is &#39;24h&#39;.</span>
+<span class="sd">        agg_func: list, optional</span>
+<span class="sd">            List of aggregation functions to be used on every bin.</span>
+<span class="sd">            Default is \[&#39;mean&#39;, &#39;median&#39;, &#39;sum&#39;, &#39;std&#39;, &#39;min&#39;, &#39;max&#39;\].</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ss : pd.DataFrame</span>
+<span class="sd">            A pandas DataFrame with summary statistics per channel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">summary_stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">agg_func</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bins</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">df_col</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bins</span><span class="p">):</span>
+                <span class="n">df_bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                    <span class="n">agg_func</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">pivot_table</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">agg_func</span><span class="p">)</span>
+                <span class="n">channels</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">df_bins</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+                    <span class="n">channels</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_bins</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df_bins</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="n">ch</span><span class="p">]</span>
+                    <span class="n">channels</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+                        <span class="n">index</span><span class="o">=</span><span class="p">{</span><span class="n">ch</span><span class="p">:</span> <span class="n">idx</span><span class="p">},</span>
+                        <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span>
+                    <span class="p">)</span>
+                    <span class="n">channels</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span> <span class="o">=</span> <span class="n">channels</span><span class="p">[</span><span class="n">ch</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">agg_func</span><span class="p">]</span>
+                <span class="n">df_col</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                        <span class="n">channels</span><span class="p">,</span>
+                        <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">summary_stats</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">df_col</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">summary_stats</span></div>
+
+<div class="viewcode-block" id="LightMetricsMixin.TAT"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.TAT.html#pyActigraphy.light.LightMetricsMixin.TAT">[docs]</a>    <span class="k">def</span> <span class="nf">TAT</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oformat</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Time above light threshold.</span>
+
+<span class="sd">        Calculate the total light exposure time above the threshold.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold: float, optional</span>
+<span class="sd">            If not set to None, discard data below threshold before computing</span>
+<span class="sd">            exposure levels.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        start_time: str, optional</span>
+<span class="sd">            If not set to None, discard data before start time,</span>
+<span class="sd">            on a daily basis.</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        stop_time: str, optional</span>
+<span class="sd">            If not set to None, discard data after stop time, on a daily basis.</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        oformat: str, optional</span>
+<span class="sd">            Output format. Available formats: &#39;minute&#39; or &#39;timedelta&#39;.</span>
+<span class="sd">            If set to &#39;minute&#39;, the result is in number of minutes.</span>
+<span class="sd">            If set to &#39;timedelta&#39;, the result is a pd.Timedelta.</span>
+<span class="sd">            If set to None, the result is in number of epochs.</span>
+<span class="sd">            Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tat : pd.Series</span>
+<span class="sd">            A pandas Series with aggreagted light exposure levels per channel</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">available_formats</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;minute&#39;</span><span class="p">,</span> <span class="s1">&#39;timedelta&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">oformat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_formats</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Specified output format (</span><span class="si">{}</span><span class="s1">) not supported. &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">oformat</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s1">&#39;Available formats are: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">available_formats</span><span class="p">))</span>
+            <span class="p">)</span>
+
+        <span class="n">light_exposure_counts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_exposure</span><span class="p">(</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+            <span class="n">stop_time</span><span class="o">=</span><span class="n">stop_time</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">oformat</span> <span class="o">==</span> <span class="s1">&#39;minute&#39;</span><span class="p">:</span>
+            <span class="n">tat</span> <span class="o">=</span> <span class="n">light_exposure_counts</span> <span class="o">*</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">delta</span><span class="o">/</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;1min&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">oformat</span> <span class="o">==</span> <span class="s1">&#39;timedelta&#39;</span><span class="p">:</span>
+            <span class="n">tat</span> <span class="o">=</span> <span class="n">light_exposure_counts</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">delta</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tat</span> <span class="o">=</span> <span class="n">light_exposure_counts</span>
+
+        <span class="k">return</span> <span class="n">tat</span></div>
+
+<div class="viewcode-block" id="LightMetricsMixin.TATp"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.TATp.html#pyActigraphy.light.LightMetricsMixin.TATp">[docs]</a>    <span class="k">def</span> <span class="nf">TATp</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oformat</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Time above light threshold (per day).</span>
+
+<span class="sd">        Calculate the total light exposure time above the threshold,</span>
+<span class="sd">        per calendar day.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold: float, optional</span>
+<span class="sd">            If not set to None, discard data below threshold before computing</span>
+<span class="sd">            exposure levels.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        start_time: str, optional</span>
+<span class="sd">            If not set to None, discard data before start time,</span>
+<span class="sd">            on a daily basis.</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        stop_time: str, optional</span>
+<span class="sd">            If not set to None, discard data after stop time, on a daily basis.</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        oformat: str, optional</span>
+<span class="sd">            Output format. Available formats: &#39;minute&#39; or &#39;timedelta&#39;.</span>
+<span class="sd">            If set to &#39;minute&#39;, the result is in number of minutes.</span>
+<span class="sd">            If set to &#39;timedelta&#39;, the result is a pd.Timedelta.</span>
+<span class="sd">            If set to None, the result is in number of epochs.</span>
+<span class="sd">            Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        tatp : pd.DataFrame</span>
+<span class="sd">            A pandas DataFrame with aggreagted light exposure levels</span>
+<span class="sd">            per channel and per day.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">available_formats</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;minute&#39;</span><span class="p">,</span> <span class="s1">&#39;timedelta&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">oformat</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_formats</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Specified output format (</span><span class="si">{}</span><span class="s1">) not supported. &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">oformat</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s1">&#39;Available formats are: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">available_formats</span><span class="p">))</span>
+            <span class="p">)</span>
+
+        <span class="n">light_exposure_counts_per_day</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_exposure</span><span class="p">(</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+            <span class="n">stop_time</span><span class="o">=</span><span class="n">stop_time</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">date</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">oformat</span> <span class="o">==</span> <span class="s1">&#39;minute&#39;</span><span class="p">:</span>
+            <span class="n">tatp</span> <span class="o">=</span> <span class="n">light_exposure_counts_per_day</span> <span class="o">*</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">delta</span><span class="o">/</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;1min&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">oformat</span> <span class="o">==</span> <span class="s1">&#39;timedelta&#39;</span><span class="p">:</span>
+            <span class="n">tatp</span> <span class="o">=</span> <span class="n">light_exposure_counts_per_day</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">delta</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tatp</span> <span class="o">=</span> <span class="n">light_exposure_counts_per_day</span>
+
+        <span class="k">return</span> <span class="n">tatp</span></div>
+
+<div class="viewcode-block" id="LightMetricsMixin.VAT"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.VAT.html#pyActigraphy.light.LightMetricsMixin.VAT">[docs]</a>    <span class="k">def</span> <span class="nf">VAT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Values above light threshold.</span>
+
+<span class="sd">        Returns the light exposure values above the threshold.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold: float, optional</span>
+<span class="sd">            If not set to None, discard data below threshold before computing</span>
+<span class="sd">            exposure levels.</span>
+<span class="sd">            Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        vat : pd.Series</span>
+<span class="sd">            A pandas Series with light exposure levels per channel</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_light_exposure</span><span class="p">(</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">stop_time</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_time_barycentre</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c1"># Normalize each epoch to midnight.</span>
+        <span class="n">Y_j</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">-</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+        <span class="c1"># Convert to indices.</span>
+        <span class="n">Y_j</span> <span class="o">/=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+        <span class="c1"># Compute barycentre</span>
+        <span class="n">bc</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">Y_j</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">data</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">bc</span>
+
+<div class="viewcode-block" id="LightMetricsMixin.MLiT"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.MLiT.html#pyActigraphy.light.LightMetricsMixin.MLiT">[docs]</a>    <span class="k">def</span> <span class="nf">MLiT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mean light timing.</span>
+
+<span class="sd">        Mean light timing above threshold, MLiT^C.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold: float</span>
+<span class="sd">            Threshold value.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        MLiT : pd.DataFrame</span>
+<span class="sd">            A pandas DataFrame with MLiT^C per channel.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        The MLiT variable is defined in ref [1]_:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            MLiT^C = \frac{\sum_{j}^{m}\sum_{k}^{n} j\times I^{C}_{jk}}{</span>
+<span class="sd">            \sum_{j}^{m}\sum_{k}^{n} I^{C}_{jk}}</span>
+
+<span class="sd">        where :math:`I^{C}_{jk}` is equal to 1 if the light level is higher</span>
+<span class="sd">        than the threshold C, m is the total number of epochs per day and n is</span>
+<span class="sd">        the number of days covered by the data.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Reid K.J., Santostasi G., Baron K.G., Wilson J., Kang J.,</span>
+<span class="sd">               Zee P.C., Timing and Intensity of Light Correlate with Body</span>
+<span class="sd">               Weight in Adults. PLoS ONE 9(4): e92251.</span>
+<span class="sd">               https://doi.org/10.1371/journal.pone.0092251</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Binarized data and convert to float in order to handle &#39;DivideByZero&#39;</span>
+        <span class="n">I_jk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+
+        <span class="n">MLiT</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_time_barycentre</span><span class="p">(</span><span class="n">I_jk</span><span class="p">)</span>
+
+        <span class="c1"># Scaling factor: MLiT is now expressed in minutes since midnight.</span>
+        <span class="n">MLiT</span> <span class="o">/=</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;1min&#39;</span><span class="p">)</span><span class="o">/</span><span class="n">I_jk</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">MLiT</span></div>
+
+<div class="viewcode-block" id="LightMetricsMixin.MLiTp"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.MLiTp.html#pyActigraphy.light.LightMetricsMixin.MLiTp">[docs]</a>    <span class="k">def</span> <span class="nf">MLiTp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mean light timing per day.</span>
+
+<span class="sd">        Mean light timing above threshold, MLiT^C, per calendar day.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        threshold: float</span>
+<span class="sd">            Threshold value.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        MLiTp : pd.DataFrame</span>
+<span class="sd">            A pandas DataFrame with MLiT^C per channel and per day.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        The MLiT variable is defined in ref [1]_:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            MLiT^C = \frac{\sum_{j}^{m}\sum_{k}^{n} j\times I^{C}_{jk}}{</span>
+<span class="sd">            \sum_{j}^{m}\sum_{k}^{n} I^{C}_{jk}}</span>
+
+<span class="sd">        where :math:`I^{C}_{jk}` is equal to 1 if the light level is higher</span>
+<span class="sd">        than the threshold C, m is the total number of epochs per day and n is</span>
+<span class="sd">        the number of days covered by the data.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Reid K.J., Santostasi G., Baron K.G., Wilson J., Kang J.,</span>
+<span class="sd">               Zee P.C., Timing and Intensity of Light Correlate with Body</span>
+<span class="sd">               Weight in Adults. PLoS ONE 9(4): e92251.</span>
+<span class="sd">               https://doi.org/10.1371/journal.pone.0092251</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Binarized data and convert to float in order to handle &#39;DivideByZero&#39;</span>
+        <span class="n">I_jk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Group data per day:</span>
+        <span class="n">MLiTp</span> <span class="o">=</span> <span class="n">I_jk</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">I_jk</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">date</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_time_barycentre</span><span class="p">)</span>
+
+        <span class="c1"># Scaling factor: MLiT is now expressed in minutes since midnight.</span>
+        <span class="n">MLiTp</span> <span class="o">/=</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;1min&#39;</span><span class="p">)</span><span class="o">/</span><span class="n">I_jk</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">MLiTp</span></div>
+
+<div class="viewcode-block" id="LightMetricsMixin.get_light_extremum"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.get_light_extremum.html#pyActigraphy.light.LightMetricsMixin.get_light_extremum">[docs]</a>    <span class="k">def</span> <span class="nf">get_light_extremum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extremum</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light extremum.</span>
+
+<span class="sd">        Return the index and the value of the requested extremum (min or max).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        extremum: str</span>
+<span class="sd">            Name of the extremum.</span>
+<span class="sd">            Available: &#39;min&#39; or &#39;max&#39;.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ext : pd.DataFrame</span>
+<span class="sd">            A pandas DataFrame with extremum info per channel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">extremum_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">extremum</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">extremum_list</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Requested extremum (</span><span class="si">{}</span><span class="s1">) not available.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">extremum</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s1">&#39; Available options are:</span><span class="se">\n</span><span class="s1">- min</span><span class="se">\n</span><span class="s1">- max&#39;</span>
+            <span class="p">)</span>
+        <span class="n">extremum_att</span> <span class="o">=</span> <span class="s1">&#39;idxmax&#39;</span> <span class="k">if</span> <span class="n">extremum</span> <span class="o">==</span> <span class="s1">&#39;max&#39;</span> <span class="k">else</span> <span class="s1">&#39;idxmin&#39;</span>
+
+        <span class="n">extremum_per_ch</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">index_ext</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">ch</span><span class="p">],</span> <span class="n">extremum_att</span><span class="p">)()</span>
+            <span class="n">extremum_per_ch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s1">&#39;channel&#39;</span><span class="p">:</span> <span class="n">ch</span><span class="p">,</span>
+                        <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">index_ext</span><span class="p">,</span>
+                        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">index_ext</span><span class="p">,</span> <span class="n">ch</span><span class="p">]</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">extremum_per_ch</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+
+<div class="viewcode-block" id="LightMetricsMixin.LMX"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.LMX.html#pyActigraphy.light.LightMetricsMixin.LMX">[docs]</a>    <span class="k">def</span> <span class="nf">LMX</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="s1">&#39;5h&#39;</span><span class="p">,</span> <span class="n">lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Least or Most light period of length X</span>
+
+<span class="sd">        Onset and mean hourly light exposure levels during the X least or most</span>
+<span class="sd">        bright hours of the day.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        length: str, optional</span>
+<span class="sd">            Period length.</span>
+<span class="sd">            Default is &#39;5h&#39;.</span>
+<span class="sd">        lowest: bool, optional</span>
+<span class="sd">            If lowest is set to True, the period of least light exposure is</span>
+<span class="sd">            considered. Otherwise, consider the period of most light exposure.</span>
+<span class="sd">            Default is True.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        lmx_t, lmx: (pd.Timedelta, float)</span>
+<span class="sd">            Onset and mean hourly light exposure level.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        The LMX variable is derived from the L5 and M10 defined in [1]_ as the</span>
+<span class="sd">        mean hourly activity levels during the 5/10 least/most active hours.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Van Someren, E.J.W., Lijzenga, C., Mirmiran, M., Swaab, D.F.</span>
+<span class="sd">               (1997). Long-Term Fitness Training Improves the Circadian</span>
+<span class="sd">               Rest-Activity Rhythm in Healthy Elderly Males.</span>
+<span class="sd">               Journal of Biological Rhythms, 12(2), 146–156.</span>
+<span class="sd">               http://doi.org/10.1177/074873049701200206</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">epoch_per_hour</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;1h&#39;</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span>
+
+        <span class="n">lmx_per_ch</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">lmx_ts</span><span class="p">,</span> <span class="n">lmx</span> <span class="o">=</span> <span class="n">_lmx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">ch</span><span class="p">],</span> <span class="n">length</span><span class="p">,</span> <span class="n">lowest</span><span class="o">=</span><span class="n">lowest</span><span class="p">)</span>
+            <span class="n">lmx_per_ch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s1">&#39;channel&#39;</span><span class="p">:</span> <span class="n">ch</span><span class="p">,</span>
+                        <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="n">lmx_ts</span><span class="p">,</span>
+                        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">lmx</span><span class="o">*</span><span class="n">epoch_per_hour</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">lmx_per_ch</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+
+    <span class="k">def</span> <span class="nf">_RAR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rar_func</span><span class="p">,</span> <span class="n">rar_name</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Generic RAR function</span>
+
+<span class="sd">        Apply a generic RAR function to the light data, per channel.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">binarize</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarized_data</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">rar_per_ch</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">rar</span> <span class="o">=</span> <span class="n">rar_func</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">ch</span><span class="p">])</span>
+            <span class="n">rar_per_ch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s1">&#39;channel&#39;</span><span class="p">:</span> <span class="n">ch</span><span class="p">,</span>
+                        <span class="n">rar_name</span><span class="p">:</span> <span class="n">rar</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">rar_per_ch</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+<div class="viewcode-block" id="LightMetricsMixin.IS"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.IS.html#pyActigraphy.light.LightMetricsMixin.IS">[docs]</a>    <span class="k">def</span> <span class="nf">IS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Interdaily stability</span>
+
+<span class="sd">        The Interdaily stability (IS) quantifies the repeatibilty of the</span>
+<span class="sd">        daily light exposure pattern over each day contained in the activity</span>
+<span class="sd">        recording.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 0.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        is : pd.DataFrame</span>
+<span class="sd">            A pandas DataFrame with IS per channel.</span>
+
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        This variable is derived from the original IS variable defined in</span>
+<span class="sd">        ref [1]_ as:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            IS = \frac{d^{24h}}{d^{1h}}</span>
+
+<span class="sd">        with:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}</span>
+
+<span class="sd">        where :math:`x_{i}` is the number of active (counts higher than a</span>
+<span class="sd">        predefined threshold) minutes during the :math:`i^{th}` period,</span>
+<span class="sd">        :math:`\bar{x}` is the mean of all data and :math:`n` is the number of</span>
+<span class="sd">        periods covered by the actigraphy data and with:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            d^{24h} = \sum_{i}^{p} \frac{</span>
+<span class="sd">                      \left( \bar{x}_{h,i} - \bar{x} \right)^{2}</span>
+<span class="sd">                      }{p}</span>
+
+<span class="sd">        where :math:`\bar{x}^{h,i}` is the average number of active minutes</span>
+<span class="sd">        over the :math:`i^{th}` period and :math:`p` is the number of periods</span>
+<span class="sd">        per day. The average runs over all the days.</span>
+
+<span class="sd">        For the record, this is the 24h value from the chi-square periodogram</span>
+<span class="sd">        (Sokolove and Bushel, 1978).</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Witting W., Kwa I.H., Eikelenboom P., Mirmiran M., Swaab D.F.</span>
+<span class="sd">               Alterations in the circadian rest–activity rhythm in aging and</span>
+<span class="sd">               Alzheimer׳s disease. Biol Psychiatry. 1990;27:563–572.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_RAR</span><span class="p">(</span>
+            <span class="n">_interdaily_stability</span><span class="p">,</span>
+            <span class="s1">&#39;IS&#39;</span><span class="p">,</span>
+            <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="LightMetricsMixin.IV"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.IV.html#pyActigraphy.light.LightMetricsMixin.IV">[docs]</a>    <span class="k">def</span> <span class="nf">IV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Intradaily variability</span>
+
+<span class="sd">        The Intradaily Variability (IV) quantifies the variability of the</span>
+<span class="sd">        light exposure pattern.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        binarize: bool, optional</span>
+<span class="sd">            If set to True, the data are binarized.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        threshold: int, optional</span>
+<span class="sd">            If binarize is set to True, data above this threshold are set to 1</span>
+<span class="sd">            and to 0 otherwise.</span>
+<span class="sd">            Default is 4.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        iv: pd.DataFrame</span>
+<span class="sd">            A pandas DataFrame with IV per channel.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        It is defined in ref [1]_:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            IV = \frac{c^{1h}}{d^{1h}}</span>
+
+<span class="sd">        with:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            d^{1h} = \sum_{i}^{n}\frac{\left(x_{i}-\bar{x}\right)^{2}}{n}</span>
+
+<span class="sd">        where :math:`x_{i}` is the number of active (counts higher than a</span>
+<span class="sd">        predefined threshold) minutes during the :math:`i^{th}` period,</span>
+<span class="sd">        :math:`\bar{x}` is the mean of all data and :math:`n` is the number of</span>
+<span class="sd">        periods covered by the actigraphy data,</span>
+
+<span class="sd">        and with:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            c^{1h} = \sum_{i}^{n-1} \frac{</span>
+<span class="sd">                        \left( x_{i+1} - x_{i} \right)^{2}</span>
+<span class="sd">                     }{n-1}</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Witting W., Kwa I.H., Eikelenboom P., Mirmiran M., Swaab D.F.</span>
+<span class="sd">               Alterations in the circadian rest–activity rhythm in aging and</span>
+<span class="sd">               Alzheimer׳s disease. Biol Psychiatry. 1990;27:563–572.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_RAR</span><span class="p">(</span>
+            <span class="n">_intradaily_variability</span><span class="p">,</span>
+            <span class="s1">&#39;IV&#39;</span><span class="p">,</span>
+            <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span>
+        <span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_filter_butterworth</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fs</span><span class="p">,</span> <span class="n">fc_low</span><span class="p">,</span> <span class="n">fc_high</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+        <span class="c1"># Filter order (Attenuation: -20*N dB/decade)</span>
+        <span class="c1"># See https://dsp.stackexchange.com/questions/60455/</span>
+        <span class="c1"># how-to-choose-order-and-cut-off-frequency-for-low-pass-butterworth-filter)</span>
+
+        <span class="c1"># Create Butterworth filter (order: N)</span>
+        <span class="c1"># whose type (highpass, lowpass, bandpass)</span>
+        <span class="c1"># depends on the input arguments</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">fc_low</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">fc_high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># Set a lowpass filter</span>
+            <span class="n">Wn</span> <span class="o">=</span> <span class="n">fc_high</span>
+            <span class="n">btype</span> <span class="o">=</span> <span class="s1">&#39;lowpass&#39;</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">fc_low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">fc_high</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># Set a highpass filter</span>
+            <span class="n">Wn</span> <span class="o">=</span> <span class="n">fc_low</span>
+            <span class="n">btype</span> <span class="o">=</span> <span class="s1">&#39;highpass&#39;</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">fc_low</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">fc_high</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># Set a bandpass filter</span>
+            <span class="n">Wn</span> <span class="o">=</span> <span class="p">[</span><span class="n">fc_low</span><span class="p">,</span> <span class="n">fc_high</span><span class="p">]</span>
+            <span class="n">btype</span> <span class="o">=</span> <span class="s1">&#39;bandpass&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Both high and low critical frequencies were set to None.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">sos</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">butter</span><span class="p">(</span>
+            <span class="n">N</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="n">Wn</span><span class="o">=</span><span class="n">Wn</span><span class="p">,</span> <span class="n">btype</span><span class="o">=</span><span class="n">btype</span><span class="p">,</span> <span class="n">fs</span><span class="o">=</span><span class="n">fs</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;sos&#39;</span>
+        <span class="p">)</span>
+
+        <span class="n">data_smooth</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">sosfiltfilt</span><span class="p">(</span><span class="n">sos</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data_smooth</span>
+
+<div class="viewcode-block" id="LightMetricsMixin.filter_butterworth"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.filter_butterworth.html#pyActigraphy.light.LightMetricsMixin.filter_butterworth">[docs]</a>    <span class="k">def</span> <span class="nf">filter_butterworth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fc_low</span><span class="p">,</span> <span class="n">fc_high</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Butterworth filtering</span>
+
+<span class="sd">        Forward-backward digital filtering using a Nth order Butterworth filter</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        fc_low: float</span>
+<span class="sd">            Critical frequency (lower).</span>
+<span class="sd">        fc_high: float</span>
+<span class="sd">            Critical fequency (higher).</span>
+<span class="sd">        N: int</span>
+<span class="sd">            Order of the filter</span>
+<span class="sd">        channels: list of str, optional.</span>
+<span class="sd">            Channel list. If set to None, use all available channels.</span>
+<span class="sd">            Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        filt: pd.DataFrame</span>
+<span class="sd">            Filtered signal, per channel.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        This function is essentially a wrapper to the scipy.signal.butter</span>
+<span class="sd">        function. For more information, see [1]_.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.butter.html</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>  <span class="c1"># noqa</span>
+
+        <span class="c1"># Select channels of interest and</span>
+        <span class="c1"># apply filtering to all available channels</span>
+        <span class="n">filt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_channels</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_filter_butterworth</span><span class="p">,</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">fs</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">delta</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">(),</span>
+            <span class="n">fc_low</span><span class="o">=</span><span class="n">fc_low</span><span class="p">,</span> <span class="n">fc_high</span><span class="o">=</span><span class="n">fc_high</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">filt</span></div></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

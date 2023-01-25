@@ -3,27 +3,26 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pyActigraphy.analysis.fractal &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyActigraphy.analysis.fractal &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script src="../../../_static/js/jquery-1.11.0.min.js"></script>
-    <script src="../../../_static/js/jquery-fix.js"></script>
-    <script src="../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script src="../../../_static/bootstrap-sphinx.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -38,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -46,6 +45,7 @@
             
                 <li><a href="../../../tutorials.html">Tutorials</a></li>
                 <li><a href="../../../api.html">API</a></li>
+                <li><a href="../../../changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -84,42 +84,84 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+    <div class="body col-md-12 content" role="main">
       
   <h1>Source code for pyActigraphy.analysis.fractal</h1><div class="highlight"><pre>
 <span></span><span class="c1"># # (Multi-fractal)Detrended fluctuation analysis</span>
-<span class="kn">from</span> <span class="nn">joblib</span> <span class="k">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="kn">from</span> <span class="nn">numba</span> <span class="k">import</span> <span class="n">njit</span>  <span class="c1"># , prange</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">njit</span>  <span class="c1"># , prange</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy.polynomial</span> <span class="k">import</span> <span class="n">polynomial</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="k">import</span> <span class="n">linregress</span>
+<span class="kn">from</span> <span class="nn">numpy.polynomial</span> <span class="kn">import</span> <span class="n">polynomial</span>
+<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">linregress</span>
 
 
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">_profile</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
 
-    <span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
-    <span class="n">prof</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">trend</span><span class="p">)</span>
+    <span class="n">prof</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nancumsum</span><span class="p">(</span><span class="n">X</span> <span class="o">-</span> <span class="n">trend</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">prof</span>
 
 
+<span class="nd">@njit</span>
+<span class="k">def</span> <span class="nf">_rolling_window</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Split input array in an array of window-sized arrays, shifted by one</span>
+<span class="sd">    element. Emulate rolling function of pandas.Series.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : (N,) array_like</span>
+<span class="sd">        Input</span>
+<span class="sd">    n : int</span>
+<span class="sd">        Size of the rolling window</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    roll : (N,n) array_like</span>
+<span class="sd">        Array containing the successive windows.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">strides</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">strides</span> <span class="o">+</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">strides</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">stride_tricks</span><span class="o">.</span><span class="n">as_strided</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">)</span>
+
+
 <span class="nd">@njit</span>  <span class="c1"># (float64[:,:](float64[:],int64,boolean))</span>
-<span class="k">def</span> <span class="nf">_segmentation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_segmentation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Split input array in an array of window-sized arrays, shifted by one</span>
+<span class="sd">    element. Emulate rolling function of pandas.Series.</span>
 
-    <span class="c1"># Number of elements</span>
-    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : (N,) array_like</span>
+<span class="sd">        Input.</span>
+<span class="sd">    n : int</span>
+<span class="sd">        Window size</span>
+<span class="sd">    backward: bool, optional.</span>
+<span class="sd">        If set to True, runs the segmentation from the end of the input array.</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    overlap: bool, optional</span>
+<span class="sd">        If set to True, consecutive windows overlap by 50%.</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    seg : (N,n) array_like</span>
+<span class="sd">        Array containing the successive windows.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="c1"># Number of segments of length n (and remainder r)</span>
-    <span class="n">nseg</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="c1"># Compute consecutive windows, shifted by one element</span>
+    <span class="n">windows</span> <span class="o">=</span> <span class="n">_rolling_window</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+    <span class="c1"># Compute distance between the center of two consecutive windows</span>
+    <span class="n">stride</span> <span class="o">=</span> <span class="n">n</span><span class="o">//</span><span class="mi">2</span> <span class="k">if</span> <span class="n">overlap</span> <span class="k">else</span> <span class="n">n</span>
 
     <span class="c1"># Non-overlapping segments</span>
     <span class="k">if</span> <span class="n">backward</span><span class="p">:</span>
-        <span class="n">segments</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">r</span><span class="p">:]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nseg</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[::</span><span class="n">stride</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">segments</span> <span class="o">=</span> <span class="n">x</span><span class="p">[:</span><span class="n">N</span><span class="o">-</span><span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">nseg</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[::</span><span class="o">-</span><span class="n">stride</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">segments</span>
 
@@ -188,7 +230,7 @@
 
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_array</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_array</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__n_array</span> <span class="o">=</span> <span class="n">n_array</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__q_array</span> <span class="o">=</span> <span class="n">q_array</span>
@@ -215,7 +257,7 @@
         <span class="k">return</span> <span class="n">_profile</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Fractal.segmentation"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.segmentation.html#pyActigraphy.analysis.Fractal.segmentation">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">segmentation</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">segmentation</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Segmentation function</span>
 
 <span class="sd">        Segment the signal into non-overlapping windows of equal size.</span>
@@ -226,8 +268,11 @@
 <span class="sd">            Input array.</span>
 <span class="sd">        n: int</span>
 <span class="sd">            Window size.</span>
-<span class="sd">        backward: bool</span>
-<span class="sd">            If set to True, start segmentation for the end of the signal.</span>
+<span class="sd">        backward: bool, optional</span>
+<span class="sd">            If set to True, start segmentation from the end of the signal.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        overlap: bool, optional</span>
+<span class="sd">            If set to True, consecutive windows overlap by 50%.</span>
 <span class="sd">            Default is False.</span>
 
 <span class="sd">        Returns</span>
@@ -235,7 +280,7 @@
 <span class="sd">        segments: numpy.array</span>
 <span class="sd">            Non-overlappping windows of size n.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="n">_segmentation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">_segmentation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Fractal.local_msq_residuals"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.local_msq_residuals.html#pyActigraphy.analysis.Fractal.local_msq_residuals">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">local_msq_residuals</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">segment</span><span class="p">,</span> <span class="n">deg</span><span class="p">):</span>
@@ -269,7 +314,7 @@
         <span class="k">return</span> <span class="n">fit_result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">n</span> <span class="k">if</span> <span class="n">fit_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
 
 <div class="viewcode-block" id="Fractal.fluctuations"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.fluctuations.html#pyActigraphy.analysis.Fractal.fluctuations">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">fluctuations</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">deg</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">fluctuations</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">deg</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Fluctuation function</span>
 
 <span class="sd">        The fluctuations are defined as the mean squared residuals</span>
@@ -283,6 +328,9 @@
 <span class="sd">            Window size.</span>
 <span class="sd">        deg: int</span>
 <span class="sd">            Degree(s) of the fitting polynomials.</span>
+<span class="sd">        overlap: bool, optional</span>
+<span class="sd">            If set to True, consecutive windows during segmentation</span>
+<span class="sd">            overlap by 50%. Default is False.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -294,8 +342,8 @@
         <span class="n">Y</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">profile</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
         <span class="c1"># Define non-overlapping segments</span>
-        <span class="n">segments_fwd</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">segmentation</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">segments_bwd</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">segmentation</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">segments_fwd</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">segmentation</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">)</span>
+        <span class="n">segments_bwd</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">segmentation</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">)</span>
 
         <span class="c1"># Assert equal numbers of segments</span>
         <span class="k">assert</span><span class="p">(</span><span class="n">segments_fwd</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">segments_bwd</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -335,7 +383,7 @@
         <span class="k">return</span> <span class="n">qth_msq</span>
 
 <div class="viewcode-block" id="Fractal.dfa"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.dfa.html#pyActigraphy.analysis.Fractal.dfa">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">dfa</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">dfa</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Detrended Fluctuation Analysis function</span>
 
 <span class="sd">        Compute the q-th order mean squared fluctuations for different segment</span>
@@ -350,6 +398,9 @@
 <span class="sd">        deg: int, optional</span>
 <span class="sd">            Degree(s) of the fitting polynomials.</span>
 <span class="sd">            Default is 1.</span>
+<span class="sd">        overlap: bool, optional</span>
+<span class="sd">            If set to True, consecutive windows during segmentation</span>
+<span class="sd">            overlap by 50%. Default is False.</span>
 <span class="sd">        log: bool, optional</span>
 <span class="sd">            If set to True, returned values are log-transformed.</span>
 <span class="sd">            Default is False.</span>
@@ -373,14 +424,19 @@
 
         <span class="n">iterable</span> <span class="o">=</span> <span class="p">(</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">q_th_order_mean_square</span><span class="p">(</span>
-                <span class="bp">cls</span><span class="o">.</span><span class="n">fluctuations</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">),</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">fluctuations</span><span class="p">(</span>
+                    <span class="n">ts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                    <span class="n">n</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
+                    <span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">,</span>
+                    <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span>
+                <span class="p">),</span>
                 <span class="n">q</span><span class="o">=</span><span class="mi">2</span>
             <span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">factor</span><span class="o">*</span><span class="n">n_array</span>
         <span class="p">)</span>
 
         <span class="n">q_th_order_msq_fluc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
             <span class="n">iterable</span><span class="p">,</span>
-            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">,</span>
             <span class="n">count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span>
         <span class="p">)</span>
 
@@ -391,7 +447,15 @@
 
 <div class="viewcode-block" id="Fractal.dfa_parallel"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.dfa_parallel.html#pyActigraphy.analysis.Fractal.dfa_parallel">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">dfa_parallel</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">ts</span><span class="p">,</span>
+        <span class="n">n_array</span><span class="p">,</span>
+        <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span>
     <span class="p">):</span>
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Detrended Fluctuation Analysis function</span>
 
@@ -407,6 +471,9 @@
 <span class="sd">        deg: int, optional</span>
 <span class="sd">            Degree(s) of the fitting polynomials.</span>
 <span class="sd">            Default is 1.</span>
+<span class="sd">        overlap: bool, optional</span>
+<span class="sd">            If set to True, consecutive windows during segmentation</span>
+<span class="sd">            overlap by 50%. Default is False.</span>
 <span class="sd">        log: bool, optional</span>
 <span class="sd">            If set to True, returned values are log-transformed.</span>
 <span class="sd">            Default is False.</span>
@@ -446,12 +513,13 @@
         <span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">fluctuations</span><span class="p">)(</span>
             <span class="n">ts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="n">n</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
-            <span class="n">deg</span><span class="o">=</span><span class="n">deg</span>
+            <span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">,</span>
+            <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span>
         <span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">factor</span><span class="o">*</span><span class="n">n_array</span><span class="p">)</span>
 
         <span class="n">q_th_order_msq_fluc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
             <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">q_th_order_mean_square</span><span class="p">(</span><span class="n">fluct</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">fluct</span> <span class="ow">in</span> <span class="n">flucts</span><span class="p">),</span>
-            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">,</span>
             <span class="n">count</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">flucts</span><span class="p">)</span>
         <span class="p">)</span>
 
@@ -578,8 +646,8 @@
                 <span class="n">n_x</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="n">n_min</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_array</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
                 <span class="n">h_ratios</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="n">n_min</span><span class="p">]</span> <span class="o">=</span> <span class="n">ratio</span>
                 <span class="n">h_ratios_err</span><span class="p">[</span><span class="n">t</span><span class="o">-</span><span class="n">n_min</span><span class="p">]</span> <span class="o">=</span> <span class="n">ratio</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-                    <span class="n">alpha_1_rel_err</span><span class="o">*</span><span class="n">alpha_1_rel_err</span> <span class="o">+</span>
-                    <span class="n">alpha_2_rel_err</span><span class="o">*</span><span class="n">alpha_2_rel_err</span>
+                    <span class="n">alpha_1_rel_err</span><span class="o">*</span><span class="n">alpha_1_rel_err</span>
+                    <span class="o">+</span> <span class="n">alpha_2_rel_err</span><span class="o">*</span><span class="n">alpha_2_rel_err</span>
                 <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
@@ -587,8 +655,83 @@
 
         <span class="k">return</span> <span class="n">h_ratios</span><span class="p">,</span> <span class="n">h_ratios_err</span><span class="p">,</span> <span class="n">n_x</span></div>
 
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">local_slopes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">F_n</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Local slopes of log(F(n)) versus log(n).</span>
+
+<span class="sd">        The local slope of the curve log(F(n)) is calculated at each point by</span>
+<span class="sd">        fitting polynomial of degree 1, using the 2*s surrounding points.</span>
+<span class="sd">        At the boundaries of {F(n)}, the local slope is calculated with a</span>
+<span class="sd">        reduced number of points (min. 3).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        F_n : array</span>
+<span class="sd">            Array of fluctuations.</span>
+<span class="sd">        n_array: array of int</span>
+<span class="sd">            Time scales (i.e window sizes). In minutes.</span>
+<span class="sd">        s: int, optional</span>
+<span class="sd">            Half size of the window used to estimate the local slope.</span>
+<span class="sd">            The total window size is (2*s+1). Default is 2.</span>
+<span class="sd">        log: bool, optional</span>
+<span class="sd">            If set to True, assume that the input values have already been</span>
+<span class="sd">            log-transformed.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            If set to True, display informations about the calculations.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        alpha_loc, alpha_loc_err, n_x: arrays of floats</span>
+<span class="sd">            Local slopes (alpha_loc), and associated uncertainties, obtained</span>
+<span class="sd">            for various time scales n_x.</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Check if inputs have the same dimension</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">F_n</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span>
+
+        <span class="c1"># Window size: 2*s + 1</span>
+        <span class="n">win_size</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">s</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="c1"># Check if the number of points for a single linear fit is at least 3</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">win_size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="p">(</span><span class="s2">&quot;Cannot perform a linear fit on series of less than&quot;</span>
+                 <span class="s2">&quot; 3 points; `s` must be greater or equal to 1.&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="c1"># Check if the number of points to fit is less than 2*n_min</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">win_size</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="p">(</span><span class="s2">&quot;Total number of points to fit is less than (2*s+1).&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">n_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">alpha_loc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">s</span><span class="p">)</span>
+        <span class="n">alpha_loc_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">s</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span><span class="o">-</span><span class="n">win_size</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="c1"># Fit the series of points (F(n) vs n) up to point n_x</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="o">*</span><span class="mi">50</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fit info:&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- t: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- current point: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="o">+</span><span class="n">s</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- F_n[t-s:t+s]: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">F_n</span><span class="p">[</span><span class="n">t</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="n">win_size</span><span class="p">]))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- n_array[t-s:t+s]: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_array</span><span class="p">[</span><span class="n">t</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="n">win_size</span><span class="p">]))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;- array center: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_array</span><span class="p">[</span><span class="n">t</span><span class="o">+</span><span class="n">s</span><span class="p">]))</span>
+
+            <span class="n">alpha_loc</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">alpha_loc_err</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">generalized_hurst_exponent</span><span class="p">(</span>
+                    <span class="n">F_n</span><span class="p">[</span><span class="n">t</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="n">win_size</span><span class="p">],</span> <span class="n">n_array</span><span class="p">[</span><span class="n">t</span><span class="p">:</span><span class="n">t</span><span class="o">+</span><span class="n">win_size</span><span class="p">],</span> <span class="n">log</span>
+            <span class="p">)</span>
+            <span class="n">n_x</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_array</span><span class="p">[</span><span class="n">t</span><span class="o">+</span><span class="n">s</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
+                <span class="n">n_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">n_x</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">alpha_loc</span><span class="p">,</span> <span class="n">alpha_loc_err</span><span class="p">,</span> <span class="n">n_x</span>
+
 <div class="viewcode-block" id="Fractal.mfdfa"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.mfdfa.html#pyActigraphy.analysis.Fractal.mfdfa">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">mfdfa</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">q_array</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">mfdfa</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">q_array</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Multifractal Detrended Fluctuation Analysis function</span>
 
 <span class="sd">        Compute the q-th order mean squared fluctuations for different segment</span>
@@ -605,6 +748,9 @@
 <span class="sd">        deg: int, optional</span>
 <span class="sd">            Degree(s) of the fitting polynomials.</span>
 <span class="sd">            Default is 1.</span>
+<span class="sd">        overlap: bool, optional</span>
+<span class="sd">            If set to True, consecutive windows during segmentation</span>
+<span class="sd">            overlap by 50%. Default is False.</span>
 <span class="sd">        log: bool, optional</span>
 <span class="sd">            If set to True, returned values are log-transformed.</span>
 <span class="sd">            Default is False.</span>
@@ -628,11 +774,16 @@
 
         <span class="n">q_th_order_msq_fluctuations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
             <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">q_array</span><span class="p">)),</span>
-            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span>
         <span class="p">)</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">factor</span><span class="o">*</span><span class="n">n_array</span><span class="p">):</span>
 
-            <span class="n">fluct</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">fluctuations</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">)</span>
+            <span class="n">fluct</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">fluctuations</span><span class="p">(</span>
+                <span class="n">ts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+                <span class="n">n</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
+                <span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">,</span>
+                <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span>
+            <span class="p">)</span>
             <span class="n">q_th_order_msq_fluctuations</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="bp">cls</span><span class="o">.</span><span class="n">q_th_order_mean_square</span><span class="p">(</span><span class="n">fluct</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">q_array</span>
             <span class="p">]</span>
@@ -649,6 +800,7 @@
         <span class="n">n_array</span><span class="p">,</span>
         <span class="n">q_array</span><span class="p">,</span>
         <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -670,6 +822,9 @@
 <span class="sd">        deg: int, optional</span>
 <span class="sd">            Degree(s) of the fitting polynomials.</span>
 <span class="sd">            Default is 1.</span>
+<span class="sd">        overlap: bool, optional</span>
+<span class="sd">            If set to True, consecutive windows during segmentation</span>
+<span class="sd">            overlap by 50%. Default is False.</span>
 <span class="sd">        log: bool, optional</span>
 <span class="sd">            If set to True, returned values are log-transformed.</span>
 <span class="sd">            Default is False.</span>
@@ -709,7 +864,8 @@
         <span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">fluctuations</span><span class="p">)(</span>
             <span class="n">ts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="n">n</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
-            <span class="n">deg</span><span class="o">=</span><span class="n">deg</span>
+            <span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">,</span>
+            <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span>
         <span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">factor</span><span class="o">*</span><span class="n">n_array</span><span class="p">)</span>
 
         <span class="n">q_th_order_msq_fluctuations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
@@ -720,7 +876,41 @@
         <span class="k">if</span> <span class="n">log</span><span class="p">:</span>
             <span class="n">q_th_order_msq_fluctuations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">q_th_order_msq_fluctuations</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">q_th_order_msq_fluctuations</span></div></div>
+        <span class="k">return</span> <span class="n">q_th_order_msq_fluctuations</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">equally_spaced_logscale_range</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mi">1440</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Equally spaced numbers in log-scale</span>
+
+<span class="sd">        Construct a series of equally spaced numbers in log scale</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n: int</span>
+<span class="sd">            Time scales (i.e window sizes). In minutes.</span>
+<span class="sd">        start: int, optional</span>
+<span class="sd">            Starting number.</span>
+<span class="sd">            Default is 1.</span>
+<span class="sd">        stop: int, optional</span>
+<span class="sd">            End number.</span>
+<span class="sd">            Default is 1440.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        n_array: numpy.array of int</span>
+<span class="sd">            Array of equally spaced numbers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Create series of exponentiated numbers evenly spaced in log-space.</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">geomspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># Cast as int and remove duplicates</span>
+        <span class="n">n_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">units</span><span class="p">)</span>
+
+        <span class="c1"># Filter out numbers &lt; start</span>
+        <span class="n">n_array</span> <span class="o">=</span> <span class="n">n_array</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">n_array</span> <span class="o">&gt;=</span> <span class="n">start</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="n">n_array</span></div>
 </pre></div>
 
     </div>
@@ -734,8 +924,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

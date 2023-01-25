@@ -3,27 +3,26 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pyActigraphy.io.reader.reader &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyActigraphy.io.reader.reader &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/language_data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script src="../../../../_static/js/jquery-1.11.0.min.js"></script>
-    <script src="../../../../_static/js/jquery-fix.js"></script>
-    <script src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script src="../../../../_static/bootstrap-sphinx.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -38,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -46,6 +45,7 @@
             
                 <li><a href="../../../../tutorials.html">Tutorials</a></li>
                 <li><a href="../../../../api.html">API</a></li>
+                <li><a href="../../../../changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -84,24 +84,24 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+    <div class="body col-md-12 content" role="main">
       
   <h1>Source code for pyActigraphy.io.reader.reader</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="k">import</span> <span class="n">Timedelta</span>
-<span class="kn">from</span> <span class="nn">pandas.tseries.frequencies</span> <span class="k">import</span> <span class="n">to_offset</span>
-<span class="kn">from</span> <span class="nn">pyActigraphy.metrics</span> <span class="k">import</span> <span class="n">ForwardMetricsMixin</span>
-<span class="kn">from</span> <span class="nn">joblib</span> <span class="k">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="kn">from</span> <span class="nn">..agd</span> <span class="k">import</span> <span class="n">read_raw_agd</span>
-<span class="kn">from</span> <span class="nn">..atr</span> <span class="k">import</span> <span class="n">read_raw_atr</span>
-<span class="kn">from</span> <span class="nn">..awd</span> <span class="k">import</span> <span class="n">read_raw_awd</span>
-<span class="kn">from</span> <span class="nn">..dqt</span> <span class="k">import</span> <span class="n">read_raw_dqt</span>
-<span class="kn">from</span> <span class="nn">..mtn</span> <span class="k">import</span> <span class="n">read_raw_mtn</span>
-<span class="kn">from</span> <span class="nn">..rpx</span> <span class="k">import</span> <span class="n">read_raw_rpx</span>
-<span class="kn">from</span> <span class="nn">..tal</span> <span class="k">import</span> <span class="n">read_raw_tal</span>
-<span class="kn">from</span> <span class="nn">pyActigraphy.log</span> <span class="k">import</span> <span class="n">read_sst_log</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Timedelta</span>
+<span class="kn">from</span> <span class="nn">pandas.tseries.frequencies</span> <span class="kn">import</span> <span class="n">to_offset</span>
+<span class="kn">from</span> <span class="nn">pyActigraphy.metrics</span> <span class="kn">import</span> <span class="n">ForwardMetricsMixin</span>
+<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span> <span class="nn">..agd</span> <span class="kn">import</span> <span class="n">read_raw_agd</span>
+<span class="kn">from</span> <span class="nn">..atr</span> <span class="kn">import</span> <span class="n">read_raw_atr</span>
+<span class="kn">from</span> <span class="nn">..awd</span> <span class="kn">import</span> <span class="n">read_raw_awd</span>
+<span class="kn">from</span> <span class="nn">..dqt</span> <span class="kn">import</span> <span class="n">read_raw_dqt</span>
+<span class="kn">from</span> <span class="nn">..mtn</span> <span class="kn">import</span> <span class="n">read_raw_mtn</span>
+<span class="kn">from</span> <span class="nn">..rpx</span> <span class="kn">import</span> <span class="n">read_raw_rpx</span>
+<span class="kn">from</span> <span class="nn">..tal</span> <span class="kn">import</span> <span class="n">read_raw_tal</span>
+<span class="kn">from</span> <span class="nn">pyActigraphy.log</span> <span class="kn">import</span> <span class="n">read_sst_log</span>
 
 
 <div class="viewcode-block" id="RawReader"><a class="viewcode-back" href="../../../../RawReader.html#pyActigraphy.io.RawReader">[docs]</a><span class="k">class</span> <span class="nc">RawReader</span><span class="p">(</span><span class="n">ForwardMetricsMixin</span><span class="p">):</span>
@@ -113,7 +113,7 @@
 <span class="sd">        List of instances of RawXXX classes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader_type</span><span class="p">,</span> <span class="n">readers</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader_type</span><span class="p">,</span> <span class="n">readers</span><span class="o">=</span><span class="p">[]):</span>
 
         <span class="c1"># store reader_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__reader_type</span> <span class="o">=</span> <span class="n">reader_type</span>
@@ -185,9 +185,9 @@
         <span class="n">freqs</span> <span class="o">=</span> <span class="p">[</span><span class="n">reader</span><span class="o">.</span><span class="n">frequency</span> <span class="k">for</span> <span class="n">reader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">freq</span> <span class="o">&lt;=</span> <span class="nb">min</span><span class="p">(</span><span class="n">freqs</span><span class="p">):</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s1">&#39;Resampling frequency equal to or lower than the lowest&#39;</span> <span class="o">+</span>
-                <span class="s1">&#39; acquisition frequency found in the list of readers.&#39;</span> <span class="o">+</span>
-                <span class="s1">&#39; Returning original data.&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Resampling frequency equal to or lower than the lowest&#39;</span>
+                <span class="o">+</span> <span class="s1">&#39; acquisition frequency found in the list of readers.&#39;</span>
+                <span class="o">+</span> <span class="s1">&#39; Returning original data.&#39;</span><span class="p">,</span>
                 <span class="ne">UserWarning</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
@@ -195,9 +195,9 @@
         <span class="c1"># 2. check if resampling freq is a multiple of the acquistion freq.</span>
         <span class="k">if</span> <span class="kc">False</span> <span class="ow">in</span> <span class="p">[(</span><span class="n">freq</span> <span class="o">%</span> <span class="n">ifreq</span><span class="p">)</span> <span class="o">==</span> <span class="n">Timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">ifreq</span> <span class="ow">in</span> <span class="n">freqs</span><span class="p">]:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s1">&#39;Resampling frequency is *not* a multiple of the&#39;</span> <span class="o">+</span>
-                <span class="s1">&#39; acquisition frequencies found in the list of readers.&#39;</span> <span class="o">+</span>
-                <span class="s1">&#39; Returning original data.&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Resampling frequency is *not* a multiple of the&#39;</span>
+                <span class="o">+</span> <span class="s1">&#39; acquisition frequencies found in the list of readers.&#39;</span>
+                <span class="o">+</span> <span class="s1">&#39; Returning original data.&#39;</span><span class="p">,</span>
                 <span class="ne">UserWarning</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span>
@@ -269,87 +269,87 @@
 <div class="viewcode-block" id="read_raw"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw.html#pyActigraphy.io.read_raw">[docs]</a><span class="k">def</span> <span class="nf">read_raw</span><span class="p">(</span>
     <span class="n">input_path</span><span class="p">,</span> <span class="n">reader_type</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for multiple raw files.</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for multiple raw files.</span>
 
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        input_path: str</span>
-<span class="sd">            Path to the files. Accept wild cards.</span>
-<span class="sd">            E.g. &#39;/path/to/my/files/*.csv&#39;</span>
-<span class="sd">        reader_type: str</span>
-<span class="sd">            Reader type.</span>
-<span class="sd">            Supported types:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_path: str</span>
+<span class="sd">        Path to the files. Accept wild cards.</span>
+<span class="sd">        E.g. &#39;/path/to/my/files/*.csv&#39;</span>
+<span class="sd">    reader_type: str</span>
+<span class="sd">        Reader type.</span>
+<span class="sd">        Supported types:</span>
 
-<span class="sd">            * AGD ((w)GT3X(+)), ActiGraph)</span>
-<span class="sd">            * ATR (ActTrust, Condor Instruments)</span>
-<span class="sd">            * AWD (ActiWatch 4, CamNtech)</span>
-<span class="sd">            * DQT (Daqtometers, Daqtix)</span>
-<span class="sd">            * MTN (MotionWatch8, CamNtech)</span>
-<span class="sd">            * RPX (Actiwatch, Respironics)</span>
-<span class="sd">            * TAL (Tempatilumi, CE Brasil)</span>
+<span class="sd">        * AGD ((w)GT3X(+)), ActiGraph)</span>
+<span class="sd">        * ATR (ActTrust, Condor Instruments)</span>
+<span class="sd">        * AWD (ActiWatch 4, CamNtech)</span>
+<span class="sd">        * DQT (Daqtometers, Daqtix)</span>
+<span class="sd">        * MTN (MotionWatch8, CamNtech)</span>
+<span class="sd">        * RPX (Actiwatch, Respironics)</span>
+<span class="sd">        * TAL (Tempatilumi, CE Brasil)</span>
 
-<span class="sd">        n_jobs: int</span>
-<span class="sd">            Number of CPU to use for parallel reading</span>
-<span class="sd">        prefer: str</span>
-<span class="sd">            Soft hint to choose the default backendself.</span>
-<span class="sd">            Supported option:&#39;processes&#39;, &#39;threads&#39;.</span>
-<span class="sd">            See joblib package documentation for more info.</span>
-<span class="sd">            Default is None.</span>
-<span class="sd">        verbose: int</span>
-<span class="sd">            Display a progress meter if set to a value &gt; 0.</span>
-<span class="sd">            Default is 0.</span>
-<span class="sd">        **kwargs</span>
-<span class="sd">            Arbitrary keyword arguments passed to the underlying reader</span>
-<span class="sd">            function.</span>
+<span class="sd">    n_jobs: int</span>
+<span class="sd">        Number of CPU to use for parallel reading</span>
+<span class="sd">    prefer: str</span>
+<span class="sd">        Soft hint to choose the default backendself.</span>
+<span class="sd">        Supported option:&#39;processes&#39;, &#39;threads&#39;.</span>
+<span class="sd">        See joblib package documentation for more info.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    verbose: int</span>
+<span class="sd">        Display a progress meter if set to a value &gt; 0.</span>
+<span class="sd">        Default is 0.</span>
+<span class="sd">    kwargs</span>
+<span class="sd">        Arbitrary keyword arguments passed to the underlying reader</span>
+<span class="sd">        function.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        raw : Instance of RawReader</span>
-<span class="sd">            An object containing raw data</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    raw : Instance of RawReader</span>
+<span class="sd">        An object containing raw data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-        <span class="n">supported_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AGD&#39;</span><span class="p">,</span> <span class="s1">&#39;ATR&#39;</span><span class="p">,</span> <span class="s1">&#39;AWD&#39;</span><span class="p">,</span> <span class="s1">&#39;DQT&#39;</span><span class="p">,</span> <span class="s1">&#39;MTN&#39;</span><span class="p">,</span> <span class="s1">&#39;RPX&#39;</span><span class="p">,</span> <span class="s1">&#39;TAL&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">reader_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_types</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Type </span><span class="si">{0}</span><span class="s1"> unsupported. Supported types: </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">reader_type</span><span class="p">,</span> <span class="n">supported_types</span>
-                <span class="p">)</span>
+    <span class="n">supported_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AGD&#39;</span><span class="p">,</span> <span class="s1">&#39;ATR&#39;</span><span class="p">,</span> <span class="s1">&#39;AWD&#39;</span><span class="p">,</span> <span class="s1">&#39;DQT&#39;</span><span class="p">,</span> <span class="s1">&#39;MTN&#39;</span><span class="p">,</span> <span class="s1">&#39;RPX&#39;</span><span class="p">,</span> <span class="s1">&#39;TAL&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">reader_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_types</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Type </span><span class="si">{0}</span><span class="s1"> unsupported. Supported types: </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">reader_type</span><span class="p">,</span> <span class="n">supported_types</span>
             <span class="p">)</span>
+        <span class="p">)</span>
 
-        <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">input_path</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">parallel_reader</span><span class="p">(</span>
-            <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_func</span><span class="p">,</span> <span class="n">file_list</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-        <span class="p">):</span>
-            <span class="k">return</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)(</span>
-                <span class="n">delayed</span><span class="p">(</span><span class="n">read_func</span><span class="p">)(</span><span class="n">file</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span>
-            <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">parallel_reader</span><span class="p">(</span>
+        <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_func</span><span class="p">,</span> <span class="n">file_list</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">read_func</span><span class="p">)(</span><span class="n">file</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span>
+        <span class="p">)</span>
 
-        <span class="n">readers</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;AGD&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
-                <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_agd</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">),</span>
-            <span class="s1">&#39;ATR&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
-                <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_atr</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">),</span>
-            <span class="s1">&#39;AWD&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
-                <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_awd</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">),</span>
-            <span class="s1">&#39;DQT&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
-                <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_dqt</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">),</span>
-            <span class="s1">&#39;MTN&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
-                <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_mtn</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">),</span>
-            <span class="s1">&#39;RPX&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
-                <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_rpx</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">),</span>
-            <span class="s1">&#39;TAL&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
-                <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_tal</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-            <span class="p">)</span>
-        <span class="p">}[</span><span class="n">reader_type</span><span class="p">](</span><span class="n">files</span><span class="p">)</span>
+    <span class="n">readers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;AGD&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
+            <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_agd</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">),</span>
+        <span class="s1">&#39;ATR&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
+            <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_atr</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">),</span>
+        <span class="s1">&#39;AWD&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
+            <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_awd</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">),</span>
+        <span class="s1">&#39;DQT&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
+            <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_dqt</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">),</span>
+        <span class="s1">&#39;MTN&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
+            <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_mtn</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">),</span>
+        <span class="s1">&#39;RPX&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
+            <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_rpx</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">),</span>
+        <span class="s1">&#39;TAL&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">files</span><span class="p">:</span> <span class="n">parallel_reader</span><span class="p">(</span>
+            <span class="n">n_jobs</span><span class="p">,</span> <span class="n">read_raw_tal</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+    <span class="p">}[</span><span class="n">reader_type</span><span class="p">](</span><span class="n">files</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">RawReader</span><span class="p">(</span><span class="n">reader_type</span><span class="p">,</span> <span class="n">readers</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">RawReader</span><span class="p">(</span><span class="n">reader_type</span><span class="p">,</span> <span class="n">readers</span><span class="p">)</span></div>
 </pre></div>
 
     </div>
@@ -363,8 +363,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

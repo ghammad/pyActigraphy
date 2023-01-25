@@ -1,0 +1,6 @@
+﻿pyActigraphy.light.LightMetricsMixin.light\_exposure\_level
+===========================================================
+
+.. currentmodule:: pyActigraphy.light
+
+.. automethod:: LightMetricsMixin.light_exposure_level

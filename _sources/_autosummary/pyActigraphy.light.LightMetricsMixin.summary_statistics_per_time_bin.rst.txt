@@ -1,0 +1,6 @@
+﻿pyActigraphy.light.LightMetricsMixin.summary\_statistics\_per\_time\_bin
+========================================================================
+
+.. currentmodule:: pyActigraphy.light
+
+.. automethod:: LightMetricsMixin.summary_statistics_per_time_bin

@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.FLM.evaluate\_reader
+pyActigraphy.analysis.FLM.evaluate\_reader
 ==========================================
 
 .. currentmodule:: pyActigraphy.analysis

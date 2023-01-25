@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.LIDS.freq
+pyActigraphy.analysis.LIDS.freq
 ===============================
 
 .. currentmodule:: pyActigraphy.analysis

@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.SSA.trajectory\_matrix
+pyActigraphy.analysis.SSA.trajectory\_matrix
 ============================================
 
 .. currentmodule:: pyActigraphy.analysis

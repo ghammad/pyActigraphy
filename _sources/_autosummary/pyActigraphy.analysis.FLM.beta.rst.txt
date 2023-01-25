@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.FLM.beta
+pyActigraphy.analysis.FLM.beta
 ==============================
 
 .. currentmodule:: pyActigraphy.analysis

@@ -1,0 +1,6 @@
+﻿pyActigraphy.light.LightMetricsMixin.get\_light\_extremum
+=========================================================
+
+.. currentmodule:: pyActigraphy.light
+
+.. automethod:: LightMetricsMixin.get_light_extremum

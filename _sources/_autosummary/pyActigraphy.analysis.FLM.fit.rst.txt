@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.FLM.fit
+pyActigraphy.analysis.FLM.fit
 =============================
 
 .. currentmodule:: pyActigraphy.analysis

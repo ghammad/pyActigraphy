@@ -1,4 +1,4 @@
-﻿pyActigraphy.sleep.SleepBoutMixin.sleep\_durations
+pyActigraphy.sleep.SleepBoutMixin.sleep\_durations
 ==================================================
 
 .. currentmodule:: pyActigraphy.sleep

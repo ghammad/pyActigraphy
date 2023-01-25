@@ -1,0 +1,6 @@
+﻿pyActigraphy.light.LightRecording.get\_channel\_list
+====================================================
+
+.. currentmodule:: pyActigraphy.light
+
+.. automethod:: LightRecording.get_channel_list

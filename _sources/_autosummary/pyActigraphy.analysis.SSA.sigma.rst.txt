@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.SSA.sigma
+pyActigraphy.analysis.SSA.sigma
 ===============================
 
 .. currentmodule:: pyActigraphy.analysis

@@ -3,27 +3,26 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pyActigraphy.sleep.scoring_base &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyActigraphy.sleep.scoring_base &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script src="../../../_static/js/jquery-1.11.0.min.js"></script>
-    <script src="../../../_static/js/jquery-fix.js"></script>
-    <script src="../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script src="../../../_static/bootstrap-sphinx.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -38,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -46,6 +45,7 @@
             
                 <li><a href="../../../tutorials.html">Tutorials</a></li>
                 <li><a href="../../../api.html">API</a></li>
+                <li><a href="../../../changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -84,18 +84,19 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+    <div class="body col-md-12 content" role="main">
       
   <h1>Source code for pyActigraphy.sleep.scoring_base</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">.scoring</span> <span class="k">import</span> <span class="n">roenneberg</span><span class="p">,</span> <span class="n">sleep_midpoint</span><span class="p">,</span> <span class="n">sri</span>
-<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="k">import</span> <span class="n">binary_closing</span><span class="p">,</span> <span class="n">binary_opening</span>
-<span class="kn">from</span> <span class="nn">..filters</span> <span class="k">import</span> <span class="n">_create_inactivity_mask</span>
-<span class="kn">from</span> <span class="nn">..utils.utils</span> <span class="k">import</span> <span class="n">_average_daily_activity</span>
-<span class="kn">from</span> <span class="nn">..utils.utils</span> <span class="k">import</span> <span class="n">_activity_onset_time</span>
-<span class="kn">from</span> <span class="nn">..utils.utils</span> <span class="k">import</span> <span class="n">_activity_offset_time</span>
+<span class="kn">from</span> <span class="nn">.scoring</span> <span class="kn">import</span> <span class="n">csm</span><span class="p">,</span> <span class="n">roenneberg</span><span class="p">,</span> <span class="n">sleep_midpoint</span><span class="p">,</span> <span class="n">sri</span>
+<span class="kn">from</span> <span class="nn">.scoring.utils</span> <span class="kn">import</span> <span class="n">rescore</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">binary_closing</span><span class="p">,</span> <span class="n">binary_opening</span>
+<span class="kn">from</span> <span class="nn">..filters</span> <span class="kn">import</span> <span class="n">_create_inactivity_mask</span>
+<span class="kn">from</span> <span class="nn">..utils.utils</span> <span class="kn">import</span> <span class="n">_average_daily_activity</span>
+<span class="kn">from</span> <span class="nn">..utils.utils</span> <span class="kn">import</span> <span class="n">_activity_onset_time</span>
+<span class="kn">from</span> <span class="nn">..utils.utils</span> <span class="kn">import</span> <span class="n">_activity_offset_time</span>
 
 
 <span class="k">def</span> <span class="nf">_td_format</span><span class="p">(</span><span class="n">td</span><span class="p">):</span>
@@ -205,7 +206,6 @@
 
 
 <span class="k">def</span> <span class="nf">_cole_kripke</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;Automatic scoring methods from Cole and Kripke&quot;&quot;&quot;</span>
 
     <span class="n">ck</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span>
@@ -216,7 +216,6 @@
 
 
 <span class="k">def</span> <span class="nf">_sadeh</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;Activity-Based Sleep-Wake Identification&quot;&quot;&quot;</span>
 
     <span class="n">r</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -243,7 +242,6 @@
 
 
 <span class="k">def</span> <span class="nf">_scripps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;Scripps Clinic algorithm for sleep-wake scoring.&quot;&quot;&quot;</span>
 
     <span class="n">scripps</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span>
@@ -254,7 +252,6 @@
 
 
 <span class="k">def</span> <span class="nf">_oakley</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
-
     <span class="sd">&quot;&quot;&quot;Oakley&#39;s algorithm for sleep-wake scoring.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">threshold</span> <span class="o">==</span> <span class="s1">&#39;automatic&#39;</span><span class="p">:</span>
         <span class="n">threshold</span> <span class="o">=</span> <span class="n">_actiware_automatic_threshold</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -403,11 +400,10 @@
 
 <div class="viewcode-block" id="ScoringMixin.CK"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.sleep.ScoringMixin.CK.html#pyActigraphy.sleep.ScoringMixin.CK">[docs]</a>    <span class="k">def</span> <span class="nf">CK</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">scale</span><span class="o">=</span><span class="mf">0.00001</span><span class="p">,</span>
-        <span class="n">window</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">400</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">1400</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">350</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
-        <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span>
+        <span class="n">settings</span><span class="o">=</span><span class="s1">&#39;30sec_max_non_overlap&#39;</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">rescoring</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">):</span>
-
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Cole&amp;Kripke algorithm for sleep-wake identification.</span>
 
 <span class="sd">        Algorithm for automatic sleep scoring based on wrist activity,</span>
@@ -416,15 +412,24 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        scale: float, optional</span>
-<span class="sd">            Scale parameter P.</span>
-<span class="sd">            Default is 0.00001.</span>
-<span class="sd">        window: np.array</span>
-<span class="sd">            Array of weighting factors, :math:`W_{i}`.</span>
-<span class="sd">            Default is [400, 600, 300, 400, 1400, 500, 350, 0, 0]</span>
+<span class="sd">        settings: str, optional</span>
+<span class="sd">            Data reduction settings for which the optimal parameters have been</span>
+<span class="sd">            derived. Available settings are:</span>
+
+<span class="sd">            * &quot;mean&quot;: mean activity per minute</span>
+<span class="sd">            * &quot;10sec_max_overlap&quot;: maximum 10-second overlapping epoch per</span>
+<span class="sd">              minute</span>
+<span class="sd">            * &quot;10sec_max_non_overlap&quot;: maximum 10-second nonoverlapping epoch</span>
+<span class="sd">              per minute</span>
+<span class="sd">            * &quot;30sec_max_non_overlap&quot;: maximum 30-second nonoverlapping epoch</span>
+<span class="sd">              per minute</span>
+
+<span class="sd">            Default is &quot;30sec_max_non_overlap&quot;.</span>
 <span class="sd">        threshold: float, optional</span>
-<span class="sd">            Threshold value for scoring sleep/wake.</span>
-<span class="sd">            Default is 1.0.</span>
+<span class="sd">            Threshold value for scoring sleep/wake. Default is 1.0.</span>
+<span class="sd">        rescoring: bool, optional</span>
+<span class="sd">            If set to True, Webster&#39;s rescoring rules are applied [2]_.</span>
+<span class="sd">            Default is True.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -454,6 +459,26 @@
 <span class="sd">          minute, the previous minute, the following minute, etc.</span>
 
 
+<span class="sd">        .. warning:: This algorithm yields scores with a period of 1 minute.</span>
+<span class="sd">                     Therefore, the time series returned by the CK function has</span>
+<span class="sd">                     a 1-min period. In the original paper, this algorithm is</span>
+<span class="sd">                     validated for devices configured in &quot;zero-crossing mode&quot;.</span>
+
+<span class="sd">        Webster&#39;s rescoring rules [2]_:</span>
+
+<span class="sd">        1. After at least 4 minutes scored as wake, the next 1 minute scored as</span>
+<span class="sd">           sleep is rescored as wake</span>
+<span class="sd">        2. After at least 10 minutes scored as wake, the next 3 minutes scored</span>
+<span class="sd">           as sleep are rescored as wake;</span>
+<span class="sd">        3. After at least 15 minutes scored as wake, the next 4 minutes scored</span>
+<span class="sd">           as sleep are rescored as wake;</span>
+<span class="sd">        4. If a period of 6 minutes or less that is scored as sleep is</span>
+<span class="sd">           surrounded by at least 15 minutes scored as wake, then rescore to</span>
+<span class="sd">           wake;</span>
+<span class="sd">        5. If a period of 10 minutes or less that is scored as sleep is</span>
+<span class="sd">           surrounded by at least 20 minutes scored as wake, then rescore to</span>
+<span class="sd">           wake.</span>
+
 <span class="sd">        References</span>
 <span class="sd">        ----------</span>
 
@@ -461,22 +486,142 @@
 <span class="sd">               &amp; Gillin, J. C. (1992). Automatic Sleep/Wake Identification</span>
 <span class="sd">               From Wrist Activity. Sleep, 15(5), 461–469.</span>
 <span class="sd">               http://doi.org/10.1093/sleep/15.5.461</span>
+<span class="sd">        .. [2] Webster, J. B., Kripke, D. F., Messin, S., Mullaney, D. J., &amp;</span>
+<span class="sd">               Wyborney, G. (1982). An Activity-Based Sleep Monitor System for</span>
+<span class="sd">               Ambulatory Use. Sleep, 5(4), 389–399.</span>
+<span class="sd">               https://doi.org/10.1093/sleep/5.4.389</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">available_settings</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;10sec_max_overlap&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;10sec_max_non_overlap&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;30sec_max_non_overlap&quot;</span>
+        <span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">_cole_kripke</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">settings</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_settings</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;CK sleep/wake identification:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                             <span class="o">+</span> <span class="s2">&quot;Required settings: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+                             <span class="o">+</span> <span class="s2">&quot;Available settings are:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                             <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">available_settings</span><span class="p">))</span>
+
+        <span class="n">ck</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">settings</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;60s&#39;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span>
+                    <span class="s2">&quot;The sampling frequency of the input data does not allow&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot; the use of the requested settings (</span><span class="si">{}</span><span class="s2">).</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">settings</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="s2">&quot;For such settings, the sampling frequency should less&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot; than 60 seconds.&quot;</span>
+                    <span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Compute the resampling factor as the original weights are</span>
+                <span class="c1"># calculated for an average of 2-sec epochs over 60 seconds:</span>
+                <span class="n">rs_f</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># 60sec/2sec</span>
+                <span class="c1"># Resample to 60 sec and take the sum</span>
+                <span class="c1"># WARNING: valid if the input data is a sum of activity counts</span>
+                <span class="n">data_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;60s&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="n">rs_f</span>
+
+                <span class="c1"># Define the scale and weights for this settings</span>
+                <span class="n">scale</span> <span class="o">=</span> <span class="mf">0.001</span>
+                <span class="n">window</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span><span class="mi">106</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="mi">58</span><span class="p">,</span> <span class="mi">76</span><span class="p">,</span> <span class="mi">230</span><span class="p">,</span> <span class="mi">74</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">int32</span>
+                <span class="p">)</span>
+
+                <span class="n">ck</span> <span class="o">=</span> <span class="n">_cole_kripke</span><span class="p">(</span><span class="n">data_mean</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">settings</span> <span class="o">==</span> <span class="s2">&quot;10sec_max_overlap&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;5s&#39;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span>
+                    <span class="s2">&quot;The sampling frequency of the input data does not allow&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot; the use of the requested settings (</span><span class="si">{}</span><span class="s2">).</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">settings</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="s2">&quot;For such settings, the sampling frequency should less&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot; than 5 seconds.&quot;</span>
+                    <span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Resample to 10/2 sec and then sum over a sliding window</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;5s&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="s1">&#39;10s&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="c1"># Resample to 60 sec and take the max of the 10 sec periods</span>
+                <span class="n">data_max</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;60s&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+                <span class="c1"># Define the scale and weights for this settings</span>
+                <span class="n">scale</span> <span class="o">=</span> <span class="mf">0.00001</span>
+                <span class="n">window</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">1400</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">350</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">int32</span>
+                <span class="p">)</span>
+
+                <span class="n">ck</span> <span class="o">=</span> <span class="n">_cole_kripke</span><span class="p">(</span><span class="n">data_max</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">settings</span> <span class="o">==</span> <span class="s2">&quot;10sec_max_non_overlap&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;10s&#39;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span>
+                    <span class="s2">&quot;The sampling frequency of the input data does not allow&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot; the use of the requested settings (</span><span class="si">{}</span><span class="s2">).</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">settings</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="s2">&quot;For such settings, the sampling frequency should less&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot; or equal to 10 seconds.&quot;</span>
+                    <span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Resample to 10 sec and then sum</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;10s&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="c1"># Resample to 60 sec and take the max of the 10 sec periods</span>
+                <span class="n">data_max</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;60s&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+                <span class="c1"># Define the scale and weights for this settings</span>
+                <span class="n">scale</span> <span class="o">=</span> <span class="mf">0.00001</span>
+                <span class="n">window</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span><span class="mi">550</span><span class="p">,</span> <span class="mi">378</span><span class="p">,</span> <span class="mi">413</span><span class="p">,</span> <span class="mi">699</span><span class="p">,</span> <span class="mi">1736</span><span class="p">,</span> <span class="mi">287</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">int32</span>
+                <span class="p">)</span>
+
+                <span class="n">ck</span> <span class="o">=</span> <span class="n">_cole_kripke</span><span class="p">(</span><span class="n">data_max</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">settings</span> <span class="o">==</span> <span class="s2">&quot;30sec_max_non_overlap&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;30s&#39;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span>
+                    <span class="s2">&quot;The sampling frequency of the input data does not allow&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot; the use of the requested settings (</span><span class="si">{}</span><span class="s2">).</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">settings</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="s2">&quot;For such settings, the sampling frequency should less&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot; or equal to 30 seconds.&quot;</span>
+                    <span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Resample to 30 sec and then sum</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;30s&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="c1"># Resample to 60 sec and take the max of the 10 sec periods</span>
+                <span class="n">data_max</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;60s&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+                <span class="c1"># Define the scale and weights for this settings</span>
+                <span class="n">scale</span> <span class="o">=</span> <span class="mf">0.0001</span>
+                <span class="n">window</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">int32</span>
+                <span class="p">)</span>
+
+                <span class="n">ck</span> <span class="o">=</span> <span class="n">_cole_kripke</span><span class="p">(</span><span class="n">data_max</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">rescoring</span><span class="p">:</span>
+            <span class="c1"># Rescoring</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">rescore</span><span class="p">(</span><span class="n">ck</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">sleep_score</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ck</span> <span class="o">=</span> <span class="n">ck</span><span class="o">*</span><span class="n">mask</span>
+
+        <span class="k">return</span> <span class="n">ck</span></div>
 
 <div class="viewcode-block" id="ScoringMixin.Sadeh"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.sleep.ScoringMixin.Sadeh.html#pyActigraphy.sleep.ScoringMixin.Sadeh">[docs]</a>    <span class="k">def</span> <span class="nf">Sadeh</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">offset</span><span class="o">=</span><span class="mf">7.601</span><span class="p">,</span>
-        <span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.065</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.08</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.056</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.703</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">),</span>
+        <span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.065</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.08</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.056</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.703</span><span class="p">],</span> <span class="nb">float</span><span class="p">),</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mf">0.0</span>
     <span class="p">):</span>
-
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sadeh algorithm for sleep identification</span>
 
 <span class="sd">        Algorithm for automatic sleep scoring based on wrist activity,</span>
@@ -565,10 +710,9 @@
             <span class="mf">0.0000</span><span class="p">,</span>  <span class="c1"># b_{+8}</span>
             <span class="mf">0.0000</span><span class="p">,</span>  <span class="c1"># b_{+9}</span>
             <span class="mf">0.0000</span>   <span class="c1"># b_{+10}</span>
-            <span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">),</span>
+            <span class="p">],</span> <span class="nb">float</span><span class="p">),</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span>
     <span class="p">):</span>
-
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Scripps Clinic algorithm for sleep-wake identification.</span>
 
 <span class="sd">        Algorithm for automatic sleep scoring based on wrist activity,</span>
@@ -635,7 +779,6 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mi">40</span>
     <span class="p">):</span>
-
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Oakley&#39;s algorithm for sleep/wake scoring.</span>
 
 <span class="sd">        Algorithm for automatic sleep/wake scoring based on wrist activity,</span>
@@ -794,14 +937,124 @@
             <span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Oakley</span><span class="se">\&#39;</span><span class="s1">s algorithm is not defined for data&#39;</span> <span class="o">+</span>
-                <span class="s1">&#39;acquired with a sampling frequency of </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span> <span class="o">+</span>
-                <span class="s1">&#39;Accepted frequencies are: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="s1">&#39;Oakley</span><span class="se">\&#39;</span><span class="s1">s algorithm is not defined for data &#39;</span>
+                <span class="o">+</span> <span class="s1">&#39;acquired with a sampling frequency of </span><span class="si">{}</span><span class="s1">. &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s1">&#39;Accepted frequencies are: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;15sec&#39;</span><span class="p">,</span> <span class="s1">&#39;30sec&#39;</span><span class="p">,</span> <span class="s1">&#39;60sec&#39;</span><span class="p">,</span> <span class="s1">&#39;120sec&#39;</span><span class="p">])</span>
                 <span class="p">)</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">_oakley</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">CSM</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">settings</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">score_rest</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">score_sleep</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Condor Sleep Model</span>
+
+<span class="sd">        Sleep-wake scoring algorithm developed by Condor Instrument for their</span>
+<span class="sd">        ActTrust devices.</span>
+
+<span class="sd">        This algorithm works in a two-step fashion. First, it classifies all</span>
+<span class="sd">        epochs as wake or rest, as function of each epoch&#39;s score. Second,</span>
+<span class="sd">        using a more stringent scoring threshold, &quot;rest&quot; epoch are</span>
+<span class="sd">        re-classified as &quot;sleep&quot;. A relabelling mechanism using the labels of</span>
+<span class="sd">        the surrounding epochs is also applied to consolidate periods of epochs</span>
+<span class="sd">        labelled as rest or sleep.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        settings: str, optional</span>
+<span class="sd">            Parameter settings for the CSM algorithm. Refers to the data</span>
+<span class="sd">            acquisition frequency. Available values are:</span>
+<span class="sd">            * &quot;auto&quot;: use input data frequency.</span>
+<span class="sd">            * &quot;30s&quot;: set parameters to optimal values obtained for a 30s data</span>
+<span class="sd">              acquisition frequency.</span>
+<span class="sd">            * &quot;60s&quot;: set parameters to optimal values obtained for a 60s data</span>
+<span class="sd">              acquisition frequency.</span>
+<span class="sd">             Default is &#39;auto&#39;.</span>
+<span class="sd">        score_rest: int, optional</span>
+<span class="sd">            State index for epochs labelled as &quot;rest&quot;.</span>
+<span class="sd">            Default is 2.</span>
+<span class="sd">        score_sleep: int, optional</span>
+<span class="sd">            State index for epochs labelled as &quot;sleep&quot;.</span>
+<span class="sd">            Default is 1.</span>
+<span class="sd">        binarize: bool, optional.</span>
+<span class="sd">            If set to True, the state index is set to 1 if the epoch is</span>
+<span class="sd">            labelled as sleep and 0 otherwise.</span>
+<span class="sd">            Defautl is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        csm : pandas.Series</span>
+<span class="sd">            Series of state indices.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># This algorithm has been developed for ActTrust devices from</span>
+        <span class="c1"># Condor Instrument. Verify if the reader has the appropriate type:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">!=</span> <span class="s1">&#39;ATR&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The CSM has been developed for ActTrust devices.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;It has not been validated for other devices.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># The CSM uses the ZCMn as input</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ZCMn</span>
+
+        <span class="k">if</span> <span class="n">settings</span> <span class="o">==</span> <span class="s2">&quot;auto&quot;</span><span class="p">:</span>
+            <span class="n">freq</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">delta</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">freq</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">freq</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;60s&#39;</span><span class="p">):</span>
+            <span class="n">wa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span><span class="mf">34.5</span><span class="p">,</span> <span class="mi">133</span><span class="p">,</span> <span class="mi">529</span><span class="p">,</span> <span class="mi">375</span><span class="p">,</span> <span class="mi">408</span><span class="p">,</span> <span class="mf">400.5</span><span class="p">,</span> <span class="mi">1074</span><span class="p">,</span> <span class="mf">2048.5</span><span class="p">,</span> <span class="mf">2424.5</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">wp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span><span class="mi">1920</span><span class="p">,</span> <span class="mf">149.5</span><span class="p">,</span> <span class="mf">257.5</span><span class="p">,</span> <span class="mi">125</span><span class="p">,</span> <span class="mf">111.5</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">69</span><span class="p">,</span> <span class="mf">40.5</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">freq</span> <span class="o">==</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="s1">&#39;30s&#39;</span><span class="p">):</span>
+            <span class="n">wa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span><span class="mi">69</span><span class="p">,</span> <span class="mi">197</span><span class="p">,</span> <span class="mi">730</span><span class="p">,</span> <span class="mi">328</span><span class="p">,</span> <span class="mi">269</span><span class="p">,</span> <span class="mi">481</span><span class="p">,</span> <span class="mi">528</span><span class="p">,</span> <span class="mi">288</span><span class="p">,</span> <span class="mi">304</span><span class="p">,</span> <span class="mi">497</span><span class="p">,</span> <span class="mi">1105</span><span class="p">,</span> <span class="mi">1043</span><span class="p">,</span>
+                 <span class="mi">1378</span><span class="p">,</span> <span class="mi">2719</span><span class="p">,</span> <span class="mi">2852</span><span class="p">,</span> <span class="mi">1997</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">wp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span><span class="mi">2972</span><span class="p">,</span> <span class="mi">868</span><span class="p">,</span> <span class="mi">269</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">495</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">39</span><span class="p">,</span> <span class="mi">211</span><span class="p">,</span> <span class="mi">91</span><span class="p">,</span> <span class="mi">132</span><span class="p">,</span> <span class="mi">203</span><span class="p">,</span> <span class="mi">37</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span>
+                 <span class="mi">71</span><span class="p">,</span> <span class="mi">81</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="s2">&quot;The settings for this acquistion frequency (</span><span class="si">{}</span><span class="s2">) &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">freq</span>
+                <span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;have not been implemented yet.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># The overall scaling and rescoring rules are identical for the</span>
+        <span class="c1"># different settings.</span>
+        <span class="n">p_rest</span> <span class="o">=</span> <span class="mf">0.00005</span>
+        <span class="n">p_sleep</span> <span class="o">=</span> <span class="mf">0.000464</span>
+        <span class="n">pr_rest</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nr_rest</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">pr_sleep</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">nr_sleep</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">states</span> <span class="o">=</span> <span class="n">csm</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span>
+            <span class="n">wa</span><span class="o">=</span><span class="n">wa</span><span class="p">,</span>
+            <span class="n">wp</span><span class="o">=</span><span class="n">wp</span><span class="p">,</span>
+            <span class="n">p_rest</span><span class="o">=</span><span class="n">p_rest</span><span class="p">,</span>
+            <span class="n">p_sleep</span><span class="o">=</span><span class="n">p_sleep</span><span class="p">,</span>
+            <span class="n">pr_rest</span><span class="o">=</span><span class="n">pr_rest</span><span class="p">,</span>
+            <span class="n">nr_rest</span><span class="o">=</span><span class="n">nr_rest</span><span class="p">,</span>
+            <span class="n">pr_sleep</span><span class="o">=</span><span class="n">pr_sleep</span><span class="p">,</span>
+            <span class="n">nr_sleep</span><span class="o">=</span><span class="n">nr_sleep</span><span class="p">,</span>
+            <span class="n">score_rest</span><span class="o">=</span><span class="n">score_rest</span><span class="p">,</span>
+            <span class="n">score_sleep</span><span class="o">=</span><span class="n">score_sleep</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">states</span> <span class="o">==</span> <span class="n">score_sleep</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="k">if</span> <span class="n">binarize</span> <span class="k">else</span> <span class="n">states</span>
 
 <div class="viewcode-block" id="ScoringMixin.SoD"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.sleep.ScoringMixin.SoD.html#pyActigraphy.sleep.ScoringMixin.SoD">[docs]</a>    <span class="k">def</span> <span class="nf">SoD</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -815,7 +1068,6 @@
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sleep over Daytime</span>
 
 <span class="sd">        Quantify the volume of epochs identified as sleep over daytime (SoD),</span>
@@ -925,7 +1177,6 @@
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Fraction of Sleep over Daytime</span>
 
 <span class="sd">        Fractional volume of epochs identified as sleep over daytime (SoD),</span>
@@ -950,17 +1201,17 @@
 <span class="sd">            Default is 4</span>
 <span class="sd">        start: str, optional</span>
 <span class="sd">            Start time of the period of interest.</span>
-<span class="sd">            Default: &#39;12:00:00&#39;</span>
-<span class="sd">            Supported times: &#39;AonT&#39;, &#39;AoffT&#39;, any &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Supported times: &#39;AonT&#39;, &#39;AoffT&#39;, any &#39;HH:MM:SS&#39;.</span>
+<span class="sd">            Default: &#39;12:00:00&#39;.</span>
 <span class="sd">        period: str, optional</span>
 <span class="sd">            Period length.</span>
-<span class="sd">            Default is &#39;10h&#39;</span>
+<span class="sd">            Default is &#39;10h&#39;.</span>
 <span class="sd">        algo: str, optional</span>
 <span class="sd">            Sleep scoring algorithm to use.</span>
 <span class="sd">            Default is &#39;Roenneberg&#39;.</span>
-<span class="sd">        *args</span>
+<span class="sd">        args</span>
 <span class="sd">            Variable length argument list passed to the scoring algorithm.</span>
-<span class="sd">        **kwargs</span>
+<span class="sd">        kwargs</span>
 <span class="sd">            Arbitrary keyword arguements passed to the scoring algorithm.</span>
 
 <span class="sd">        Returns</span>
@@ -972,11 +1223,12 @@
 <span class="sd">        .. warning:: The value of this variable depends on the convention used</span>
 <span class="sd">                     by the underlying sleep scoring algorithm. The expected</span>
 <span class="sd">                     convention is the following:</span>
-<span class="sd">                    * epochs scored as 1 refer to inactivity/sleep</span>
 
-<span class="sd">                    Otherwise, this variable will actually return the fraction</span>
-<span class="sd">                    of epochs scored as activity. The fraction of sleep can</span>
-<span class="sd">                    simply be recovered by calculating (1-fSOD).</span>
+<span class="sd">                     * epochs scored as 1 refer to inactivity/sleep</span>
+
+<span class="sd">                     Otherwise, this variable will actually return the fraction</span>
+<span class="sd">                     of epochs scored as activity. The fraction of sleep can</span>
+<span class="sd">                     simply be recovered by calculating (1-fSOD).</span>
 
 
 <span class="sd">        Examples</span>
@@ -1022,11 +1274,10 @@
 <div class="viewcode-block" id="ScoringMixin.Crespo"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.sleep.ScoringMixin.Crespo.html#pyActigraphy.sleep.ScoringMixin.Crespo">[docs]</a>    <span class="k">def</span> <span class="nf">Crespo</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">zeta</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">zeta_r</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">zeta_a</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">t</span><span class="o">=.</span><span class="mi">33</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="s1">&#39;8h&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="s1">&#39;1h&#39;</span><span class="p">,</span>
+        <span class="n">t</span><span class="o">=</span><span class="mf">.33</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="s1">&#39;8h&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="s1">&#39;1h&#39;</span><span class="p">,</span>
         <span class="n">estimate_zeta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seq_length_max</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Crespo algorithm for activity/rest identification</span>
 
 <span class="sd">        Algorithm for automatic identification of activity-rest periods based</span>
@@ -1265,11 +1516,10 @@
 <div class="viewcode-block" id="ScoringMixin.Crespo_AoT"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.sleep.ScoringMixin.Crespo_AoT.html#pyActigraphy.sleep.ScoringMixin.Crespo_AoT">[docs]</a>    <span class="k">def</span> <span class="nf">Crespo_AoT</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">zeta</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">zeta_r</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">zeta_a</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">t</span><span class="o">=.</span><span class="mi">33</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="s1">&#39;8h&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="s1">&#39;1h&#39;</span><span class="p">,</span>
+        <span class="n">t</span><span class="o">=</span><span class="mf">.33</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="s1">&#39;8h&#39;</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="s1">&#39;1h&#39;</span><span class="p">,</span>
         <span class="n">estimate_zeta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seq_length_max</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-
         <span class="sd">&quot;&quot;&quot;Automatic identification of activity onset/offset times, based on</span>
 <span class="sd">        the Crespo algorithm.</span>
 
@@ -1349,7 +1599,8 @@
         <span class="n">threshold</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
         <span class="n">min_seed_period</span><span class="o">=</span><span class="s1">&#39;30Min&#39;</span><span class="p">,</span>
         <span class="n">max_test_period</span><span class="o">=</span><span class="s1">&#39;12h&#39;</span><span class="p">,</span>
-        <span class="n">n_succ</span><span class="o">=</span><span class="mi">3</span>
+        <span class="n">r_consec_below</span><span class="o">=</span><span class="s1">&#39;30Min&#39;</span><span class="p">,</span>
+        <span class="n">rsfreq</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Automatic sleep detection.</span>
 
@@ -1375,15 +1626,28 @@
 <span class="sd">        max_test_period : str, optional</span>
 <span class="sd">            Maximal period of the test series.</span>
 <span class="sd">            Default is &#39;12h&#39;</span>
-<span class="sd">        n_succ : int, optional</span>
-<span class="sd">            Number of successive elements to consider when searching for the</span>
-<span class="sd">            maximum correlation peak.</span>
+<span class="sd">        r_consec_below : str, optional</span>
+<span class="sd">            Time range to consider, past the potential correlation peak when</span>
+<span class="sd">            searching for the maximum correlation peak.</span>
+<span class="sd">            Default is &#39;30Min&#39;.</span>
+<span class="sd">        rsfreq: str, optional</span>
+<span class="sd">            Resampling frequency used to evaluate the sleep periods. The final</span>
+<span class="sd">            time series with rest/activity scores is returned with a frequency</span>
+<span class="sd">            equal to one of the input data. If set to None, no resampling is</span>
+<span class="sd">            performed.</span>
+<span class="sd">            Default is None.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        rbg : pandas.core.Series</span>
 <span class="sd">            Time series containing the estimated periods of rest (1) and</span>
 <span class="sd">            activity (0).</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        .. warning:: The performance of this algorithm has been evaluated for</span>
+<span class="sd">                     actigraphy data aggregated in 10-min bins [2]_.</span>
 
 <span class="sd">        References</span>
 <span class="sd">        ----------</span>
@@ -1392,21 +1656,35 @@
 <span class="sd">               Vetter, C., &amp; Winnebeck, E. C. (2015). Human Activity and Rest</span>
 <span class="sd">               In Situ. In Methods in Enzymology (Vol. 552, pp. 257-283).</span>
 <span class="sd">               http://doi.org/10.1016/bs.mie.2014.11.028</span>
+<span class="sd">        .. [2] Loock, A., Khan Sullivan, A., Reis, C., Paiva, T., Ghotbi, N.,</span>
+<span class="sd">               Pilz, L. K., Biller, A. M., Molenda, C., Vuori‐Brodowski, M. T.,</span>
+<span class="sd">               Roenneberg, T., &amp; Winnebeck, E. C. (2021). Validation of the</span>
+<span class="sd">               Munich Actimetry Sleep Detection Algorithm for estimating</span>
+<span class="sd">               sleep–wake patterns from activity recordings. Journal of Sleep</span>
+<span class="sd">               Research, April, 1–12. https://doi.org/10.1111/jsr.13371</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">rsfreq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rsdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">resampled_data</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="n">rsfreq</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rsdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
 
         <span class="n">rbg</span> <span class="o">=</span> <span class="n">roenneberg</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">rsdata</span><span class="p">,</span>
             <span class="n">trend_period</span><span class="o">=</span><span class="n">trend_period</span><span class="p">,</span>
             <span class="n">min_trend_period</span><span class="o">=</span><span class="n">min_trend_period</span><span class="p">,</span>
             <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
             <span class="n">min_seed_period</span><span class="o">=</span><span class="n">min_seed_period</span><span class="p">,</span>
             <span class="n">max_test_period</span><span class="o">=</span><span class="n">max_test_period</span><span class="p">,</span>
-            <span class="n">n_succ</span><span class="o">=</span><span class="n">n_succ</span>
+            <span class="n">r_consec_below</span><span class="o">=</span><span class="n">r_consec_below</span>
         <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">rsfreq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">rbg</span> <span class="o">=</span> <span class="n">rbg</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pad&#39;</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">rbg</span></div>
 
 <div class="viewcode-block" id="ScoringMixin.Roenneberg_AoT"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.sleep.ScoringMixin.Roenneberg_AoT.html#pyActigraphy.sleep.ScoringMixin.Roenneberg_AoT">[docs]</a>    <span class="k">def</span> <span class="nf">Roenneberg_AoT</span><span class="p">(</span>
@@ -1416,7 +1694,8 @@
         <span class="n">threshold</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
         <span class="n">min_seed_period</span><span class="o">=</span><span class="s1">&#39;30Min&#39;</span><span class="p">,</span>
         <span class="n">max_test_period</span><span class="o">=</span><span class="s1">&#39;12h&#39;</span><span class="p">,</span>
-        <span class="n">n_succ</span><span class="o">=</span><span class="mi">3</span>
+        <span class="n">r_consec_below</span><span class="o">=</span><span class="s1">&#39;30Min&#39;</span><span class="p">,</span>
+        <span class="n">rsfreq</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Automatic identification of activity onset/offset times, based on</span>
 <span class="sd">        Roenneberg&#39;s algorithm.</span>
@@ -1443,16 +1722,29 @@
 <span class="sd">            Default is &#39;30Min&#39;.</span>
 <span class="sd">        max_test_period : str, optional</span>
 <span class="sd">            Maximal period of the test series.</span>
-<span class="sd">            Default is &#39;12h&#39;.</span>
-<span class="sd">        n_succ : int, optional</span>
-<span class="sd">            Number of successive elements to consider when searching for the</span>
-<span class="sd">            maximum correlation peak.</span>
+<span class="sd">            Default is &#39;12h&#39;</span>
+<span class="sd">        r_consec_below : str, optional</span>
+<span class="sd">            Time range to consider, past the potential correlation peak when</span>
+<span class="sd">            searching for the maximum correlation peak.</span>
+<span class="sd">            Default is &#39;30Min&#39;.</span>
+<span class="sd">        rsfreq: str, optional</span>
+<span class="sd">            Resampling frequency used to evaluate the sleep periods. The final</span>
+<span class="sd">            time series with rest/activity scores is returned with a frequency</span>
+<span class="sd">            equal to one of the input data. If set to None, no resampling is</span>
+<span class="sd">            performed.</span>
+<span class="sd">            Default is None.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        aot : (ndarray, ndarray)</span>
 <span class="sd">            Arrays containing the estimated activity onset and offset times,</span>
 <span class="sd">            respectively.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+
+<span class="sd">        .. warning:: The performance of this algorithm has been evaluated for</span>
+<span class="sd">                     actigraphy data aggregated in 10-min bins [2]_.</span>
 
 <span class="sd">        References</span>
 <span class="sd">        ----------</span>
@@ -1461,20 +1753,26 @@
 <span class="sd">               Vetter, C., &amp; Winnebeck, E. C. (2015). Human Activity and Rest</span>
 <span class="sd">               In Situ. In Methods in Enzymology (Vol. 552, pp. 257-283).</span>
 <span class="sd">               http://doi.org/10.1016/bs.mie.2014.11.028</span>
+<span class="sd">        .. [2] Loock, A., Khan Sullivan, A., Reis, C., Paiva, T., Ghotbi, N.,</span>
+<span class="sd">               Pilz, L. K., Biller, A. M., Molenda, C., Vuori‐Brodowski, M. T.,</span>
+<span class="sd">               Roenneberg, T., &amp; Winnebeck, E. C. (2021). Validation of the</span>
+<span class="sd">               Munich Actimetry Sleep Detection Algorithm for estimating</span>
+<span class="sd">               sleep–wake patterns from activity recordings. Journal of Sleep</span>
+<span class="sd">               Research, April, 1–12. https://doi.org/10.1111/jsr.13371</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">rbg</span> <span class="o">=</span> <span class="n">roenneberg</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="n">rbg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Roenneberg</span><span class="p">(</span>
             <span class="n">trend_period</span><span class="o">=</span><span class="n">trend_period</span><span class="p">,</span>
             <span class="n">min_trend_period</span><span class="o">=</span><span class="n">min_trend_period</span><span class="p">,</span>
             <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
             <span class="n">min_seed_period</span><span class="o">=</span><span class="n">min_seed_period</span><span class="p">,</span>
             <span class="n">max_test_period</span><span class="o">=</span><span class="n">max_test_period</span><span class="p">,</span>
-            <span class="n">n_succ</span><span class="o">=</span><span class="n">n_succ</span>
+            <span class="n">r_consec_below</span><span class="o">=</span><span class="n">r_consec_below</span><span class="p">,</span>
+            <span class="n">rsfreq</span><span class="o">=</span><span class="n">rsfreq</span>
         <span class="p">)</span>
 
         <span class="n">diff</span> <span class="o">=</span> <span class="n">rbg</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -1644,9 +1942,9 @@
 <span class="sd">        algo: str, optional</span>
 <span class="sd">            Sleep scoring algorithm to use.</span>
 <span class="sd">            Default is &#39;Roenneberg&#39;.</span>
-<span class="sd">        *args</span>
+<span class="sd">        \*args</span>
 <span class="sd">            Variable length argument list passed to the scoring algorithm.</span>
-<span class="sd">        **kwargs</span>
+<span class="sd">        \*\*kwargs</span>
 <span class="sd">            Arbitrary keyword arguements passed to the scoring algorithm.</span>
 
 <span class="sd">        Returns</span>
@@ -1667,10 +1965,11 @@
 <span class="sd">                  \sum_{j=1}^M\sum_{i=1}^N</span>
 <span class="sd">                  s_{i,j} \times cos\left(\frac{2\pi t_i}{1440}\right)</span>
 <span class="sd">                  \right)</span>
+
 <span class="sd">        with:</span>
-<span class="sd">            :math:`t_j`, time of day in minutes at epoch j,</span>
-<span class="sd">            :math:`\delta(s_{i,j}, s_{i+1,j}) = 1` if</span>
-<span class="sd">            :math:`s_{i,j} = s_{i+1,j}` and 0 otherwise.</span>
+<span class="sd">            * :math:`t_j`, time of day in minutes at epoch j,</span>
+<span class="sd">            * :math:`\delta(s_{i,j}, s_{i+1,j}) = 1` if</span>
+<span class="sd">              :math:`s_{i,j} = s_{i+1,j}` and 0 otherwise.</span>
 
 <span class="sd">        References</span>
 <span class="sd">        ----------</span>
@@ -1709,8 +2008,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

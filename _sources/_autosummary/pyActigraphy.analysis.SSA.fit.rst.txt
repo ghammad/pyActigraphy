@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.SSA.fit
+pyActigraphy.analysis.SSA.fit
 =============================
 
 .. currentmodule:: pyActigraphy.analysis

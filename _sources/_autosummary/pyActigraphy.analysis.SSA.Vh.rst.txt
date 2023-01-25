@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.SSA.Vh
+pyActigraphy.analysis.SSA.Vh
 ============================
 
 .. currentmodule:: pyActigraphy.analysis

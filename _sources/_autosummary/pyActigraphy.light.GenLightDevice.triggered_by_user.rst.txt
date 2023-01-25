@@ -1,0 +1,6 @@
+﻿pyActigraphy.light.GenLightDevice.triggered\_by\_user
+=====================================================
+
+.. currentmodule:: pyActigraphy.light
+
+.. autoproperty:: GenLightDevice.triggered_by_user

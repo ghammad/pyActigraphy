@@ -1,4 +1,4 @@
-﻿pyActigraphy.sleep.ScoringMixin.Roenneberg\_AoT
+pyActigraphy.sleep.ScoringMixin.Roenneberg\_AoT
 ===============================================
 
 .. currentmodule:: pyActigraphy.sleep

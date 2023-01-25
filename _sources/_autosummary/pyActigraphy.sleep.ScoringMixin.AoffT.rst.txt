@@ -1,4 +1,4 @@
-﻿pyActigraphy.sleep.ScoringMixin.AoffT
+pyActigraphy.sleep.ScoringMixin.AoffT
 =====================================
 
 .. currentmodule:: pyActigraphy.sleep

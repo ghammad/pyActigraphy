@@ -1,0 +1,6 @@
+﻿pyActigraphy.light.GenLightDevice.tilt
+======================================
+
+.. currentmodule:: pyActigraphy.light
+
+.. autoproperty:: GenLightDevice.tilt

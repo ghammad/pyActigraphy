@@ -3,26 +3,29 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>How to read raw files by batch &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>How to read raw files by batch &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
-<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
-<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -37,7 +40,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -45,6 +48,7 @@
             
                 <li><a href="tutorials.html">Tutorials</a></li>
                 <li><a href="api.html">API</a></li>
+                <li><a href="changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -299,7 +303,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -337,37 +341,26 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<div class="section" id="How-to-read-raw-files-by-batch">
+<section id="How-to-read-raw-files-by-batch">
 <h1>How to read raw files by batch<a class="headerlink" href="#How-to-read-raw-files-by-batch" title="Permalink to this headline">¶</a></h1>
 <p>Visual inspections of individual files are usually useful to detect problems that occurred during the acquisition. However, at the analysis level, it is convenient to read files, and calculate the variables of interest, by batch.</p>
 <p>In <code class="docutils literal notranslate"><span class="pre">pyActigraphy</span></code>, there is a dedicated class to read files by batch: <a class="reference external" href="https://ghammad.github.io/pyActigraphy/RawReader.html#pyActigraphy.io.RawReader">RawReader</a>. Objects from that class can easily be instanciated using the <a class="reference external" href="https://ghammad.github.io/pyActigraphy/_autosummary/pyActigraphy.io.read_raw.html#pyActigraphy.io.read_raw">read_raw</a> function.</p>
 <p>Let’s see now how to use it.</p>
-<div class="section" id="Define-imported-packages-and-file-path">
+<section id="Define-imported-packages-and-file-path">
 <h2>Define imported packages and file path<a class="headerlink" href="#Define-imported-packages-and-file-path" title="Permalink to this headline">¶</a></h2>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/usr/local/lib/python3.7/site-packages/statsmodels/tools/_testing.py:19: FutureWarning: pandas.util.testing is deprecated. Use the functions in the public API at pandas.testing instead.
-  import pandas.util.testing as tm
-</pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
 </pre></div>
 </div>
 </div>
@@ -375,8 +368,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># retrieve path to example files</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># retrieve path to example files</span>
 <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">pyActigraphy</span><span class="o">.</span><span class="vm">__file__</span><span class="p">),</span><span class="s1">&#39;tests/data/&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -385,33 +377,30 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">plotly.graph_objs</span> <span class="k">as</span> <span class="nn">go</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">plotly.graph_objs</span> <span class="k">as</span> <span class="nn">go</span>
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Read-files-by-batch">
+</section>
+<section id="Read-files-by-batch">
 <h2>Read files by batch<a class="headerlink" href="#Read-files-by-batch" title="Permalink to this headline">¶</a></h2>
 <p>As raw file extensions (such as .csv or .txt) do not allow to infer the type of device used to acquire the data, it is necessary to specify the “reader type” upon reading the files:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Read test files</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Read test files</span>
 <span class="n">raw</span> <span class="o">=</span> <span class="n">pyActigraphy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw</span><span class="p">(</span><span class="n">fpath</span><span class="o">+</span><span class="s1">&#39;example_0*.AWD&#39;</span><span class="p">,</span> <span class="n">reader_type</span><span class="o">=</span><span class="s1">&#39;AWD&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<p>In the example above, we use a wildcard “*“; it substitutes any character and it is a convenient way to specify multiple files at once. Any file whose name contains”example_0“, with a”.AWD” extension will be read. More info on wildcards: <a class="reference external" href="https://en.wikipedia.org/wiki/Wildcard_character">Wikipedia</a></p>
+<p>In the example above, we use a wildcard “*“; it substitutes any character and it is a convenient way to specify multiple files at once. Any file whose name contains”example_0”, with a “.AWD” extension will be read. More info on wildcards: <a class="reference external" href="https://en.wikipedia.org/wiki/Wildcard_character">Wikipedia</a></p>
 <p>The <code class="docutils literal notranslate"><span class="pre">raw</span></code> object that has been instanciated contains a list of objects that one would have otherwise had to create by hand using individual file functions such as <code class="docutils literal notranslate"><span class="pre">read_raw_awd</span></code>.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Check how many files have been read</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check how many files have been read</span>
 <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">readers</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -430,8 +419,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">names</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">names</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -441,23 +429,23 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-[&#39;example_01&#39;,
- &#39;example_01_mask&#39;,
+[&#39;example_04&#39;,
+ &#39;example_05&#39;,
  &#39;example_02&#39;,
  &#39;example_03&#39;,
- &#39;example_04&#39;,
- &#39;example_05&#39;]
+ &#39;example_01&#39;,
+ &#39;example_01_mask&#39;]
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Analyse-files-by-batch">
+</section>
+<section id="Analyse-files-by-batch">
 <h2>Analyse files by batch<a class="headerlink" href="#Analyse-files-by-batch" title="Permalink to this headline">¶</a></h2>
 <p>There are two ways to analyse files that have been read by batch:</p>
 <ul class="simple">
 <li><p>the needed function already exists at the <code class="docutils literal notranslate"><span class="pre">RawReader</span></code> class level</p></li>
 <li><p>the needed function does not exist and one needs to loop over the files</p></li>
 </ul>
-<div class="section" id="Direct-analysis">
+<section id="Direct-analysis">
 <h3>Direct analysis<a class="headerlink" href="#Direct-analysis" title="Permalink to this headline">¶</a></h3>
 <p>For convenience, a certain number of functions, available at the individual reader level, have been extended to the <code class="docutils literal notranslate"><span class="pre">RawReader</span></code> class.</p>
 <p>For example:</p>
@@ -465,8 +453,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Check the duration of the recording</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check the duration of the recording</span>
 <span class="n">raw</span><span class="o">.</span><span class="n">duration</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -477,12 +464,12 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;example_01&#39;: Timedelta(&#39;12 days 18:41:00&#39;),
- &#39;example_01_mask&#39;: Timedelta(&#39;12 days 18:41:00&#39;),
+{&#39;example_04&#39;: Timedelta(&#39;21 days 17:39:00&#39;),
+ &#39;example_05&#39;: Timedelta(&#39;15 days 01:43:00&#39;),
  &#39;example_02&#39;: Timedelta(&#39;12 days 18:53:00&#39;),
  &#39;example_03&#39;: Timedelta(&#39;14 days 21:36:00&#39;),
- &#39;example_04&#39;: Timedelta(&#39;21 days 17:39:00&#39;),
- &#39;example_05&#39;: Timedelta(&#39;15 days 01:43:00&#39;)}
+ &#39;example_01&#39;: Timedelta(&#39;12 days 18:41:00&#39;),
+ &#39;example_01_mask&#39;: Timedelta(&#39;12 days 18:41:00&#39;)}
 </pre></div></div>
 </div>
 <p>These functions return a dictionary whose keys are the individual file names and values are the required outputs (here, the duration of the individual recordings).</p>
@@ -491,8 +478,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">IS</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -502,20 +488,19 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;example_01&#39;: 0.5261668298837823,
- &#39;example_01_mask&#39;: 0.4453375595033997,
- &#39;example_02&#39;: 0.5188779301789207,
- &#39;example_03&#39;: 0.3717308344487576,
- &#39;example_04&#39;: 0.2551624866267735,
- &#39;example_05&#39;: 0.662777313088957}
+{&#39;example_04&#39;: 0.2551624866267735,
+ &#39;example_05&#39;: 0.6595438549841431,
+ &#39;example_02&#39;: 0.5237758757150337,
+ &#39;example_03&#39;: 0.3720781873681576,
+ &#39;example_01&#39;: 0.527656245354158,
+ &#39;example_01_mask&#39;: 0.44565929945478583}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">kAR</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">kAR</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -525,24 +510,23 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-{&#39;example_01&#39;: 0.033762534539447164,
- &#39;example_01_mask&#39;: 0.036345931354120085,
+{&#39;example_04&#39;: 0.03815016462875074,
+ &#39;example_05&#39;: 0.030282109908435897,
  &#39;example_02&#39;: 0.026240794466679603,
  &#39;example_03&#39;: 0.023099082226598566,
- &#39;example_04&#39;: 0.03815016462875074,
- &#39;example_05&#39;: 0.030282109908435897}
+ &#39;example_01&#39;: 0.033762534539447164,
+ &#39;example_01_mask&#39;: 0.036345931354120085}
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Manual-analysis">
+</section>
+<section id="Manual-analysis">
 <h3>Manual analysis<a class="headerlink" href="#Manual-analysis" title="Permalink to this headline">¶</a></h3>
 <p>As already mentioned, the “raw” object is a container. It is possible to simply loop over the objects contained in the “raw” object:</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="n">raw</span><span class="o">.</span><span class="n">readers</span><span class="p">:</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">iread</span> <span class="ow">in</span> <span class="n">raw</span><span class="o">.</span><span class="n">readers</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Object type: </span><span class="si">{}</span><span class="s2">. Name: </span><span class="si">{}</span><span class="s2">. Duration of the recording: </span><span class="si">{}</span><span class="s2">. Number of acquisition points: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">iread</span><span class="p">),</span><span class="n">iread</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">iread</span><span class="o">.</span><span class="n">duration</span><span class="p">(),</span><span class="nb">len</span><span class="p">(</span><span class="n">iread</span><span class="o">.</span><span class="n">data</span><span class="p">)))</span>
 </pre></div>
 </div>
@@ -552,19 +536,19 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Object type: &lt;class &#39;pyActigraphy.io.awd.awd.RawAWD&#39;&gt;. Name: example_01. Duration of the recording: 12 days 18:41:00. Number of acquisition points: 18401
-Object type: &lt;class &#39;pyActigraphy.io.awd.awd.RawAWD&#39;&gt;. Name: example_01_mask. Duration of the recording: 12 days 18:41:00. Number of acquisition points: 18401
-Object type: &lt;class &#39;pyActigraphy.io.awd.awd.RawAWD&#39;&gt;. Name: example_02. Duration of the recording: 12 days 18:53:00. Number of acquisition points: 18413
-Object type: &lt;class &#39;pyActigraphy.io.awd.awd.RawAWD&#39;&gt;. Name: example_03. Duration of the recording: 14 days 21:36:00. Number of acquisition points: 21456
 Object type: &lt;class &#39;pyActigraphy.io.awd.awd.RawAWD&#39;&gt;. Name: example_04. Duration of the recording: 21 days 17:39:00. Number of acquisition points: 31299
 Object type: &lt;class &#39;pyActigraphy.io.awd.awd.RawAWD&#39;&gt;. Name: example_05. Duration of the recording: 15 days 01:43:00. Number of acquisition points: 21703
+Object type: &lt;class &#39;pyActigraphy.io.awd.awd.RawAWD&#39;&gt;. Name: example_02. Duration of the recording: 12 days 18:53:00. Number of acquisition points: 18413
+Object type: &lt;class &#39;pyActigraphy.io.awd.awd.RawAWD&#39;&gt;. Name: example_03. Duration of the recording: 14 days 21:36:00. Number of acquisition points: 21456
+Object type: &lt;class &#39;pyActigraphy.io.awd.awd.RawAWD&#39;&gt;. Name: example_01. Duration of the recording: 12 days 18:41:00. Number of acquisition points: 18401
+Object type: &lt;class &#39;pyActigraphy.io.awd.awd.RawAWD&#39;&gt;. Name: example_01_mask. Duration of the recording: 12 days 18:41:00. Number of acquisition points: 18401
 </pre></div></div>
 </div>
 <p>So, for a more advanced analysis of the actigraphy recordings, simply replace the “print” statement by our analysis code.</p>
 <p>Et voilà! Easy, isn’t it?</p>
-</div>
-</div>
-</div>
+</section>
+</section>
+</section>
 
 
     </div>
@@ -578,8 +562,8 @@ Object type: &lt;class &#39;pyActigraphy.io.awd.awd.RawAWD&#39;&gt;. Name: examp
       
     </p>
     <p>
-        &copy; Copyright 2018-2021, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

@@ -1,4 +1,4 @@
-﻿pyActigraphy.metrics.MetricsMixin.average\_daily\_activity
+pyActigraphy.metrics.MetricsMixin.average\_daily\_activity
 ==========================================================
 
 .. currentmodule:: pyActigraphy.metrics

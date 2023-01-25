@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.FLM.sampling\_freq
+pyActigraphy.analysis.FLM.sampling\_freq
 ========================================
 
 .. currentmodule:: pyActigraphy.analysis

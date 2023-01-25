@@ -3,27 +3,26 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pyActigraphy.io.atr.atr &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyActigraphy.io.atr.atr &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/language_data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script src="../../../../_static/js/jquery-1.11.0.min.js"></script>
-    <script src="../../../../_static/js/jquery-fix.js"></script>
-    <script src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script src="../../../../_static/bootstrap-sphinx.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -38,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -46,6 +45,7 @@
             
                 <li><a href="../../../../tutorials.html">Tutorials</a></li>
                 <li><a href="../../../../api.html">API</a></li>
+                <li><a href="../../../../changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -84,14 +84,15 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+    <div class="body col-md-12 content" role="main">
       
   <h1>Source code for pyActigraphy.io.atr.atr</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">BaseRaw</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">BaseRaw</span>
+<span class="kn">from</span> <span class="nn">pyActigraphy.light</span> <span class="kn">import</span> <span class="n">LightRecording</span>
 
 
 <span class="k">class</span> <span class="nc">RawATR</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
@@ -116,7 +117,9 @@
 <span class="sd">        Default is None (i.e all the data).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="n">__default_modes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PIM&quot;</span><span class="p">,</span> <span class="s2">&quot;PIMn&quot;</span><span class="p">,</span> <span class="s2">&quot;TAT&quot;</span><span class="p">,</span> <span class="s2">&quot;TATn&quot;</span><span class="p">,</span> <span class="s2">&quot;ZCM&quot;</span><span class="p">,</span> <span class="s2">&quot;ZCMn&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_fname</span><span class="p">,</span>
         <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;PIM&#39;</span><span class="p">,</span>
@@ -133,8 +136,8 @@
             <span class="n">first_line</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\+-*\+ \w+ \w+ \w+ \+-*\+&quot;</span><span class="p">,</span> <span class="n">first_line</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;The input file (</span><span class="si">{}</span><span class="s2">) does not &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span> <span class="o">+</span>
-                    <span class="s2">&quot;seem to contain the usual header.</span><span class="se">\n</span><span class="s2"> Aborting.&quot;</span>
+                    <span class="s2">&quot;The input file (</span><span class="si">{}</span><span class="s2">) does not &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="s2">&quot;seem to contain the usual header.</span><span class="se">\n</span><span class="s2"> Aborting.&quot;</span>
                 <span class="p">)</span>
             <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fp</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s1">&#39;+-------------------&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
@@ -145,16 +148,8 @@
                         <span class="n">header</span><span class="p">[</span><span class="n">chunks</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">chunks</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">header</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;The input file (</span><span class="si">{}</span><span class="s2">) does not &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span> <span class="o">+</span>
-                <span class="s2">&quot;contain a header.</span><span class="se">\n</span><span class="s2"> Aborting.&quot;</span>
-            <span class="p">)</span>
-
-        <span class="c1"># Check requested sampling mode is available:</span>
-        <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">header</span><span class="p">[</span><span class="s1">&#39;MODE&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;The requested mode (</span><span class="si">{}</span><span class="s2">) is not available&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span> <span class="o">+</span>
-                <span class="s2">&quot; for this recording.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span>
-                <span class="s2">&quot;Available modes are </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="s1">&#39;MODE&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="s2">&quot;The input file (</span><span class="si">{}</span><span class="s2">) does not &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">&quot;contain a header.</span><span class="se">\n</span><span class="s2"> Aborting.&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># extract informations from the header</span>
@@ -173,26 +168,19 @@
             <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="p">)</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
-        <span class="c1"># TEMP</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span>
-            <span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;TEMPERATURE&#39;</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__temperature_ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span>
-            <span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;EXT TEMPERATURE&#39;</span>
-        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__available_modes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">index_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__default_modes</span><span class="p">))))</span>
 
-        <span class="c1"># LIGHT</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__amb_light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;AMB LIGHT&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__red_light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;RED LIGHT&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__green_light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span>
-            <span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;GREEN LIGHT&#39;</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__blue_light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;BLUE LIGHT&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">__ir_light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;IR LIGHT&#39;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">__uva_light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;UVA LIGHT&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__uvb_light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;UVB LIGHT&#39;</span><span class="p">)</span>
+        <span class="c1"># Check requested sampling mode is available:</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__available_modes</span><span class="p">:</span>  <span class="c1"># header[&#39;MODE&#39;][0].split(&#39;/&#39;):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The requested mode (</span><span class="si">{}</span><span class="s2">) is not available&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s2">&quot; for this recording.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot;Available modes are </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__available_modes</span>  <span class="c1"># header[&#39;MODE&#39;][0]</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">start_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_time</span><span class="p">)</span>
@@ -208,18 +196,73 @@
 
         <span class="n">index_data</span> <span class="o">=</span> <span class="n">index_data</span><span class="p">[</span><span class="n">start_time</span><span class="p">:</span><span class="n">stop_time</span><span class="p">]</span>
 
+        <span class="c1"># ACTIVITY</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__activity</span> <span class="o">=</span> <span class="n">index_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__available_modes</span><span class="p">]</span>
+
+        <span class="c1"># TEMP</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__temperature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span>
+            <span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;TEMPERATURE&#39;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__temperature_ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span>
+            <span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;EXT TEMPERATURE&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># LIGHT</span>
+        <span class="n">index_light</span> <span class="o">=</span> <span class="n">index_data</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">like</span><span class="o">=</span><span class="s2">&quot;LIGHT&quot;</span><span class="p">)</span>
+
         <span class="c1"># call __init__ function of the base class</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
-            <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ART&#39;</span><span class="p">,</span>
+            <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;ATR&#39;</span><span class="p">,</span>
             <span class="n">axial_mode</span><span class="o">=</span><span class="s1">&#39;tri-axial&#39;</span><span class="p">,</span>
             <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
             <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
             <span class="n">frequency</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">index_data</span><span class="p">[</span><span class="n">mode</span><span class="p">],</span>
-            <span class="n">light</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="n">index_data</span><span class="p">,</span> <span class="s1">&#39;LIGHT&#39;</span><span class="p">)</span>
+            <span class="n">light</span><span class="o">=</span><span class="n">LightRecording</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">index_light</span><span class="p">,</span>
+                <span class="n">frequency</span><span class="o">=</span><span class="n">index_light</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span>
+            <span class="p">)</span> <span class="k">if</span> <span class="n">index_light</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="c1"># self.__extract_from_data(index_data, &#39;LIGHT&#39;)</span>
         <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">available_modes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Available acquistion modes (PIM, ZCM, etc)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__available_modes</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">PIM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity (in PIM mode).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__activity</span><span class="p">,</span> <span class="s1">&#39;PIM&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">PIMn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity (in normalized PIM mode).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__activity</span><span class="p">,</span> <span class="s1">&#39;PIMn&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">TAT</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity (in TAT mode).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__activity</span><span class="p">,</span> <span class="s1">&#39;TAT&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">TATn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity (in normalized PIM mode).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__activity</span><span class="p">,</span> <span class="s1">&#39;TATn&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ZCM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity (in ZCM mode).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__activity</span><span class="p">,</span> <span class="s1">&#39;ZCM&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ZCMn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity (in normalized ZCM mode).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__activity</span><span class="p">,</span> <span class="s1">&#39;ZCMn&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -234,37 +277,42 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">amb_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the light intensity in µw/cm².&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__amb_light</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;AMB LIGHT&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">white_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the light intensity in µw/cm².&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;LIGHT&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">red_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the light intensity in µw/cm².&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__red_light</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;RED LIGHT&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">green_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the light intensity in µw/cm².&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__green_light</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;GREEN LIGHT&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">blue_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the light intensity in µw/cm².&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__blue_light</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;BLUE LIGHT&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ir_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the light intensity in µw/cm².&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__ir_light</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;IR LIGHT&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">uva_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the light intensity in µw/cm².&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__uva_light</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;UVA LIGHT&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">uvb_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the light intensity in µw/cm².&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__uvb_light</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;UVB LIGHT&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tat_threshold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -282,6 +330,12 @@
             <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__extract_light_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">light</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">light</span><span class="o">.</span><span class="n">get_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="read_raw_atr"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_atr.html#pyActigraphy.io.read_raw_atr">[docs]</a><span class="k">def</span> <span class="nf">read_raw_atr</span><span class="p">(</span>
@@ -335,8 +389,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

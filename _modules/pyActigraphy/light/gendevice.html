@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyActigraphy.light.gendevice &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../tutorials.html">Tutorials</a></li>
+                <li><a href="../../../api.html">API</a></li>
+                <li><a href="../../../changelog.html">What's new</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <h1>Source code for pyActigraphy.light.gendevice</h1><div class="highlight"><pre>
+<span></span><span class="c1">#############################################################################</span>
+<span class="c1"># Copyright (c) 2022, Daylight Academy</span>
+<span class="c1"># Author: Grégory Hammad</span>
+<span class="c1"># Owner: Daylight Academy (https://daylight.academy)</span>
+<span class="c1"># Maintainer: Grégory Hammad</span>
+<span class="c1"># Email: gregory.hammad@uliege.be</span>
+<span class="c1"># Status: development</span>
+<span class="c1">#############################################################################</span>
+<span class="c1"># The development of a module for analysing light exposure</span>
+<span class="c1"># data was led and financially supported by members of the Daylight Academy</span>
+<span class="c1"># Project “The role of daylight for humans” (led by Mirjam Münch, Manuel</span>
+<span class="c1"># Spitschan). The module is part of the Human Light Exposure Database. For</span>
+<span class="c1"># more information about the project, please see</span>
+<span class="c1"># https://daylight.academy/projects/state-of-light-in-humans/.</span>
+<span class="c1">#</span>
+<span class="c1"># This module is also part of the pyActigraphy software.</span>
+<span class="c1"># pyActigraphy is a free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1"># pyActigraphy is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+<span class="c1">############################################################################</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">.light</span> <span class="kn">import</span> <span class="n">LightRecording</span>
+
+
+<div class="viewcode-block" id="GenLightDevice"><a class="viewcode-back" href="../../../GenLightDevice.html#pyActigraphy.light.GenLightDevice">[docs]</a><span class="k">class</span> <span class="nc">GenLightDevice</span><span class="p">(</span><span class="n">LightRecording</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Generic light acquisition device</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_fname: str</span>
+<span class="sd">        Path to the file.</span>
+<span class="sd">    channels: list of str, optional</span>
+<span class="sd">        Select channels to read from the input file.</span>
+<span class="sd">        If the list is empty, all channels are read.</span>
+<span class="sd">        Default is \[\].</span>
+<span class="sd">    rsfreq: str, optional</span>
+<span class="sd">        Resampling frequency. Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    agg: str, optional</span>
+<span class="sd">        Aggregation function to use when resampling.</span>
+<span class="sd">        Default is &#39;mean&#39;.</span>
+<span class="sd">    log10_transform: bool, optional</span>
+<span class="sd">        If set to True, data are (log10\+1)-transformed.</span>
+<span class="sd">        Default is True.</span>
+<span class="sd">    start_time: datetime-like, optional</span>
+<span class="sd">        Read data from this time.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    period: str, optional</span>
+<span class="sd">        Length of the read data.</span>
+<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        Default is None (i.e all the data).</span>
+<span class="sd">    dayfirst: bool, optional</span>
+<span class="sd">        If set to True, the timestamps are parsed as DD/MM/YYYY</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_fname</span><span class="p">,</span>
+        <span class="n">channels</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">rsfreq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">agg</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span>
+        <span class="n">log10_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dayfirst</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">):</span>
+
+        <span class="c1"># get absolute file path</span>
+        <span class="n">input_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span>
+        <span class="c1"># [TO-DO] check if file exists</span>
+        <span class="c1"># [TO-DO] check it is has the right file extension .awd</span>
+
+        <span class="c1"># Extracting data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+            <span class="n">input_fname</span><span class="p">,</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;UTC Timestamp&#39;</span><span class="p">,</span>
+            <span class="n">parse_dates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">infer_datetime_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">dayfirst</span><span class="o">=</span><span class="n">dayfirst</span>
+        <span class="p">)</span>
+        <span class="c1"># Extracting UUID</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Device ID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">uuid</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;The UUID retrieved from the input file is </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s1">&#39;missing&#39;</span> <span class="k">if</span> <span class="n">uuid</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;not unique: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">uuid</span> <span class="o">=</span> <span class="n">uuid</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># Drop UUID column once it has been extracted</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Device ID&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Resampling, if required and possible.</span>
+        <span class="k">if</span> <span class="n">rsfreq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">inferred_freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">inferred_freq</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;The acquisition frequency could not be retrieved from the&quot;</span>
+                    <span class="s2">&quot; data and no resampling frequency was not provided by the&quot;</span>
+                    <span class="s2">&quot; user.</span><span class="se">\n</span><span class="s2">Please specify the input parameter &#39;rsfrq&#39; in&quot;</span>
+                    <span class="s2">&quot; order to overcome this issue.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">rsfreq</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">agg</span><span class="p">)</span>
+
+        <span class="c1"># Restricting data to start/stop times, if required.</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_time</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">period</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+            <span class="n">stop_time</span> <span class="o">=</span> <span class="n">start_time</span><span class="o">+</span><span class="n">period</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stop_time</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">period</span> <span class="o">=</span> <span class="n">stop_time</span> <span class="o">-</span> <span class="n">start_time</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_time</span><span class="p">:</span><span class="n">stop_time</span><span class="p">]</span>
+
+        <span class="c1"># Extracting other metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;CCT in K&#39;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__duv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;Duv&#39;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__tilt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;Tilt in °&#39;</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__usertriggered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_from_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;TriggeredByUser&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Drop metadata</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;CCT in K&#39;</span><span class="p">,</span> <span class="s1">&#39;Duv&#39;</span><span class="p">,</span> <span class="s1">&#39;Tilt in °&#39;</span><span class="p">,</span> <span class="s1">&#39;TriggeredByUser&#39;</span><span class="p">],</span>
+            <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span>  <span class="c1"># Change to ignore optional columns</span>
+        <span class="p">)</span>
+
+        <span class="c1"># call __init__ function of the base class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">input_fname</span><span class="p">),</span>
+            <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span>
+                <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span>
+                 <span class="k">if</span> <span class="p">((</span><span class="n">col</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">)</span> <span class="k">if</span> <span class="n">channels</span> <span class="k">else</span> <span class="kc">True</span><span class="p">)]</span>
+            <span class="p">],</span>
+            <span class="n">frequency</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">delta</span><span class="p">,</span>
+            <span class="n">log10_transform</span><span class="o">=</span><span class="n">log10_transform</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">=</span> <span class="n">start_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">period</span> <span class="o">=</span> <span class="n">period</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__extract_from_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the CCT (in K).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cct</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">duv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the delta u,v.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__duv</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tilt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the tilt (in °).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__tilt</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">triggered_by_user</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the marker &#39;TriggeredByUser&#39;.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__usertriggered</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">read_raw_gld</span><span class="p">(</span>
+    <span class="n">input_fname</span><span class="p">,</span>
+    <span class="n">channels</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">rsfreq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">agg</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span>
+    <span class="n">log10_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dayfirst</span><span class="o">=</span><span class="kc">True</span>
+
+
+<span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for generic light device file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_fname: str</span>
+<span class="sd">        Path to the file.</span>
+<span class="sd">    channels: list of str, optional</span>
+<span class="sd">        Select channels to read from the input file.</span>
+<span class="sd">        If the list is empty, all channels are read.</span>
+<span class="sd">        Default is \[\].</span>
+<span class="sd">    rsfreq: str, optional</span>
+<span class="sd">        Resampling frequency. Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    agg: str, optional</span>
+<span class="sd">        Aggregation function to use when resampling.</span>
+<span class="sd">        Default is &#39;mean&#39;.</span>
+<span class="sd">    log10_transform: bool, optional</span>
+<span class="sd">        If set to True, data are (log10\+1)-transformed.</span>
+<span class="sd">        Default is True.</span>
+<span class="sd">    start_time: datetime-like, optional</span>
+<span class="sd">        Read data from this time.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    period: str, optional</span>
+<span class="sd">        Length of the read data.</span>
+<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        Default is None (i.e all the data).</span>
+<span class="sd">    dayfirst: bool, optional</span>
+<span class="sd">        If set to True, the timestamps are parsed as DD/MM/YYYY</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    raw : Instance of GenLightDevice</span>
+<span class="sd">        An object containing raw GLD data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">GenLightDevice</span><span class="p">(</span>
+        <span class="n">input_fname</span><span class="p">,</span>
+        <span class="n">channels</span><span class="o">=</span><span class="n">channels</span><span class="p">,</span>
+        <span class="n">rsfreq</span><span class="o">=</span><span class="n">rsfreq</span><span class="p">,</span>
+        <span class="n">agg</span><span class="o">=</span><span class="n">agg</span><span class="p">,</span>
+        <span class="n">log10_transform</span><span class="o">=</span><span class="n">log10_transform</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+        <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+        <span class="n">dayfirst</span><span class="o">=</span><span class="n">dayfirst</span>
+    <span class="p">)</span>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

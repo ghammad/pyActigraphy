@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyActigraphy.light.light &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../tutorials.html">Tutorials</a></li>
+                <li><a href="../../../api.html">API</a></li>
+                <li><a href="../../../changelog.html">What's new</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <h1>Source code for pyActigraphy.light.light</h1><div class="highlight"><pre>
+<span></span><span class="c1">#############################################################################</span>
+<span class="c1"># Copyright (c) 2022, Daylight Academy</span>
+<span class="c1"># Author: Grégory Hammad</span>
+<span class="c1"># Owner: Daylight Academy (https://daylight.academy)</span>
+<span class="c1"># Maintainer: Grégory Hammad</span>
+<span class="c1"># Email: gregory.hammad@uliege.be</span>
+<span class="c1"># Status: development</span>
+<span class="c1">#############################################################################</span>
+<span class="c1"># The development of a module for analysing light exposure</span>
+<span class="c1"># data was led and financially supported by members of the Daylight Academy</span>
+<span class="c1"># Project “The role of daylight for humans” (led by Mirjam Münch, Manuel</span>
+<span class="c1"># Spitschan). The module is part of the Human Light Exposure Database. For</span>
+<span class="c1"># more information about the project, please see</span>
+<span class="c1"># https://daylight.academy/projects/state-of-light-in-humans/.</span>
+<span class="c1">#</span>
+<span class="c1"># This module is also part of the pyActigraphy software.</span>
+<span class="c1"># pyActigraphy is a free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1"># pyActigraphy is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+<span class="c1">############################################################################</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">..mask</span> <span class="kn">import</span> <span class="n">_create_dummy_mask</span>
+<span class="kn">from</span> <span class="nn">..mask</span> <span class="kn">import</span> <span class="n">_add_mask_period</span>
+<span class="kn">from</span> <span class="nn">..mask</span> <span class="kn">import</span> <span class="n">_add_mask_periods</span>
+<span class="kn">from</span> <span class="nn">..recording</span> <span class="kn">import</span> <span class="n">BaseRecording</span>
+<span class="kn">from</span> <span class="nn">.light_metrics</span> <span class="kn">import</span> <span class="n">LightMetricsMixin</span>
+
+
+<div class="viewcode-block" id="LightRecording"><a class="viewcode-back" href="../../../LightRecording.html#pyActigraphy.light.LightRecording">[docs]</a><span class="k">class</span> <span class="nc">LightRecording</span><span class="p">(</span><span class="n">LightMetricsMixin</span><span class="p">,</span> <span class="n">BaseRecording</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Base class for light recordings. Derives from</span>
+<span class="sd">    :mod:`pyActigraphy.recording.BaseRecording`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name: str</span>
+<span class="sd">        Name of the light recording.</span>
+<span class="sd">    data: pandas.DataFrame</span>
+<span class="sd">        Dataframe containing the light data found in the recording.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Name of the light recording.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name</span>
+
+<div class="viewcode-block" id="LightRecording.get_channel"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightRecording.get_channel.html#pyActigraphy.light.LightRecording.get_channel">[docs]</a>    <span class="k">def</span> <span class="nf">get_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light channel accessor</span>
+
+<span class="sd">        Get access to the requested channel.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        channel: str.</span>
+<span class="sd">            Channel to access.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        light: pd.Series</span>
+<span class="sd">            Series with the requested channel.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;The light channel you tried to access (</span><span class="si">{}</span><span class="s1">) &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s1">&#39;is not available.</span><span class="se">\n</span><span class="s1"> Available channels:</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">- </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">- &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">channel</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="LightRecording.get_channels"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightRecording.get_channels.html#pyActigraphy.light.LightRecording.get_channels">[docs]</a>    <span class="k">def</span> <span class="nf">get_channels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light channel accessor</span>
+
+<span class="sd">        Get access to the requested channels.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        channels: list of str, optional.</span>
+<span class="sd">            Channel list. If set to None, use all available channels.</span>
+<span class="sd">            Default is None.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        light: pd.DataFrame</span>
+<span class="sd">            Dataframe with the requested channels.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Select channels of interest</span>
+        <span class="k">if</span> <span class="n">channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">channels_sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Check if some required channels are not available:</span>
+            <span class="n">channels_unavail</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span><span class="o">-</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">channels_unavail</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="n">channels</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;None of the requested channels (</span><span class="si">{}</span><span class="s1">) is available.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">channels</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels_unavail</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s1">&#39;Required but unavailable channel(s): </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">channels_unavail</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="n">channels_sel</span> <span class="o">=</span> <span class="p">[</span><span class="n">ch</span> <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">channels</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">channels_sel</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="LightRecording.get_channel_list"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightRecording.get_channel_list.html#pyActigraphy.light.LightRecording.get_channel_list">[docs]</a>    <span class="k">def</span> <span class="nf">get_channel_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;List of light channels&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">columns</span></div>
+
+    <span class="k">def</span> <span class="nf">_check_light_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Check if mask is not None&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;No light mask available. Please create one with the function&quot;</span>
+                <span class="o">+</span> <span class="s2">&quot; &#39;create_light_mask&#39; before adding mask periods.&quot;</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="LightRecording.create_light_mask"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightRecording.create_light_mask.html#pyActigraphy.light.LightRecording.create_light_mask">[docs]</a>    <span class="k">def</span> <span class="nf">create_light_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a blank mask for all light channels.</span>
+
+<span class="sd">        This mask has the same length as its underlying data and can be used</span>
+<span class="sd">        to offuscate meaningless periods.</span>
+
+<span class="sd">        The mask is empty (filled with 1s) and is meant to be edited by adding</span>
+<span class="sd">        mask periods manually.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Create a mask filled with ones by default.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">_create_dummy_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LightRecording.add_light_mask_period"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightRecording.add_light_mask_period.html#pyActigraphy.light.LightRecording.add_light_mask_period">[docs]</a>    <span class="k">def</span> <span class="nf">add_light_mask_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a masking period.</span>
+
+<span class="sd">        This period extends between the specified start and stop times.</span>
+<span class="sd">        It is possible to target a specific channel. If None is used, the</span>
+<span class="sd">        masking period is set on all channels.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        start: str</span>
+<span class="sd">            Start time (YYYY-MM-DD HH:MM:SS) of the masking period.</span>
+<span class="sd">        stop: str</span>
+<span class="sd">            Stop time (YYYY-MM-DD HH:MM:SS) of the masking period.</span>
+<span class="sd">        channel: str, optional</span>
+<span class="sd">            Set masking period to a specific channel (i.e. column).</span>
+<span class="sd">            If set to None, the period is set on all channels.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check if mask is not None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_light_mask</span><span class="p">()</span>
+
+        <span class="c1"># Define correct channel</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">current_channel</span> <span class="o">=</span> <span class="n">channel</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_channel_list</span><span class="p">()</span>
+
+        <span class="c1"># Add specified period</span>
+        <span class="n">_add_mask_period</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+            <span class="n">stop</span><span class="o">=</span><span class="n">stop</span><span class="p">,</span>
+            <span class="n">channel</span><span class="o">=</span><span class="n">current_channel</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="LightRecording.add_light_mask_periods"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightRecording.add_light_mask_periods.html#pyActigraphy.light.LightRecording.add_light_mask_periods">[docs]</a>    <span class="k">def</span> <span class="nf">add_light_mask_periods</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">input_fname</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add masking periods from a file.</span>
+
+<span class="sd">        Function to read masking periods (start and stop times) from a Mask log</span>
+<span class="sd">        file. Supports different file format (.ods, .xls(x), .csv).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_fname: str</span>
+<span class="sd">            Path to the log file.</span>
+<span class="sd">        channel: str, optional</span>
+<span class="sd">            Set masking period to a specific channel (i.e. column).</span>
+<span class="sd">            If set to None, the period is set on all channels.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        *args</span>
+<span class="sd">            Variable length argument list passed to the subsequent reader</span>
+<span class="sd">            function.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Arbitrary keyword arguments passed to the subsequent reader</span>
+<span class="sd">            function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check if mask is not None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_light_mask</span><span class="p">()</span>
+
+        <span class="c1"># Define correct channel</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">current_channel</span> <span class="o">=</span> <span class="n">channel</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_channel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_channel_list</span><span class="p">()</span>
+
+        <span class="c1"># Add specified period</span>
+        <span class="n">_add_mask_periods</span><span class="p">(</span>
+            <span class="n">input_fname</span><span class="o">=</span><span class="n">input_fname</span><span class="p">,</span>
+            <span class="n">mask</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">,</span>
+            <span class="n">channel</span><span class="o">=</span><span class="n">current_channel</span><span class="p">,</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

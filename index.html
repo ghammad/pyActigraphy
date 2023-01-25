@@ -3,26 +3,29 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyActigraphy &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pyActigraphy &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
-<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
-<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -37,7 +40,7 @@
         </button>
         <a class="navbar-brand" href="#">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -45,6 +48,7 @@
             
                 <li><a href="tutorials.html">Tutorials</a></li>
                 <li><a href="api.html">API</a></li>
+                <li><a href="changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -93,9 +97,11 @@
 <a class="reference external image-reference" href="https://gitlab.com/ghammad/pyActigraphy/commits/master"><img alt="https://gitlab.com/ghammad/pyActigraphy/badges/master/pipeline.svg?key_text=CI+tests" src="https://gitlab.com/ghammad/pyActigraphy/badges/master/pipeline.svg?key_text=CI+tests" /></a>
 <a class="reference external image-reference" href="https://pypi.org/project/pyActigraphy"><img alt="https://img.shields.io/pypi/v/pyActigraphy.svg" src="https://img.shields.io/pypi/v/pyActigraphy.svg" /></a>
 <a class="reference external image-reference" href="https://doi.org/10.5281/zenodo.2537920"><img alt="https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg" src="https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg" /></a>
-<div class="section" id="pyactigraphy">
+<a class="reference external image-reference" href="https://bestpractices.coreinfrastructure.org/projects/6933"><img alt="https://bestpractices.coreinfrastructure.org/projects/6933/badge" src="https://bestpractices.coreinfrastructure.org/projects/6933/badge" /></a>
+<a class="reference external image-reference" href="CODE_OF_CONDUCT.md"><img alt="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" /></a>
+<section id="pyactigraphy">
 <h1><strong>pyActigraphy</strong><a class="headerlink" href="#pyactigraphy" title="Permalink to this headline">¶</a></h1>
-<p>Open-source python package for actigraphy data visualization and analysis.</p>
+<p>Open-source python package for actigraphy and light exposure data visualization and analysis.</p>
 <p>This package is meant to provide a comprehensive set of tools to:</p>
 <ul class="simple">
 <li><p>read native actigraphy data files with various formats:</p>
@@ -110,6 +116,7 @@
 </li>
 </ul>
 <ul class="simple">
+<li><p><strong>NEW</strong> read light exposure data recorded by the aforementioned devices (when available)</p></li>
 <li><p>clean the raw data and mask spurious periods of inactivity</p></li>
 <li><p>produce activity profile plots</p></li>
 <li><p>visualize sleep agendas and compute summary statistics</p></li>
@@ -122,6 +129,7 @@
 </li>
 </ul>
 <ul class="simple">
+<li><p><strong>NEW</strong> compute light exposure metrics (TAT, <span class="math notranslate nohighlight">\(MLit^{500}\)</span>, summary statistics, …)</p></li>
 <li><p>automatically detect rest periods using various algorithms (Cole-Kripke, Sadeh, …, Crespo, Roenneberg)</p></li>
 <li><p>perform complex analyses:</p>
 <ul>
@@ -134,14 +142,29 @@
 </ul>
 </li>
 </ul>
-</div>
-<div class="section" id="code-and-documentation">
+</section>
+<section id="citation">
+<h1>Citation<a class="headerlink" href="#citation" title="Permalink to this headline">¶</a></h1>
+<p>We are very pleased to announce that the <a class="reference external" href="https://github.com/ghammad/pyActigraphy/releases/tag/v1.0">v1.0</a> version of the pyActigraphy package has been published. So, if you find this package useful in your research, please consider citing:</p>
+<blockquote>
+<div><p>Hammad G, Reyt M, Beliy N, Baillet M, Deantoni M, Lesoinne A, et al. (2021) pyActigraphy: Open-source python package for actigraphy data visualization and    analysis. PLoS Comput Biol 17(10): e1009514. <a class="reference external" href="https://doi.org/10.1371/journal.pcbi.1009514">https://doi.org/10.1371/journal.pcbi.1009514</a></p>
+</div></blockquote>
+</section>
+<section id="pylight">
+<h1>pyLight<a class="headerlink" href="#pylight" title="Permalink to this headline">¶</a></h1>
+<p>In the context of the Daylight Academy Project, <a class="reference external" href="https://daylight.academy/projects/state-of-light-in-humans">The role of daylight for humans</a> and
+thanks to the support of its members, Dr. Mirjam Münch and Prof. <a class="reference external" href="https://github.com/spitschan">Manuel Spitschan</a>,
+a pyActigraphy module for analysing light exposure data has been developed, <strong>pyLight</strong>.
+This module is part of the Human Light Exposure Database and is included in pyActigraphy version <a class="reference external" href="https://github.com/ghammad/pyActigraphy/releases/tag/v1.1">v1.1</a> and higher.</p>
+<p>A manuscript describing the <em>pyLight</em> module is available as a preprint <a class="reference external" href="https://osf.io/msk9n/">here</a>.</p>
+</section>
+<section id="code-and-documentation">
 <h1>Code and documentation<a class="headerlink" href="#code-and-documentation" title="Permalink to this headline">¶</a></h1>
 <p>The pyActigraphy package is open-source and its source code is accessible <a class="reference external" href="https://github.com/ghammad/pyActigraphy">online</a>.</p>
 <p>An online documentation of the package is also available <a class="reference external" href="https://ghammad.github.io/pyActigraphy/index.html">here</a>.
-It contains <a class="reference external" href="https://ghammad.github.io/pyActigraphy/tutorials.html">notebooks</a> illustrating various functionalities of the package.</p>
-</div>
-<div class="section" id="installation">
+It contains <a class="reference external" href="https://ghammad.github.io/pyActigraphy/tutorials.html">notebooks</a> illustrating various functionalities of the package. Specific tutorials for the processing and the analysis of light exposure data with pyLight are also available.</p>
+</section>
+<section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p>In a (bash) shell, simply type:</p>
 <ul class="simple">
@@ -163,8 +186,8 @@ git checkout develop
 pip3 install -e .
 </pre></div>
 </div>
-</div>
-<div class="section" id="quick-start">
+</section>
+<section id="quick-start">
 <h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
 <p>The following example illustrates how to calculate the interdaily stability
 with the pyActigraphy package:</p>
@@ -178,8 +201,8 @@ with the pyActigraphy package:</p>
 <span class="go">0.5257020914453097</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="contributing">
+</section>
+<section id="contributing">
 <h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
 <p>There are plenty of ways to contribute to this package, including (but not limiting to):</p>
 <ul class="simple">
@@ -187,26 +210,26 @@ with the pyActigraphy package:</p>
 <li><p>suggest improvements</p></li>
 <li><p>improve the documentation</p></li>
 </ul>
-</div>
-<div class="section" id="authors">
+</section>
+<section id="authors">
 <h1>Authors<a class="headerlink" href="#authors" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p><strong>Grégory Hammad</strong> <a class="reference external" href="https://github.com/ghammad">&#64;ghammad</a> - <em>Initial and main developer</em></p></li>
 <li><p><strong>Mathilde Reyt</strong> <a class="reference external" href="https://github.com/ReytMathilde">&#64;ReytMathilde</a></p></li>
 </ul>
 <p>See also the list of <a class="reference external" href="https://github.com/ghammad/pyActigraphy/contributors">contributors</a> who participated in this project.</p>
-</div>
-<div class="section" id="license">
+</section>
+<section id="license">
 <h1>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h1>
 <p>This project is licensed under the GNU GPL-3.0 License - see the <a class="reference external" href="LICENSE">LICENSE</a> file for details</p>
-</div>
-<div class="section" id="acknowledgments">
+</section>
+<section id="acknowledgments">
 <h1>Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p><strong>Aubin Ardois</strong> <a class="reference external" href="https://github.com/aardoi">&#64;aardoi</a> developed the first version of the MTN class during his internship at the CRC, in May-August 2018.</p></li>
 <li><p>The CRC colleagues for their support, ideas, etc.</p></li>
 </ul>
-</div>
+</section>
 
 
     </div>
@@ -220,8 +243,8 @@ with the pyActigraphy package:</p>
       
     </p>
     <p>
-        &copy; Copyright 2018-2021, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

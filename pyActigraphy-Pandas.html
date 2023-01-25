@@ -3,26 +3,29 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>How to read data from DataFrames with pyActigraphy &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>How to read data from DataFrames with pyActigraphy &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
-<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
-<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -37,7 +40,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -45,6 +48,7 @@
             
                 <li><a href="tutorials.html">Tutorials</a></li>
                 <li><a href="api.html">API</a></li>
+                <li><a href="changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -299,7 +303,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -337,17 +341,16 @@ div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
-<div class="section" id="How-to-read-data-from-DataFrames-with-pyActigraphy">
+<section id="How-to-read-data-from-DataFrames-with-pyActigraphy">
 <h1>How to read data from DataFrames with pyActigraphy<a class="headerlink" href="#How-to-read-data-from-DataFrames-with-pyActigraphy" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="Imported-packages-and-input-data">
+<section id="Imported-packages-and-input-data">
 <h2>Imported packages and input data<a class="headerlink" href="#Imported-packages-and-input-data" title="Permalink to this headline">¶</a></h2>
 <p>The usual suspects:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 </pre></div>
 </div>
 </div>
@@ -355,28 +358,17 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
 </pre></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-/usr/local/lib/python3.7/site-packages/statsmodels/tools/_testing.py:19: FutureWarning: pandas.util.testing is deprecated. Use the functions in the public API at pandas.testing instead.
-  import pandas.util.testing as tm
-</pre></div></div>
 </div>
 <p>In this example, let’s generate some input data:</p>
 <p>NB: if you already have your data under a pandas.DataFrame format, jump directly to the next section.</p>
@@ -384,8 +376,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">N</span> <span class="o">=</span> <span class="mi">1440</span><span class="o">*</span><span class="mi">7</span> <span class="c1"># 7 days of acquisition at a frequency of 60s.</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">N</span> <span class="o">=</span> <span class="mi">1440</span><span class="o">*</span><span class="mi">7</span> <span class="c1"># 7 days of acquisition at a frequency of 60s.</span>
 </pre></div>
 </div>
 </div>
@@ -393,8 +384,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">activity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">activity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
 <span class="n">light</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="n">N</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -403,8 +393,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">non_wear</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">non_wear</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -412,8 +401,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Set up a segment of  spurious inactivity</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up a segment of  spurious inactivity</span>
 <span class="n">activity</span><span class="p">[</span><span class="mi">2060</span><span class="p">:</span><span class="mi">2160</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="n">non_wear</span><span class="p">[</span><span class="mi">2060</span><span class="p">:</span><span class="mi">2160</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
 </pre></div>
@@ -423,8 +411,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Activity&#39;</span><span class="p">:</span> <span class="n">activity</span><span class="p">,</span> <span class="s1">&#39;Light&#39;</span><span class="p">:</span> <span class="n">light</span><span class="p">,</span> <span class="s1">&#39;Non-wear&#39;</span><span class="p">:</span> <span class="n">non_wear</span><span class="p">}</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Activity&#39;</span><span class="p">:</span> <span class="n">activity</span><span class="p">,</span> <span class="s1">&#39;Light&#39;</span><span class="p">:</span> <span class="n">light</span><span class="p">,</span> <span class="s1">&#39;Non-wear&#39;</span><span class="p">:</span> <span class="n">non_wear</span><span class="p">}</span>
 </pre></div>
 </div>
 </div>
@@ -432,8 +419,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s1">&#39;01-01-2020&#39;</span><span class="p">,</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;60s&#39;</span><span class="p">,</span><span class="n">periods</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="s1">&#39;01-01-2020&#39;</span><span class="p">,</span><span class="n">freq</span><span class="o">=</span><span class="s1">&#39;60s&#39;</span><span class="p">,</span><span class="n">periods</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -441,8 +427,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -450,8 +435,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span>
 </pre></div>
 </div>
 </div>
@@ -486,33 +470,33 @@ div.rendered_html tbody tr:hover {
   <tbody>
     <tr>
       <th>2020-01-01 00:00:00</th>
-      <td>10.161639</td>
-      <td>87.219188</td>
-      <td>0.0</td>
+      <td>9.342980</td>
+      <td>88.271312</td>
+      <td>0.000000e+00</td>
     </tr>
     <tr>
       <th>2020-01-01 00:01:00</th>
-      <td>10.016515</td>
-      <td>104.312417</td>
-      <td>0.0</td>
+      <td>9.828015</td>
+      <td>86.814367</td>
+      <td>2.193078e-314</td>
     </tr>
     <tr>
       <th>2020-01-01 00:02:00</th>
-      <td>10.356472</td>
-      <td>107.568331</td>
-      <td>0.0</td>
+      <td>9.829185</td>
+      <td>89.269111</td>
+      <td>8.319226e-319</td>
     </tr>
     <tr>
       <th>2020-01-01 00:03:00</th>
-      <td>9.496464</td>
-      <td>95.080364</td>
-      <td>0.0</td>
+      <td>11.650134</td>
+      <td>100.820727</td>
+      <td>NaN</td>
     </tr>
     <tr>
       <th>2020-01-01 00:04:00</th>
-      <td>9.450826</td>
-      <td>111.420042</td>
-      <td>0.0</td>
+      <td>10.201251</td>
+      <td>113.166345</td>
+      <td>8.331307e-316</td>
     </tr>
     <tr>
       <th>...</th>
@@ -522,60 +506,58 @@ div.rendered_html tbody tr:hover {
     </tr>
     <tr>
       <th>2020-01-07 23:55:00</th>
-      <td>10.674776</td>
-      <td>107.970748</td>
-      <td>0.0</td>
+      <td>11.120278</td>
+      <td>100.841176</td>
+      <td>1.163115e+214</td>
     </tr>
     <tr>
       <th>2020-01-07 23:56:00</th>
-      <td>10.426524</td>
-      <td>117.168763</td>
-      <td>0.0</td>
+      <td>11.057372</td>
+      <td>116.926055</td>
+      <td>2.427668e-154</td>
     </tr>
     <tr>
       <th>2020-01-07 23:57:00</th>
-      <td>9.467549</td>
-      <td>100.109809</td>
-      <td>0.0</td>
+      <td>9.717031</td>
+      <td>107.979246</td>
+      <td>2.288961e+243</td>
     </tr>
     <tr>
       <th>2020-01-07 23:58:00</th>
-      <td>9.751687</td>
-      <td>104.764560</td>
-      <td>0.0</td>
+      <td>10.377258</td>
+      <td>100.955777</td>
+      <td>2.473798e-91</td>
     </tr>
     <tr>
       <th>2020-01-07 23:59:00</th>
-      <td>11.440382</td>
-      <td>97.947009</td>
-      <td>0.0</td>
+      <td>9.772486</td>
+      <td>104.259887</td>
+      <td>2.440413e-154</td>
     </tr>
   </tbody>
 </table>
 <p>10080 rows × 3 columns</p>
 </div></div>
 </div>
-</div>
-<div class="section" id="Manual-creation-of-a-BaseRaw-object">
+</section>
+<section id="Manual-creation-of-a-BaseRaw-object">
 <h2>Manual creation of a BaseRaw object<a class="headerlink" href="#Manual-creation-of-a-BaseRaw-object" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pyActigraphy.io</span> <span class="kn">import</span> <span class="n">BaseRaw</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyActigraphy.io</span> <span class="kn">import</span> <span class="n">BaseRaw</span>
 </pre></div>
 </div>
 </div>
 <p>help(BaseRaw)</p>
-<div class="section" id="Set-activity-and-light-data-(if-available)">
+<section id="Set-activity-and-light-data-(if-available)">
 <h3>Set activity and light data (if available)<a class="headerlink" href="#Set-activity-and-light-data-(if-available)" title="Permalink to this headline">¶</a></h3>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span> <span class="o">=</span> <span class="n">BaseRaw</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span> <span class="o">=</span> <span class="n">BaseRaw</span><span class="p">(</span>
     <span class="n">name</span><span class="o">=</span><span class="s2">&quot;myName&quot;</span><span class="p">,</span>
     <span class="n">uuid</span><span class="o">=</span><span class="s1">&#39;DeviceId&#39;</span><span class="p">,</span>
     <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;Pandas&#39;</span><span class="p">,</span>
@@ -593,8 +575,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">data</span>
 </pre></div>
 </div>
 </div>
@@ -604,45 +585,43 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2020-01-01 00:00:00    10.161639
-2020-01-01 00:01:00    10.016515
-2020-01-01 00:02:00    10.356472
-2020-01-01 00:03:00     9.496464
-2020-01-01 00:04:00     9.450826
+2020-01-01 00:00:00     9.342980
+2020-01-01 00:01:00     9.828015
+2020-01-01 00:02:00     9.829185
+2020-01-01 00:03:00    11.650134
+2020-01-01 00:04:00    10.201251
                          ...
-2020-01-07 23:55:00    10.674776
-2020-01-07 23:56:00    10.426524
-2020-01-07 23:57:00     9.467549
-2020-01-07 23:58:00     9.751687
-2020-01-07 23:59:00    11.440382
+2020-01-07 23:55:00    11.120278
+2020-01-07 23:56:00    11.057372
+2020-01-07 23:57:00     9.717031
+2020-01-07 23:58:00    10.377258
+2020-01-07 23:59:00     9.772486
 Freq: 60S, Name: Activity, Length: 10080, dtype: float64
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Set-up-a-mask">
+</section>
+<section id="Set-up-a-mask">
 <h3>Set up a mask<a class="headerlink" href="#Set-up-a-mask" title="Permalink to this headline">¶</a></h3>
 <p>Most devices that have a wear sensor return this information as a binary time series with “1” when the device is most likely not worn and “0” otherwise. In pyActigraphy, this information can be used to create a mask and thus invalidate the corresponding data points (set to “0” most probably). However, the mask, the value “1” correspond to “no masking”. So, depending on your “non-wear” data, be careful to transform them appropriately:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># Here, I assume that 0: the device is worn, 1: device not worn.</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Here, I assume that 0: the device is worn, 1: device not worn.</span>
 <span class="c1"># As mentioned aboce, for the mask, 1: no masking. (NB: it is a convolution: data*mask)</span>
 <span class="n">raw</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;Non-wear&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-</div>
-</div>
-<div class="section" id="Tests">
+</section>
+</section>
+<section id="Tests">
 <h2>Tests<a class="headerlink" href="#Tests" title="Permalink to this headline">¶</a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">duration</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">duration</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -659,8 +638,7 @@ Freq: 60S, Name: Activity, Length: 10080, dtype: float64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">length</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -677,8 +655,7 @@ Freq: 60S, Name: Activity, Length: 10080, dtype: float64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">ADAT</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">ADAT</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -688,15 +665,14 @@ Freq: 60S, Name: Activity, Length: 10080, dtype: float64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-14257.019160492273
+14251.683725482248
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -706,15 +682,14 @@ Freq: 60S, Name: Activity, Length: 10080, dtype: float64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-1.0786515197769488
+1.1361697639502482
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># If you want to mask the data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># If you want to mask the data</span>
 <span class="n">raw</span><span class="o">.</span><span class="n">mask_inactivity</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
@@ -723,8 +698,7 @@ Freq: 60S, Name: Activity, Length: 10080, dtype: float64
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1"># For a gaussian noise, IV should be close to 2.</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># For a gaussian noise, IV should be close to 2.</span>
 <span class="n">raw</span><span class="o">.</span><span class="n">IV</span><span class="p">(</span><span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -735,13 +709,13 @@ Freq: 60S, Name: Activity, Length: 10080, dtype: float64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-1.929526935116606
+2.098938677215842
 </pre></div></div>
 </div>
 <p>The masking seems to work!</p>
 <p>Et voilà!</p>
-</div>
-</div>
+</section>
+</section>
 
 
     </div>
@@ -755,8 +729,8 @@ Freq: 60S, Name: Activity, Length: 10080, dtype: float64
       
     </p>
     <p>
-        &copy; Copyright 2018-2021, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

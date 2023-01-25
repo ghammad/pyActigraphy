@@ -1,0 +1,6 @@
+﻿pyActigraphy.light.LightRecording.create\_light\_mask
+=====================================================
+
+.. currentmodule:: pyActigraphy.light
+
+.. automethod:: LightRecording.create_light_mask

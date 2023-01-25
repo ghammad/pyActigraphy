@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.Fractal.fluctuations
+pyActigraphy.analysis.Fractal.fluctuations
 ==========================================
 
 .. currentmodule:: pyActigraphy.analysis

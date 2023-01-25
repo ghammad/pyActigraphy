@@ -1,0 +1,6 @@
+﻿pyActigraphy.light.LightMetricsMixin.VAT
+========================================
+
+.. currentmodule:: pyActigraphy.light
+
+.. automethod:: LightMetricsMixin.VAT

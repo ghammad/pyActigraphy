@@ -1,4 +1,4 @@
-﻿pyActigraphy.io.read_raw_awd
+pyActigraphy.io.read_raw_awd
 ============================
 
 .. currentmodule:: pyActigraphy.io

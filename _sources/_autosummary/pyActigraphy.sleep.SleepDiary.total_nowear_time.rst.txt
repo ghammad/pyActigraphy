@@ -1,4 +1,4 @@
-﻿pyActigraphy.sleep.SleepDiary.total\_nowear\_time
+pyActigraphy.sleep.SleepDiary.total\_nowear\_time
 =================================================
 
 .. currentmodule:: pyActigraphy.sleep

@@ -3,27 +3,26 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pyActigraphy.io.agd.agd &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="../../../../_static/bootstrap-sphinx.css" type="text/css" />
-    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyActigraphy.io.agd.agd &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/language_data.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script src="../../../../_static/js/jquery-1.11.0.min.js"></script>
-    <script src="../../../../_static/js/jquery-fix.js"></script>
-    <script src="../../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script src="../../../../_static/bootstrap-sphinx.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -38,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -46,6 +45,7 @@
             
                 <li><a href="../../../../tutorials.html">Tutorials</a></li>
                 <li><a href="../../../../api.html">API</a></li>
+                <li><a href="../../../../changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -84,7 +84,7 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+    <div class="body col-md-12 content" role="main">
       
   <h1>Source code for pyActigraphy.io.agd.agd</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -93,7 +93,7 @@
 <span class="kn">import</span> <span class="nn">sqlite3</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">..base</span> <span class="k">import</span> <span class="n">BaseRaw</span>
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">BaseRaw</span>
 
 
 <span class="k">class</span> <span class="nc">RawAGD</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
@@ -113,7 +113,7 @@
 <span class="sd">        Default is None (i.e all the data).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_fname</span><span class="p">,</span>
         <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -148,36 +148,45 @@
         <span class="p">)</span>
 
         <span class="c1"># extract proximity (wear/no-wear) informations</span>
-        <span class="n">capsense</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span>
-            <span class="s2">&quot;SELECT state, timeStamp FROM capsense&quot;</span><span class="p">,</span>
-            <span class="n">connection</span><span class="p">,</span>
-            <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;timeStamp&#39;</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-        <span class="c1"># convert index to a date time</span>
-        <span class="n">capsense</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__to_timestamps</span><span class="p">(</span><span class="n">capsense</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-        <span class="c1"># set index frequency</span>
-        <span class="k">if</span> <span class="s1">&#39;proximityIntervalInSeconds&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">capsense</span> <span class="o">=</span> <span class="n">capsense</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span>
-                <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span>
-                    <span class="nb">int</span><span class="p">(</span>
-                        <span class="n">settings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span>
-                            <span class="s1">&#39;proximityIntervalInSeconds&#39;</span><span class="p">,</span>
-                            <span class="s1">&#39;settingValue&#39;</span>
-                        <span class="p">]</span>
-                    <span class="p">),</span>
-                    <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">capsense</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span>
+                <span class="s2">&quot;SELECT state, timeStamp FROM capsense&quot;</span><span class="p">,</span>
+                <span class="n">connection</span><span class="p">,</span>
+                <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;timeStamp&#39;</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+            <span class="c1"># convert index to a date time</span>
+            <span class="n">capsense</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__to_timestamps</span><span class="p">(</span><span class="n">capsense</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+            <span class="c1"># set index frequency</span>
+            <span class="k">if</span> <span class="s1">&#39;proximityIntervalInSeconds&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">capsense</span> <span class="o">=</span> <span class="n">capsense</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span>
+                        <span class="nb">int</span><span class="p">(</span>
+                            <span class="n">settings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span>
+                                <span class="s1">&#39;proximityIntervalInSeconds&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;settingValue&#39;</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                        <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">elif</span> <span class="n">capsense</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">inferred_freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">capsense</span> <span class="o">=</span> <span class="n">capsense</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="n">capsense</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">inferred_freq</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">capsense</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">inferred_freq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">capsense</span> <span class="o">=</span> <span class="n">capsense</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="n">capsense</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">inferred_freq</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s1">&#39;Acquisition frequency for the wearing sensor data &#39;</span>
+                    <span class="o">+</span> <span class="s1">&#39;(capsense) could neither be retrieved nor inferred from&#39;</span>
+                    <span class="o">+</span> <span class="s1">&#39; the data.</span><span class="se">\n</span><span class="s1"> Use this information at your own risk&#39;</span><span class="p">,</span>
+                    <span class="ne">UserWarning</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">capsense</span> <span class="o">=</span> <span class="n">capsense</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+            <span class="c1"># TODO: specialize exception (eg;sqlite3.OperationalError)</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s1">&#39;Acquisition frequency for the wearing sensor data &#39;</span> <span class="o">+</span>
-                <span class="s1">&#39;(capsense) could neither be retrieved nor inferred from &#39;</span> <span class="o">+</span>
-                <span class="s1">&#39;the data.</span><span class="se">\n</span><span class="s1"> Use this information at your own risk&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;Could not find wearing sensor data (capsense): </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">err</span><span class="p">),</span>
                 <span class="ne">UserWarning</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">capsense</span> <span class="o">=</span> <span class="n">capsense</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">capsense</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="c1"># extract acceleration and light data</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span>
@@ -192,9 +201,9 @@
 
         <span class="c1"># calculate the magnitude of the acceleration vector.</span>
         <span class="n">data</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis1&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis1&#39;</span><span class="p">]</span> <span class="o">+</span>
-            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis2&#39;</span><span class="p">]</span> <span class="o">+</span>
-            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis3&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis3&#39;</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis1&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis1&#39;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis2&#39;</span><span class="p">]</span>
+            <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis3&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;axis3&#39;</span><span class="p">]</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -210,6 +219,9 @@
             <span class="n">period</span> <span class="o">=</span> <span class="n">stop_time</span> <span class="o">-</span> <span class="n">start_time</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_time</span><span class="p">:</span><span class="n">stop_time</span><span class="p">]</span>
+
+        <span class="c1"># Extract position info:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__position</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s1">&#39;incline*&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s1">&#39;columns&#39;</span><span class="p">)</span>
 
         <span class="c1"># call __init__ function of the base class</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -227,12 +239,70 @@
         <span class="c1"># Close sqlite3 connection</span>
         <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
+    <span class="k">def</span> <span class="nf">__extract_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__position</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__position</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">column</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">__to_timestamps</span><span class="p">(</span><span class="n">ticks</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
             <span class="p">(</span><span class="n">ticks</span><span class="o">/</span><span class="mi">10000000</span><span class="p">)</span> <span class="o">-</span> <span class="mi">62135596800</span><span class="p">,</span>
             <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span>
         <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">inclineOff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hourly positional information: inclineOff &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_position</span><span class="p">(</span><span class="s1">&#39;inclineOff&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">inclineStanding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hourly positional information: inclineStanding &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_position</span><span class="p">(</span><span class="s1">&#39;inclineStanding&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">inclineSitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hourly positional information: inclineSitting &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_position</span><span class="p">(</span><span class="s1">&#39;inclineSitting&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">inclineLying</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hourly positional information: inclineLying &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_position</span><span class="p">(</span><span class="s1">&#39;inclineLying&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">inclinePosition</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pos_map</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;inclineOff&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;inclineLying&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s1">&#39;inclineSitting&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s1">&#39;inclineStanding&#39;</span><span class="p">:</span> <span class="mi">2</span>
+        <span class="p">}</span>
+    <span class="p">):</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for raw AWD file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pos_map: dict, optional</span>
+<span class="sd">            Positional information map.</span>
+<span class="sd">            Can be used to turn positional info (str) into int, for example.</span>
+<span class="sd">            Set to None to keep original information.</span>
+<span class="sd">            Default mapping is:</span>
+<span class="sd">            * &#39;inclineOff&#39;: -1</span>
+<span class="sd">            * &#39;inclineLying&#39;: 0</span>
+<span class="sd">            * &#39;inclineSitting&#39;: 1</span>
+<span class="sd">            * &#39;inclineStanding&#39;: 2</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pos : Pandas.Series</span>
+<span class="sd">            Time series with positional information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__position</span><span class="o">.</span><span class="n">idxmax</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pos</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">pos_map</span><span class="p">)</span> <span class="k">if</span> <span class="n">pos_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">pos</span>
 
 
 <div class="viewcode-block" id="read_raw_agd"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_agd.html#pyActigraphy.io.read_raw_agd">[docs]</a><span class="k">def</span> <span class="nf">read_raw_agd</span><span class="p">(</span>
@@ -279,8 +349,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.LIDS.lids\_transform
+pyActigraphy.analysis.LIDS.lids\_transform
 ==========================================
 
 .. currentmodule:: pyActigraphy.analysis

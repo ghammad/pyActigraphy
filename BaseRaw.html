@@ -3,11 +3,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BaseRaw class &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>BaseRaw class &#8212; pyActigraphy 1.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
@@ -19,10 +20,10 @@
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<script type="text/javascript" src="_static/js/jquery-1.11.0.min.js "></script>
-<script type="text/javascript" src="_static/js/jquery-fix.js "></script>
-<script type="text/javascript" src="_static/bootstrap-3.3.7/js/bootstrap.min.js "></script>
-<script type="text/javascript" src="_static/bootstrap-sphinx.js "></script>
+<script type="text/javascript" src="_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -37,7 +38,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -45,6 +46,7 @@
             
                 <li><a href="tutorials.html">Tutorials</a></li>
                 <li><a href="api.html">API</a></li>
+                <li><a href="changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -89,128 +91,132 @@
   <div class="row">
     <div class="body col-md-12 content" role="main">
       
-  <div class="section" id="baseraw-class">
+  <section id="baseraw-class">
 <h1>BaseRaw class<a class="headerlink" href="#baseraw-class" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="pyActigraphy.io.BaseRaw">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pyActigraphy.io.</span></code><code class="sig-name descname"><span class="pre">BaseRaw</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uuid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">light</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyActigraphy.io.</span></span><span class="sig-name descname"><span class="pre">BaseRaw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">uuid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axial_mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">period</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">light</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for raw data.</p>
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.axial_mode">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">axial_mode</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.axial_mode" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.axial_mode">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">axial_mode</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.axial_mode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Acquistion mode (mono-axial or tri-axial)</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.binarized_data">
-<code class="sig-name descname"><span class="pre">binarized_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.binarized_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.binarized_data" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.binarized_data">
+<span class="sig-name descname"><span class="pre">binarized_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.binarized_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.binarized_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Boolean thresholding of Pandas Series</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.data">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">data</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.data" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Indexed data extracted from the raw file.
 If mask_inactivity is set to true, the <cite>mask</cite> is used
 to filter out inactive data.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.display_name">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">display_name</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.display_name" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.display_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">display_name</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.display_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name to be used for display.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.duration">
-<code class="sig-name descname"><span class="pre">duration</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.duration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.duration" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.duration">
+<span class="sig-name descname"><span class="pre">duration</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.duration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.duration" title="Permalink to this definition">¶</a></dt>
 <dd><p>Duration (in days, hours, etc) of the data acquistion period</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.exclude_if_mask">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">exclude_if_mask</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.exclude_if_mask" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.exclude_if_mask">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">exclude_if_mask</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.exclude_if_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Boolean to exclude partially masked data when resampling</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.format">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">format</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.format" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.format">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.format" title="Permalink to this definition">¶</a></dt>
 <dd><p>Format of the raw data file (AWD,RPX,MTN,…)</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.frequency">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">frequency</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.frequency" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.frequency">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frequency</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.frequency" title="Permalink to this definition">¶</a></dt>
 <dd><p>Acquisition frequency as extracted from the raw file.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.inactivity_length">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">inactivity_length</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.inactivity_length" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.inactivity_length">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">inactivity_length</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.inactivity_length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Length of the inactivity mask.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.length">
-<code class="sig-name descname"><span class="pre">length</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.length" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.length">
+<span class="sig-name descname"><span class="pre">length</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of data acquisition points</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.light">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">light</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.light" title="Permalink to this definition">¶</a></dt>
-<dd><p>Indexed light extracted from the raw file.
-If mask_inactivity is set to true, the <cite>mask</cite> is used
-to filter out inactive data.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.light">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">light</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.light" title="Permalink to this definition">¶</a></dt>
+<dd><p>Light measurement performed by the device</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.mask">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">mask</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.mask" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.mask">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mask</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mask used to filter out inactive data.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.mask_fraction">
-<code class="sig-name descname"><span class="pre">mask_fraction</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.mask_fraction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.mask_fraction" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.mask_fraction">
+<span class="sig-name descname"><span class="pre">mask_fraction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.mask_fraction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.mask_fraction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fraction of masked data</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.mask_inactivity">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">mask_inactivity</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.mask_inactivity" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.mask_fraction_period">
+<span class="sig-name descname"><span class="pre">mask_fraction_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">period</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'7D'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.mask_fraction_period"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.mask_fraction_period" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mask fraction per consecutive periods</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.mask_inactivity">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mask_inactivity</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.mask_inactivity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Switch to mask inactive data.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.name">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">name</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.name" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Study name as extracted from the raw file.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.period">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">period</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.period" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.period">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">period</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.period" title="Permalink to this definition">¶</a></dt>
 <dd><p>Period of data acquistion as extracted from the raw file or
 specified by the user.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.raw_data">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">raw_data</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.raw_data" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.raw_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw_data</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.raw_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Indexed data extracted from the raw file.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.raw_light">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">raw_light</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.raw_light" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.raw_light">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw_light</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.raw_light" title="Permalink to this definition">¶</a></dt>
 <dd><p>Light measurement performed by the device</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.read_sleep_diary">
-<code class="sig-name descname"><span class="pre">read_sleep_diary</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'ACTIVE':</span> <span class="pre">2,</span> <span class="pre">'NAP':</span> <span class="pre">1,</span> <span class="pre">'NIGHT':</span> <span class="pre">0,</span> <span class="pre">'NOWEAR':</span> <span class="pre">-</span> <span class="pre">1}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_colour</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'NAP':</span> <span class="pre">'#7bc043',</span> <span class="pre">'NIGHT':</span> <span class="pre">'#d3d3d3',</span> <span class="pre">'NOWEAR':</span> <span class="pre">'#ee4035'}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.read_sleep_diary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.read_sleep_diary" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.read_sleep_diary">
+<span class="sig-name descname"><span class="pre">read_sleep_diary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_fname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'ACTIVE':</span> <span class="pre">2,</span> <span class="pre">'NAP':</span> <span class="pre">1,</span> <span class="pre">'NIGHT':</span> <span class="pre">0,</span> <span class="pre">'NOWEAR':</span> <span class="pre">-</span> <span class="pre">1}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_colour</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'NAP':</span> <span class="pre">'#7bc043',</span> <span class="pre">'NIGHT':</span> <span class="pre">'#d3d3d3',</span> <span class="pre">'NOWEAR':</span> <span class="pre">'#ee4035'}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.read_sleep_diary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.read_sleep_diary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reader function for sleep diaries.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -228,46 +234,46 @@ Default is NAP=’#7bc043’, NIGHT=’#d3d3d3’, NOWEAR=’#ee4035’.</p></li
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.resampled_data">
-<code class="sig-name descname"><span class="pre">resampled_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binarize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.resampled_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.resampled_data" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.resampled_data">
+<span class="sig-name descname"><span class="pre">resampled_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binarize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.resampled_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.resampled_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data resampled at the specified frequency.
 If mask_inactivity is True, the <cite>mask</cite> is used to filter inactive data.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.resampled_light">
-<code class="sig-name descname"><span class="pre">resampled_light</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.resampled_light"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.resampled_light" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.resampled_light">
+<span class="sig-name descname"><span class="pre">resampled_light</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.resampled_light"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.resampled_light" title="Permalink to this definition">¶</a></dt>
 <dd><p>Light measurement, resampled at the specified frequency.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.sleep_diary">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">sleep_diary</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.sleep_diary" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.sleep_diary">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sleep_diary</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.sleep_diary" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">SleepDiary</span></code> class instanciation.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.start_time">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">start_time</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.start_time" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.start_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.start_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start time of data acquistion as extracted from the raw file or
 specified by the user.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.time_range">
-<code class="sig-name descname"><span class="pre">time_range</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.time_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.time_range" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.time_range">
+<span class="sig-name descname"><span class="pre">time_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/base.html#BaseRaw.time_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.BaseRaw.time_range" title="Permalink to this definition">¶</a></dt>
 <dd><p>Range (in days, hours, etc) of the data acquistion period</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pyActigraphy.io.BaseRaw.uuid">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">uuid</span></code><a class="headerlink" href="#pyActigraphy.io.BaseRaw.uuid" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.BaseRaw.uuid">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uuid</span></span><a class="headerlink" href="#pyActigraphy.io.BaseRaw.uuid" title="Permalink to this definition">¶</a></dt>
 <dd><p>UUID of the device used to acquire the data</p>
 </dd></dl>
 
 </dd></dl>
 
-</div>
+</section>
 
 
     </div>
@@ -281,8 +287,8 @@ specified by the user.</p>
       
     </p>
     <p>
-        &copy; Copyright 2018-2021, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.5.4.<br/>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
     </p>
   </div>
 </footer>

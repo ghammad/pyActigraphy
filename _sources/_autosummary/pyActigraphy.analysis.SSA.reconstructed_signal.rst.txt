@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.SSA.reconstructed\_signal
+pyActigraphy.analysis.SSA.reconstructed\_signal
 ===============================================
 
 .. currentmodule:: pyActigraphy.analysis

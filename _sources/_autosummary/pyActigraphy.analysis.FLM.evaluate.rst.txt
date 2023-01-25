@@ -1,4 +1,4 @@
-﻿pyActigraphy.analysis.FLM.evaluate
+pyActigraphy.analysis.FLM.evaluate
 ==================================
 
 .. currentmodule:: pyActigraphy.analysis

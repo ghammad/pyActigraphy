@@ -1,0 +1,1064 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "59843784",
+   "metadata": {},
+   "source": [
+    "# Light exposure analysis with pyActigraphy"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "796a75ef",
+   "metadata": {},
+   "source": [
+    "![Light&Gears](img/daniele-levis-pelusi-Pp9qkEV_xPk-unsplash.jpg)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8c514efe",
+   "metadata": {},
+   "source": [
+    "Photo by <a href=\"https://unsplash.com/@yogidan2012?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText\">Daniele Levis Pelusi</a> on <a href=\"https://unsplash.com/s/photos/clocks-light?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText\">Unsplash</a>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3ea9684d",
+   "metadata": {},
+   "source": [
+    "## Disclaimer\n",
+    "\n",
+    "The development of the pyActigraphy module for analysing light exposure data was led and financially supported by members of the Daylight Academy Project *The role of daylight for humans* (led by Mirjam Münch, Manuel Spitschan). The module is part of the Human Light Exposure Database. For more information about the project, please see\n",
+    "https://daylight.academy/projects/state-of-light-in-humans/."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "804bc272",
+   "metadata": {},
+   "source": [
+    "## Introduction\n",
+    "\n",
+    "Similarly to the analysis of locomotor activity via actigraphy, light exposure data analysis is difficult because of the lack of open-source analysis softwares that gives users access to a list of various analysis metrics.\n",
+    "\n",
+    "The light exposure data analysis module of *pyActigraphy* is meant to fix this issue."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2684d70b",
+   "metadata": {},
+   "source": [
+    "In this tutorial, we will review the light exposure analysis metrics currently available in pyActigraphy:\n",
+    "\n",
+    "* Exposure levels\n",
+    "* Summary statistics\n",
+    "* Time above threshold (TAT)\n",
+    "* Mean light timing above threshold (MLit)\n",
+    "* Extrema (min. and max.)\n",
+    "* L5 and M10 (LMX)\n",
+    "* IS and IV\n",
+    "* Direct access to raw or thresholded data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e9a0910d",
+   "metadata": {},
+   "source": [
+    "## Imports"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "67b7bd15",
+   "metadata": {},
+   "source": [
+    "As usual, first import the necessary packages:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1676dbe8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pyActigraphy"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3adbe4a1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import plotly.graph_objects as go"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "2ac0fd6b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7921981b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import os"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f35e8e90",
+   "metadata": {},
+   "source": [
+    "## Log-transformation of light data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4dee9a8b",
+   "metadata": {},
+   "source": [
+    "Light data are (log10+1)-transformed in *pyActigraphy*. Therefore, when threshold values are meant to applied to the light levels, the corresponding value on the (log10+1) scale should be applied.\n",
+    "\n",
+    "**NB**: an offset of 1 is added to the light data before log10 transformation in order to avoid a divergence of the log10 function when the light data values are zero: $\\log_{10}(0) = -\\infty $.\n",
+    "\n",
+    "So, on a (log10+1) scale:\n",
+    "\n",
+    "* 10 lux threshold correspond to a value of log(10+1)~1\n",
+    "* 100 lux threshold correspond to a value of log(100+1)~2\n",
+    "* 1000 lux threshold correspond to a value of log(1000+1)~3\n",
+    "* ...\n",
+    "\n",
+    "To simply get the exact value, use the `np.log10` function of the *numpy* package we imported earlier:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1fc4382d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "np.log10(10+1), np.log10(100+1), np.log10(1000+1)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a1aa7fde",
+   "metadata": {},
+   "source": [
+    "## Input data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ff1ef61e",
+   "metadata": {},
+   "source": [
+    "Set up a path to your favorite data file. Here, we use a recording made with a Actiwatch Spectrum Pro from Respironic:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0de4f34b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "fpath = os.path.join(\n",
+    "    os.path.dirname(pyActigraphy.__file__),\n",
+    "    'tests','data', 'test_sample_rpx_ger_with_light.csv'\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d05d42ff",
+   "metadata": {},
+   "source": [
+    "To read such a file, use the corresponding reader function:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d55209af",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw = pyActigraphy.io.read_raw_rpx(\n",
+    "    fpath,\n",
+    "    language='GER',\n",
+    "    delimiter=',',\n",
+    "    decimal=','\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "76efcaba",
+   "metadata": {},
+   "source": [
+    "Now, let's verify which light channels are available for this recording:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "369afd25",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.get_channel_list()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "863dbcdc",
+   "metadata": {},
+   "source": [
+    "As expected, this device records light exposure data in 4 different channels (White light + RBG).\n",
+    "\n",
+    "In the following, we will learn how to analyse these different channels."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f2b27773",
+   "metadata": {},
+   "source": [
+    "## Light exposure metrics"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c91231aa",
+   "metadata": {},
+   "source": [
+    "### Exposure level"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fd896a99",
+   "metadata": {},
+   "source": [
+    "This function returns coarse statistics (mean, median, sum, etc) about the light exposure level. It is possible to define the daily time window during which these statistics are calculated."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fca5c988",
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [],
+   "source": [
+    "help(raw.light.light_exposure_level)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ce6eebb3",
+   "metadata": {},
+   "source": [
+    "Default settings: mean exposure level per acquisition epoch"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "abba6512",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.light_exposure_level()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "65a351ff",
+   "metadata": {},
+   "source": [
+    "Median exposure level:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c94048d6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.light_exposure_level(agg='median')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "deb5ee02",
+   "metadata": {},
+   "source": [
+    "Restricting the time window to '08:00'-'16:00' on a daily basis:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "fec94552",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.light_exposure_level(\n",
+    "    start_time='08:00:00',\n",
+    "    stop_time='16:00:00',\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "aceb6075",
+   "metadata": {},
+   "source": [
+    "It is also possible to only consider light exposure data above a certain threshold. For example, to compute the mean light exposure level above 10 lux, between '12:00' and '18:00':"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9bf25322",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.light_exposure_level(\n",
+    "    threshold=1, # on a log10 scale\n",
+    "    start_time='12:00',\n",
+    "    stop_time='18:00'\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f96455b1",
+   "metadata": {},
+   "source": [
+    "### Summary statistics (mean, median, s.d., max., min., sum)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "caa3eecd",
+   "metadata": {},
+   "source": [
+    "This function returns various summary statistics about the data aggregated into time bins. The length of these time bins, but also their start and stop times, are configurable."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "795fa45f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "help(raw.light.summary_statistics_per_time_bin)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "86ab2125",
+   "metadata": {},
+   "source": [
+    "By default, this function returns the mean, median, sum, standard deviation, as well as the min and max, of data aggregated into consecutive 24h bins, for all light channels separately:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "73f66f2c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.summary_statistics_per_time_bin()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "af0892d5",
+   "metadata": {},
+   "source": [
+    "To change the size of the time bins, now focusing on the mean light level, computed every 12h for instance:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "c47abda5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.summary_statistics_per_time_bin(bins='12h', agg_func=['mean'])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "80c68993",
+   "metadata": {},
+   "source": [
+    "Finally, arbitrary start and stop times can be used to define the time bins;"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "647ed039",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.summary_statistics_per_time_bin(\n",
+    "    bins=[\n",
+    "        ['2019-09-19 12:00:00','2019-09-19 19:59:00'],\n",
+    "        ['2019-09-23 12:00:00','2019-09-23 23:59:00']\n",
+    "    ],\n",
+    "    agg_func=['mean','std']\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "92d8a8f1",
+   "metadata": {},
+   "source": [
+    "### Time above threshold (TAT)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "28979a02",
+   "metadata": {},
+   "source": [
+    "This function computes the total time spent with a light exposure level above a certain threshold. Similarly to the light exposure level function, it is possible to configure the daily time window during which this metric is calculated. Various time output format are available."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "16257818",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "help(raw.light.TAT)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "076d493c",
+   "metadata": {},
+   "source": [
+    "With the default settings (no threshold, no time window restriction):"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0ad7ccd3",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "raw.light.TAT()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c2bec589",
+   "metadata": {},
+   "source": [
+    "the results are identical to the total number of epochs in the recording."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d2712672",
+   "metadata": {},
+   "source": [
+    "To calculate the number of epochs spent above a threshold of 10 lux:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ef68ce45",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "raw.light.TAT(threshold=1)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f15500ed",
+   "metadata": {},
+   "source": [
+    "The parameter `oformat` defines the output format. Available formats:\n",
+    "* 'minute':"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e4cb3e5d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.TAT(threshold=1, oformat='minute')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fb0e1cfd",
+   "metadata": {},
+   "source": [
+    "* 'timedelta': "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6f12e663",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.TAT(threshold=1, oformat='timedelta')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "050e57e9",
+   "metadata": {},
+   "source": [
+    "Time spent above threshold at specific time periods:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "122cb1d8",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.TAT(\n",
+    "    threshold=1, start_time='08:00:00', stop_time='20:00:00', oformat='timedelta'\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "6fd5fd2f",
+   "metadata": {},
+   "source": [
+    "### Time above threshold per period (TATp)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cee9eed3",
+   "metadata": {},
+   "source": [
+    "Sometimes, it could be useful to compute the TAT on consecutive periods of time in order to assess the evolution of such metric through time or before and after a specific intervention. While it is always to possible to read the same file multiple times and restrict its start and stop time to different periods each time, *pyActigraphy* allows users to directly compute the TAT on a daily basis."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2c41aa71",
+   "metadata": {},
+   "source": [
+    "This function has the same input parameters as the TAT function:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "79c124f7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "help(raw.light.TATp)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "d5dbdcc2",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.TATp(threshold=2, oformat='minute')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "162f8f9d",
+   "metadata": {},
+   "source": [
+    "### Mean light timing (MLit)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fea6e9df",
+   "metadata": {},
+   "source": [
+    "This function calculates the mean light timing above threshold ($\\mathrm{MLit}^{XXX}$), defined in [Reid et al. (2014)](https://doi.org/10.1371/journal.pone.0092251) as the average clock time of all aggregated data points above XXX lux. In the original paper, a threshold of 500 lux was chosen but in this function, the threshold is configurable.\n",
+    "\n",
+    "The results are expressed in number of minutes since midnight, irrespective of the sampling period."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "7d1b6d4b",
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [],
+   "source": [
+    "help(raw.light.MLiT)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b3fe723d",
+   "metadata": {},
+   "source": [
+    "To compute the $\\mathrm{MLit}^{500}$:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1d4f423e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Do not forget that the light exposure data are converted to log10+1.\n",
+    "raw.light.MLiT(threshold=np.log10(500+1))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "08fc1c67",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "# To convert this number of minutes into a time of day, simply divide it by the number of minutes per hour:\n",
+    "divmod(791.039116,60)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f177d7d8",
+   "metadata": {},
+   "source": [
+    "The mean light timing for white light exposure above 500 lux is around 13h11 for this recording."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "8215c82f",
+   "metadata": {},
+   "source": [
+    "Just like for the TAT, it might be interesting to compute the $\\mathrm{MLit}^{XXX}$ variable on a daily basis. Again, *pyActigraphy* makes that operation easy:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "05486564",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.MLiTp(threshold=np.log10(500+1))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e2713198",
+   "metadata": {},
+   "source": [
+    "### Extrema"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e3182c70",
+   "metadata": {},
+   "source": [
+    "This function simply returns information (timing and value) about the minimal or maximal light exposure data value."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6017cc08",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "help(raw.light.get_light_extremum)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "092647fd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.get_light_extremum(extremum='max')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5155495b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.get_light_extremum(extremum='min')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7a7efbf6",
+   "metadata": {},
+   "source": [
+    "### L5 and M10 (values and timing)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b3f419dc",
+   "metadata": {},
+   "source": [
+    "The L5 (M10) variable refers to the 5(10)h-period of daily light exposure profile with the lowest(highest) light exposure levels. In this function, the length of this period can be configured. Information about the timing and the mean hourly light exposure levels are returned."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "de5a5803",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "help(raw.light.LMX)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b00c92e6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.LMX(length='10h',lowest=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "085e6a5c",
+   "metadata": {},
+   "source": [
+    "It seems that the 10h long period with the highest light exposure levels starts at 8h21."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f4981ce9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.LMX(length='5h',lowest=True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "388735c7",
+   "metadata": {},
+   "source": [
+    "It seems that the 5h long period with the lowest light exposure levels starts at 00h00."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3b78bfb8",
+   "metadata": {},
+   "source": [
+    "It is easy to visually check if these results are correct by computing the average daily profile of light exposure:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "149e4f85",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dlp = raw.light.average_daily_profile(\n",
+    "    rsfreq='60min', cyclic=False, channel='Weißes Licht'\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ef323ca5",
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [],
+   "source": [
+    "dlp_fig = go.Figure(go.Scatter(x=dlp.index.astype(str),y=dlp))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b79d9214",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dlp_fig.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cffa6da2",
+   "metadata": {},
+   "source": [
+    "### IS & IV"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ebf5fec5",
+   "metadata": {},
+   "source": [
+    "The interdaily stability (IS) and intradaily variability (IV) were first defined in the context of the locomotor activity analysis, to quantify the stability of the circadian activity pattern and the fragmentation of this daily pattern, respectively.\n",
+    "\n",
+    "Now, within the pyActigraphy module for light analysis, these metrics can be computed using the light exposure levels as inputs.\n",
+    "\n",
+    "**NB**: the default parameter values for these functions are different from the values used by default for the IS/IV functions for activity data, directly accessible via `raw.IS()` or `raw.IV()`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "34b9aae5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "help(raw.light.IS)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "069efd78",
+   "metadata": {},
+   "source": [
+    "By default, light exposure data are not binarized before computing the IS:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "46b682d0",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "raw.light.IS()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "33016794",
+   "metadata": {},
+   "source": [
+    "However, it remains possible to do so by applying a threshold (at 100 lux for example):"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "792db3c9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.IS(binarize=True, threshold=2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3f97740a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "help(raw.light.IV)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3cf7ae49",
+   "metadata": {},
+   "source": [
+    "By default, no data binarization is applied:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "5ab0cceb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.IV()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "eac267cf",
+   "metadata": {},
+   "source": [
+    "But, again, data binarization can easily be performed:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "22be461c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.IV(binarize=True, threshold=1)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2274771f",
+   "metadata": {},
+   "source": [
+    "### Access to raw and thresholded data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "bd3bf622",
+   "metadata": {},
+   "source": [
+    "Most of the analyses on light exposure can be performed using the various metrics available in the *pyActigraphy* light module. However, for the most fearless users that require full access to the light exposure time series, it is possible to directly access the raw data or simply the thresholded data:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8982eff8",
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [],
+   "source": [
+    "help(raw.light.VAT)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b6e33371",
+   "metadata": {},
+   "source": [
+    "Inspect the first 5 epochs of raw light data:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "977f76a9",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.data.head(5)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0e78a9df",
+   "metadata": {},
+   "source": [
+    "Or access the raw data thresholded at 100 lux:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "1303c80a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "raw.light.VAT(2)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c4aecb10",
+   "metadata": {},
+   "source": [
+    "Et voilà! For now..."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "pyActi37",
+   "language": "python",
+   "name": "pyacti37"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
