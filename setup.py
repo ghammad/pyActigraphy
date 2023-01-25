@@ -60,7 +60,7 @@ setup(
     #
     # This field corresponds to the "Home-Page" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    url='http://github.com/ghammad/pyActigraphy',
+    url='https://github.com/ghammad/pyActigraphy',
 
     author='Grégory Hammad',
     author_email='gregory.hammad@hotmail.fr',
@@ -106,9 +106,9 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'joblib', 'lmfit', 'pandas', 'numba', 'numpy', 'pyexcel',
-        'pyexcel-ods3', 'scipy', 'spm1d', 'statsmodels>=0.10',
-        'stochastic>=0.4.0'
+        'joblib', 'lmfit', 'pandas', 'plotly', 'numba', 'numpy', 'pyexcel',
+        'pyexcel-ods3', 'pyexcel-xlsx', 'scipy', 'spm1d', 'statsmodels>=0.10',
+        'stochastic>=0.6.0'
     ],  # Optional
 
     # Data files included in your packages that need to be installed.

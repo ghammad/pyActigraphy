@@ -28,6 +28,11 @@ def test_read_raw_awd_uuid():
     assert rawAWD.uuid == 'myUUID'
 
 
+def test_read_raw_awd_frequency():
+
+    assert rawAWD.frequency == pd.Timedelta('1min')
+
+
 def test_read_raw_awd_start_time():
 
     assert rawAWD.start_time == pd.Timestamp('2018-01-01 08:30:00')

@@ -12,6 +12,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import pyActigraphy
 import os
 import sys
 import time
@@ -26,7 +27,6 @@ from sphinx.util.inspect import safe_getattr
 
 # sys.path.insert(0, os.path.abspath(os.path.pardir))
 sys.path.insert(0, os.path.abspath('../..'))
-import pyActigraphy
 
 
 class AutoAutoSummary(Autosummary):
@@ -80,7 +80,7 @@ class AutoAutoSummary(Autosummary):
 
 def setup(app):
     app.add_directive('autoautosummary', AutoAutoSummary)
-    app.add_javascript(
+    app.add_js_file(
         'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/'
         'require.min.js'
     )
@@ -183,6 +183,7 @@ html_theme_options = {
         # ("Tests", "tests"),
         ("Tutorials", "tutorials"),
         ("API", "api"),
+        ("What's new", "changelog")
         # ("Examples", "auto_examples/index"),
     ],
 

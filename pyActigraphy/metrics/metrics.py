@@ -25,9 +25,32 @@ __all__ = [
     '_td_format']
 
 
-def _average_daily_total_activity(data):
+def _average_daily_total_activity(data, rescale, exclude_ends):
+    r"""Calculate the average daily activity"""
 
-    return data.resample('1D').sum().mean()
+    # Shortcut: if rescale is false, compute the daily average
+    if rescale is False:
+        daily_sum = data.resample('1D').sum()
+    else:
+        # Aggregate data daily:
+        # - compute the daily sum
+        # - count the number of epochs included in each day
+        daily_agg = data.resample('1D').agg(['count', 'sum'])
+
+        # Compute weights as a function of the number of epochs per day:
+        # weight =  (#epochs/day) / (#count/day)
+        # NB: needed to account for potentially masked periods.
+        daily_agg['weigth'] = (pd.Timedelta('24h')/data.index.freq)
+        daily_agg['weigth'] /= daily_agg['count']
+
+        # Rescale activity
+        daily_sum = daily_agg['sum']*daily_agg['weigth']
+
+    # Exclude first and last days
+    if exclude_ends:
+        daily_sum = daily_sum.iloc[1:-1]
+
+    return daily_sum.mean()
 
 
 def _interdaily_stability(data):
@@ -283,8 +306,8 @@ class MetricsMixin(object):
                     raise ValueError(
                         'Time origin format ({}) not supported.\n'.format(
                             time_origin
-                        ) +
-                        'Supported format: {}.'.format('HH:MM:SS')
+                        )
+                        + 'Supported format: {}.'.format('HH:MM:SS')
                     )
 
             elif not isinstance(time_origin, pd.Timedelta):
@@ -330,7 +353,9 @@ class MetricsMixin(object):
 
         return avgdaily_light
 
-    def ADAT(self, binarize=True, threshold=4):
+    def ADAT(
+        self, binarize=True, threshold=4, rescale=True, exclude_ends=False
+    ):
         """Total average daily activity
 
         Calculate the total activity counts, averaged over all the days.
@@ -343,6 +368,15 @@ class MetricsMixin(object):
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
+        rescale: bool, optional
+            If set to True, the activity counts are rescaled to account for
+            masked periods (if any).
+            Default is True.
+        exclude_ends: bool, optional
+            If set to True, the first and last daily periods are excluded from
+            the calculation. Useful when the recording does start or end at
+            midnigth.
+            Default is False.
 
         Returns
         -------
@@ -354,11 +388,20 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        adat = _average_daily_total_activity(data)
+        adat = _average_daily_total_activity(
+            data, rescale=rescale, exclude_ends=exclude_ends)
 
         return adat
 
-    def ADATp(self, period='7D', binarize=True, threshold=4, verbose=False):
+    def ADATp(
+        self,
+        period='7D',
+        binarize=True,
+        threshold=4,
+        rescale=True,
+        exclude_ends=False,
+        verbose=False
+    ):
         """Total average daily activity per period
 
         Calculate the total activity counts, averaged over each consecutive
@@ -375,9 +418,19 @@ class MetricsMixin(object):
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
+        rescale: bool, optional
+            If set to True, the activity counts are rescaled to account for
+            masked periods (if any).
+            Default is True.
+        exclude_ends: bool, optional
+            If set to True, the first and last daily periods are excluded from
+            the calculation. Useful when the recording does start or end at
+            midnigth.
+            Default is False.
         verbose: bool, optional
             If set to True, display the number of periods found in the data.
             Also display the time not accounted for.
+            Default is False.
 
         Returns
         -------
@@ -393,7 +446,9 @@ class MetricsMixin(object):
 
         results = [
             _average_daily_total_activity(
-                data[time[0]:time[1]]
+                data[time[0]:time[1]],
+                rescale=rescale,
+                exclude_ends=exclude_ends
             ) for time in intervals
         ]
 
@@ -1623,22 +1678,99 @@ class ForwardMetricsMixin(object):
     # str(iread.duration()) for iread in self.readers
     #     }
 
-    def ADAT(self, binarize=True, threshold=4):
+    def ADAT(
+        self, binarize=True, threshold=4, rescale=True, exclude_ends=False
+    ):
+        """Total average daily activity
+
+        Calculate the total activity counts, averaged over all the days.
+
+        Parameters
+        ----------
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+        rescale: bool, optional
+            If set to True, the activity counts are rescaled to account for
+            masked periods (if any).
+            Default is True.
+        exclude_ends: bool, optional
+            If set to True, the first and last daily periods are excluded from
+            the calculation. Useful when the recording does start or end at
+            midnigth.
+            Default is False.
+
+        Returns
+        -------
+        adat : dict
+            Dictionary with filenames as keys and ADAT as values.
+        """
 
         return {
             iread.display_name: iread.ADAT(
                 binarize=binarize,
-                threshold=threshold
+                threshold=threshold,
+                rescale=rescale,
+                exclude_ends=exclude_ends
             ) for iread in self.readers
         }
 
-    def ADATp(self, period='7D', binarize=True, threshold=4, verbose=False):
+    def ADATp(
+        self,
+        period='7D',
+        binarize=True,
+        threshold=4,
+        rescale=True,
+        exclude_ends=False,
+        verbose=False
+    ):
+        """Total average daily activity per period
+
+        Calculate the total activity counts, averaged over each consecutive
+        period contained in the data. The number of periods
+
+        Parameters
+        ----------
+        period: str, optional
+            Time length of the period to be considered. Must be understandable
+            by pandas.Timedelta
+        binarize: bool, optional
+            If set to True, the data are binarized.
+            Default is True.
+        threshold: int, optional
+            If binarize is set to True, data above this threshold are set to 1
+            and to 0 otherwise.
+        rescale: bool, optional
+            If set to True, the activity counts are rescaled to account for
+            masked periods (if any).
+            Default is True.
+        exclude_ends: bool, optional
+            If set to True, the first and last daily periods are excluded from
+            the calculation. Useful when the recording does start or end at
+            midnigth.
+            Default is False.
+        verbose: bool, optional
+            If set to True, display the number of periods found in the data.
+            Also display the time not accounted for.
+            Default is False.
+
+        Returns
+        -------
+        adatp : list of int
+            Dictionary with filenames as keys and a list of ADAT per period
+            as values.
+        """
 
         return {
             iread.display_name: iread.ADATp(
                 period=period,
                 binarize=binarize,
                 threshold=threshold,
+                rescale=rescale,
+                exclude_ends=exclude_ends,
                 verbose=verbose
             ) for iread in self.readers
         }

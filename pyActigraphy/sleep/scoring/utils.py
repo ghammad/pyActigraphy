@@ -169,4 +169,160 @@ def consecutive_values(x, target=1, min_length=10):
     # Runs start and end where absdiff is 1.
     ranges = np.where(absdiff == 1)[0].reshape(-1, 2)
 
-    return ranges[np.where(ranges[:, 1] - ranges[:, 0] > min_length)]
+    return ranges[np.where(ranges[:, 1] - ranges[:, 0] >= min_length)]
+
+
+def rescore_if_preceded(scoring, n_periods, n_previous, sleep_score=1):
+    r'''Returns a binary series with 0 at indices of epochs scored as sleep
+    that are preceded by epochs scored as wake.
+
+    Parameters
+    ----------
+    scoring : np.ndarray
+        Binary series with sleep-wake scoring
+
+    n_periods : int
+        Number of successive epochs scored as sleep to search for.
+
+    n_previous : int
+        Number of successive epochs scored as wake, preceding sleep epochs
+        to search for.
+
+    sleep_score: int, optional
+        Sleep score.
+        Default is 1.
+
+    Return
+    ----------
+    mask : array_like
+        Binary array.
+
+    '''
+    # Check input type
+    if not isinstance(scoring, (np.ndarray)):
+        raise TypeError(
+            "Wrong input type for 'scoring': {}.\nExpect np.array.".format(
+                type(scoring)
+            ))
+
+    # Search for the indices of the stretches of epochs scored as sleep
+    indices = consecutive_values(
+            scoring, target=sleep_score, min_length=n_periods
+        )
+
+    # Create mask
+    mask = np.ones_like(scoring)
+
+    # For each stretch of epochs scored as sleep:
+    for index in indices:
+        if (index[0] < n_previous) or (index[1] > len(scoring)):
+            continue
+        # If all preceding epochs are scored as wake:
+        if np.all(scoring[index[0]-n_previous:index[0]] == 0):
+            mask[index[0]:index[0]+n_periods] = 0
+
+    return mask
+
+
+def rescore_if_surrounded(scoring, n_periods, n_surround, sleep_score=1):
+    r'''Returns a binary series with 0 at indices of epochs scored as sleep
+    that are surrounded by epochs scored as wake.
+
+    Parameters
+    ----------
+    scoring : np.ndarray
+        Binary series with sleep-wake scoring
+
+    n_periods : int
+        Number of successive epochs scored as sleep to search for.
+
+    n_previous : int
+        Number of successive epochs scored as wake, surrounding sleep epochs
+        to search for.
+
+    sleep_score: int, optional
+        Sleep score.
+        Default is 1.
+
+    Return
+    ----------
+    mask : array_like
+        Binary array.
+
+    '''
+    # Check input type
+    if not isinstance(scoring, (np.ndarray)):
+        raise TypeError(
+            "Wrong input type for 'scoring': {}.\nExpect np.array.".format(
+                type(scoring)
+            ))
+
+    # Search for the indices of the stretches of epochs scored as wake
+    indices = consecutive_values(
+        scoring, target=np.abs(sleep_score-1), min_length=n_surround
+    )
+
+    # Create mask
+    mask = np.ones_like(scoring)
+
+    # For each stretch of epochs scored as wake:
+    for idx in range(indices.shape[0]-1):
+        # Diff between first element of the next wake period and the last
+        # element of the current wake period
+        sleep_duration = indices[idx+1][0] - indices[idx][1]
+
+        # If the number of epochs scored as sleep is below threshold:
+        if sleep_duration <= n_periods:
+            mask[indices[idx][1]:indices[idx+1][0]] = 0
+
+    return mask
+
+
+def rescore(scoring, sleep_score=1):
+    r'''Returns a binary series with 0 at indices of epochs scored as sleep
+    that should rescored as wake according to Webster's rules.
+
+    Parameters
+    ----------
+    scoring : np.ndarray
+        Binary series with sleep-wake scoring
+
+    sleep_score: int, optional
+        Sleep score.
+        Default is 1.
+
+    Return
+    ----------
+    mask : array_like
+        Binary array.
+
+    '''
+    # create an initial series of 1
+    rescoring_masks = np.empty((5, len(scoring)))
+
+    # Rule 1: Search for series of at least 4 minutes scored as wake...
+    rescoring_masks[0] = rescore_if_preceded(
+        scoring, n_periods=1, n_previous=4, sleep_score=1)
+
+    # Rule 2: Search for series of at least 3 minutes scored as sleep...
+    rescoring_masks[1] = rescore_if_preceded(
+        scoring, n_periods=3, n_previous=10, sleep_score=1)
+
+    # Rule 3: Search for series of at least 3 minutes scored as sleep...
+    rescoring_masks[2] = rescore_if_preceded(
+        scoring, n_periods=4, n_previous=15, sleep_score=1)
+
+    # Rule 4: Search for series of at least 10 minutes scored as wake...
+    rescoring_masks[3] = rescore_if_surrounded(
+        scoring, n_periods=6, n_surround=10, sleep_score=1)
+
+    # Rule 5: Search for series of at least 20 minutes scored as wake...
+    rescoring_masks[4] = rescore_if_surrounded(
+        scoring, n_periods=10, n_surround=20, sleep_score=1)
+
+    # Multiply all the rescoring mask elements across the different rules.
+    # If there is any zero (i.e. an epoch rescored as wake by any of the 5
+    # rules), the result is zero.
+    mask = np.prod(rescoring_masks, axis=0)
+
+    return mask

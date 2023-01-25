@@ -7,8 +7,8 @@ Python API Reference
     :depth: 2
 
 
-Reading raw data
-================
+Reading actigraphy data
+=======================
 
 Raw file reader
 ---------------
@@ -21,6 +21,7 @@ Currently, the supported formats are:
 * ActTrust 2, Condor Instruments (.txt);
 * Daqtometer, Daqtix (.csv);
 * Actiwatch 2 and Actiwatch Spectrum Plus, Philips Respironics (.csv)
+* Tempatilumi (CE Brasil)
 
 Associated functions:
 
@@ -36,6 +37,7 @@ Associated functions:
    read_raw_dqt
    read_raw_mtn
    read_raw_rpx
+   read_raw_tal
 
 These functions return a `BaseRaw` object. which is the main class in
 pyActigraphy: :class:`pyActigraphy.io.BaseRaw`
@@ -83,6 +85,16 @@ Rest-activity scoring and sleep diary
 * Sleep diary: :mod:`pyActigraphy.sleep.SleepDiary`
 
 * Sleep bout identification: :mod:`pyActigraphy.sleep.SleepBoutMixin`
+
+
+Light-specific modules
+=====================================
+
+* Light recording class: :mod:`pyActigraphy.light.LightRecording`
+
+* Light exposure metrics: :mod:`pyActigraphy.light.LightMetricsMixin`
+
+* Generic light class example: :mod:`pyActigraphy.light.GenLightDevice`
 
 
 Analysis

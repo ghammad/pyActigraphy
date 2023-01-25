@@ -1,4 +1,4 @@
-"""GIGA-CRC In Vivo Imaging Software for actigraphy data analysis."""
+"""Open-source software for actigraphy data analysis"""
 
 # PEP0440 compatible formatted version, see:
 # https://www.python.org/dev/peps/pep-0440/
@@ -15,8 +15,28 @@
 #
 # Dev branch marker is: 'X.Y.devN' where N is an integer.
 #
-from . import analysis, io, filters, metrics, sleep, utils, tests
+from . import analysis
+from . import filters
+from . import io
+from . import light
+from . import metrics
+from . import recording
+from . import sleep
+from . import utils
+from . import tests
+from . import viz
 
-__all__ = ["analysis", "io", "filters", "metrics", "sleep", "utils", "tests"]
+__all__ = [
+    "analysis",
+    "filters",
+    "io",
+    "light",
+    "metrics",
+    "recording",
+    "sleep",
+    "tests",
+    "utils",
+    "viz"
+]
 
-__version__ = '1.0'
+__version__ = '1.1'

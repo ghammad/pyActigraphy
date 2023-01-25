@@ -3,6 +3,7 @@ import os
 import re
 
 from ..base import BaseRaw
+from pyActigraphy.light import LightRecording
 
 
 class RawTAL(BaseRaw):
@@ -55,8 +56,6 @@ class RawTAL(BaseRaw):
         # [TO-DO] check it is has the right file extension .awd
 
         # extract header and data
-        # if os.stat(input_fname).st_size == 0:
-        #     raise ValueError("File is empty")
         with open(input_fname, encoding=encoding) as f:
             header = []
             pos = 0
@@ -81,31 +80,11 @@ class RawTAL(BaseRaw):
                 },
             )
         index_data.set_index('Date_Time', inplace=True)
-        # with open(input_fname, encoding=encoding) as f:
-        #     header = [next(f) for x in range(header_size)]
 
         # extract informations from the header
         uuid = self.__extract_tal_uuid(header)
         if name is None:
             name = uuid
-
-        # index_data = pd.read_csv(
-        #     # input_fname,
-        #     filepath_or_buffer=input_fname,
-        #     encoding=encoding,
-        #     skipinitialspace=True,
-        #     skiprows=len(header),
-        #     delimiter='\t',
-        #     infer_datetime_format=True,
-        #     index_col=0,
-        #     parse_dates={
-        #         'Date_Time': [
-        #             'Data',
-        #             'Hora'
-        #         ]
-        #     },
-        #     dayfirst=True
-        # )
 
         # Check column names
         # Evento	 Temperatura	 Luminosidade	 Atividade
@@ -151,6 +130,9 @@ class RawTAL(BaseRaw):
 
         index_data = index_data[start_time:stop_time]
 
+        # Light
+        index_light = self.__extract_from_data(index_data, 'Luminosidade')
+
         # call __init__ function of the base class
         super().__init__(
             name=name,
@@ -161,8 +143,21 @@ class RawTAL(BaseRaw):
             period=period,
             frequency=freq,
             data=index_data['Atividade'],
-            light=self.__extract_from_data(index_data, 'Luminosidade')
+            light=LightRecording(
+                name=name,
+                uuid=uuid,
+                data=index_light.to_frame(name='whitelight'),
+                frequency=freq
+            )
         )
+
+    @property
+    def white_light(self):
+        r"""Value of the light intensity in µw/cm²."""
+        if self.light is None:
+            return None
+        else:
+            return self.light.get_channel("whitelight")
 
     @property
     def temperature(self):

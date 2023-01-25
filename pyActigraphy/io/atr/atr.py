@@ -3,6 +3,7 @@ import os
 import re
 
 from ..base import BaseRaw
+from pyActigraphy.light import LightRecording
 
 
 class RawATR(BaseRaw):
@@ -27,6 +28,8 @@ class RawATR(BaseRaw):
         Default is None (i.e all the data).
     """
 
+    __default_modes = ["PIM", "PIMn", "TAT", "TATn", "ZCM", "ZCMn"]
+
     def __init__(
         self,
         input_fname,
@@ -44,8 +47,8 @@ class RawATR(BaseRaw):
             first_line = fp.readline()
             if not re.match(r"\+-*\+ \w+ \w+ \w+ \+-*\+", first_line):
                 raise ValueError(
-                    "The input file ({}) does not ".format(input_fname) +
-                    "seem to contain the usual header.\n Aborting."
+                    "The input file ({}) does not ".format(input_fname)
+                    + "seem to contain the usual header.\n Aborting."
                 )
             for line in fp:
                 if '+-------------------' in line:
@@ -56,16 +59,8 @@ class RawATR(BaseRaw):
                         header[chunks[0]] = chunks[1:]
         if not header:
             raise ValueError(
-                "The input file ({}) does not ".format(input_fname) +
-                "contain a header.\n Aborting."
-            )
-
-        # Check requested sampling mode is available:
-        if mode not in header['MODE'][0].split('/'):
-            raise ValueError(
-                "The requested mode ({}) is not available".format(mode) +
-                " for this recording.\n" +
-                "Available modes are {}.".format(header['MODE'][0])
+                "The input file ({}) does not ".format(input_fname)
+                + "contain a header.\n Aborting."
             )
 
         # extract informations from the header
@@ -84,26 +79,19 @@ class RawATR(BaseRaw):
             index_col=[0]
         ).resample(freq).sum()
 
-        # TEMP
-        self.__temperature = self.__extract_from_data(
-            index_data, 'TEMPERATURE'
-        )
-        self.__temperature_ext = self.__extract_from_data(
-            index_data, 'EXT TEMPERATURE'
-        )
+        self.__available_modes = sorted(list(
+            set(index_data.columns.values).intersection(
+                set(self.__default_modes))))
 
-        # LIGHT
-        self.__amb_light = self.__extract_from_data(index_data, 'AMB LIGHT')
-        self.__red_light = self.__extract_from_data(index_data, 'RED LIGHT')
-        self.__green_light = self.__extract_from_data(
-            index_data, 'GREEN LIGHT'
-        )
-        self.__blue_light = self.__extract_from_data(index_data, 'BLUE LIGHT')
-
-        self.__ir_light = self.__extract_from_data(index_data, 'IR LIGHT')
-
-        self.__uva_light = self.__extract_from_data(index_data, 'UVA LIGHT')
-        self.__uvb_light = self.__extract_from_data(index_data, 'UVB LIGHT')
+        # Check requested sampling mode is available:
+        if mode not in self.__available_modes:  # header['MODE'][0].split('/'):
+            raise ValueError(
+                "The requested mode ({}) is not available".format(mode)
+                + " for this recording.\n"
+                + "Available modes are {}.".format(
+                    self.__available_modes  # header['MODE'][0]
+                )
+            )
 
         if start_time is not None:
             start_time = pd.to_datetime(start_time)
@@ -119,18 +107,73 @@ class RawATR(BaseRaw):
 
         index_data = index_data[start_time:stop_time]
 
+        # ACTIVITY
+        self.__activity = index_data[self.__available_modes]
+
+        # TEMP
+        self.__temperature = self.__extract_from_data(
+            index_data, 'TEMPERATURE'
+        )
+        self.__temperature_ext = self.__extract_from_data(
+            index_data, 'EXT TEMPERATURE'
+        )
+
+        # LIGHT
+        index_light = index_data.filter(like="LIGHT")
+
         # call __init__ function of the base class
         super().__init__(
             name=name,
             uuid=uuid,
-            format='ART',
+            format='ATR',
             axial_mode='tri-axial',
             start_time=start_time,
             period=period,
             frequency=freq,
             data=index_data[mode],
-            light=self.__extract_from_data(index_data, 'LIGHT')
+            light=LightRecording(
+                name=name,
+                uuid=uuid,
+                data=index_light,
+                frequency=index_light.index.freq
+            ) if index_light is not None else None
+            # self.__extract_from_data(index_data, 'LIGHT')
         )
+
+    @property
+    def available_modes(self):
+        r"""Available acquistion modes (PIM, ZCM, etc)"""
+        return self.__available_modes
+
+    @property
+    def PIM(self):
+        r"""Activity (in PIM mode)."""
+        return self.__extract_from_data(self.__activity, 'PIM')
+
+    @property
+    def PIMn(self):
+        r"""Activity (in normalized PIM mode)."""
+        return self.__extract_from_data(self.__activity, 'PIMn')
+
+    @property
+    def TAT(self):
+        r"""Activity (in TAT mode)."""
+        return self.__extract_from_data(self.__activity, 'TAT')
+
+    @property
+    def TATn(self):
+        r"""Activity (in normalized PIM mode)."""
+        return self.__extract_from_data(self.__activity, 'TATn')
+
+    @property
+    def ZCM(self):
+        r"""Activity (in ZCM mode)."""
+        return self.__extract_from_data(self.__activity, 'ZCM')
+
+    @property
+    def ZCMn(self):
+        r"""Activity (in normalized ZCM mode)."""
+        return self.__extract_from_data(self.__activity, 'ZCMn')
 
     @property
     def temperature(self):
@@ -145,37 +188,42 @@ class RawATR(BaseRaw):
     @property
     def amb_light(self):
         r"""Value of the light intensity in µw/cm²."""
-        return self.__amb_light
+        return self.__extract_light_channel("AMB LIGHT")
+
+    @property
+    def white_light(self):
+        r"""Value of the light intensity in µw/cm²."""
+        return self.__extract_light_channel("LIGHT")
 
     @property
     def red_light(self):
         r"""Value of the light intensity in µw/cm²."""
-        return self.__red_light
+        return self.__extract_light_channel("RED LIGHT")
 
     @property
     def green_light(self):
         r"""Value of the light intensity in µw/cm²."""
-        return self.__green_light
+        return self.__extract_light_channel("GREEN LIGHT")
 
     @property
     def blue_light(self):
         r"""Value of the light intensity in µw/cm²."""
-        return self.__blue_light
+        return self.__extract_light_channel("BLUE LIGHT")
 
     @property
     def ir_light(self):
         r"""Value of the light intensity in µw/cm²."""
-        return self.__ir_light
+        return self.__extract_light_channel("IR LIGHT")
 
     @property
     def uva_light(self):
         r"""Value of the light intensity in µw/cm²."""
-        return self.__uva_light
+        return self.__extract_light_channel("UVA LIGHT")
 
     @property
     def uvb_light(self):
         r"""Value of the light intensity in µw/cm²."""
-        return self.__uvb_light
+        return self.__extract_light_channel("UVB LIGHT")
 
     @property
     def tat_threshold(self):
@@ -193,6 +241,12 @@ class RawATR(BaseRaw):
             return data[key]
         else:
             return None
+
+    def __extract_light_channel(self, channel):
+        if self.light is None:
+            return None
+        else:
+            return self.light.get_channel(channel)
 
 
 def read_raw_atr(

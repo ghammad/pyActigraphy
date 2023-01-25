@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
 import re
-from .scoring import roenneberg, sleep_midpoint, sri
+from .scoring import csm, roenneberg, sleep_midpoint, sri
+from .scoring.utils import rescore
 from scipy.ndimage import binary_closing, binary_opening
 from ..filters import _create_inactivity_mask
 from ..utils.utils import _average_daily_activity
@@ -116,7 +117,6 @@ def _window_convolution(x, scale, window, offset=0.0):
 
 
 def _cole_kripke(data, scale, window, threshold):
-
     """Automatic scoring methods from Cole and Kripke"""
 
     ck = data.rolling(
@@ -127,7 +127,6 @@ def _cole_kripke(data, scale, window, threshold):
 
 
 def _sadeh(data, offset, weights, threshold):
-
     """Activity-Based Sleep-Wake Identification"""
 
     r = data.rolling(11, center=True)
@@ -154,7 +153,6 @@ def _sadeh(data, offset, weights, threshold):
 
 
 def _scripps(data, scale, window, threshold):
-
     """Scripps Clinic algorithm for sleep-wake scoring."""
 
     scripps = data.rolling(
@@ -165,7 +163,6 @@ def _scripps(data, scale, window, threshold):
 
 
 def _oakley(data, window, threshold):
-
     """Oakley's algorithm for sleep-wake scoring."""
     if threshold == 'automatic':
         threshold = _actiware_automatic_threshold(data)
@@ -314,11 +311,10 @@ class ScoringMixin(object):
 
     def CK(
         self,
-        scale=0.00001,
-        window=np.array([400, 600, 300, 400, 1400, 500, 350, 0, 0], np.int32),
-        threshold=1.0
+        settings='30sec_max_non_overlap',
+        threshold=1.0,
+        rescoring=True
     ):
-
         r"""Cole&Kripke algorithm for sleep-wake identification.
 
         Algorithm for automatic sleep scoring based on wrist activity,
@@ -327,15 +323,24 @@ class ScoringMixin(object):
 
         Parameters
         ----------
-        scale: float, optional
-            Scale parameter P.
-            Default is 0.00001.
-        window: np.array
-            Array of weighting factors, :math:`W_{i}`.
-            Default is [400, 600, 300, 400, 1400, 500, 350, 0, 0]
+        settings: str, optional
+            Data reduction settings for which the optimal parameters have been
+            derived. Available settings are:
+
+            * "mean": mean activity per minute
+            * "10sec_max_overlap": maximum 10-second overlapping epoch per
+              minute
+            * "10sec_max_non_overlap": maximum 10-second nonoverlapping epoch
+              per minute
+            * "30sec_max_non_overlap": maximum 30-second nonoverlapping epoch
+              per minute
+
+            Default is "30sec_max_non_overlap".
         threshold: float, optional
-            Threshold value for scoring sleep/wake.
-            Default is 1.0.
+            Threshold value for scoring sleep/wake. Default is 1.0.
+        rescoring: bool, optional
+            If set to True, Webster's rescoring rules are applied [2]_.
+            Default is True.
 
         Returns
         -------
@@ -365,6 +370,26 @@ class ScoringMixin(object):
           minute, the previous minute, the following minute, etc.
 
 
+        .. warning:: This algorithm yields scores with a period of 1 minute.
+                     Therefore, the time series returned by the CK function has
+                     a 1-min period. In the original paper, this algorithm is
+                     validated for devices configured in "zero-crossing mode".
+
+        Webster's rescoring rules [2]_:
+
+        1. After at least 4 minutes scored as wake, the next 1 minute scored as
+           sleep is rescored as wake
+        2. After at least 10 minutes scored as wake, the next 3 minutes scored
+           as sleep are rescored as wake;
+        3. After at least 15 minutes scored as wake, the next 4 minutes scored
+           as sleep are rescored as wake;
+        4. If a period of 6 minutes or less that is scored as sleep is
+           surrounded by at least 15 minutes scored as wake, then rescore to
+           wake;
+        5. If a period of 10 minutes or less that is scored as sleep is
+           surrounded by at least 20 minutes scored as wake, then rescore to
+           wake.
+
         References
         ----------
 
@@ -372,22 +397,142 @@ class ScoringMixin(object):
                & Gillin, J. C. (1992). Automatic Sleep/Wake Identification
                From Wrist Activity. Sleep, 15(5), 461–469.
                http://doi.org/10.1093/sleep/15.5.461
+        .. [2] Webster, J. B., Kripke, D. F., Messin, S., Mullaney, D. J., &
+               Wyborney, G. (1982). An Activity-Based Sleep Monitor System for
+               Ambulatory Use. Sleep, 5(4), 389–399.
+               https://doi.org/10.1093/sleep/5.4.389
 
         Examples
         --------
 
 
         """
+        available_settings = [
+            "mean",
+            "10sec_max_overlap",
+            "10sec_max_non_overlap",
+            "30sec_max_non_overlap"
+        ]
 
-        return _cole_kripke(self.data, scale, window, threshold)
+        if settings not in available_settings:
+            raise ValueError("CK sleep/wake identification:\n"
+                             + "Required settings: {}\n".format(settings)
+                             + "Available settings are:\n"
+                             + "\n".join(available_settings))
+
+        ck = None
+
+        if settings == "mean":
+            if pd.Timedelta(self.data.index.freq) > pd.Timedelta('60s'):
+                raise ValueError((
+                    "The sampling frequency of the input data does not allow"
+                    + " the use of the requested settings ({}).\n".format(
+                        settings)
+                    + "For such settings, the sampling frequency should less"
+                    + " than 60 seconds."
+                    ))
+            else:
+                # Compute the resampling factor as the original weights are
+                # calculated for an average of 2-sec epochs over 60 seconds:
+                rs_f = 30  # 60sec/2sec
+                # Resample to 60 sec and take the sum
+                # WARNING: valid if the input data is a sum of activity counts
+                data_mean = self.data.resample('60s').sum()/rs_f
+
+                # Define the scale and weights for this settings
+                scale = 0.001
+                window = np.array(
+                    [106, 54, 58, 76, 230, 74, 67, 0, 0],
+                    np.int32
+                )
+
+                ck = _cole_kripke(data_mean, scale, window, threshold)
+
+        elif settings == "10sec_max_overlap":
+            if pd.Timedelta(self.data.index.freq) > pd.Timedelta('5s'):
+                raise ValueError((
+                    "The sampling frequency of the input data does not allow"
+                    + " the use of the requested settings ({}).\n".format(
+                        settings)
+                    + "For such settings, the sampling frequency should less"
+                    + " than 5 seconds."
+                    ))
+            else:
+                # Resample to 10/2 sec and then sum over a sliding window
+                data = self.data.resample('5s').sum().rolling('10s').sum()
+                # Resample to 60 sec and take the max of the 10 sec periods
+                data_max = data.resample('60s').max()
+
+                # Define the scale and weights for this settings
+                scale = 0.00001
+                window = np.array(
+                    [50, 30, 300, 400, 1400, 500, 350, 0, 0],
+                    np.int32
+                )
+
+                ck = _cole_kripke(data_max, scale, window, threshold)
+
+        elif settings == "10sec_max_non_overlap":
+            if pd.Timedelta(self.data.index.freq) > pd.Timedelta('10s'):
+                raise ValueError((
+                    "The sampling frequency of the input data does not allow"
+                    + " the use of the requested settings ({}).\n".format(
+                        settings)
+                    + "For such settings, the sampling frequency should less"
+                    + " or equal to 10 seconds."
+                    ))
+            else:
+                # Resample to 10 sec and then sum
+                data = self.data.resample('10s').sum()
+                # Resample to 60 sec and take the max of the 10 sec periods
+                data_max = data.resample('60s').max()
+
+                # Define the scale and weights for this settings
+                scale = 0.00001
+                window = np.array(
+                    [550, 378, 413, 699, 1736, 287, 300, 0, 0],
+                    np.int32
+                )
+
+                ck = _cole_kripke(data_max, scale, window, threshold)
+
+        elif settings == "30sec_max_non_overlap":
+            if pd.Timedelta(self.data.index.freq) > pd.Timedelta('30s'):
+                raise ValueError((
+                    "The sampling frequency of the input data does not allow"
+                    + " the use of the requested settings ({}).\n".format(
+                        settings)
+                    + "For such settings, the sampling frequency should less"
+                    + " or equal to 30 seconds."
+                    ))
+            else:
+                # Resample to 30 sec and then sum
+                data = self.data.resample('30s').sum()
+                # Resample to 60 sec and take the max of the 10 sec periods
+                data_max = data.resample('60s').max()
+
+                # Define the scale and weights for this settings
+                scale = 0.0001
+                window = np.array(
+                    [50, 30, 14, 28, 12, 8, 50, 0, 0],
+                    np.int32
+                )
+
+                ck = _cole_kripke(data_max, scale, window, threshold)
+
+        if rescoring:
+            # Rescoring
+            mask = rescore(ck.values, sleep_score=1)
+            ck = ck*mask
+
+        return ck
 
     def Sadeh(
         self,
         offset=7.601,
-        weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
+        weights=np.array([-0.065, -1.08, -0.056, -0.703], float),
         threshold=0.0
     ):
-
         r"""Sadeh algorithm for sleep identification
 
         Algorithm for automatic sleep scoring based on wrist activity,
@@ -476,10 +621,9 @@ class ScoringMixin(object):
             0.0000,  # b_{+8}
             0.0000,  # b_{+9}
             0.0000   # b_{+10}
-            ], np.float),
+            ], float),
         threshold=1.0
     ):
-
         r"""Scripps Clinic algorithm for sleep-wake identification.
 
         Algorithm for automatic sleep scoring based on wrist activity,
@@ -546,7 +690,6 @@ class ScoringMixin(object):
         self,
         threshold=40
     ):
-
         r"""Oakley's algorithm for sleep/wake scoring.
 
         Algorithm for automatic sleep/wake scoring based on wrist activity,
@@ -705,14 +848,124 @@ class ScoringMixin(object):
             ], np.float)
         else:
             raise ValueError(
-                'Oakley\'s algorithm is not defined for data' +
-                'acquired with a sampling frequency of {}.'.format(freq) +
-                'Accepted frequencies are: {}'.format(
+                'Oakley\'s algorithm is not defined for data '
+                + 'acquired with a sampling frequency of {}. '.format(freq)
+                + 'Accepted frequencies are: {}'.format(
                     ', '.join(['15sec', '30sec', '60sec', '120sec'])
                 )
             )
 
         return _oakley(self.data, window, threshold)
+
+    def CSM(
+        self,
+        settings="auto",
+        score_rest=2,
+        score_sleep=1,
+        binarize=False
+    ):
+        """Condor Sleep Model
+
+        Sleep-wake scoring algorithm developed by Condor Instrument for their
+        ActTrust devices.
+
+        This algorithm works in a two-step fashion. First, it classifies all
+        epochs as wake or rest, as function of each epoch's score. Second,
+        using a more stringent scoring threshold, "rest" epoch are
+        re-classified as "sleep". A relabelling mechanism using the labels of
+        the surrounding epochs is also applied to consolidate periods of epochs
+        labelled as rest or sleep.
+
+        Parameters
+        ----------
+        settings: str, optional
+            Parameter settings for the CSM algorithm. Refers to the data
+            acquisition frequency. Available values are:
+            * "auto": use input data frequency.
+            * "30s": set parameters to optimal values obtained for a 30s data
+              acquisition frequency.
+            * "60s": set parameters to optimal values obtained for a 60s data
+              acquisition frequency.
+             Default is 'auto'.
+        score_rest: int, optional
+            State index for epochs labelled as "rest".
+            Default is 2.
+        score_sleep: int, optional
+            State index for epochs labelled as "sleep".
+            Default is 1.
+        binarize: bool, optional.
+            If set to True, the state index is set to 1 if the epoch is
+            labelled as sleep and 0 otherwise.
+            Defautl is False.
+
+        Returns
+        -------
+        csm : pandas.Series
+            Series of state indices.
+        """
+        # This algorithm has been developed for ActTrust devices from
+        # Condor Instrument. Verify if the reader has the appropriate type:
+        if self.format != 'ATR':
+            raise ValueError(
+                "The CSM has been developed for ActTrust devices.\n"
+                "It has not been validated for other devices."
+            )
+
+        # The CSM uses the ZCMn as input
+        data = self.ZCMn
+
+        if settings == "auto":
+            freq = data.index.freq.delta
+        else:
+            freq = pd.Timedelta(settings)
+
+        if freq == pd.Timedelta('60s'):
+            wa = np.array(
+                [34.5, 133, 529, 375, 408, 400.5, 1074, 2048.5, 2424.5]
+            )
+            wp = np.array(
+                [1920, 149.5, 257.5, 125, 111.5, 120, 69, 40.5]
+            )
+        elif freq == pd.Timedelta('30s'):
+            wa = np.array(
+                [69, 197, 730, 328, 269, 481, 528, 288, 304, 497, 1105, 1043,
+                 1378, 2719, 2852, 1997]
+            )
+            wp = np.array(
+                [2972, 868, 269, 30, 495, 20, 39, 211, 91, 132, 203, 37, 67,
+                 71, 81]
+            )
+        else:
+            raise NotImplementedError(
+                "The settings for this acquistion frequency ({}) ".format(
+                    freq
+                ) + "have not been implemented yet."
+            )
+
+        # The overall scaling and rescoring rules are identical for the
+        # different settings.
+        p_rest = 0.00005
+        p_sleep = 0.000464
+        pr_rest = 0
+        nr_rest = 0
+        pr_sleep = 1
+        nr_sleep = 0
+
+        states = csm(
+            data,
+            wa=wa,
+            wp=wp,
+            p_rest=p_rest,
+            p_sleep=p_sleep,
+            pr_rest=pr_rest,
+            nr_rest=nr_rest,
+            pr_sleep=pr_sleep,
+            nr_sleep=nr_sleep,
+            score_rest=score_rest,
+            score_sleep=score_sleep
+        )
+
+        return (states == score_sleep).astype(int) if binarize else states
 
     def SoD(
         self,
@@ -726,7 +979,6 @@ class ScoringMixin(object):
         *args,
         **kwargs
     ):
-
         r"""Sleep over Daytime
 
         Quantify the volume of epochs identified as sleep over daytime (SoD),
@@ -836,7 +1088,6 @@ class ScoringMixin(object):
         *args,
         **kwargs
     ):
-
         r"""Fraction of Sleep over Daytime
 
         Fractional volume of epochs identified as sleep over daytime (SoD),
@@ -861,17 +1112,17 @@ class ScoringMixin(object):
             Default is 4
         start: str, optional
             Start time of the period of interest.
-            Default: '12:00:00'
-            Supported times: 'AonT', 'AoffT', any 'HH:MM:SS'
+            Supported times: 'AonT', 'AoffT', any 'HH:MM:SS'.
+            Default: '12:00:00'.
         period: str, optional
             Period length.
-            Default is '10h'
+            Default is '10h'.
         algo: str, optional
             Sleep scoring algorithm to use.
             Default is 'Roenneberg'.
-        *args
+        args
             Variable length argument list passed to the scoring algorithm.
-        **kwargs
+        kwargs
             Arbitrary keyword arguements passed to the scoring algorithm.
 
         Returns
@@ -883,11 +1134,12 @@ class ScoringMixin(object):
         .. warning:: The value of this variable depends on the convention used
                      by the underlying sleep scoring algorithm. The expected
                      convention is the following:
-                    * epochs scored as 1 refer to inactivity/sleep
 
-                    Otherwise, this variable will actually return the fraction
-                    of epochs scored as activity. The fraction of sleep can
-                    simply be recovered by calculating (1-fSOD).
+                     * epochs scored as 1 refer to inactivity/sleep
+
+                     Otherwise, this variable will actually return the fraction
+                     of epochs scored as activity. The fraction of sleep can
+                     simply be recovered by calculating (1-fSOD).
 
 
         Examples
@@ -937,7 +1189,6 @@ class ScoringMixin(object):
         estimate_zeta=False, seq_length_max=100,
         verbose=False
     ):
-
         r"""Crespo algorithm for activity/rest identification
 
         Algorithm for automatic identification of activity-rest periods based
@@ -1180,7 +1431,6 @@ class ScoringMixin(object):
         estimate_zeta=False, seq_length_max=100,
         verbose=False
     ):
-
         """Automatic identification of activity onset/offset times, based on
         the Crespo algorithm.
 
@@ -1260,7 +1510,8 @@ class ScoringMixin(object):
         threshold=0.15,
         min_seed_period='30Min',
         max_test_period='12h',
-        n_succ=3
+        r_consec_below='30Min',
+        rsfreq=None
     ):
         """Automatic sleep detection.
 
@@ -1286,15 +1537,28 @@ class ScoringMixin(object):
         max_test_period : str, optional
             Maximal period of the test series.
             Default is '12h'
-        n_succ : int, optional
-            Number of successive elements to consider when searching for the
-            maximum correlation peak.
+        r_consec_below : str, optional
+            Time range to consider, past the potential correlation peak when
+            searching for the maximum correlation peak.
+            Default is '30Min'.
+        rsfreq: str, optional
+            Resampling frequency used to evaluate the sleep periods. The final
+            time series with rest/activity scores is returned with a frequency
+            equal to one of the input data. If set to None, no resampling is
+            performed.
+            Default is None.
 
         Returns
         -------
         rbg : pandas.core.Series
             Time series containing the estimated periods of rest (1) and
             activity (0).
+
+        Notes
+        -----
+
+        .. warning:: The performance of this algorithm has been evaluated for
+                     actigraphy data aggregated in 10-min bins [2]_.
 
         References
         ----------
@@ -1303,21 +1567,35 @@ class ScoringMixin(object):
                Vetter, C., & Winnebeck, E. C. (2015). Human Activity and Rest
                In Situ. In Methods in Enzymology (Vol. 552, pp. 257-283).
                http://doi.org/10.1016/bs.mie.2014.11.028
+        .. [2] Loock, A., Khan Sullivan, A., Reis, C., Paiva, T., Ghotbi, N.,
+               Pilz, L. K., Biller, A. M., Molenda, C., Vuori‐Brodowski, M. T.,
+               Roenneberg, T., & Winnebeck, E. C. (2021). Validation of the
+               Munich Actimetry Sleep Detection Algorithm for estimating
+               sleep–wake patterns from activity recordings. Journal of Sleep
+               Research, April, 1–12. https://doi.org/10.1111/jsr.13371
 
         Examples
         --------
 
         """
+        if rsfreq is not None:
+            rsdata = self.resampled_data(freq=rsfreq)
+        else:
+            rsdata = self.data
 
         rbg = roenneberg(
-            self.data,
+            rsdata,
             trend_period=trend_period,
             min_trend_period=min_trend_period,
             threshold=threshold,
             min_seed_period=min_seed_period,
             max_test_period=max_test_period,
-            n_succ=n_succ
+            r_consec_below=r_consec_below
         )
+
+        if rsfreq is not None:
+            rbg = rbg.asfreq(self.data.index.freq, method='pad')
+
         return rbg
 
     def Roenneberg_AoT(
@@ -1327,7 +1605,8 @@ class ScoringMixin(object):
         threshold=0.15,
         min_seed_period='30Min',
         max_test_period='12h',
-        n_succ=3
+        r_consec_below='30Min',
+        rsfreq=None
     ):
         """Automatic identification of activity onset/offset times, based on
         Roenneberg's algorithm.
@@ -1354,16 +1633,29 @@ class ScoringMixin(object):
             Default is '30Min'.
         max_test_period : str, optional
             Maximal period of the test series.
-            Default is '12h'.
-        n_succ : int, optional
-            Number of successive elements to consider when searching for the
-            maximum correlation peak.
+            Default is '12h'
+        r_consec_below : str, optional
+            Time range to consider, past the potential correlation peak when
+            searching for the maximum correlation peak.
+            Default is '30Min'.
+        rsfreq: str, optional
+            Resampling frequency used to evaluate the sleep periods. The final
+            time series with rest/activity scores is returned with a frequency
+            equal to one of the input data. If set to None, no resampling is
+            performed.
+            Default is None.
 
         Returns
         -------
         aot : (ndarray, ndarray)
             Arrays containing the estimated activity onset and offset times,
             respectively.
+
+        Notes
+        -----
+
+        .. warning:: The performance of this algorithm has been evaluated for
+                     actigraphy data aggregated in 10-min bins [2]_.
 
         References
         ----------
@@ -1372,20 +1664,26 @@ class ScoringMixin(object):
                Vetter, C., & Winnebeck, E. C. (2015). Human Activity and Rest
                In Situ. In Methods in Enzymology (Vol. 552, pp. 257-283).
                http://doi.org/10.1016/bs.mie.2014.11.028
+        .. [2] Loock, A., Khan Sullivan, A., Reis, C., Paiva, T., Ghotbi, N.,
+               Pilz, L. K., Biller, A. M., Molenda, C., Vuori‐Brodowski, M. T.,
+               Roenneberg, T., & Winnebeck, E. C. (2021). Validation of the
+               Munich Actimetry Sleep Detection Algorithm for estimating
+               sleep–wake patterns from activity recordings. Journal of Sleep
+               Research, April, 1–12. https://doi.org/10.1111/jsr.13371
 
         Examples
         --------
 
         """
 
-        rbg = roenneberg(
-            self.data,
+        rbg = self.Roenneberg(
             trend_period=trend_period,
             min_trend_period=min_trend_period,
             threshold=threshold,
             min_seed_period=min_seed_period,
             max_test_period=max_test_period,
-            n_succ=n_succ
+            r_consec_below=r_consec_below,
+            rsfreq=rsfreq
         )
 
         diff = rbg.diff(1)
@@ -1555,9 +1853,9 @@ class ScoringMixin(object):
         algo: str, optional
             Sleep scoring algorithm to use.
             Default is 'Roenneberg'.
-        *args
+        \*args
             Variable length argument list passed to the scoring algorithm.
-        **kwargs
+        \*\*kwargs
             Arbitrary keyword arguements passed to the scoring algorithm.
 
         Returns
@@ -1578,10 +1876,11 @@ class ScoringMixin(object):
                   \sum_{j=1}^M\sum_{i=1}^N
                   s_{i,j} \times cos\left(\frac{2\pi t_i}{1440}\right)
                   \right)
+
         with:
-            :math:`t_j`, time of day in minutes at epoch j,
-            :math:`\delta(s_{i,j}, s_{i+1,j}) = 1` if
-            :math:`s_{i,j} = s_{i+1,j}` and 0 otherwise.
+            * :math:`t_j`, time of day in minutes at epoch j,
+            * :math:`\delta(s_{i,j}, s_{i+1,j}) = 1` if
+              :math:`s_{i,j} = s_{i+1,j}` and 0 otherwise.
 
         References
         ----------
