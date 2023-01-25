@@ -530,7 +530,7 @@ class ScoringMixin(object):
     def Sadeh(
         self,
         offset=7.601,
-        weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
+        weights=np.array([-0.065, -1.08, -0.056, -0.703], float),
         threshold=0.0
     ):
         r"""Sadeh algorithm for sleep identification
@@ -621,7 +621,7 @@ class ScoringMixin(object):
             0.0000,  # b_{+8}
             0.0000,  # b_{+9}
             0.0000   # b_{+10}
-            ], np.float),
+            ], float),
         threshold=1.0
     ):
         r"""Scripps Clinic algorithm for sleep-wake identification.
@@ -939,8 +939,7 @@ class ScoringMixin(object):
             raise NotImplementedError(
                 "The settings for this acquistion frequency ({}) ".format(
                     freq
-                ) +
-                "have not been implemented yet."
+                ) + "have not been implemented yet."
             )
 
         # The overall scaling and rescoring rules are identical for the

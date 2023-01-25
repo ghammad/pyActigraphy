@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import os
 import warnings
 
@@ -73,12 +72,12 @@ class RawDQT(BaseRaw):
             index_col=0,
             parse_dates=[0],
             infer_datetime_format=True,
-            dtype=np.float,
+            dtype=float,
             na_values='x'
         ).asfreq(freq)
 
         # Convert activity from string to float
-        index_data['activity'] = index_data['activity'].astype(np.float)
+        index_data['activity'] = index_data['activity'].astype(float)
 
         if start_time is not None:
             start_time = pd.to_datetime(start_time)

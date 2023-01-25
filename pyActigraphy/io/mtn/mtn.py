@@ -36,8 +36,8 @@ class RawMTN(BaseRaw):
         input_fname,
         start_time=None,
         period=None,
-        data_dtype=np.int,
-        light_dtype=np.float
+        data_dtype=int,
+        light_dtype=float
     ):
 
         # get absolute file path
@@ -241,8 +241,8 @@ def read_raw_mtn(
     input_fname,
     start_time=None,
     period=None,
-    data_dtype=np.int,
-    light_dtype=np.float
+    data_dtype=int,
+    light_dtype=float
 ):
     """Reader function for raw MTN file.
 
