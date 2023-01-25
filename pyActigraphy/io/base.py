@@ -170,13 +170,16 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
             # Create a mask if it does not exist
             if self.inactivity_length is not None:
                 self.create_inactivity_mask(self.inactivity_length)
+                return self.__mask.loc[
+                    self.start_time:self.start_time+self.period
+                ]
             else:
                 warnings.warn(
                     'Inactivity length set to None. Could not create a mask.',
                     UserWarning
                 )
-
-        return self.__mask.loc[self.start_time:self.start_time+self.period]
+        else:
+            return self.__mask.loc[self.start_time:self.start_time+self.period]
 
     @mask.setter
     def mask(self, value):
