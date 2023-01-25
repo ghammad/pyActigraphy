@@ -594,9 +594,11 @@ class LIDS():
 
         Note
         ----
+
         As there is no way to automatically derive the LIDS period from the fit
         parameters, the fitted period needs to be set via its own setter
         function.
+
         '''
         if self.freq is None:
             # TODO: evaluate if raise ValueError('') more appropriate
@@ -651,8 +653,8 @@ class LIDS():
         # before sleep offset
         last_inflex_idx = -1 * (
             # reverse order to find last
-            np.argmax(_inflexion_points(df_dx, d2f_dx2)[::-1]) +
-            1  # to account for index shifting during reverse (-1: 0th elem)
+            np.argmax(_inflexion_points(df_dx, d2f_dx2)[::-1])
+            + 1  # to account for index shifting during reverse (-1: 0th elem)
         )
         # Convert the index into a phase using the fitted period
         offset_phase = np.abs(last_inflex_idx*step/params['period']*360)
