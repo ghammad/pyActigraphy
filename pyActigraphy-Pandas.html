@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -11,9 +11,11 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -203,10 +205,11 @@ div.nboutput.container div.prompt > div {
     }
 }
 
-/* disable scrollbars on prompts */
+/* disable scrollbars and line breaks on prompts */
 div.nbinput.container div.prompt pre,
 div.nboutput.container div.prompt pre {
     overflow: hidden;
+    white-space: pre;
 }
 
 /* input/output area */
@@ -308,6 +311,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* Some additional styling taken form the Jupyter notebook CSS */
+.jp-RenderedHTMLCommon table,
 div.rendered_html table {
   border: none;
   border-collapse: collapse;
@@ -316,10 +320,14 @@ div.rendered_html table {
   font-size: 12px;
   table-layout: fixed;
 }
+.jp-RenderedHTMLCommon thead,
 div.rendered_html thead {
   border-bottom: 1px solid black;
   vertical-align: bottom;
 }
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td,
 div.rendered_html tr,
 div.rendered_html th,
 div.rendered_html td {
@@ -331,20 +339,23 @@ div.rendered_html td {
   max-width: none;
   border: none;
 }
+.jp-RenderedHTMLCommon th,
 div.rendered_html th {
   font-weight: bold;
 }
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
 div.rendered_html tbody tr:nth-child(odd) {
   background: #f5f5f5;
 }
+.jp-RenderedHTMLCommon tbody tr:hover,
 div.rendered_html tbody tr:hover {
   background: rgba(66, 165, 245, 0.2);
 }
 </style>
 <section id="How-to-read-data-from-DataFrames-with-pyActigraphy">
-<h1>How to read data from DataFrames with pyActigraphy<a class="headerlink" href="#How-to-read-data-from-DataFrames-with-pyActigraphy" title="Permalink to this headline">¶</a></h1>
+<h1>How to read data from DataFrames with pyActigraphy<a class="headerlink" href="#How-to-read-data-from-DataFrames-with-pyActigraphy" title="Permalink to this heading">¶</a></h1>
 <section id="Imported-packages-and-input-data">
-<h2>Imported packages and input data<a class="headerlink" href="#Imported-packages-and-input-data" title="Permalink to this headline">¶</a></h2>
+<h2>Imported packages and input data<a class="headerlink" href="#Imported-packages-and-input-data" title="Permalink to this heading">¶</a></h2>
 <p>The usual suspects:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
@@ -470,32 +481,32 @@ div.rendered_html tbody tr:hover {
   <tbody>
     <tr>
       <th>2020-01-01 00:00:00</th>
-      <td>9.342980</td>
-      <td>88.271312</td>
+      <td>8.550218</td>
+      <td>104.999953</td>
       <td>0.000000e+00</td>
     </tr>
     <tr>
       <th>2020-01-01 00:01:00</th>
-      <td>9.828015</td>
-      <td>86.814367</td>
-      <td>2.193078e-314</td>
+      <td>10.923393</td>
+      <td>95.088518</td>
+      <td>2.194245e-314</td>
     </tr>
     <tr>
       <th>2020-01-01 00:02:00</th>
-      <td>9.829185</td>
-      <td>89.269111</td>
-      <td>8.319226e-319</td>
+      <td>8.144349</td>
+      <td>103.872427</td>
+      <td>4.052524e-319</td>
     </tr>
     <tr>
       <th>2020-01-01 00:03:00</th>
-      <td>11.650134</td>
-      <td>100.820727</td>
+      <td>9.285714</td>
+      <td>113.352058</td>
       <td>NaN</td>
     </tr>
     <tr>
       <th>2020-01-01 00:04:00</th>
-      <td>10.201251</td>
-      <td>113.166345</td>
+      <td>10.159414</td>
+      <td>116.400666</td>
       <td>8.331307e-316</td>
     </tr>
     <tr>
@@ -506,33 +517,33 @@ div.rendered_html tbody tr:hover {
     </tr>
     <tr>
       <th>2020-01-07 23:55:00</th>
-      <td>11.120278</td>
-      <td>100.841176</td>
-      <td>1.163115e+214</td>
+      <td>9.421655</td>
+      <td>102.225861</td>
+      <td>2.072129e-309</td>
     </tr>
     <tr>
       <th>2020-01-07 23:56:00</th>
-      <td>11.057372</td>
-      <td>116.926055</td>
-      <td>2.427668e-154</td>
+      <td>10.571214</td>
+      <td>97.894970</td>
+      <td>7.900019e+305</td>
     </tr>
     <tr>
       <th>2020-01-07 23:57:00</th>
-      <td>9.717031</td>
-      <td>107.979246</td>
-      <td>2.288961e+243</td>
+      <td>8.522185</td>
+      <td>126.530327</td>
+      <td>8.157913e-312</td>
     </tr>
     <tr>
       <th>2020-01-07 23:58:00</th>
-      <td>10.377258</td>
-      <td>100.955777</td>
-      <td>2.473798e-91</td>
+      <td>10.488261</td>
+      <td>101.407490</td>
+      <td>5.367234e-303</td>
     </tr>
     <tr>
       <th>2020-01-07 23:59:00</th>
-      <td>9.772486</td>
-      <td>104.259887</td>
-      <td>2.440413e-154</td>
+      <td>11.041405</td>
+      <td>100.372527</td>
+      <td>1.333605e+241</td>
     </tr>
   </tbody>
 </table>
@@ -541,7 +552,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </section>
 <section id="Manual-creation-of-a-BaseRaw-object">
-<h2>Manual creation of a BaseRaw object<a class="headerlink" href="#Manual-creation-of-a-BaseRaw-object" title="Permalink to this headline">¶</a></h2>
+<h2>Manual creation of a BaseRaw object<a class="headerlink" href="#Manual-creation-of-a-BaseRaw-object" title="Permalink to this heading">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
@@ -552,7 +563,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>help(BaseRaw)</p>
 <section id="Set-activity-and-light-data-(if-available)">
-<h3>Set activity and light data (if available)<a class="headerlink" href="#Set-activity-and-light-data-(if-available)" title="Permalink to this headline">¶</a></h3>
+<h3>Set activity and light data (if available)<a class="headerlink" href="#Set-activity-and-light-data-(if-available)" title="Permalink to this heading">¶</a></h3>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
@@ -585,23 +596,23 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2020-01-01 00:00:00     9.342980
-2020-01-01 00:01:00     9.828015
-2020-01-01 00:02:00     9.829185
-2020-01-01 00:03:00    11.650134
-2020-01-01 00:04:00    10.201251
+2020-01-01 00:00:00     8.550218
+2020-01-01 00:01:00    10.923393
+2020-01-01 00:02:00     8.144349
+2020-01-01 00:03:00     9.285714
+2020-01-01 00:04:00    10.159414
                          ...
-2020-01-07 23:55:00    11.120278
-2020-01-07 23:56:00    11.057372
-2020-01-07 23:57:00     9.717031
-2020-01-07 23:58:00    10.377258
-2020-01-07 23:59:00     9.772486
+2020-01-07 23:55:00     9.421655
+2020-01-07 23:56:00    10.571214
+2020-01-07 23:57:00     8.522185
+2020-01-07 23:58:00    10.488261
+2020-01-07 23:59:00    11.041405
 Freq: 60S, Name: Activity, Length: 10080, dtype: float64
 </pre></div></div>
 </div>
 </section>
 <section id="Set-up-a-mask">
-<h3>Set up a mask<a class="headerlink" href="#Set-up-a-mask" title="Permalink to this headline">¶</a></h3>
+<h3>Set up a mask<a class="headerlink" href="#Set-up-a-mask" title="Permalink to this heading">¶</a></h3>
 <p>Most devices that have a wear sensor return this information as a binary time series with “1” when the device is most likely not worn and “0” otherwise. In pyActigraphy, this information can be used to create a mask and thus invalidate the corresponding data points (set to “0” most probably). However, the mask, the value “1” correspond to “no masking”. So, depending on your “non-wear” data, be careful to transform them appropriately:</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
@@ -616,7 +627,7 @@ Freq: 60S, Name: Activity, Length: 10080, dtype: float64
 </section>
 </section>
 <section id="Tests">
-<h2>Tests<a class="headerlink" href="#Tests" title="Permalink to this headline">¶</a></h2>
+<h2>Tests<a class="headerlink" href="#Tests" title="Permalink to this heading">¶</a></h2>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
@@ -665,7 +676,7 @@ Freq: 60S, Name: Activity, Length: 10080, dtype: float64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-14251.683725482248
+14232.551520242358
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
@@ -682,7 +693,7 @@ Freq: 60S, Name: Activity, Length: 10080, dtype: float64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-1.1361697639502482
+1.0878760497043665
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -709,7 +720,7 @@ Freq: 60S, Name: Activity, Length: 10080, dtype: float64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-2.098938677215842
+2.0276331847662488
 </pre></div></div>
 </div>
 <p>The masking seems to work!</p>
@@ -730,7 +741,7 @@ Freq: 60S, Name: Activity, Length: 10080, dtype: float64
     </p>
     <p>
         &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
     </p>
   </div>
 </footer>

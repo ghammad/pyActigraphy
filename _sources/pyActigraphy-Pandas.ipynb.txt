@@ -23,8 +23,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 1,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:20.797012Z",
+     "start_time": "2023-01-30T15:46:20.640738Z"
+    }
+   },
    "outputs": [],
    "source": [
     "import numpy as np"
@@ -32,8 +37,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 2,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:21.029765Z",
+     "start_time": "2023-01-30T15:46:20.798230Z"
+    }
+   },
    "outputs": [],
    "source": [
     "import pandas as pd"
@@ -41,8 +51,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 3,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.362016Z",
+     "start_time": "2023-01-30T15:46:21.031406Z"
+    }
+   },
    "outputs": [],
    "source": [
     "import pyActigraphy"
@@ -64,8 +79,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 4,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.365103Z",
+     "start_time": "2023-01-30T15:46:22.363452Z"
+    }
+   },
    "outputs": [],
    "source": [
     "N = 1440*7 # 7 days of acquisition at a frequency of 60s."
@@ -73,8 +93,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 5,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.370183Z",
+     "start_time": "2023-01-30T15:46:22.366077Z"
+    }
+   },
    "outputs": [],
    "source": [
     "activity = np.random.normal(10,1,N)\n",
@@ -83,8 +108,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 6,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.373357Z",
+     "start_time": "2023-01-30T15:46:22.371173Z"
+    }
+   },
    "outputs": [],
    "source": [
     "non_wear = np.empty(N)"
@@ -92,8 +122,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 7,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.376814Z",
+     "start_time": "2023-01-30T15:46:22.374774Z"
+    }
+   },
    "outputs": [],
    "source": [
     "# Set up a segment of  spurious inactivity\n",
@@ -103,8 +138,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 8,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.382434Z",
+     "start_time": "2023-01-30T15:46:22.380545Z"
+    }
+   },
    "outputs": [],
    "source": [
     "d = {'Activity': activity, 'Light': light, 'Non-wear': non_wear}"
@@ -112,8 +152,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 9,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.387956Z",
+     "start_time": "2023-01-30T15:46:22.384391Z"
+    }
+   },
    "outputs": [],
    "source": [
     "index = pd.date_range(start='01-01-2020',freq='60s',periods=N)"
@@ -121,8 +166,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 10,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.393274Z",
+     "start_time": "2023-01-30T15:46:22.389782Z"
+    }
+   },
    "outputs": [],
    "source": [
     "data = pd.DataFrame(index=index,data=d)"
@@ -130,9 +180,134 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 11,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.406545Z",
+     "start_time": "2023-01-30T15:46:22.394383Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Activity</th>\n",
+       "      <th>Light</th>\n",
+       "      <th>Non-wear</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>2020-01-01 00:00:00</th>\n",
+       "      <td>8.550218</td>\n",
+       "      <td>104.999953</td>\n",
+       "      <td>0.000000e+00</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2020-01-01 00:01:00</th>\n",
+       "      <td>10.923393</td>\n",
+       "      <td>95.088518</td>\n",
+       "      <td>2.194245e-314</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2020-01-01 00:02:00</th>\n",
+       "      <td>8.144349</td>\n",
+       "      <td>103.872427</td>\n",
+       "      <td>4.052524e-319</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2020-01-01 00:03:00</th>\n",
+       "      <td>9.285714</td>\n",
+       "      <td>113.352058</td>\n",
+       "      <td>NaN</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2020-01-01 00:04:00</th>\n",
+       "      <td>10.159414</td>\n",
+       "      <td>116.400666</td>\n",
+       "      <td>8.331307e-316</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2020-01-07 23:55:00</th>\n",
+       "      <td>9.421655</td>\n",
+       "      <td>102.225861</td>\n",
+       "      <td>2.072129e-309</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2020-01-07 23:56:00</th>\n",
+       "      <td>10.571214</td>\n",
+       "      <td>97.894970</td>\n",
+       "      <td>7.900019e+305</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2020-01-07 23:57:00</th>\n",
+       "      <td>8.522185</td>\n",
+       "      <td>126.530327</td>\n",
+       "      <td>8.157913e-312</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2020-01-07 23:58:00</th>\n",
+       "      <td>10.488261</td>\n",
+       "      <td>101.407490</td>\n",
+       "      <td>5.367234e-303</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2020-01-07 23:59:00</th>\n",
+       "      <td>11.041405</td>\n",
+       "      <td>100.372527</td>\n",
+       "      <td>1.333605e+241</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>10080 rows × 3 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                      Activity       Light       Non-wear\n",
+       "2020-01-01 00:00:00   8.550218  104.999953   0.000000e+00\n",
+       "2020-01-01 00:01:00  10.923393   95.088518  2.194245e-314\n",
+       "2020-01-01 00:02:00   8.144349  103.872427  4.052524e-319\n",
+       "2020-01-01 00:03:00   9.285714  113.352058            NaN\n",
+       "2020-01-01 00:04:00  10.159414  116.400666  8.331307e-316\n",
+       "...                        ...         ...            ...\n",
+       "2020-01-07 23:55:00   9.421655  102.225861  2.072129e-309\n",
+       "2020-01-07 23:56:00  10.571214   97.894970  7.900019e+305\n",
+       "2020-01-07 23:57:00   8.522185  126.530327  8.157913e-312\n",
+       "2020-01-07 23:58:00  10.488261  101.407490  5.367234e-303\n",
+       "2020-01-07 23:59:00  11.041405  100.372527  1.333605e+241\n",
+       "\n",
+       "[10080 rows x 3 columns]"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "data"
    ]
@@ -146,8 +321,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 12,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.410078Z",
+     "start_time": "2023-01-30T15:46:22.407864Z"
+    }
+   },
    "outputs": [],
    "source": [
     "from pyActigraphy.io import BaseRaw"
@@ -169,8 +349,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 13,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.414671Z",
+     "start_time": "2023-01-30T15:46:22.411146Z"
+    }
+   },
    "outputs": [],
    "source": [
     "raw = BaseRaw(\n",
@@ -188,9 +373,36 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 14,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.421343Z",
+     "start_time": "2023-01-30T15:46:22.416023Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "2020-01-01 00:00:00     8.550218\n",
+       "2020-01-01 00:01:00    10.923393\n",
+       "2020-01-01 00:02:00     8.144349\n",
+       "2020-01-01 00:03:00     9.285714\n",
+       "2020-01-01 00:04:00    10.159414\n",
+       "                         ...    \n",
+       "2020-01-07 23:55:00     9.421655\n",
+       "2020-01-07 23:56:00    10.571214\n",
+       "2020-01-07 23:57:00     8.522185\n",
+       "2020-01-07 23:58:00    10.488261\n",
+       "2020-01-07 23:59:00    11.041405\n",
+       "Freq: 60S, Name: Activity, Length: 10080, dtype: float64"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.data"
    ]
@@ -212,8 +424,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 15,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.425960Z",
+     "start_time": "2023-01-30T15:46:22.422846Z"
+    }
+   },
    "outputs": [],
    "source": [
     "# Here, I assume that 0: the device is worn, 1: device not worn. \n",
@@ -230,44 +447,113 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 16,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.430376Z",
+     "start_time": "2023-01-30T15:46:22.427707Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<604800 * Seconds>"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.duration()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 17,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.435614Z",
+     "start_time": "2023-01-30T15:46:22.431691Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "10080"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.length()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 18,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.464546Z",
+     "start_time": "2023-01-30T15:46:22.436610Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "14232.551520242358"
+      ]
+     },
+     "execution_count": 18,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.ADAT(binarize=False)"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 19,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.471681Z",
+     "start_time": "2023-01-30T15:46:22.465690Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1.0878760497043665"
+      ]
+     },
+     "execution_count": 19,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.IV(binarize=False)"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 20,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.475334Z",
+     "start_time": "2023-01-30T15:46:22.472677Z"
+    }
+   },
    "outputs": [],
    "source": [
     "# If you want to mask the data\n",
@@ -276,9 +562,25 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 21,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:46:22.489791Z",
+     "start_time": "2023-01-30T15:46:22.477058Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "2.0276331847662488"
+      ]
+     },
+     "execution_count": 21,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "# For a gaussian noise, IV should be close to 2.\n",
     "raw.IV(binarize=False)"

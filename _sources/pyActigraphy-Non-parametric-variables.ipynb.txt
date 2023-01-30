@@ -39,8 +39,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 1,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.296909Z",
+     "start_time": "2023-01-30T15:45:53.664088Z"
+    }
+   },
    "outputs": [],
    "source": [
     "import pyActigraphy"
@@ -48,8 +53,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 2,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.300207Z",
+     "start_time": "2023-01-30T15:45:55.298268Z"
+    }
+   },
    "outputs": [],
    "source": [
     "import os\n",
@@ -58,8 +68,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 3,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.317262Z",
+     "start_time": "2023-01-30T15:45:55.301950Z"
+    }
+   },
    "outputs": [],
    "source": [
     "# Read test file\n",
@@ -86,18 +101,50 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 4,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.330230Z",
+     "start_time": "2023-01-30T15:45:55.319102Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.527656245354158"
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.IS()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 5,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.339861Z",
+     "start_time": "2023-01-30T15:45:55.332372Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.32913524895082263"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.IV()"
    ]
@@ -125,18 +172,50 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 6,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.348874Z",
+     "start_time": "2023-01-30T15:45:55.340906Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.49538299172546324"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.IS(freq='30min')"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 7,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.356604Z",
+     "start_time": "2023-01-30T15:45:55.349971Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.314973337080311"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.IV(freq='30min')"
    ]
@@ -157,18 +236,50 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 8,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.366903Z",
+     "start_time": "2023-01-30T15:45:55.358343Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.5418567121727559"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.IS(threshold=10)"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 9,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.375728Z",
+     "start_time": "2023-01-30T15:45:55.369454Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.33654319292100576"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.IV(threshold=10)"
    ]
@@ -189,18 +300,50 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 10,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.384412Z",
+     "start_time": "2023-01-30T15:45:55.377329Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.46561431150973936"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.IS(binarize=False)"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 11,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.391180Z",
+     "start_time": "2023-01-30T15:45:55.385466Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.7095292983583361"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.IV(binarize=False)"
    ]
@@ -226,20 +369,51 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 12,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.410045Z",
+     "start_time": "2023-01-30T15:45:55.392267Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.7576503909857768"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.RA()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": 13,
    "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.425131Z",
+     "start_time": "2023-01-30T15:45:55.411562Z"
+    },
     "scrolled": true
    },
-   "outputs": [],
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.9168632026873167"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.RA(binarize=False)"
    ]
@@ -272,18 +446,50 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 14,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.500727Z",
+     "start_time": "2023-01-30T15:45:55.426742Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.47064337220625074"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.ISm()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 15,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.554141Z",
+     "start_time": "2023-01-30T15:45:55.501878Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.2706746158264432"
+      ]
+     },
+     "execution_count": 15,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.IVm()"
    ]
@@ -297,8 +503,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 16,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.557479Z",
+     "start_time": "2023-01-30T15:45:55.555246Z"
+    }
+   },
    "outputs": [],
    "source": [
     "new_resampling_frequencies = ['5min','30min','1H']"
@@ -306,9 +517,25 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 17,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.572834Z",
+     "start_time": "2023-01-30T15:45:55.559072Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.48841431777142963"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.ISm(freqs=new_resampling_frequencies)"
    ]
@@ -336,9 +563,25 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 18,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.581735Z",
+     "start_time": "2023-01-30T15:45:55.574008Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[0.6876777827182482]"
+      ]
+     },
+     "execution_count": 18,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.ISp()"
    ]
@@ -352,9 +595,25 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 19,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.592836Z",
+     "start_time": "2023-01-30T15:45:55.582775Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[0.629359516562714, 0.8780603587977001, 0.43948376768341835]"
+      ]
+     },
+     "execution_count": 19,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "# Period of 4 days for example\n",
     "raw.ISp(period='4D')"
@@ -369,9 +628,33 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 20,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:45:55.605138Z",
+     "start_time": "2023-01-30T15:45:55.594570Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Number of periods: 3\n",
+      " Time unaccounted for: 0 days, 18h, 0m, 0s\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "[0.629359516562714, 0.8780603587977001, 0.43948376768341835]"
+      ]
+     },
+     "execution_count": 20,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.ISp(period='4D', verbose=True)"
    ]

@@ -37,8 +37,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 1,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:41:46.327155Z",
+     "start_time": "2023-01-30T15:41:44.633568Z"
+    }
+   },
    "outputs": [],
    "source": [
     "import pyActigraphy"
@@ -46,8 +51,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 2,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:41:46.330210Z",
+     "start_time": "2023-01-30T15:41:46.328528Z"
+    }
+   },
    "outputs": [],
    "source": [
     "import os"
@@ -55,8 +65,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 3,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:41:46.333405Z",
+     "start_time": "2023-01-30T15:41:46.331641Z"
+    }
+   },
    "outputs": [],
    "source": [
     "# retrieve path to example files\n",
@@ -65,8 +80,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 4,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:41:46.336437Z",
+     "start_time": "2023-01-30T15:41:46.334806Z"
+    }
+   },
    "outputs": [],
    "source": [
     "import plotly.graph_objs as go"
@@ -88,8 +108,13 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
+   "execution_count": 5,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:41:46.428326Z",
+     "start_time": "2023-01-30T15:41:46.337386Z"
+    }
+   },
    "outputs": [],
    "source": [
     "# Read test files\n",
@@ -112,9 +137,25 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 6,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:41:46.433922Z",
+     "start_time": "2023-01-30T15:41:46.429362Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "6"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "# Check how many files have been read\n",
     "len(raw.readers)"
@@ -129,9 +170,30 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 7,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:41:46.439849Z",
+     "start_time": "2023-01-30T15:41:46.436095Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "['example_04',\n",
+       " 'example_05',\n",
+       " 'example_02',\n",
+       " 'example_03',\n",
+       " 'example_01',\n",
+       " 'example_01_mask']"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.names()"
    ]
@@ -176,9 +238,30 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 8,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:41:46.449351Z",
+     "start_time": "2023-01-30T15:41:46.442320Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'example_04': Timedelta('21 days 17:39:00'),\n",
+       " 'example_05': Timedelta('15 days 01:43:00'),\n",
+       " 'example_02': Timedelta('12 days 18:53:00'),\n",
+       " 'example_03': Timedelta('14 days 21:36:00'),\n",
+       " 'example_01': Timedelta('12 days 18:41:00'),\n",
+       " 'example_01_mask': Timedelta('12 days 18:41:00')}"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "# Check the duration of the recording\n",
     "raw.duration()"
@@ -200,18 +283,60 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 9,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:41:46.483322Z",
+     "start_time": "2023-01-30T15:41:46.451156Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'example_04': 0.2551624866267735,\n",
+       " 'example_05': 0.6595438549841431,\n",
+       " 'example_02': 0.5237758757150337,\n",
+       " 'example_03': 0.3720781873681576,\n",
+       " 'example_01': 0.527656245354158,\n",
+       " 'example_01_mask': 0.44565929945478583}"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.IS()"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 10,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:41:47.201192Z",
+     "start_time": "2023-01-30T15:41:46.484579Z"
+    }
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'example_04': 0.03815016462875074,\n",
+       " 'example_05': 0.030282109908435897,\n",
+       " 'example_02': 0.026240794466679603,\n",
+       " 'example_03': 0.023099082226598566,\n",
+       " 'example_01': 0.033762534539447164,\n",
+       " 'example_01_mask': 0.036345931354120085}"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
    "source": [
     "raw.kAR(0)"
    ]
@@ -232,9 +357,27 @@
   },
   {
    "cell_type": "code",
-   "execution_count": null,
-   "metadata": {},
-   "outputs": [],
+   "execution_count": 11,
+   "metadata": {
+    "ExecuteTime": {
+     "end_time": "2023-01-30T15:41:47.206264Z",
+     "start_time": "2023-01-30T15:41:47.202292Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Object type: <class 'pyActigraphy.io.awd.awd.RawAWD'>. Name: example_04. Duration of the recording: 21 days 17:39:00. Number of acquisition points: 31299\n",
+      "Object type: <class 'pyActigraphy.io.awd.awd.RawAWD'>. Name: example_05. Duration of the recording: 15 days 01:43:00. Number of acquisition points: 21703\n",
+      "Object type: <class 'pyActigraphy.io.awd.awd.RawAWD'>. Name: example_02. Duration of the recording: 12 days 18:53:00. Number of acquisition points: 18413\n",
+      "Object type: <class 'pyActigraphy.io.awd.awd.RawAWD'>. Name: example_03. Duration of the recording: 14 days 21:36:00. Number of acquisition points: 21456\n",
+      "Object type: <class 'pyActigraphy.io.awd.awd.RawAWD'>. Name: example_01. Duration of the recording: 12 days 18:41:00. Number of acquisition points: 18401\n",
+      "Object type: <class 'pyActigraphy.io.awd.awd.RawAWD'>. Name: example_01_mask. Duration of the recording: 12 days 18:41:00. Number of acquisition points: 18401\n"
+     ]
+    }
+   ],
    "source": [
     "for iread in raw.readers:\n",
     "    print(\"Object type: {}. Name: {}. Duration of the recording: {}. Number of acquisition points: {}\".format(type(iread),iread.name,iread.duration(),len(iread.data)))"

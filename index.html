@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
@@ -11,9 +11,11 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -100,7 +102,7 @@
 <a class="reference external image-reference" href="https://bestpractices.coreinfrastructure.org/projects/6933"><img alt="https://bestpractices.coreinfrastructure.org/projects/6933/badge" src="https://bestpractices.coreinfrastructure.org/projects/6933/badge" /></a>
 <a class="reference external image-reference" href="CODE_OF_CONDUCT.md"><img alt="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" /></a>
 <section id="pyactigraphy">
-<h1><strong>pyActigraphy</strong><a class="headerlink" href="#pyactigraphy" title="Permalink to this headline">¶</a></h1>
+<h1><strong>pyActigraphy</strong><a class="headerlink" href="#pyactigraphy" title="Permalink to this heading">¶</a></h1>
 <p>Open-source python package for actigraphy and light exposure data visualization and analysis.</p>
 <p>This package is meant to provide a comprehensive set of tools to:</p>
 <ul class="simple">
@@ -144,14 +146,14 @@
 </ul>
 </section>
 <section id="citation">
-<h1>Citation<a class="headerlink" href="#citation" title="Permalink to this headline">¶</a></h1>
+<h1>Citation<a class="headerlink" href="#citation" title="Permalink to this heading">¶</a></h1>
 <p>We are very pleased to announce that the <a class="reference external" href="https://github.com/ghammad/pyActigraphy/releases/tag/v1.0">v1.0</a> version of the pyActigraphy package has been published. So, if you find this package useful in your research, please consider citing:</p>
 <blockquote>
 <div><p>Hammad G, Reyt M, Beliy N, Baillet M, Deantoni M, Lesoinne A, et al. (2021) pyActigraphy: Open-source python package for actigraphy data visualization and    analysis. PLoS Comput Biol 17(10): e1009514. <a class="reference external" href="https://doi.org/10.1371/journal.pcbi.1009514">https://doi.org/10.1371/journal.pcbi.1009514</a></p>
 </div></blockquote>
 </section>
 <section id="pylight">
-<h1>pyLight<a class="headerlink" href="#pylight" title="Permalink to this headline">¶</a></h1>
+<h1>pyLight<a class="headerlink" href="#pylight" title="Permalink to this heading">¶</a></h1>
 <p>In the context of the Daylight Academy Project, <a class="reference external" href="https://daylight.academy/projects/state-of-light-in-humans">The role of daylight for humans</a> and
 thanks to the support of its members, Dr. Mirjam Münch and Prof. <a class="reference external" href="https://github.com/spitschan">Manuel Spitschan</a>,
 a pyActigraphy module for analysing light exposure data has been developed, <strong>pyLight</strong>.
@@ -159,36 +161,36 @@ This module is part of the Human Light Exposure Database and is included in pyAc
 <p>A manuscript describing the <em>pyLight</em> module is available as a preprint <a class="reference external" href="https://osf.io/msk9n/">here</a>.</p>
 </section>
 <section id="code-and-documentation">
-<h1>Code and documentation<a class="headerlink" href="#code-and-documentation" title="Permalink to this headline">¶</a></h1>
+<h1>Code and documentation<a class="headerlink" href="#code-and-documentation" title="Permalink to this heading">¶</a></h1>
 <p>The pyActigraphy package is open-source and its source code is accessible <a class="reference external" href="https://github.com/ghammad/pyActigraphy">online</a>.</p>
 <p>An online documentation of the package is also available <a class="reference external" href="https://ghammad.github.io/pyActigraphy/index.html">here</a>.
 It contains <a class="reference external" href="https://ghammad.github.io/pyActigraphy/tutorials.html">notebooks</a> illustrating various functionalities of the package. Specific tutorials for the processing and the analysis of light exposure data with pyLight are also available.</p>
 </section>
 <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
 <p>In a (bash) shell, simply type:</p>
 <ul class="simple">
 <li><p>For users:</p></li>
 </ul>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3 install pyActigraphy
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>pyActigraphy
 </pre></div>
 </div>
 <p>To update the package:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3 install -U pyActigraphy
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>pyActigraphy
 </pre></div>
 </div>
 <ul class="simple">
 <li><p>For developers:</p></li>
 </ul>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone git@github.com:ghammad/pyActigraphy.git
-<span class="nb">cd</span> pyActigraphy/
-git checkout develop
-pip3 install -e .
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:ghammad/pyActigraphy.git
+<span class="nb">cd</span><span class="w"> </span>pyActigraphy/
+git<span class="w"> </span>checkout<span class="w"> </span>develop
+pip3<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
 </div>
 </section>
 <section id="quick-start">
-<h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
+<h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h1>
 <p>The following example illustrates how to calculate the interdaily stability
 with the pyActigraphy package:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
@@ -203,7 +205,7 @@ with the pyActigraphy package:</p>
 </div>
 </section>
 <section id="contributing">
-<h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
+<h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this heading">¶</a></h1>
 <p>There are plenty of ways to contribute to this package, including (but not limiting to):</p>
 <ul class="simple">
 <li><p>report bugs (and, ideally, how to reproduce the bug)</p></li>
@@ -212,7 +214,7 @@ with the pyActigraphy package:</p>
 </ul>
 </section>
 <section id="authors">
-<h1>Authors<a class="headerlink" href="#authors" title="Permalink to this headline">¶</a></h1>
+<h1>Authors<a class="headerlink" href="#authors" title="Permalink to this heading">¶</a></h1>
 <ul class="simple">
 <li><p><strong>Grégory Hammad</strong> <a class="reference external" href="https://github.com/ghammad">&#64;ghammad</a> - <em>Initial and main developer</em></p></li>
 <li><p><strong>Mathilde Reyt</strong> <a class="reference external" href="https://github.com/ReytMathilde">&#64;ReytMathilde</a></p></li>
@@ -220,11 +222,11 @@ with the pyActigraphy package:</p>
 <p>See also the list of <a class="reference external" href="https://github.com/ghammad/pyActigraphy/contributors">contributors</a> who participated in this project.</p>
 </section>
 <section id="license">
-<h1>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h1>
+<h1>License<a class="headerlink" href="#license" title="Permalink to this heading">¶</a></h1>
 <p>This project is licensed under the GNU GPL-3.0 License - see the <a class="reference external" href="LICENSE">LICENSE</a> file for details</p>
 </section>
 <section id="acknowledgments">
-<h1>Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permalink to this headline">¶</a></h1>
+<h1>Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permalink to this heading">¶</a></h1>
 <ul class="simple">
 <li><p><strong>Aubin Ardois</strong> <a class="reference external" href="https://github.com/aardoi">&#64;aardoi</a> developed the first version of the MTN class during his internship at the CRC, in May-August 2018.</p></li>
 <li><p>The CRC colleagues for their support, ideas, etc.</p></li>
@@ -244,7 +246,7 @@ with the pyActigraphy package:</p>
     </p>
     <p>
         &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
     </p>
   </div>
 </footer>
