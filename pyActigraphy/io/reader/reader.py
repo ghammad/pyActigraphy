@@ -97,9 +97,9 @@ class RawReader(ForwardMetricsMixin):
         freqs = [reader.frequency for reader in self.readers]
         if freq <= min(freqs):
             warnings.warn(
-                'Resampling frequency equal to or lower than the lowest' +
-                ' acquisition frequency found in the list of readers.' +
-                ' Returning original data.',
+                'Resampling frequency equal to or lower than the lowest'
+                + ' acquisition frequency found in the list of readers.'
+                + ' Returning original data.',
                 UserWarning
             )
             return self.readers
@@ -107,9 +107,9 @@ class RawReader(ForwardMetricsMixin):
         # 2. check if resampling freq is a multiple of the acquistion freq.
         if False in [(freq % ifreq) == Timedelta(0) for ifreq in freqs]:
             warnings.warn(
-                'Resampling frequency is *not* a multiple of the' +
-                ' acquisition frequencies found in the list of readers.' +
-                ' Returning original data.',
+                'Resampling frequency is *not* a multiple of the'
+                + ' acquisition frequencies found in the list of readers.'
+                + ' Returning original data.',
                 UserWarning
             )
             return self.readers
@@ -177,7 +177,7 @@ class RawReader(ForwardMetricsMixin):
             print('Could not find a SST log file. Please run the read_sst_log'
                   ' function before using the `apply_sst` function.')
 
-    def create_activity_report(self, cut_points, labels, verbose=False):
+    def create_activity_report(self, *args, **kwargs):
         r"""Activity report.
 
         Create an activity report with the fraction of time spent with an
@@ -185,23 +185,16 @@ class RawReader(ForwardMetricsMixin):
 
         Parameters
         ----------
-        input_fname: str
-            Path to the sleep diary file.
-        cut_points: array
-            Activity cut-points. If all the values are below 1, they are
-            interpreted as percentiles of the activity counts. Lower
-            (i.e 0 count) and upper (i.e max count) boundaries are
-            automatically added.
-        labels: array
-            Labels for the intervals defined by the cut points.
-            The number of labels should be N+1 for N cut-points.
-        verbose: bool, optional
-            If set to True, print out info about the cut points.
-            Default is False.
+        *args
+            Variable length argument list passed to the individual
+            `create_activity_report` function.
+        **kwargs
+            Arbitrary keyword arguments passed to the individual
+            `create_activity_report` function.
         """
         # Create activity reports
         for iread in self.readers:
-            iread.create_activity_report(cut_points, labels, verbose)
+            iread.create_activity_report(*args, **kwargs)
 
     @property
     def activity_report(self):
@@ -212,84 +205,84 @@ class RawReader(ForwardMetricsMixin):
 def read_raw(
     input_path, reader_type, n_jobs=1, prefer=None, verbose=0, **kwargs
 ):
-        r"""Reader function for multiple raw files.
+    r"""Reader function for multiple raw files.
 
-        Parameters
-        ----------
-        input_path: str
-            Path to the files. Accept wild cards.
-            E.g. '/path/to/my/files/*.csv'
-        reader_type: str
-            Reader type.
-            Supported types:
+    Parameters
+    ----------
+    input_path: str
+        Path to the files. Accept wild cards.
+        E.g. '/path/to/my/files/*.csv'
+    reader_type: str
+        Reader type.
+        Supported types:
 
-            * AGD ((w)GT3X(+)), ActiGraph)
-            * ATR (ActTrust, Condor Instruments)
-            * AWD (ActiWatch 4, CamNtech)
-            * DQT (Daqtometers, Daqtix)
-            * MTN (MotionWatch8, CamNtech)
-            * RPX (Actiwatch, Respironics)
-            * TAL (Tempatilumi, CE Brasil)
+        * AGD ((w)GT3X(+)), ActiGraph)
+        * ATR (ActTrust, Condor Instruments)
+        * AWD (ActiWatch 4, CamNtech)
+        * DQT (Daqtometers, Daqtix)
+        * MTN (MotionWatch8, CamNtech)
+        * RPX (Actiwatch, Respironics)
+        * TAL (Tempatilumi, CE Brasil)
 
-        n_jobs: int
-            Number of CPU to use for parallel reading
-        prefer: str
-            Soft hint to choose the default backendself.
-            Supported option:'processes', 'threads'.
-            See joblib package documentation for more info.
-            Default is None.
-        verbose: int
-            Display a progress meter if set to a value > 0.
-            Default is 0.
-        **kwargs
-            Arbitrary keyword arguments passed to the underlying reader
-            function.
+    n_jobs: int
+        Number of CPU to use for parallel reading
+    prefer: str
+        Soft hint to choose the default backendself.
+        Supported option:'processes', 'threads'.
+        See joblib package documentation for more info.
+        Default is None.
+    verbose: int
+        Display a progress meter if set to a value > 0.
+        Default is 0.
+    **kwargs
+        Arbitrary keyword arguments passed to the underlying reader
+        function.
 
-        Returns
-        -------
-        raw : Instance of RawReader
-            An object containing raw data
-        """
+    Returns
+    -------
+    raw : Instance of RawReader
+        An object containing raw data
+    """
 
-        supported_types = ['AGD', 'ATR', 'AWD', 'DQT', 'MTN', 'RPX', 'TAL']
-        if reader_type not in supported_types:
-            raise ValueError(
-                'Type {0} unsupported. Supported types: {1}'.format(
-                    reader_type, supported_types
-                )
+    supported_types = ['AGD', 'ATR', 'AWD', 'DQT', 'MTN', 'RPX', 'TAL']
+    if reader_type not in supported_types:
+        raise ValueError(
+            'Type {0} unsupported. Supported types: {1}'.format(
+                reader_type, supported_types
             )
+        )
 
-        files = glob.glob(input_path)
+    files = glob.glob(input_path)
 
-        def parallel_reader(
-            n_jobs, read_func, file_list, prefer=None, verbose=0, **kwargs
-        ):
-            return Parallel(n_jobs=n_jobs, prefer=prefer, verbose=verbose)(
-                delayed(read_func)(file, **kwargs) for file in file_list
-            )
+    def parallel_reader(
+        n_jobs, read_func, file_list, prefer=None, verbose=0, **kwargs
+    ):
+        return Parallel(n_jobs=n_jobs, prefer=prefer, verbose=verbose)(
+            delayed(read_func)(file, **kwargs) for file in file_list
+        )
 
-        readers = {
-            'AGD': lambda files: parallel_reader(
-                n_jobs, read_raw_agd, files, prefer, verbose, **kwargs
-            ),
-            'ATR': lambda files: parallel_reader(
-                n_jobs, read_raw_atr, files, prefer, verbose, **kwargs
-            ),
-            'AWD': lambda files: parallel_reader(
-                n_jobs, read_raw_awd, files, prefer, verbose, **kwargs
-            ),
-            'DQT': lambda files: parallel_reader(
-                n_jobs, read_raw_dqt, files, prefer, verbose, **kwargs
-            ),
-            'MTN': lambda files: parallel_reader(
-                n_jobs, read_raw_mtn, files, prefer, verbose, **kwargs
-            ),
-            'RPX': lambda files: parallel_reader(
-                n_jobs, read_raw_rpx, files, prefer, verbose, **kwargs
-            ),
-            'TAL': lambda files: parallel_reader(
-                n_jobs, read_raw_tal, files, prefer, verbose, **kwargs
-            )
-        }[reader_type](files)
+    readers = {
+        'AGD': lambda files: parallel_reader(
+            n_jobs, read_raw_agd, files, prefer, verbose, **kwargs
+        ),
+        'ATR': lambda files: parallel_reader(
+            n_jobs, read_raw_atr, files, prefer, verbose, **kwargs
+        ),
+        'AWD': lambda files: parallel_reader(
+            n_jobs, read_raw_awd, files, prefer, verbose, **kwargs
+        ),
+        'DQT': lambda files: parallel_reader(
+            n_jobs, read_raw_dqt, files, prefer, verbose, **kwargs
+        ),
+        'MTN': lambda files: parallel_reader(
+            n_jobs, read_raw_mtn, files, prefer, verbose, **kwargs
+        ),
+        'RPX': lambda files: parallel_reader(
+            n_jobs, read_raw_rpx, files, prefer, verbose, **kwargs
+        ),
+        'TAL': lambda files: parallel_reader(
+            n_jobs, read_raw_tal, files, prefer, verbose, **kwargs
+        )
+    }[reader_type](files)
 
-        return RawReader(reader_type, readers)
+    return RawReader(reader_type, readers)
