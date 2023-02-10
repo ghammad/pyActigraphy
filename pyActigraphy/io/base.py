@@ -11,6 +11,7 @@ from ..sleep import SleepDiary, ScoringMixin, SleepBoutMixin
 
 class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
     """Base class for raw data."""
+
     def __init__(
         self,
         name,
@@ -238,8 +239,8 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
             return data
         elif to_offset(freq).delta < self.frequency:
             warnings.warn(
-                'Resampling frequency lower than the acquisition' +
-                ' frequency. Returning original data.',
+                'Resampling frequency lower than the acquisition'
+                + ' frequency. Returning original data.',
                 UserWarning
             )
             return data
@@ -274,8 +275,8 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
 
         if to_offset(freq).delta <= self.frequency:
             warnings.warn(
-                'Resampling frequency equal to or lower than the acquisition' +
-                ' frequency. Returning original data.',
+                'Resampling frequency equal to or lower than the acquisition'
+                + ' frequency. Returning original data.',
                 UserWarning
             )
             return light
@@ -329,22 +330,52 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
     def sleep_diary(self, value):
         self.__sleep_diary = value
 
-    def create_activity_report(self, cut_points, labels, verbose=False):
+    def create_activity_report(
+        self,
+        cut_points,
+        labels=None,
+        threshold=None,
+        start_time=None,
+        stop_time=None,
+        oformat=None,
+        verbose=False
+    ):
         r"""Activity report.
 
-        Create an activity report with the fraction of time spent with an
-        activity level comprised between the specified cut-points.
+        Create an activity report with aggregated statistics on activity levels
+        and time spent between the specified cut-points.
 
         Parameters
         ----------
         cut_points: array
             Activity cut-points. If all the values are below 1, they are
             interpreted as percentiles of the activity counts. Lower
-            (i.e 0 count) and upper (i.e infty count) boundaries are
+            (i.e -infinity count) and upper (i.e infinity count) boundaries are
             automatically added.
-        labels: array
+        labels: array, optional
             Labels for the intervals defined by the cut points.
             The number of labels should be N+1 for N cut-points.
+            If set to None, the cut points are used to define the labels.
+            Default is None.
+        threshold: float, optional
+            If not set to None, discard data below threshold before computing
+            activity ranges.
+            Default is None.
+        start_time: str, optional
+            If not set to None, discard data before start time,
+            on a daily basis.
+            Supported time string: 'HH:MM:SS'
+            Default is None.
+        stop_time: str, optional
+            If not set to None, discard data after stop time, on a daily basis.
+            Supported time string: 'HH:MM:SS'
+            Default is None.
+        oformat: str, optional
+            Output format. Available formats: 'minute' or 'timedelta'.
+            If set to 'minute', the result is in number of minutes.
+            If set to 'timedelta', the result is a pd.Timedelta.
+            If set to None, the result is in number of epochs.
+            Default is None.
         verbose: bool, optional
             If set to True, print out info about the cut points.
             Default is False.
@@ -352,12 +383,26 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
         # Create activity report
         self.__activity_report = ActivityReport(self.data, cut_points, labels)
         # Fill the activity report
-        self.__activity_report.fit(verbose=verbose)
+        self.__activity_report.fit(
+            threshold=threshold,
+            start_time=start_time,
+            stop_time=stop_time,
+            oformat=oformat,
+            verbose=verbose
+        )
+        # Reset and rename index
+        self.__activity_report.results.reset_index(inplace=True)
+        self.__activity_report.results.rename(
+            columns={'index': 'activity level'}, inplace=True
+        )
+
+        # Add recording name
+        self.__activity_report.results.loc[:, 'ID'] = self.display_name
 
     @property
     def activity_report(self):
         r"""Activity report accessor"""
-        self.__activity_report.results.name = self.name
+        # self.__activity_report.results.name = self.name
         return self.__activity_report.pretty_results()
 
     def create_sleep_report(
