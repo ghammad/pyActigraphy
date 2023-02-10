@@ -159,7 +159,7 @@ class ActivityReport(Report):
         )
 
         results = data_mask_in.groupby(out).agg(
-            ['mean', 'median', 'std', 'count']
+            ['sum', 'mean', 'median', 'std', 'count']
         )
 
         if scale:
@@ -173,5 +173,5 @@ class ActivityReport(Report):
     def pretty_results(self):
         r'''DESCRIPTION'''
 
-        return super(ActivityReport, self).pretty_results(transpose=True)
+        return super(ActivityReport, self).pretty_results(transpose=False)
     # pd.DataFrame(self.results).T
