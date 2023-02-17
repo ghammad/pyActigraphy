@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,9 +10,11 @@
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta charset='utf-8'>
@@ -94,7 +96,7 @@
 
 
 <span class="k">def</span> <span class="nf">_cosinor</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;1-harmonic cosine function&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;1-harmonic cosine function&#39;&#39;&#39;</span>
 
     <span class="n">A</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Amplitude&#39;</span><span class="p">]</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;Acrophase&#39;</span><span class="p">]</span>
@@ -105,14 +107,14 @@
 
 
 <span class="k">def</span> <span class="nf">_residual</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">fit_func</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Residual function to minimize&#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Residual function to minimize&#39;&#39;&#39;</span>
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">fit_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">data</span><span class="o">-</span><span class="n">model</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Cosinor"><a class="viewcode-back" href="../../../Cosinor.html#pyActigraphy.analysis.Cosinor">[docs]</a><span class="k">class</span> <span class="nc">Cosinor</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class for Cosinor analysis.</span>
 
 <span class="sd">    Cornelissen, G. (2014). Cosinor-based rhythmometry.</span>
@@ -140,7 +142,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_convert_timestamp_to_index</span><span class="p">(</span><span class="n">ts</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Convert timestamps&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Convert timestamps&#39;&#39;&#39;</span>
         <span class="c1"># Define the x range by converting timestamps to indices, in order to</span>
         <span class="c1"># deal with time series with irregular index.</span>
         <span class="n">x</span> <span class="o">=</span> <span class="p">((</span><span class="n">ts</span><span class="o">.</span><span class="n">index</span> <span class="o">-</span> <span class="n">ts</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="n">ts</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
@@ -148,12 +150,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">fit_func</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Cosinor fit function&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Cosinor fit function&#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fit_func</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">fit_initial_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Initial parameters of the cosinor fit function&#39;&#39;&#39;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Initial parameters of the cosinor fit function&#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fit_initial_params</span>
 
     <span class="nd">@fit_initial_params</span><span class="o">.</span><span class="n">setter</span>
@@ -169,7 +171,7 @@
         <span class="n">reduce_fcn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Fit the actigraphy data using a cosinor function.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Fit the actigraphy data using a cosinor function.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -237,7 +239,7 @@
         <span class="k">return</span> <span class="n">fit_results</span></div>
 
 <div class="viewcode-block" id="Cosinor.best_fit"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Cosinor.best_fit.html#pyActigraphy.analysis.Cosinor.best_fit">[docs]</a>    <span class="k">def</span> <span class="nf">best_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Best fit function of the data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Best fit function of the data.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -279,7 +281,7 @@
         <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose_parallel</span><span class="o">=</span><span class="mi">0</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Batch cosinor fit</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Batch cosinor fit</span>
 
 <span class="sd">        Fit the actigraphy data contained in a reader using a cosinor function.</span>
 
@@ -404,7 +406,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
     </p>
   </div>
 </footer>

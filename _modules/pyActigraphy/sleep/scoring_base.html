@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,9 +10,11 @@
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta charset='utf-8'>
@@ -108,7 +110,7 @@
 
 
 <span class="k">def</span> <span class="nf">_actiware_automatic_threshold</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">scale_factor</span><span class="o">=</span><span class="mf">0.88888</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&#39;&#39;&#39;Automatic Wake Threshold Value calculation</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Automatic Wake Threshold Value calculation</span>
 
 
 <span class="sd">    1. Sum the activity counts for all epochs of the data set.</span>
@@ -206,7 +208,7 @@
 
 
 <span class="k">def</span> <span class="nf">_cole_kripke</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Automatic scoring methods from Cole and Kripke&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Automatic scoring methods from Cole and Kripke&quot;&quot;&quot;</span>
 
     <span class="n">ck</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span>
         <span class="n">window</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span>
@@ -216,7 +218,7 @@
 
 
 <span class="k">def</span> <span class="nf">_sadeh</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Activity-Based Sleep-Wake Identification&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Activity-Based Sleep-Wake Identification&quot;&quot;&quot;</span>
 
     <span class="n">r</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -242,7 +244,7 @@
 
 
 <span class="k">def</span> <span class="nf">_scripps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">scale</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Scripps Clinic algorithm for sleep-wake scoring.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scripps Clinic algorithm for sleep-wake scoring.&quot;&quot;&quot;</span>
 
     <span class="n">scripps</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span>
         <span class="n">window</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">center</span><span class="o">=</span><span class="kc">True</span>
@@ -252,7 +254,7 @@
 
 
 <span class="k">def</span> <span class="nf">_oakley</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Oakley&#39;s algorithm for sleep-wake scoring.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Oakley&#39;s algorithm for sleep-wake scoring.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">threshold</span> <span class="o">==</span> <span class="s1">&#39;automatic&#39;</span><span class="p">:</span>
         <span class="n">threshold</span> <span class="o">=</span> <span class="n">_actiware_automatic_threshold</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">threshold</span><span class="p">):</span>
@@ -268,13 +270,13 @@
 
 
 <div class="viewcode-block" id="ScoringMixin"><a class="viewcode-back" href="../../../ScoringMixin.html#pyActigraphy.sleep.ScoringMixin">[docs]</a><span class="k">class</span> <span class="nc">ScoringMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Mixin Class for scoring:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Mixin Class for scoring:</span>
 <span class="sd">    - sleep/wake periods</span>
 <span class="sd">    - ...</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ScoringMixin.AonT"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.sleep.ScoringMixin.AonT.html#pyActigraphy.sleep.ScoringMixin.AonT">[docs]</a>    <span class="k">def</span> <span class="nf">AonT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span> <span class="n">whs</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity onset time.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity onset time.</span>
 
 <span class="sd">        Activity onset time derived from the daily activity profile.</span>
 
@@ -336,7 +338,7 @@
         <span class="k">return</span> <span class="n">_activity_onset_time</span><span class="p">(</span><span class="n">dailyprof</span><span class="p">,</span> <span class="n">whs</span><span class="o">=</span><span class="n">whs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ScoringMixin.AoffT"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.sleep.ScoringMixin.AoffT.html#pyActigraphy.sleep.ScoringMixin.AoffT">[docs]</a>    <span class="k">def</span> <span class="nf">AoffT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span> <span class="n">whs</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity offset time.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity offset time.</span>
 
 <span class="sd">        Activity offset time derived from the daily activity profile.</span>
 
@@ -404,7 +406,7 @@
         <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
         <span class="n">rescoring</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Cole&amp;Kripke algorithm for sleep-wake identification.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Cole&amp;Kripke algorithm for sleep-wake identification.</span>
 
 <span class="sd">        Algorithm for automatic sleep scoring based on wrist activity,</span>
 <span class="sd">        developped by Cole, Kripke et al [1]_.</span>
@@ -622,7 +624,7 @@
         <span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.065</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.08</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.056</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.703</span><span class="p">],</span> <span class="nb">float</span><span class="p">),</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mf">0.0</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sadeh algorithm for sleep identification</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sadeh algorithm for sleep identification</span>
 
 <span class="sd">        Algorithm for automatic sleep scoring based on wrist activity,</span>
 <span class="sd">        developped by Sadeh et al [1]_.</span>
@@ -713,7 +715,7 @@
             <span class="p">],</span> <span class="nb">float</span><span class="p">),</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Scripps Clinic algorithm for sleep-wake identification.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Scripps Clinic algorithm for sleep-wake identification.</span>
 
 <span class="sd">        Algorithm for automatic sleep scoring based on wrist activity,</span>
 <span class="sd">        developed by Kripke et al [1]_.</span>
@@ -779,7 +781,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mi">40</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Oakley&#39;s algorithm for sleep/wake scoring.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Oakley&#39;s algorithm for sleep/wake scoring.</span>
 
 <span class="sd">        Algorithm for automatic sleep/wake scoring based on wrist activity,</span>
 <span class="sd">        developed by Oakley [1]_.</span>
@@ -953,7 +955,7 @@
         <span class="n">score_sleep</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Condor Sleep Model</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Condor Sleep Model</span>
 
 <span class="sd">        Sleep-wake scoring algorithm developed by Condor Instrument for their</span>
 <span class="sd">        ActTrust devices.</span>
@@ -1068,7 +1070,7 @@
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sleep over Daytime</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sleep over Daytime</span>
 
 <span class="sd">        Quantify the volume of epochs identified as sleep over daytime (SoD),</span>
 <span class="sd">        using sleep-wake scoring algorithms.</span>
@@ -1177,7 +1179,7 @@
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Fraction of Sleep over Daytime</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Fraction of Sleep over Daytime</span>
 
 <span class="sd">        Fractional volume of epochs identified as sleep over daytime (SoD),</span>
 <span class="sd">        using sleep-wake scoring algorithms.</span>
@@ -1258,7 +1260,7 @@
         <span class="k">return</span> <span class="n">SoD</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">SoD</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">SleepFragmentation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Sleep Fragmentation is an index of restlessness during the sleep</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sleep Fragmentation is an index of restlessness during the sleep</span>
 <span class="sd">        period expressed as a percentage. The higher the index, the more sleep</span>
 <span class="sd">        is disrupted. ActiLife calculates three values for sleep fragmentation:</span>
 <span class="sd">        movement Index, a fragmentation index, and total sleep fragmentation</span>
@@ -1278,7 +1280,7 @@
         <span class="n">estimate_zeta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seq_length_max</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Crespo algorithm for activity/rest identification</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Crespo algorithm for activity/rest identification</span>
 
 <span class="sd">        Algorithm for automatic identification of activity-rest periods based</span>
 <span class="sd">        on actigraphy, developped by Crespo et al. [1]_.</span>
@@ -1520,7 +1522,7 @@
         <span class="n">estimate_zeta</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seq_length_max</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Automatic identification of activity onset/offset times, based on</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Automatic identification of activity onset/offset times, based on</span>
 <span class="sd">        the Crespo algorithm.</span>
 
 <span class="sd">        Identification of the activity onset and offset times using the</span>
@@ -1602,7 +1604,7 @@
         <span class="n">r_consec_below</span><span class="o">=</span><span class="s1">&#39;30Min&#39;</span><span class="p">,</span>
         <span class="n">rsfreq</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Automatic sleep detection.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Automatic sleep detection.</span>
 
 <span class="sd">        Identification of consolidated sleep episodes using the</span>
 <span class="sd">        algorithm developped by Roenneberg et al. [1]_.</span>
@@ -1697,7 +1699,7 @@
         <span class="n">r_consec_below</span><span class="o">=</span><span class="s1">&#39;30Min&#39;</span><span class="p">,</span>
         <span class="n">rsfreq</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Automatic identification of activity onset/offset times, based on</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Automatic identification of activity onset/offset times, based on</span>
 <span class="sd">        Roenneberg&#39;s algorithm.</span>
 
 <span class="sd">        Identification of the activity onset and offset times using the</span>
@@ -1789,7 +1791,7 @@
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Normalized sleep daily profile</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Normalized sleep daily profile</span>
 
 <span class="sd">        XXXXX</span>
 
@@ -1842,7 +1844,7 @@
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Sleep regularity index</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot; Sleep regularity index</span>
 
 <span class="sd">        Likelihood that any two time-points (epoch-by-epoch) 24 hours apart are</span>
 <span class="sd">        in the same sleep/wake state, across all days. This index is originally</span>
@@ -1923,7 +1925,7 @@
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Sleep midpoint</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot; Sleep midpoint</span>
 
 <span class="sd">        Center of the mean sleep periods</span>
 
@@ -2009,7 +2011,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
     </p>
   </div>
 </footer>

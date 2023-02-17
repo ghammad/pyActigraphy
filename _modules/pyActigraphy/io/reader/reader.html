@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,9 +10,11 @@
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../../_static/doctools.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
 <meta charset='utf-8'>
@@ -105,7 +107,7 @@
 
 
 <div class="viewcode-block" id="RawReader"><a class="viewcode-back" href="../../../../RawReader.html#pyActigraphy.io.RawReader">[docs]</a><span class="k">class</span> <span class="nc">RawReader</span><span class="p">(</span><span class="n">ForwardMetricsMixin</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader for multiple Raw files</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader for multiple Raw files</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -125,12 +127,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reader_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;The type of RawXXX readers.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The type of RawXXX readers.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__reader_type</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">readers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;The list of RawXXX readers.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;The list of RawXXX readers.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__readers</span>
         <span class="c1"># return np.asarray(self.__readers)</span>
 
@@ -174,7 +176,7 @@
         <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Data resampled at the specified frequency.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Data resampled at the specified frequency.</span>
 <span class="sd">        If mask_inactivity is True, inactive data (0 count) are masked.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -218,7 +220,7 @@
         <span class="p">))</span></div>
 
 <div class="viewcode-block" id="RawReader.read_sst_log"><a class="viewcode-back" href="../../../../RawReader.html#pyActigraphy.io.RawReader.read_sst_log">[docs]</a>    <span class="k">def</span> <span class="nf">read_sst_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_fname</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for start/stop-time log files.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for start/stop-time log files.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -240,11 +242,11 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sst_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;:class:`SSTLog` class instanciation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;:class:`SSTLog` class instanciation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sst_log</span>
 
 <div class="viewcode-block" id="RawReader.apply_sst"><a class="viewcode-back" href="../../../../RawReader.html#pyActigraphy.io.RawReader.apply_sst">[docs]</a>    <span class="k">def</span> <span class="nf">apply_sst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set start time and duration in all readers &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set start time and duration in all readers &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sst_log</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">reader</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">readers</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">reader</span><span class="o">.</span><span class="n">display_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sst_log</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
@@ -269,7 +271,7 @@
 <div class="viewcode-block" id="read_raw"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw.html#pyActigraphy.io.read_raw">[docs]</a><span class="k">def</span> <span class="nf">read_raw</span><span class="p">(</span>
     <span class="n">input_path</span><span class="p">,</span> <span class="n">reader_type</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
 <span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for multiple raw files.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for multiple raw files.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -364,7 +366,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
     </p>
   </div>
 </footer>

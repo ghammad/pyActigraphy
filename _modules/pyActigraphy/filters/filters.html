@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,9 +10,11 @@
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta charset='utf-8'>
@@ -155,10 +157,10 @@
 
 
 <div class="viewcode-block" id="FiltersMixin"><a class="viewcode-back" href="../../../FiltersMixin.html#pyActigraphy.filters.FiltersMixin">[docs]</a><span class="k">class</span> <span class="nc">FiltersMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="FiltersMixin.create_inactivity_mask"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.filters.FiltersMixin.create_inactivity_mask.html#pyActigraphy.filters.FiltersMixin.create_inactivity_mask">[docs]</a>    <span class="k">def</span> <span class="nf">create_inactivity_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create a mask for inactivity (count equal to zero) periods.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a mask for inactivity (count equal to zero) periods.</span>
 
 <span class="sd">        This mask has the same length as its underlying data and can be used</span>
 <span class="sd">        to offuscate inactive periods where the actimeter has most likely been</span>
@@ -193,7 +195,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">_create_inactivity_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">nepochs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FiltersMixin.add_mask_period"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.filters.FiltersMixin.add_mask_period.html#pyActigraphy.filters.FiltersMixin.add_mask_period">[docs]</a>    <span class="k">def</span> <span class="nf">add_mask_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Add a period to the inactivity mask</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Add a period to the inactivity mask</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -233,7 +235,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="FiltersMixin.add_mask_periods"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.filters.FiltersMixin.add_mask_periods.html#pyActigraphy.filters.FiltersMixin.add_mask_periods">[docs]</a>    <span class="k">def</span> <span class="nf">add_mask_periods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_fname</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Add periods to the inactivity mask</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Add periods to the inactivity mask</span>
 
 <span class="sd">        Function to read start and stop times from a Mask log file. Supports</span>
 <span class="sd">        different file format (.ods, .xls(x), .csv).</span>
@@ -270,7 +272,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
     </p>
   </div>
 </footer>

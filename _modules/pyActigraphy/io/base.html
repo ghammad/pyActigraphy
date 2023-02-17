@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,9 +10,11 @@
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta charset='utf-8'>
@@ -98,7 +100,7 @@
 
 
 <div class="viewcode-block" id="BaseRaw"><a class="viewcode-back" href="../../../BaseRaw.html#pyActigraphy.io.BaseRaw">[docs]</a><span class="k">class</span> <span class="nc">BaseRaw</span><span class="p">(</span><span class="n">SleepBoutMixin</span><span class="p">,</span> <span class="n">ScoringMixin</span><span class="p">,</span> <span class="n">MetricsMixin</span><span class="p">,</span> <span class="n">FiltersMixin</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Base class for raw data.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for raw data.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -134,12 +136,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Study name as extracted from the raw file.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Study name as extracted from the raw file.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Name to be used for display.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Name to be used for display.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__display_name</span>
 
     <span class="nd">@display_name</span><span class="o">.</span><span class="n">setter</span>
@@ -148,22 +150,22 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;UUID of the device used to acquire the data&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;UUID of the device used to acquire the data&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__uuid</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Format of the raw data file (AWD,RPX,MTN,...)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Format of the raw data file (AWD,RPX,MTN,...)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__format</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">axial_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Acquistion mode (mono-axial or tri-axial)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Acquistion mode (mono-axial or tri-axial)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__axial_mode</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Start time of data acquistion as extracted from the raw file or</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Start time of data acquistion as extracted from the raw file or</span>
 <span class="sd">        specified by the user.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__start_time</span>
 
@@ -173,7 +175,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">period</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Period of data acquistion as extracted from the raw file or</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Period of data acquistion as extracted from the raw file or</span>
 <span class="sd">        specified by the user.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__period</span>
 
@@ -183,18 +185,18 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Acquisition frequency as extracted from the raw file.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Acquisition frequency as extracted from the raw file.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__frequency</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Indexed data extracted from the raw file.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Indexed data extracted from the raw file.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span>
 
     <span class="c1"># TODO: @lru_cache(maxsize=6) ???</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Indexed data extracted from the raw file.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Indexed data extracted from the raw file.</span>
 <span class="sd">        If mask_inactivity is set to true, the `mask` is used</span>
 <span class="sd">        to filter out inactive data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -220,18 +222,18 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">raw_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light measurement performed by the device&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light measurement performed by the device&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__light</span>
 
     <span class="c1"># TODO: @lru_cache(maxsize=6) ???</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light measurement performed by the device&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light measurement performed by the device&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__light</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mask_inactivity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Switch to mask inactive data.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Switch to mask inactive data.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mask_inactivity</span>
 
     <span class="nd">@mask_inactivity</span><span class="o">.</span><span class="n">setter</span>
@@ -240,7 +242,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">inactivity_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Length of the inactivity mask.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Length of the inactivity mask.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__inactivity_length</span>
 
     <span class="nd">@inactivity_length</span><span class="o">.</span><span class="n">setter</span>
@@ -254,7 +256,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mask used to filter out inactive data.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mask used to filter out inactive data.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Create a mask if it does not exist</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inactivity_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -276,7 +278,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">exclude_if_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Boolean to exclude partially masked data when resampling&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Boolean to exclude partially masked data when resampling&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__exclude_if_mask</span>
 
     <span class="nd">@exclude_if_mask</span><span class="o">.</span><span class="n">setter</span>
@@ -284,13 +286,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__exclude_if_mask</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="BaseRaw.mask_fraction"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.mask_fraction.html#pyActigraphy.io.BaseRaw.mask_fraction">[docs]</a>    <span class="k">def</span> <span class="nf">mask_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Fraction of masked data&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Fraction of masked data&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mf">1.</span><span class="o">-</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">])</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseRaw.mask_fraction_period"><a class="viewcode-back" href="../../../BaseRaw.html#pyActigraphy.io.BaseRaw.mask_fraction_period">[docs]</a>    <span class="k">def</span> <span class="nf">mask_fraction_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mask fraction per consecutive periods&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mask fraction per consecutive periods&quot;&quot;&quot;</span>
 
         <span class="c1"># Compute consecutive intervals</span>
         <span class="n">intervals</span> <span class="o">=</span> <span class="n">_interval_maker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span>
@@ -302,19 +304,19 @@
         <span class="k">return</span> <span class="n">results</span></div>
 
 <div class="viewcode-block" id="BaseRaw.length"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.length.html#pyActigraphy.io.BaseRaw.length">[docs]</a>    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Number of data acquisition points&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Number of data acquisition points&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseRaw.time_range"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.time_range.html#pyActigraphy.io.BaseRaw.time_range">[docs]</a>    <span class="k">def</span> <span class="nf">time_range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Range (in days, hours, etc) of the data acquistion period&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Range (in days, hours, etc) of the data acquistion period&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="BaseRaw.duration"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.duration.html#pyActigraphy.io.BaseRaw.duration">[docs]</a>    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Duration (in days, hours, etc) of the data acquistion period&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Duration (in days, hours, etc) of the data acquistion period&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="BaseRaw.binarized_data"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.binarized_data.html#pyActigraphy.io.BaseRaw.binarized_data">[docs]</a>    <span class="k">def</span> <span class="nf">binarized_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Boolean thresholding of Pandas Series&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Boolean thresholding of Pandas Series&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span>
@@ -322,7 +324,7 @@
 
     <span class="c1"># TODO: @lru_cache(maxsize=6) ???</span>
 <div class="viewcode-block" id="BaseRaw.resampled_data"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.resampled_data.html#pyActigraphy.io.BaseRaw.resampled_data">[docs]</a>    <span class="k">def</span> <span class="nf">resampled_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Data resampled at the specified frequency.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Data resampled at the specified frequency.</span>
 <span class="sd">        If mask_inactivity is True, the `mask` is used to filter inactive data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">binarize</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
@@ -364,7 +366,7 @@
 
     <span class="c1"># TODO: @lru_cache(maxsize=6) ???</span>
 <div class="viewcode-block" id="BaseRaw.resampled_light"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.resampled_light.html#pyActigraphy.io.BaseRaw.resampled_light">[docs]</a>    <span class="k">def</span> <span class="nf">resampled_light</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Light measurement, resampled at the specified frequency.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Light measurement, resampled at the specified frequency.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">light</span>
 
@@ -389,7 +391,7 @@
                 <span class="n">NOWEAR</span><span class="o">=</span><span class="s1">&#39;#ee4035&#39;</span>
             <span class="p">)</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for sleep diaries.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for sleep diaries.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -418,7 +420,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">sleep_diary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; :class:`SleepDiary` class instanciation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; :class:`SleepDiary` class instanciation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_diary</span>
 
     <span class="nd">@sleep_diary</span><span class="o">.</span><span class="n">setter</span>
@@ -438,7 +440,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
     </p>
   </div>
 </footer>

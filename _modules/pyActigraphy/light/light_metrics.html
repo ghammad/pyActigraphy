@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,9 +10,11 @@
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta charset='utf-8'>
@@ -127,7 +129,7 @@
 
 
 <div class="viewcode-block" id="LightMetricsMixin"><a class="viewcode-back" href="../../../LightMetricsMixin.html#pyActigraphy.light.LightMetricsMixin">[docs]</a><span class="k">class</span> <span class="nc">LightMetricsMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="LightMetricsMixin.average_daily_profile"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.average_daily_profile.html#pyActigraphy.light.LightMetricsMixin.average_daily_profile">[docs]</a>    <span class="k">def</span> <span class="nf">average_daily_profile</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -138,7 +140,7 @@
         <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">time_origin</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average daily light profile</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average daily light profile</span>
 
 <span class="sd">        Calculate the daily profile of light exposure. Data are averaged over</span>
 <span class="sd">        all the days.</span>
@@ -248,7 +250,7 @@
         <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">time_origin</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;AUC of the average daily light profile</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;AUC of the average daily light profile</span>
 
 <span class="sd">        Calculate the area under the curve of the daily profile of light</span>
 <span class="sd">        exposure. Data are averaged over all the days.</span>
@@ -348,7 +350,7 @@
         <span class="k">return</span> <span class="n">avgdaily</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_time</span><span class="p">:</span><span class="n">stop_time</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">_light_exposure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light exposure</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light exposure</span>
 
 <span class="sd">        Calculate the light exposure level and time</span>
 
@@ -393,7 +395,7 @@
 <div class="viewcode-block" id="LightMetricsMixin.light_exposure_level"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.light_exposure_level.html#pyActigraphy.light.LightMetricsMixin.light_exposure_level">[docs]</a>    <span class="k">def</span> <span class="nf">light_exposure_level</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">agg</span><span class="o">=</span><span class="s1">&#39;mean&#39;</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light exposure level</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light exposure level</span>
 
 <span class="sd">        Calculate the aggregated (mean, median, etc) light exposure level</span>
 <span class="sd">        per epoch.</span>
@@ -438,7 +440,7 @@
         <span class="n">bins</span><span class="o">=</span><span class="s1">&#39;24h&#39;</span><span class="p">,</span>
         <span class="n">agg_func</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;median&#39;</span><span class="p">,</span> <span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="s1">&#39;max&#39;</span><span class="p">]</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Summary statistics.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Summary statistics.</span>
 
 <span class="sd">        Calculate summary statistics (ex: mean, median, etc) according to a</span>
 <span class="sd">        user-defined (regular or arbitrary) binning.</span>
@@ -489,7 +491,7 @@
 <div class="viewcode-block" id="LightMetricsMixin.TAT"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.TAT.html#pyActigraphy.light.LightMetricsMixin.TAT">[docs]</a>    <span class="k">def</span> <span class="nf">TAT</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oformat</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Time above light threshold.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Time above light threshold.</span>
 
 <span class="sd">        Calculate the total light exposure time above the threshold.</span>
 
@@ -546,7 +548,7 @@
 <div class="viewcode-block" id="LightMetricsMixin.TATp"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.TATp.html#pyActigraphy.light.LightMetricsMixin.TATp">[docs]</a>    <span class="k">def</span> <span class="nf">TATp</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oformat</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Time above light threshold (per day).</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Time above light threshold (per day).</span>
 
 <span class="sd">        Calculate the total light exposure time above the threshold,</span>
 <span class="sd">        per calendar day.</span>
@@ -603,7 +605,7 @@
         <span class="k">return</span> <span class="n">tatp</span></div>
 
 <div class="viewcode-block" id="LightMetricsMixin.VAT"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.VAT.html#pyActigraphy.light.LightMetricsMixin.VAT">[docs]</a>    <span class="k">def</span> <span class="nf">VAT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Values above light threshold.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Values above light threshold.</span>
 
 <span class="sd">        Returns the light exposure values above the threshold.</span>
 
@@ -638,7 +640,7 @@
         <span class="k">return</span> <span class="n">bc</span>
 
 <div class="viewcode-block" id="LightMetricsMixin.MLiT"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.MLiT.html#pyActigraphy.light.LightMetricsMixin.MLiT">[docs]</a>    <span class="k">def</span> <span class="nf">MLiT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mean light timing.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mean light timing.</span>
 
 <span class="sd">        Mean light timing above threshold, MLiT^C.</span>
 
@@ -688,7 +690,7 @@
         <span class="k">return</span> <span class="n">MLiT</span></div>
 
 <div class="viewcode-block" id="LightMetricsMixin.MLiTp"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.MLiTp.html#pyActigraphy.light.LightMetricsMixin.MLiTp">[docs]</a>    <span class="k">def</span> <span class="nf">MLiTp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mean light timing per day.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mean light timing per day.</span>
 
 <span class="sd">        Mean light timing above threshold, MLiT^C, per calendar day.</span>
 
@@ -739,7 +741,7 @@
         <span class="k">return</span> <span class="n">MLiTp</span></div>
 
 <div class="viewcode-block" id="LightMetricsMixin.get_light_extremum"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.get_light_extremum.html#pyActigraphy.light.LightMetricsMixin.get_light_extremum">[docs]</a>    <span class="k">def</span> <span class="nf">get_light_extremum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extremum</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light extremum.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light extremum.</span>
 
 <span class="sd">        Return the index and the value of the requested extremum (min or max).</span>
 
@@ -778,7 +780,7 @@
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">extremum_per_ch</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
 
 <div class="viewcode-block" id="LightMetricsMixin.LMX"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.LMX.html#pyActigraphy.light.LightMetricsMixin.LMX">[docs]</a>    <span class="k">def</span> <span class="nf">LMX</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="s1">&#39;5h&#39;</span><span class="p">,</span> <span class="n">lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Least or Most light period of length X</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Least or Most light period of length X</span>
 
 <span class="sd">        Onset and mean hourly light exposure levels during the X least or most</span>
 <span class="sd">        bright hours of the day.</span>
@@ -833,7 +835,7 @@
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">lmx_per_ch</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
 
     <span class="k">def</span> <span class="nf">_RAR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rar_func</span><span class="p">,</span> <span class="n">rar_name</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot; Generic RAR function</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot; Generic RAR function</span>
 
 <span class="sd">        Apply a generic RAR function to the light data, per channel.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -857,7 +859,7 @@
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">rar_per_ch</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
 
 <div class="viewcode-block" id="LightMetricsMixin.IS"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.IS.html#pyActigraphy.light.LightMetricsMixin.IS">[docs]</a>    <span class="k">def</span> <span class="nf">IS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Interdaily stability</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Interdaily stability</span>
 
 <span class="sd">        The Interdaily stability (IS) quantifies the repeatibilty of the</span>
 <span class="sd">        daily light exposure pattern over each day contained in the activity</span>
@@ -929,7 +931,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="LightMetricsMixin.IV"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.IV.html#pyActigraphy.light.LightMetricsMixin.IV">[docs]</a>    <span class="k">def</span> <span class="nf">IV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Intradaily variability</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Intradaily variability</span>
 
 <span class="sd">        The Intradaily Variability (IV) quantifies the variability of the</span>
 <span class="sd">        light exposure pattern.</span>
@@ -1027,7 +1029,7 @@
         <span class="k">return</span> <span class="n">data_smooth</span>
 
 <div class="viewcode-block" id="LightMetricsMixin.filter_butterworth"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.light.LightMetricsMixin.filter_butterworth.html#pyActigraphy.light.LightMetricsMixin.filter_butterworth">[docs]</a>    <span class="k">def</span> <span class="nf">filter_butterworth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fc_low</span><span class="p">,</span> <span class="n">fc_high</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Butterworth filtering</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Butterworth filtering</span>
 
 <span class="sd">        Forward-backward digital filtering using a Nth order Butterworth filter</span>
 
@@ -1086,7 +1088,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
     </p>
   </div>
 </footer>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,9 +10,11 @@
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
     <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta charset='utf-8'>
@@ -115,7 +117,7 @@
 
 
 <span class="k">def</span> <span class="nf">_average_daily_total_activity</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">rescale</span><span class="p">,</span> <span class="n">exclude_ends</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the average daily activity&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the average daily activity&quot;&quot;&quot;</span>
 
     <span class="c1"># Shortcut: if rescale is false, compute the daily average</span>
     <span class="k">if</span> <span class="n">rescale</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
@@ -143,7 +145,7 @@
 
 
 <span class="k">def</span> <span class="nf">_interdaily_stability</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the interdaily stability&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the interdaily stability&quot;&quot;&quot;</span>
 
     <span class="n">d_24h</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span>
         <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span>
@@ -157,7 +159,7 @@
 
 
 <span class="k">def</span> <span class="nf">_intradaily_variability</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the intradaily variability&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Calculate the intradaily variability&quot;&quot;&quot;</span>
 
     <span class="n">c_1h</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 
@@ -167,7 +169,7 @@
 
 
 <span class="k">def</span> <span class="nf">_lmx</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the start time and mean activity of the period of</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the start time and mean activity of the period of</span>
 <span class="sd">    lowest/highest activity&quot;&quot;&quot;</span>
 
     <span class="n">avgdaily</span> <span class="o">=</span> <span class="n">_average_daily_activity</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -186,7 +188,7 @@
 
 
 <span class="k">def</span> <span class="nf">_interval_maker</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">period</span><span class="p">,</span> <span class="n">verbose</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="c1"># TODO: test if period is a valid string</span>
 
     <span class="p">(</span><span class="n">num_periods</span><span class="p">,</span> <span class="n">td</span><span class="p">)</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span>
@@ -213,7 +215,7 @@
 
 
 <span class="k">def</span> <span class="nf">_count_consecutive_values</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Create a count list for identical consecutive numbers</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Create a count list for identical consecutive numbers</span>
 <span class="sd">    together with a state for each series:</span>
 <span class="sd">     - 1 if the sum of the consecutive series numbers is positive</span>
 <span class="sd">     - 0 otherwise</span>
@@ -311,7 +313,7 @@
 
 
 <div class="viewcode-block" id="MetricsMixin"><a class="viewcode-back" href="../../../MetricsMixin.html#pyActigraphy.metrics.MetricsMixin">[docs]</a><span class="k">class</span> <span class="nc">MetricsMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="MetricsMixin.average_daily_activity"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.average_daily_activity.html#pyActigraphy.metrics.MetricsMixin.average_daily_activity">[docs]</a>    <span class="k">def</span> <span class="nf">average_daily_activity</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -322,7 +324,7 @@
         <span class="n">time_origin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">whs</span><span class="o">=</span><span class="s1">&#39;1h&#39;</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average daily activity distribution</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average daily activity distribution</span>
 
 <span class="sd">        Calculate the daily profile of activity. Data are averaged over all the</span>
 <span class="sd">        days.</span>
@@ -413,7 +415,7 @@
             <span class="k">return</span> <span class="n">_shift_time_axis</span><span class="p">(</span><span class="n">avgdaily</span><span class="p">,</span> <span class="n">shift</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MetricsMixin.average_daily_light"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.average_daily_light.html#pyActigraphy.metrics.MetricsMixin.average_daily_light">[docs]</a>    <span class="k">def</span> <span class="nf">average_daily_light</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;5min&#39;</span><span class="p">,</span> <span class="n">cyclic</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average daily light distribution</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average daily light distribution</span>
 
 <span class="sd">        Calculate the daily profile of light exposure (in lux). Data are</span>
 <span class="sd">        averaged over all the days.</span>
@@ -445,7 +447,7 @@
 <div class="viewcode-block" id="MetricsMixin.ADAT"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.ADAT.html#pyActigraphy.metrics.MetricsMixin.ADAT">[docs]</a>    <span class="k">def</span> <span class="nf">ADAT</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">rescale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exclude_ends</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Total average daily activity</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Total average daily activity</span>
 
 <span class="sd">        Calculate the total activity counts, averaged over all the days.</span>
 
@@ -491,7 +493,7 @@
         <span class="n">exclude_ends</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Total average daily activity per period</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Total average daily activity per period</span>
 
 <span class="sd">        Calculate the total activity counts, averaged over each consecutive</span>
 <span class="sd">        period contained in the data. The number of periods</span>
@@ -544,7 +546,7 @@
         <span class="k">return</span> <span class="n">results</span></div>
 
 <div class="viewcode-block" id="MetricsMixin.L5"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.L5.html#pyActigraphy.metrics.MetricsMixin.L5">[docs]</a>    <span class="k">def</span> <span class="nf">L5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;L5</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;L5</span>
 
 <span class="sd">        Mean activity during the 5 least active hours of the day.</span>
 
@@ -604,7 +606,7 @@
         <span class="k">return</span> <span class="n">l5</span></div>
 
 <div class="viewcode-block" id="MetricsMixin.M10"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.M10.html#pyActigraphy.metrics.MetricsMixin.M10">[docs]</a>    <span class="k">def</span> <span class="nf">M10</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;M10</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;M10</span>
 
 <span class="sd">        Mean activity during the 10 most active hours of the day.</span>
 
@@ -664,7 +666,7 @@
         <span class="k">return</span> <span class="n">m10</span></div>
 
 <div class="viewcode-block" id="MetricsMixin.RA"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.RA.html#pyActigraphy.metrics.MetricsMixin.RA">[docs]</a>    <span class="k">def</span> <span class="nf">RA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Relative rest/activity amplitude</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Relative rest/activity amplitude</span>
 
 <span class="sd">        Relative amplitude between the mean activity during the 10 most active</span>
 <span class="sd">        hours of the day and the mean activity during the 5 least active hours</span>
@@ -727,7 +729,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">m10</span><span class="o">-</span><span class="n">l5</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">m10</span><span class="o">+</span><span class="n">l5</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MetricsMixin.L5p"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.L5p.html#pyActigraphy.metrics.MetricsMixin.L5p">[docs]</a>    <span class="k">def</span> <span class="nf">L5p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;L5 per period</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;L5 per period</span>
 
 <span class="sd">        The L5 variable is calculated for each consecutive period found in the</span>
 <span class="sd">        actigraphy recording.</span>
@@ -804,7 +806,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="MetricsMixin.M10p"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.M10p.html#pyActigraphy.metrics.MetricsMixin.M10p">[docs]</a>    <span class="k">def</span> <span class="nf">M10p</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;M10 per period</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;M10 per period</span>
 
 <span class="sd">        The M10 variable is calculated for each consecutive period found in the</span>
 <span class="sd">        actigraphy recording.</span>
@@ -881,7 +883,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="MetricsMixin.RAp"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.RAp.html#pyActigraphy.metrics.MetricsMixin.RAp">[docs]</a>    <span class="k">def</span> <span class="nf">RAp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;RA per period</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;RA per period</span>
 
 <span class="sd">        The RA variable is calculated for each consecutive period found in the</span>
 <span class="sd">        actigraphy recording.</span>
@@ -960,7 +962,7 @@
 
     <span class="c1"># @lru_cache(maxsize=6)</span>
 <div class="viewcode-block" id="MetricsMixin.IS"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.IS.html#pyActigraphy.metrics.MetricsMixin.IS">[docs]</a>    <span class="k">def</span> <span class="nf">IS</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Interdaily stability</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Interdaily stability</span>
 
 <span class="sd">        The Interdaily stability (IS) quantifies the repeatibilty of the</span>
 <span class="sd">        daily rest-activity pattern over each day contained in the activity</span>
@@ -1055,7 +1057,7 @@
         <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average interdaily stability</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average interdaily stability</span>
 
 <span class="sd">        ISm [1]_ is the average of the IS values obtained with resampling</span>
 <span class="sd">        periods divisors of 1440 between 1 and 60 min.</span>
@@ -1112,7 +1114,7 @@
 
 <div class="viewcode-block" id="MetricsMixin.ISp"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.ISp.html#pyActigraphy.metrics.MetricsMixin.ISp">[docs]</a>    <span class="k">def</span> <span class="nf">ISp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span>
             <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Interdaily stability per period</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Interdaily stability per period</span>
 
 <span class="sd">        The IS is calculated for each consecutive period found in the</span>
 <span class="sd">        actigraphy recording.</span>
@@ -1174,7 +1176,7 @@
 
     <span class="c1"># @lru_cache(maxsize=6)</span>
 <div class="viewcode-block" id="MetricsMixin.IV"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.IV.html#pyActigraphy.metrics.MetricsMixin.IV">[docs]</a>    <span class="k">def</span> <span class="nf">IV</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Intradaily variability</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Intradaily variability</span>
 
 <span class="sd">        The Intradaily Variability (IV) quantifies the variability of the</span>
 <span class="sd">        activity recording. This variable thus measures the rest or activity</span>
@@ -1259,7 +1261,7 @@
         <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average intradaily variability</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Average intradaily variability</span>
 
 <span class="sd">        IVm [1]_ is the average of the IV values obtained with resampling</span>
 <span class="sd">        periods divisors of 1440 between 1 and 60 min.</span>
@@ -1316,7 +1318,7 @@
 
 <div class="viewcode-block" id="MetricsMixin.IVp"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.IVp.html#pyActigraphy.metrics.MetricsMixin.IVp">[docs]</a>    <span class="k">def</span> <span class="nf">IVp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span>
             <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Intradaily variability per period</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Intradaily variability per period</span>
 
 <span class="sd">        The IV is calculated for each consecutive period found in the</span>
 <span class="sd">        actigraphy recording.</span>
@@ -1379,7 +1381,7 @@
         <span class="k">return</span> <span class="n">results</span></div>
 
 <div class="viewcode-block" id="MetricsMixin.pRA"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.pRA.html#pyActigraphy.metrics.MetricsMixin.pRA">[docs]</a>    <span class="k">def</span> <span class="nf">pRA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability distribution</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability distribution</span>
 
 <span class="sd">        Conditional probability, pRA(t), that an individual would be</span>
 <span class="sd">        resting at time (t+1) given that the individual had been continuously</span>
@@ -1462,7 +1464,7 @@
         <span class="k">return</span> <span class="n">pRA</span><span class="p">,</span> <span class="n">pRA_weights</span></div>
 
 <div class="viewcode-block" id="MetricsMixin.pAR"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.metrics.MetricsMixin.pAR.html#pyActigraphy.metrics.MetricsMixin.pAR">[docs]</a>    <span class="k">def</span> <span class="nf">pAR</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity-&gt;Rest transition probability distribution</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity-&gt;Rest transition probability distribution</span>
 
 <span class="sd">        Conditional probability, pAR(t), that an individual would be</span>
 <span class="sd">        active at time (t+1) given that the individual had been continuously</span>
@@ -1548,7 +1550,7 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="mf">.3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">logit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;15min&#39;</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability</span>
 
 <span class="sd">        Weighted average value of pRA(t) within the constant regions, defined</span>
 <span class="sd">        as the longest stretch within which the LOWESS curve varied by no more</span>
@@ -1647,7 +1649,7 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frac</span><span class="o">=</span><span class="mf">.3</span><span class="p">,</span> <span class="n">it</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">logit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="s1">&#39;15min&#39;</span>
     <span class="p">):</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Rest-&gt;Activity transition probability</span>
 
 <span class="sd">        Weighted average value of pAR(t) within the constant regions, defined</span>
 <span class="sd">        as the longest stretch within which the LOWESS curve varied by no more</span>
@@ -1744,7 +1746,7 @@
 
 
 <span class="k">class</span> <span class="nc">ForwardMetricsMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
 
     <span class="c1"># def mask_fraction(self):</span>
     <span class="c1">#</span>
@@ -1770,7 +1772,7 @@
     <span class="k">def</span> <span class="nf">ADAT</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">rescale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exclude_ends</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Total average daily activity</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Total average daily activity</span>
 
 <span class="sd">        Calculate the total activity counts, averaged over all the days.</span>
 
@@ -1816,7 +1818,7 @@
         <span class="n">exclude_ends</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Total average daily activity per period</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Total average daily activity per period</span>
 
 <span class="sd">        Calculate the total activity counts, averaged over each consecutive</span>
 <span class="sd">        period contained in the data. The number of periods</span>
@@ -2190,7 +2192,7 @@
     </p>
     <p>
         &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
     </p>
   </div>
 </footer>
