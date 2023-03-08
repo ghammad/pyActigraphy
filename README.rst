@@ -76,7 +76,7 @@ thanks to the support of its members, Dr. Mirjam Münch and Prof. `Manuel Spitsc
 a pyActigraphy module for analysing light exposure data has been developed, **pyLight**.
 This module is part of the Human Light Exposure Database and is included in pyActigraphy version `v1.1 <https://github.com/ghammad/pyActigraphy/releases/tag/v1.1>`_ and higher.
 
-A manuscript describing the *pyLight* module is available as a preprint `here <https://osf.io/msk9n/>`_.
+A manuscript describing the *pyLight* module is available as a `preprint <https://osf.io/msk9n/>`_.
 
 Code and documentation
 ======================
@@ -89,6 +89,7 @@ It contains `notebooks <https://ghammad.github.io/pyActigraphy/tutorials.html>`_
 
 Installation
 ============
+
 In a (bash) shell, simply type:
 
 * For users:
