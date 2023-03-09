@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import warnings
 
 from ..base import BaseRaw
 
@@ -41,6 +42,32 @@ class RawAWD(BaseRaw):
         'C2': '10s'
     }
 
+    device_code = {
+        'D': 'Actiwatch-7',
+        'I': 'Actiwatch-Insomnia (pressure sens.)',
+        'L': 'Actiwatch-L (amb. light)',
+        'M': 'Actiwatch-Mini',
+        'P': 'Actiwatch-L-Plus (amb. light)',
+        'S': 'Actiwatch-S (env. sound)',
+        'T': 'Actiwatch-T (temp.)',
+        'V': 'Actiwatch-4'
+    }
+
+    device_default_channels = ['Activity', 'Marker']
+
+    device_additional_channel = {
+        'D': 'Light',
+        'I': 'Pressure',
+        'L': 'Light',
+        # 'M': None,
+        'P': 'Light',
+        'S': 'Sound',
+        'T': 'Temp.',
+        # 'V': None,
+        # 'U': None,
+        # 'X': None
+    }
+
     def __init__(
         self,
         input_fname,
@@ -65,6 +92,9 @@ class RawAWD(BaseRaw):
         freq = RawAWD.__extract_awd_frequency(header)
         uuid = RawAWD.__extract_awd_uuid(header)
         start = RawAWD.__extract_awd_start_time(header)
+        if uuid:
+            # extract model from UUID:
+            self.__device_type = RawAWD.__extract_awd_model(uuid)
 
         if freq is None:
             if frequency is not None:
@@ -113,6 +143,11 @@ class RawAWD(BaseRaw):
             light=None
         )
 
+    @property
+    def model(self):
+        """Actiwatch Model as inferred from the header info."""
+        return RawAWD.device_code[self.__device_type]
+
     @staticmethod
     def __extract_awd_name(header):
         return header[0].replace('\n', '')
@@ -133,6 +168,41 @@ class RawAWD(BaseRaw):
     @staticmethod
     def __extract_awd_start_time(header):
         return pd.to_datetime(header[1] + ' ' + header[2])
+
+    @staticmethod
+    def __extract_awd_model(uuid):
+        # extract model from UUID:
+        wrn_msg = (
+            'Only the first data column will be used, assuming it corresponds '
+            'to activity counts.'
+        )
+        if uuid[0].isalpha():  # check if character is alphabetic
+            dcode = uuid[0].capitalize()
+            if dcode in RawAWD.device_code.keys():
+                return dcode
+            else:
+                warnings.warn(
+                    'The model specified in the UUID ({})'.format(dcode)
+                    + ' is not supported at the moment.\n'
+                    + 'List of supported Actiwatch models:\n'
+                    + '\n'.join(
+                        [
+                            '- {}: {}'.format(k, dev)
+                            for k, dev in RawAWD.device_code.items()
+                        ]
+                    )
+                    + '\n'
+                    + wrn_msg
+                )
+                return 'U'
+        else:
+            warnings.warn(
+                'Cannot detect from the header info (UUID) '
+                + 'which Actiwatch model was used to acquire the data.'
+                + '\n'
+                + wrn_msg
+            )
+            return 'X'
 
 
 def read_raw_awd(
