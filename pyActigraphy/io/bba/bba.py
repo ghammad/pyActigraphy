@@ -1,5 +1,6 @@
-import pandas as pd
+import json
 import os
+import pandas as pd
 
 from ..base import BaseRaw
 from accelerometer.utils import date_parser
@@ -44,6 +45,14 @@ class RawBBA(BaseRaw):
         If set to True, use missing data imputation from the biobankanalysis
         package.
         Default is False.
+    use_metadata_json: bool, optional.
+        If set to True, extract meta-data from summary json file.
+        Default is True.
+    metadata_fname: str, optional
+        Path to the summary json file.
+        If None, the path to the summary json file is inferred from the input
+        file (/path/to/XXX-timeSeries.csv.gz -> /path/to/XXX-summary.json).
+        Default is None.
     """
 
     def __init__(
@@ -55,7 +64,9 @@ class RawBBA(BaseRaw):
         start_time=None,
         period=None,
         engine='c',
-        impute_missing=False
+        impute_missing=False,
+        use_metadata_json=True,
+        metadata_fname=None
     ):
 
         # get absolute file path
@@ -69,6 +80,32 @@ class RawBBA(BaseRaw):
             parse_dates=['time'],
             date_parser=date_parser
         )
+
+        # read meta-data file (if found):
+        if use_metadata_json:
+            meta_data = self.__read_baa_metadata_json(
+                input_fname, metadata_fname
+            )
+
+            # extract UUID if not provided
+            if uuid is None:
+                uuid = self.__extract_baa_metadata(meta_data, 'file-deviceID')
+
+            # extract QC calibration marker
+            self.__qc_calibrated_on_own_data = bool(
+                self.__extract_baa_metadata(
+                    meta_data,
+                    'quality-calibratedOnOwnData'
+                )
+            )
+
+            # extract QC DST cross-over marker
+            self.__qc_daylight_savings_crossover = bool(
+                self.__extract_baa_metadata(
+                    meta_data,
+                    'quality-daylightSavingsCrossover'
+                )
+            )
 
         if frequency is not None:
             data = data.resample(frequency).mean()
@@ -130,7 +167,7 @@ class RawBBA(BaseRaw):
 
         # call __init__ function of the base class
         super().__init__(
-            name=name,
+            name=name if name is not None else os.path.basename(input_fname),
             uuid=uuid,
             format='BAA',
             axial_mode='tri-axial',
@@ -166,23 +203,106 @@ class RawBBA(BaseRaw):
         r"""Value of the MET index."""
         return self.__met
 
+    @property
+    def isCalibratedOnOwnData(self):
+        r"""Boolean indicating if the data have been calibrated."""
+        return self.__qc_calibrated_on_own_data
+
+    @property
+    def isDSTCrossing(self):
+        r"""Boolean indicating if the data have been acquired during a DST."""
+        return self.__qc_daylight_savings_crossover
+
     @staticmethod
     def __extract_baa_data(data, column):
+        """ Data reader
+
+        Read requested data column.
+
+        Parameters
+        ----------
+        data: pd.DataFrame
+            Input data frame.
+        column: str
+            Column name.
+
+        Returns
+        -------
+        ts : pd.Series
+            Data contained in the requested column.
+        """
 
         return data.loc[:, column] if column in data.columns else None
 
-    # @staticmethod
-    # def __parse_baa_dt(t):
-    #     '''
-    #     Parse date a date string of the form e.g.
-    #     2020-06-14 19:01:15.123+0100 [Europe/London]
+    @staticmethod
+    def __read_baa_metadata_json(input_fname, metadata_fname):
+        """ Meta-data reader
 
-    #     '''
-    #     tz = re.search(r'(?<=\[).+?(?=\])', t)
-    #     if tz is not None:
-    #         tz = tz.group()
-    #     t = re.sub(r'\[(.*?)\]', '', t)
-    #     return pd.to_datetime(t, utc=True).tz_convert(tz)
+        Read meta data summary json file produced when processing .CWA file
+        into X-timeSeries.csv.gz file with the biobank acc. package.
+
+        Parameters
+        ----------
+        input_fname: str
+            Path to the .csv(.gz) file.
+        metadata_fname: str
+            Path to the meta-data (summary.json) file.
+
+        Returns
+        -------
+        metadata : dict
+            Dictionnary containing the meta-data.
+        """
+
+        # read meta-data file (if found):
+        if metadata_fname is None:
+            input_metadata = input_fname.replace(
+                '-timeSeries.csv.gz',
+                '-summary.json'
+            )
+        else:
+            input_metadata = os.path.abspath(metadata_fname)
+
+        # load meta data json file
+        with open(input_metadata) as file:
+            meta_data = json.load(file)
+
+        # check filename consistency:
+        if meta_data['file-name'] != os.path.abspath(input_fname):
+            raise ValueError(
+                'Attempting to read a metadata file referring to another '
+                'input file.\n- Input file: {}\n- Metadata ref: {}'.format(
+                    input_fname,
+                    input_metadata
+                )
+            )
+        return meta_data
+
+    @staticmethod
+    def __extract_baa_metadata(meta_data, field):
+        """ Meta-data extractor
+
+        Extract meta data from summary json file.
+
+        Parameters
+        ----------
+        meta_data : dict
+            Dictionnary containing the meta-data.
+        field: str
+            Field (key) to extract.
+
+        Returns
+        -------
+        value: str or int
+            Requested field extracted from the meta-data dict.
+        """
+
+        if field in meta_data.keys():
+            return meta_data[field]
+        else:
+            raise KeyError(
+                'Information ({}) not found in meta-data file.'.format(field)
+            )
 
 
 def read_raw_bba(
@@ -193,7 +313,9 @@ def read_raw_bba(
     start_time=None,
     period=None,
     engine='c',
-    impute_missing=False
+    impute_missing=False,
+    use_metadata_json=True,
+    metadata_fname=None
 ):
     r"""Reader function for files produced by the biobankAccelerometerAnalysis
     package.
@@ -230,6 +352,14 @@ def read_raw_bba(
         If set to True, use missing data imputation from the biobankanalysis
         package.
         Default is False.
+    use_metadata_json: bool, optional.
+        If set to True, extract meta-data from summary json file.
+        Default is True.
+    metadata_fname: str, optional
+        Path to the summary json file.
+        If None, the path to the summary json file is inferred from the input
+        file (/path/to/XXX-timeSeries.csv.gz -> /path/to/XXX-summary.json).
+        Default is None.
 
     Returns
     -------
@@ -245,5 +375,7 @@ def read_raw_bba(
         start_time=start_time,
         period=period,
         engine=engine,
-        impute_missing=impute_missing
+        impute_missing=impute_missing,
+        use_metadata_json=use_metadata_json,
+        metadata_fname=metadata_fname
     )
