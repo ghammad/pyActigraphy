@@ -1,6 +1,7 @@
 import json
 import os
 import pandas as pd
+import re
 
 from ..base import BaseRaw
 from accelerometer.utils import date_parser
@@ -268,7 +269,25 @@ class RawBBA(BaseRaw):
             meta_data = json.load(file)
 
         # check filename consistency:
-        if meta_data['file-name'] != os.path.basename(input_fname):
+        # - META-DATA: file-name = 'basename'.cwa[.gz]
+        # - INPUT DATA: input_fname = 'basename'-timeSeries.csv[.gz]
+
+        match_basename = re.match(
+            pattern=r'^(\w*)-timeSeries.csv(\.gz)?',
+            string=os.path.basename(input_fname)
+        )
+        if match_basename:
+            input_basename = match_basename.groups()[0]
+        else:
+            raise ValueError(
+                'Could extract file basename (XXX-timeSeries.csv.gz)'
+                + ' from input filename: {}'.format(input_fname)
+            )
+
+        if not re.match(
+            pattern=r'{}.(cwa|CWA)(\.gz)?'.format(input_basename),
+            string='sample.cwa.gz'
+        ):
             raise ValueError(
                 'Attempting to read a metadata file referring to another '
                 + 'input file.\n'
