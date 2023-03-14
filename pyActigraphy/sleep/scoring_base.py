@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import re
-from .scoring import roenneberg, sleep_midpoint, sri
+from .scoring import csm, roenneberg, sleep_midpoint, sri
 from .scoring.utils import rescore
 from scipy.ndimage import binary_closing, binary_opening
 from ..filters import _create_inactivity_mask
@@ -311,7 +311,7 @@ class ScoringMixin(object):
 
     def CK(
         self,
-        settings='10sec_max_overlap',
+        settings='30sec_max_non_overlap',
         threshold=1.0,
         rescoring=True
     ):
@@ -334,11 +334,10 @@ class ScoringMixin(object):
               per minute
             * "30sec_max_non_overlap": maximum 30-second nonoverlapping epoch
               per minute
-            Default is "max30sec_non_overlap".
 
+            Default is "30sec_max_non_overlap".
         threshold: float, optional
             Threshold value for scoring sleep/wake. Default is 1.0.
-
         rescoring: bool, optional
             If set to True, Webster's rescoring rules are applied [2]_.
             Default is True.
@@ -531,7 +530,7 @@ class ScoringMixin(object):
     def Sadeh(
         self,
         offset=7.601,
-        weights=np.array([-0.065, -1.08, -0.056, -0.703], np.float),
+        weights=np.array([-0.065, -1.08, -0.056, -0.703], float),
         threshold=0.0
     ):
         r"""Sadeh algorithm for sleep identification
@@ -622,7 +621,7 @@ class ScoringMixin(object):
             0.0000,  # b_{+8}
             0.0000,  # b_{+9}
             0.0000   # b_{+10}
-            ], np.float),
+            ], float),
         threshold=1.0
     ):
         r"""Scripps Clinic algorithm for sleep-wake identification.
@@ -858,6 +857,116 @@ class ScoringMixin(object):
 
         return _oakley(self.data, window, threshold)
 
+    def CSM(
+        self,
+        settings="auto",
+        score_rest=2,
+        score_sleep=1,
+        binarize=False
+    ):
+        """Condor Sleep Model
+
+        Sleep-wake scoring algorithm developed by Condor Instrument for their
+        ActTrust devices.
+
+        This algorithm works in a two-step fashion. First, it classifies all
+        epochs as wake or rest, as function of each epoch's score. Second,
+        using a more stringent scoring threshold, "rest" epoch are
+        re-classified as "sleep". A relabelling mechanism using the labels of
+        the surrounding epochs is also applied to consolidate periods of epochs
+        labelled as rest or sleep.
+
+        Parameters
+        ----------
+        settings: str, optional
+            Parameter settings for the CSM algorithm. Refers to the data
+            acquisition frequency. Available values are:
+            * "auto": use input data frequency.
+            * "30s": set parameters to optimal values obtained for a 30s data
+              acquisition frequency.
+            * "60s": set parameters to optimal values obtained for a 60s data
+              acquisition frequency.
+             Default is 'auto'.
+        score_rest: int, optional
+            State index for epochs labelled as "rest".
+            Default is 2.
+        score_sleep: int, optional
+            State index for epochs labelled as "sleep".
+            Default is 1.
+        binarize: bool, optional.
+            If set to True, the state index is set to 1 if the epoch is
+            labelled as sleep and 0 otherwise.
+            Defautl is False.
+
+        Returns
+        -------
+        csm : pandas.Series
+            Series of state indices.
+        """
+        # This algorithm has been developed for ActTrust devices from
+        # Condor Instrument. Verify if the reader has the appropriate type:
+        if self.format != 'ATR':
+            raise ValueError(
+                "The CSM has been developed for ActTrust devices.\n"
+                "It has not been validated for other devices."
+            )
+
+        # The CSM uses the ZCMn as input
+        data = self.ZCMn
+
+        if settings == "auto":
+            freq = data.index.freq.delta
+        else:
+            freq = pd.Timedelta(settings)
+
+        if freq == pd.Timedelta('60s'):
+            wa = np.array(
+                [34.5, 133, 529, 375, 408, 400.5, 1074, 2048.5, 2424.5]
+            )
+            wp = np.array(
+                [1920, 149.5, 257.5, 125, 111.5, 120, 69, 40.5]
+            )
+        elif freq == pd.Timedelta('30s'):
+            wa = np.array(
+                [69, 197, 730, 328, 269, 481, 528, 288, 304, 497, 1105, 1043,
+                 1378, 2719, 2852, 1997]
+            )
+            wp = np.array(
+                [2972, 868, 269, 30, 495, 20, 39, 211, 91, 132, 203, 37, 67,
+                 71, 81]
+            )
+        else:
+            raise NotImplementedError(
+                "The settings for this acquistion frequency ({}) ".format(
+                    freq
+                ) + "have not been implemented yet."
+            )
+
+        # The overall scaling and rescoring rules are identical for the
+        # different settings.
+        p_rest = 0.00005
+        p_sleep = 0.000464
+        pr_rest = 0
+        nr_rest = 0
+        pr_sleep = 1
+        nr_sleep = 0
+
+        states = csm(
+            data,
+            wa=wa,
+            wp=wp,
+            p_rest=p_rest,
+            p_sleep=p_sleep,
+            pr_rest=pr_rest,
+            nr_rest=nr_rest,
+            pr_sleep=pr_sleep,
+            nr_sleep=nr_sleep,
+            score_rest=score_rest,
+            score_sleep=score_sleep
+        )
+
+        return (states == score_sleep).astype(int) if binarize else states
+
     def SoD(
         self,
         freq='5min',
@@ -1003,17 +1112,17 @@ class ScoringMixin(object):
             Default is 4
         start: str, optional
             Start time of the period of interest.
-            Default: '12:00:00'
-            Supported times: 'AonT', 'AoffT', any 'HH:MM:SS'
+            Supported times: 'AonT', 'AoffT', any 'HH:MM:SS'.
+            Default: '12:00:00'.
         period: str, optional
             Period length.
-            Default is '10h'
+            Default is '10h'.
         algo: str, optional
             Sleep scoring algorithm to use.
             Default is 'Roenneberg'.
-        *args
+        args
             Variable length argument list passed to the scoring algorithm.
-        **kwargs
+        kwargs
             Arbitrary keyword arguements passed to the scoring algorithm.
 
         Returns
@@ -1025,11 +1134,12 @@ class ScoringMixin(object):
         .. warning:: The value of this variable depends on the convention used
                      by the underlying sleep scoring algorithm. The expected
                      convention is the following:
-                    * epochs scored as 1 refer to inactivity/sleep
 
-                    Otherwise, this variable will actually return the fraction
-                    of epochs scored as activity. The fraction of sleep can
-                    simply be recovered by calculating (1-fSOD).
+                     * epochs scored as 1 refer to inactivity/sleep
+
+                     Otherwise, this variable will actually return the fraction
+                     of epochs scored as activity. The fraction of sleep can
+                     simply be recovered by calculating (1-fSOD).
 
 
         Examples
@@ -1743,9 +1853,9 @@ class ScoringMixin(object):
         algo: str, optional
             Sleep scoring algorithm to use.
             Default is 'Roenneberg'.
-        *args
+        \*args
             Variable length argument list passed to the scoring algorithm.
-        **kwargs
+        \*\*kwargs
             Arbitrary keyword arguements passed to the scoring algorithm.
 
         Returns
@@ -1766,10 +1876,11 @@ class ScoringMixin(object):
                   \sum_{j=1}^M\sum_{i=1}^N
                   s_{i,j} \times cos\left(\frac{2\pi t_i}{1440}\right)
                   \right)
+
         with:
-            :math:`t_j`, time of day in minutes at epoch j,
-            :math:`\delta(s_{i,j}, s_{i+1,j}) = 1` if
-            :math:`s_{i,j} = s_{i+1,j}` and 0 otherwise.
+            * :math:`t_j`, time of day in minutes at epoch j,
+            * :math:`\delta(s_{i,j}, s_{i+1,j}) = 1` if
+              :math:`s_{i,j} = s_{i+1,j}` and 0 otherwise.
 
         References
         ----------
