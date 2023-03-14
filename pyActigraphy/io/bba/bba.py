@@ -1,9 +1,9 @@
 import pandas as pd
 import os
-import re
 
 from ..base import BaseRaw
 from accelerometer.utils import date_parser
+from accelerometer.summarisation import imputeMissing
 
 
 class RawBBA(BaseRaw):
@@ -40,6 +40,10 @@ class RawBBA(BaseRaw):
     engine: str, optional
         Parser engine to use. Argument passed to Pandas.
         Default is 'c'.
+    impute_missing: bool, optional
+        If set to True, use missing data imputation from the biobankanalysis
+        package.
+        Default is False.
     """
 
     def __init__(
@@ -50,7 +54,8 @@ class RawBBA(BaseRaw):
         frequency=None,
         start_time=None,
         period=None,
-        engine='c'
+        engine='c',
+        impute_missing=False
     ):
 
         # get absolute file path
@@ -93,6 +98,10 @@ class RawBBA(BaseRaw):
             period = stop_time - start_time
 
         data = data.loc[start_time:stop_time]
+
+        # Impute missing data (if required)
+        if impute_missing:
+            data = imputeMissing(data)
 
         # LIGHT
         self.__white_light = self.__extract_baa_data(
@@ -168,7 +177,6 @@ class RawBBA(BaseRaw):
     #     Parse date a date string of the form e.g.
     #     2020-06-14 19:01:15.123+0100 [Europe/London]
 
-
     #     '''
     #     tz = re.search(r'(?<=\[).+?(?=\])', t)
     #     if tz is not None:
@@ -184,7 +192,8 @@ def read_raw_bba(
     frequency=None,
     start_time=None,
     period=None,
-    engine='c'
+    engine='c',
+    impute_missing=False
 ):
     r"""Reader function for files produced by the biobankAccelerometerAnalysis
     package.
@@ -217,6 +226,10 @@ def read_raw_bba(
     engine: str, optional
         Parser engine to use. Argument passed to Pandas.
         Default is 'c'.
+    impute_missing: bool, optional
+        If set to True, use missing data imputation from the biobankanalysis
+        package.
+        Default is False.
 
     Returns
     -------
@@ -231,5 +244,6 @@ def read_raw_bba(
         frequency=frequency,
         start_time=start_time,
         period=period,
-        engine=engine
+        engine=engine,
+        impute_missing=impute_missing
     )
