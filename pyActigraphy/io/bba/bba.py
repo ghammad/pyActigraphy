@@ -268,13 +268,15 @@ class RawBBA(BaseRaw):
             meta_data = json.load(file)
 
         # check filename consistency:
-        if meta_data['file-name'] != os.path.abspath(input_fname):
+        if meta_data['file-name'] != os.path.basename(input_fname):
             raise ValueError(
                 'Attempting to read a metadata file referring to another '
-                'input file.\n- Input file: {}\n- Metadata ref: {}'.format(
-                    input_fname,
-                    input_metadata
+                + 'input file.\n'
+                + '- Input file: {}\n'.format(os.path.basename(input_fname))
+                + '- Metadata ref: {}\n'.format(
+                    os.path.basename(meta_data['file-name'])
                 )
+                + '- Metadata path: {}\n'.format(input_metadata)
             )
         return meta_data
 
