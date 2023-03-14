@@ -199,7 +199,14 @@ class RawReader(ForwardMetricsMixin):
     @property
     def activity_report(self):
         r"""Activity report accessor"""
-        return concat([iread.activity_report for iread in self.readers])
+
+        report = concat([iread.activity_report for iread in self.readers])
+        # Sort by subject ID
+        report.sort_values('ID', inplace=True)
+        # Reset index
+        report.reset_index(inplace=True, drop=True)
+
+        return report
 
 
 def read_raw(
