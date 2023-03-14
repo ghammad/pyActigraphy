@@ -1,7 +1,9 @@
 import pandas as pd
 import os
+import re
 
 from ..base import BaseRaw
+from accelerometer.utils import date_parser
 
 
 class RawBBA(BaseRaw):
@@ -35,6 +37,9 @@ class RawBBA(BaseRaw):
         Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
         Default is None (i.e all the data).
+    engine: str, optional
+        Parser engine to use. Argument passed to Pandas.
+        Default is 'c'.
     """
 
     def __init__(
@@ -44,7 +49,8 @@ class RawBBA(BaseRaw):
         uuid=None,
         frequency=None,
         start_time=None,
-        period=None
+        period=None,
+        engine='c'
     ):
 
         # get absolute file path
@@ -53,10 +59,10 @@ class RawBBA(BaseRaw):
         # read file
         data = pd.read_csv(
             input_fname,
+            engine=engine,
             index_col=['time'],
-            date_parser=lambda x: pd.to_datetime(
-                x, format='%Y-%m-%d %H:%M:%S.%f%z', exact=False
-            )
+            parse_dates=['time'],
+            date_parser=date_parser
         )
 
         if frequency is not None:
@@ -156,6 +162,20 @@ class RawBBA(BaseRaw):
 
         return data.loc[:, column] if column in data.columns else None
 
+    # @staticmethod
+    # def __parse_baa_dt(t):
+    #     '''
+    #     Parse date a date string of the form e.g.
+    #     2020-06-14 19:01:15.123+0100 [Europe/London]
+
+
+    #     '''
+    #     tz = re.search(r'(?<=\[).+?(?=\])', t)
+    #     if tz is not None:
+    #         tz = tz.group()
+    #     t = re.sub(r'\[(.*?)\]', '', t)
+    #     return pd.to_datetime(t, utc=True).tz_convert(tz)
+
 
 def read_raw_bba(
     input_fname,
@@ -164,6 +184,7 @@ def read_raw_bba(
     frequency=None,
     start_time=None,
     period=None,
+    engine='c'
 ):
     r"""Reader function for files produced by the biobankAccelerometerAnalysis
     package.
@@ -193,6 +214,9 @@ def read_raw_bba(
         Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
         Default is None (i.e all the data).
+    engine: str, optional
+        Parser engine to use. Argument passed to Pandas.
+        Default is 'c'.
 
     Returns
     -------
@@ -207,4 +231,5 @@ def read_raw_bba(
         frequency=frequency,
         start_time=start_time,
         period=period,
+        engine=engine
     )
