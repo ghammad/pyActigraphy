@@ -286,12 +286,13 @@ class RawBBA(BaseRaw):
 
         if not re.match(
             pattern=r'{}.(cwa|CWA)(\.gz)?'.format(input_basename),
-            string='sample.cwa.gz'
+            string=meta_data['file-name']
         ):
             raise ValueError(
                 'Attempting to read a metadata file referring to another '
                 + 'input file.\n'
                 + '- Input file: {}\n'.format(os.path.basename(input_fname))
+                + '- Extracted basename: {}\n'.format(input_basename)
                 + '- Metadata ref: {}\n'.format(
                     os.path.basename(meta_data['file-name'])
                 )
