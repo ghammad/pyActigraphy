@@ -13,6 +13,7 @@ frequency = pd.Timedelta(sampling_period, unit='s')
 start_time = '01/01/2000 08:00:00'
 N = 1440
 period = pd.Timedelta(N*sampling_period, unit='s')
+A = 100  # oscillation amplitude
 
 # Set seed for reproducibility
 np.random.seed(0)
@@ -21,8 +22,8 @@ sine_wave = generate_series(
     generate_sinewave(
         N=N,  # number of samples
         T=24*60*sampling_period,  # period in sec: 24*60*60
-        Ts=60,  # sampling rate (sec.)
-        A=100,  # oscillation amplitude
+        Ts=sampling_period,  # sampling rate (sec.)
+        A=A,  # oscillation amplitude
         add_noise=False,  # add gaussian noise
         noise_power=0,
         offset=True  # offset oscillations between 0 and +2A
@@ -79,8 +80,8 @@ def test_report_activity_perc():
     ].sum()
 
     assert (
-        (report_sum['sum'] == 1440*100)
-        & (report_sum['mean'] == pytest.approx(2*100, rel=0.01))
-        & (report_sum['median'] == pytest.approx(2*100, rel=0.01))
-        & (report_sum['count'] == pytest.approx(1440, rel=0.05))
+        (report_sum['sum'] == N*A)
+        & (report_sum['mean'] == pytest.approx(2*A, rel=0.01))
+        & (report_sum['median'] == pytest.approx(2*A, rel=0.01))
+        & (report_sum['count'] == pytest.approx(N, rel=0.05))
     )
