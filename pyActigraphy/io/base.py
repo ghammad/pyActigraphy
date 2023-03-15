@@ -5,6 +5,7 @@ import warnings
 from pandas.tseries.frequencies import to_offset
 from ..filters import FiltersMixin
 from ..metrics import MetricsMixin, _interval_maker
+from ..reports import ActivityReport, create_sleep_report
 from ..sleep import SleepDiary, ScoringMixin, SleepBoutMixin
 
 
@@ -335,3 +336,148 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
     @sleep_diary.setter
     def sleep_diary(self, value):
         self.__sleep_diary = value
+
+    def create_activity_report(
+        self,
+        cut_points,
+        labels=None,
+        threshold=None,
+        start_time=None,
+        stop_time=None,
+        oformat=None,
+        verbose=False
+    ):
+        r"""Activity report.
+
+        Create an activity report with aggregated statistics on activity levels
+        and time spent between the specified cut-points.
+
+        Parameters
+        ----------
+        cut_points: array
+            Activity cut-points. If all the values are below 1, they are
+            interpreted as percentiles of the activity counts. Lower
+            (i.e -infinity count) and upper (i.e infinity count) boundaries are
+            automatically added.
+        labels: array, optional
+            Labels for the intervals defined by the cut points.
+            The number of labels should be N+1 for N cut-points.
+            If set to None, the cut points are used to define the labels.
+            Default is None.
+        threshold: float, optional
+            If not set to None, discard data below threshold before computing
+            activity ranges.
+            Default is None.
+        start_time: str, optional
+            If not set to None, discard data before start time,
+            on a daily basis.
+            Supported time string: 'HH:MM:SS'
+            Default is None.
+        stop_time: str, optional
+            If not set to None, discard data after stop time, on a daily basis.
+            Supported time string: 'HH:MM:SS'
+            Default is None.
+        oformat: str, optional
+            Output format. Available formats: 'minute' or 'timedelta'.
+            If set to 'minute', the result is in number of minutes.
+            If set to 'timedelta', the result is a pd.Timedelta.
+            If set to None, the result is in number of epochs.
+            Default is None.
+        verbose: bool, optional
+            If set to True, print out info about the cut points.
+            Default is False.
+        """
+        # Create activity report
+        self.__activity_report = ActivityReport(self.data, cut_points, labels)
+        # Fill the activity report
+        self.__activity_report.fit(
+            threshold=threshold,
+            start_time=start_time,
+            stop_time=stop_time,
+            oformat=oformat,
+            verbose=verbose
+        )
+        # Reset and rename index
+        self.__activity_report.results.reset_index(inplace=True)
+        self.__activity_report.results.rename(
+            columns={'index': 'activity level'}, inplace=True
+        )
+
+        # Add recording name
+        self.__activity_report.results.loc[:, 'ID'] = self.display_name
+
+    @property
+    def activity_report(self):
+        r"""Activity report accessor"""
+        # self.__activity_report.results.name = self.name
+        return self.__activity_report.pretty_results()
+
+    def create_sleep_report(
+        self,
+        states=['NIGHT'],
+        state_scoring={'NIGHT': 1},
+        convert_td_to_num_min=True,
+        verbose=False,
+        scoring_algo='Scripps',
+        *args,
+        **kwargs
+    ):
+        r"""Sleep report.
+
+        Create an sleep report using the periods reported in the sleep diary as
+        periods of interest.
+
+        Parameters
+        ----------
+        states: list
+            List of types of periods of interest. Should match the types
+            reported in the sleep diary file.
+        state_scoring: dict
+            Expected scores from the sleep algorithm for the states of
+            interest.
+        convert_dt_to_num_min: bool, optional
+            If set to True, all durations are reported in minutes instead of
+            pd.Timedelta.
+        verbose: bool, optional
+            If set to True, print out info about periods found in the sleep
+            diary.
+            Default is False.
+        scoring_algo: str, optional
+            Sleep/wake scoring algorithm to use.
+            Default is 'Scripps'.
+        *args
+            Variable length argument list passed to the scoring algorithm.
+        **kwargs
+            Arbitrary keyword arguments passed to the scoring algorithm.
+        """
+
+        # Check if sleep diary is available
+        if self.sleep_diary is None:
+            warning_msg = (
+                'The sleep diary is None. '
+                'Please run the "read_sleep_diary" function.'
+            )
+            print(warning_msg)
+            return None
+
+        # Retrieve sleep scoring function dynamically by name
+        sleep_algo = getattr(self, scoring_algo)
+
+        # Sleep scoring
+        scoring = sleep_algo(*args, **kwargs)
+
+        # Create sleep report
+        self.__sleep_report = create_sleep_report(
+            self.sleep_diary,
+            scoring,
+            states=states,
+            state_scoring=state_scoring,
+            convert_td_to_num_min=convert_td_to_num_min,
+            verbose=verbose,
+        )
+
+    @property
+    def sleep_report(self):
+        r"""Sleep report accessor"""
+        self.__sleep_report.name = self.name
+        return self.__sleep_report
