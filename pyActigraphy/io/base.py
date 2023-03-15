@@ -4,7 +4,7 @@ import warnings
 
 from pandas.tseries.frequencies import to_offset
 from ..filters import FiltersMixin
-from ..metrics import MetricsMixin
+from ..metrics import MetricsMixin, _interval_maker
 from ..reports import ActivityReport, create_sleep_report
 from ..sleep import SleepDiary, ScoringMixin, SleepBoutMixin
 
@@ -128,7 +128,7 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
                 data = self.raw_data
         else:
             data = self.raw_data
-        return data[self.start_time:self.start_time+self.period]
+        return data.loc[self.start_time:self.start_time+self.period]
 
     @property
     def raw_light(self):
@@ -138,18 +138,8 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
     # TODO: @lru_cache(maxsize=6) ???
     @property
     def light(self):
-        r"""Indexed light extracted from the raw file.
-        If mask_inactivity is set to true, the `mask` is used
-        to filter out inactive data.
-        """
-        if self.__light is None:
-            return self.__light
-
-        if self.mask_inactivity is True:
-            light = self.raw_light.where(self.mask > 0)
-        else:
-            light = self.raw_light
-        return light[self.start_time:self.start_time+self.period]
+        r"""Light measurement performed by the device"""
+        return self.__light
 
     @property
     def mask_inactivity(self):
@@ -181,13 +171,16 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
             # Create a mask if it does not exist
             if self.inactivity_length is not None:
                 self.create_inactivity_mask(self.inactivity_length)
+                return self.__mask.loc[
+                    self.start_time:self.start_time+self.period
+                ]
             else:
                 warnings.warn(
                     'Inactivity length set to None. Could not create a mask.',
                     UserWarning
                 )
-
-        return self.__mask
+        else:
+            return self.__mask.loc[self.start_time:self.start_time+self.period]
 
     @mask.setter
     def mask(self, value):
@@ -202,9 +195,23 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
     def exclude_if_mask(self, value):
         self.__exclude_if_mask = value
 
-    def mask_fraction(self):
+    def mask_fraction(self, start=None, stop=None):
         r"""Fraction of masked data"""
-        return 1.-(self.mask.sum()/len(self.mask))
+        return 1.-(
+            self.mask.loc[start:stop].sum()/len(self.mask.loc[start:stop])
+        )
+
+    def mask_fraction_period(self, period='7D', verbose=False):
+        r"""Mask fraction per consecutive periods"""
+
+        # Compute consecutive intervals
+        intervals = _interval_maker(self.data.index, period, verbose)
+
+        results = [
+            self.mask_fraction(start=time[0], stop=time[1])
+            for time in intervals
+        ]
+        return results
 
     def length(self):
         r"""Number of data acquisition points"""
@@ -247,7 +254,7 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
         elif to_offset(freq).delta == self.frequency:
             return data
 
-        resampled_data = data.resample(freq).sum()
+        resampled_data = data.resample(freq, origin='start').sum()
         if self.mask_inactivity is True:
             if self.mask is None:
                 warnings.warn(
@@ -260,9 +267,9 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
                 )
                 return resampled_data
             elif self.exclude_if_mask:
-                resampled_mask = self.mask.resample(freq).min()
+                resampled_mask = self.mask.resample(freq, origin='start').min()
             else:
-                resampled_mask = self.mask.resample(freq).max()
+                resampled_mask = self.mask.resample(freq, origin='start').max()
             return resampled_data.where(resampled_mask > 0)
         else:
             return resampled_data
@@ -281,7 +288,7 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
             )
             return light
         else:
-            return light.resample(freq).sum()
+            return light.resample(freq, origin='start').sum()
 
     def read_sleep_diary(
             self,

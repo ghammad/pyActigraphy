@@ -136,7 +136,9 @@ def _test_sleep_bout(uncleaned_binary_data, period='12h'):
     return corr
 
 
-def _clean_sleep_bout(uncleaned_binary_data, period='12h', n_succ=3):
+def _clean_sleep_bout(
+    uncleaned_binary_data, period='12h', r_consec_below='30Min'
+):
     r'''Find the time index of the sleep offset.
 
     The sleep offset is defined as the index at which the current time series
@@ -152,10 +154,10 @@ def _clean_sleep_bout(uncleaned_binary_data, period='12h', n_succ=3):
         Maximal period of the test series.
         Default is '12h'
 
-    n_succ : int, optional
-        Number of successive elements to consider when searching for the
-        maximum correlation peak.
-        Default is 3.
+    r_consec_below : str, optional
+        Time range to consider, past the potential correlation peak when
+        searching for the maximum correlation peak.
+        Default is '30Min'.
 
     Return
     ----------
@@ -167,7 +169,8 @@ def _clean_sleep_bout(uncleaned_binary_data, period='12h', n_succ=3):
     corr = _test_sleep_bout(uncleaned_binary_data, period=period)
 
     # Find the date_time index corresponding to the highest correlation peak
-    sleep_offset_idx = find_highest_peak_idx(corr, n_succ=n_succ)
+    n_succ = int(pd.Timedelta(r_consec_below)/uncleaned_binary_data.index.freq)
+    sleep_offset_idx = find_highest_peak_idx(corr, n_succ=n_succ+1)
 
     if sleep_offset_idx is not None:
         return uncleaned_binary_data.index[sleep_offset_idx]
@@ -182,7 +185,7 @@ def roenneberg(
     threshold=0.15,
     min_seed_period='30Min',
     max_test_period='12h',
-    n_succ=3
+    r_consec_below='30Min'
 ):
     r'''Automatic sleep detection.
 
@@ -212,10 +215,10 @@ def roenneberg(
         Maximal period of the test series.
         Default is '12h'
 
-    n_succ : int, optional
-        Number of successive elements to consider when searching for the
-        maximum correlation peak.
-        Default is 3.
+    r_consec_below : str, optional
+        Time range to consider, past the potential correlation peak when
+        searching for the maximum correlation peak.
+        Default is '30Min'.
 
     Return
     ----------
@@ -259,7 +262,7 @@ def roenneberg(
         sleep_offset = _clean_sleep_bout(
             sw.loc[sleep_onset:sleep_onset+pd.Timedelta(max_test_period)],
             period=max_test_period,
-            n_succ=n_succ
+            r_consec_below=r_consec_below
         )
         if sleep_offset is not None:
             sw.loc[sleep_onset:sleep_offset] = 1

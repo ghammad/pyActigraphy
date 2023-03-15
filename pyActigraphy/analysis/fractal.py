@@ -10,27 +10,69 @@ from scipy.stats import linregress
 @njit
 def _profile(X):
 
-    trend = np.mean(X)
+    trend = np.nanmean(X)
 
-    prof = np.cumsum(X - trend)
+    prof = np.nancumsum(X - trend)
 
     return prof
 
 
+@njit
+def _rolling_window(x, n):
+    r'''Split input array in an array of window-sized arrays, shifted by one
+    element. Emulate rolling function of pandas.Series.
+
+    Parameters
+    ----------
+    x : (N,) array_like
+        Input
+    n : int
+        Size of the rolling window
+    Returns
+    -------
+    roll : (N,n) array_like
+        Array containing the successive windows.
+    '''
+
+    shape = x.shape[:-1] + (x.shape[-1] - n + 1, n)
+    strides = x.strides + (x.strides[-1],)
+    return np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
+
+
 @njit  # (float64[:,:](float64[:],int64,boolean))
-def _segmentation(x, n, backward=False):
+def _segmentation(x, n, backward=False, overlap=False):
+    r'''Split input array in an array of window-sized arrays, shifted by one
+    element. Emulate rolling function of pandas.Series.
 
-    # Number of elements
-    N = len(x)
+    Parameters
+    ----------
+    x : (N,) array_like
+        Input.
+    n : int
+        Window size
+    backward: bool, optional.
+        If set to True, runs the segmentation from the end of the input array.
+        Default is False.
+    overlap: bool, optional
+        If set to True, consecutive windows overlap by 50%.
+        Default is False.
+    Returns
+    -------
+    seg : (N,n) array_like
+        Array containing the successive windows.
+    '''
 
-    # Number of segments of length n (and remainder r)
-    nseg, r = divmod(N, n)
+    # Compute consecutive windows, shifted by one element
+    windows = _rolling_window(x, n)
+
+    # Compute distance between the center of two consecutive windows
+    stride = n//2 if overlap else n
 
     # Non-overlapping segments
     if backward:
-        segments = x[r:].reshape(nseg, n)
+        segments = windows[::stride]
     else:
-        segments = x[:N-r].reshape(nseg, n)
+        segments = windows[::-stride]
 
     return segments
 
@@ -126,7 +168,7 @@ class Fractal():
         return _profile(X)
 
     @classmethod
-    def segmentation(cls, x, n, backward=False):
+    def segmentation(cls, x, n, backward=False, overlap=False):
         r'''Segmentation function
 
         Segment the signal into non-overlapping windows of equal size.
@@ -137,8 +179,11 @@ class Fractal():
             Input array.
         n: int
             Window size.
-        backward: bool
-            If set to True, start segmentation for the end of the signal.
+        backward: bool, optional
+            If set to True, start segmentation from the end of the signal.
+            Default is False.
+        overlap: bool, optional
+            If set to True, consecutive windows overlap by 50%.
             Default is False.
 
         Returns
@@ -146,7 +191,7 @@ class Fractal():
         segments: numpy.array
             Non-overlappping windows of size n.
         '''
-        return _segmentation(x, n, backward)
+        return _segmentation(x, n, backward, overlap)
 
     @classmethod
     def local_msq_residuals(cls, segment, deg):
@@ -180,7 +225,7 @@ class Fractal():
         return fit_result[0][0]/n if fit_result[0].size != 0 else np.nan
 
     @classmethod
-    def fluctuations(cls, X, n, deg):
+    def fluctuations(cls, X, n, deg, overlap=False):
         r'''Fluctuation function
 
         The fluctuations are defined as the mean squared residuals
@@ -194,6 +239,9 @@ class Fractal():
             Window size.
         deg: int
             Degree(s) of the fitting polynomials.
+        overlap: bool, optional
+            If set to True, consecutive windows during segmentation
+            overlap by 50%. Default is False.
 
         Returns
         -------
@@ -205,8 +253,8 @@ class Fractal():
         Y = cls.profile(X)
 
         # Define non-overlapping segments
-        segments_fwd = cls.segmentation(Y, n, backward=False)
-        segments_bwd = cls.segmentation(Y, n, backward=True)
+        segments_fwd = cls.segmentation(Y, n, backward=False, overlap=overlap)
+        segments_bwd = cls.segmentation(Y, n, backward=True, overlap=overlap)
 
         # Assert equal numbers of segments
         assert(segments_fwd.shape == segments_bwd.shape)
@@ -246,7 +294,7 @@ class Fractal():
         return qth_msq
 
     @classmethod
-    def dfa(cls, ts, n_array, deg=1, log=False):
+    def dfa(cls, ts, n_array, deg=1, overlap=False, log=False):
         r'''Detrended Fluctuation Analysis function
 
         Compute the q-th order mean squared fluctuations for different segment
@@ -261,6 +309,9 @@ class Fractal():
         deg: int, optional
             Degree(s) of the fitting polynomials.
             Default is 1.
+        overlap: bool, optional
+            If set to True, consecutive windows during segmentation
+            overlap by 50%. Default is False.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -284,14 +335,19 @@ class Fractal():
 
         iterable = (
             cls.q_th_order_mean_square(
-                cls.fluctuations(ts.values, n=int(n), deg=deg),
+                cls.fluctuations(
+                    ts.values,
+                    n=int(n),
+                    deg=deg,
+                    overlap=overlap
+                ),
                 q=2
             ) for n in factor*n_array
         )
 
         q_th_order_msq_fluc = np.fromiter(
             iterable,
-            dtype=np.float,
+            dtype='float',
             count=len(n_array)
         )
 
@@ -302,7 +358,15 @@ class Fractal():
 
     @classmethod
     def dfa_parallel(
-        cls, ts, n_array, deg=1, log=False, n_jobs=2, prefer=None, verbose=0
+        cls,
+        ts,
+        n_array,
+        deg=1,
+        overlap=False,
+        log=False,
+        n_jobs=2,
+        prefer=None,
+        verbose=0
     ):
         r'''Detrended Fluctuation Analysis function
 
@@ -318,6 +382,9 @@ class Fractal():
         deg: int, optional
             Degree(s) of the fitting polynomials.
             Default is 1.
+        overlap: bool, optional
+            If set to True, consecutive windows during segmentation
+            overlap by 50%. Default is False.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -357,12 +424,13 @@ class Fractal():
         )(delayed(cls.fluctuations)(
             ts.values,
             n=int(n),
-            deg=deg
+            deg=deg,
+            overlap=overlap
         ) for n in factor*n_array)
 
         q_th_order_msq_fluc = np.fromiter(
             (cls.q_th_order_mean_square(fluct, q=2) for fluct in flucts),
-            dtype=np.float,
+            dtype='float',
             count=len(flucts)
         )
 
@@ -489,8 +557,8 @@ class Fractal():
                 n_x[t-n_min] = n_array[t]
                 h_ratios[t-n_min] = ratio
                 h_ratios_err[t-n_min] = ratio*np.sqrt(
-                    alpha_1_rel_err*alpha_1_rel_err +
-                    alpha_2_rel_err*alpha_2_rel_err
+                    alpha_1_rel_err*alpha_1_rel_err
+                    + alpha_2_rel_err*alpha_2_rel_err
                 )
 
             if log:
@@ -499,7 +567,82 @@ class Fractal():
         return h_ratios, h_ratios_err, n_x
 
     @classmethod
-    def mfdfa(cls, ts, n_array, q_array, deg=1, log=False):
+    def local_slopes(cls, F_n, n_array, s=2, log=False, verbose=False):
+        r'''Local slopes of log(F(n)) versus log(n).
+
+        The local slope of the curve log(F(n)) is calculated at each point by
+        fitting polynomial of degree 1, using the 2*s surrounding points.
+        At the boundaries of {F(n)}, the local slope is calculated with a
+        reduced number of points (min. 3).
+
+        Parameters
+        ----------
+        F_n : array
+            Array of fluctuations.
+        n_array: array of int
+            Time scales (i.e window sizes). In minutes.
+        s: int, optional
+            Half size of the window used to estimate the local slope.
+            The total window size is (2*s+1). Default is 2.
+        log: bool, optional
+            If set to True, assume that the input values have already been
+            log-transformed.
+            Default is False.
+        verbose: bool, optional
+            If set to True, display informations about the calculations.
+            Default is False.
+
+        Returns
+        -------
+        alpha_loc, alpha_loc_err, n_x: arrays of floats
+            Local slopes (alpha_loc), and associated uncertainties, obtained
+            for various time scales n_x.
+
+        '''
+        # Check if inputs have the same dimension
+        assert len(F_n) == len(n_array)
+
+        # Window size: 2*s + 1
+        win_size = 2*s + 1
+        # Check if the number of points for a single linear fit is at least 3
+        if(win_size < 3):
+            raise ValueError(
+                ("Cannot perform a linear fit on series of less than"
+                 " 3 points; `s` must be greater or equal to 1.")
+            )
+        # Check if the number of points to fit is less than 2*n_min
+        if(len(n_array) < win_size):
+            raise ValueError(
+                ("Total number of points to fit is less than (2*s+1).")
+            )
+
+        n_x = np.empty(len(n_array)-2*s)
+        alpha_loc = np.empty(len(n_array)-2*s)
+        alpha_loc_err = np.empty(len(n_array)-2*s)
+
+        for t in np.arange(0, len(n_array)-win_size+1):
+            # Fit the series of points (F(n) vs n) up to point n_x
+            if verbose:
+                print("-"*50)
+                print("Fit info:")
+                print("- t: {}".format(t))
+                print("- current point: {}".format(t+s))
+                print("- F_n[t-s:t+s]: {}".format(F_n[t:t+win_size]))
+                print("- n_array[t-s:t+s]: {}".format(n_array[t:t+win_size]))
+                print("- array center: {}".format(n_array[t+s]))
+
+            alpha_loc[t], alpha_loc_err[t] = cls.generalized_hurst_exponent(
+                    F_n[t:t+win_size], n_array[t:t+win_size], log
+            )
+            n_x[t] = n_array[t+s]
+
+            if log:
+                n_x = np.exp(n_x)
+
+        return alpha_loc, alpha_loc_err, n_x
+
+    @classmethod
+    def mfdfa(cls, ts, n_array, q_array, deg=1, overlap=False, log=False):
         r'''Multifractal Detrended Fluctuation Analysis function
 
         Compute the q-th order mean squared fluctuations for different segment
@@ -516,6 +659,9 @@ class Fractal():
         deg: int, optional
             Degree(s) of the fitting polynomials.
             Default is 1.
+        overlap: bool, optional
+            If set to True, consecutive windows during segmentation
+            overlap by 50%. Default is False.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -539,11 +685,16 @@ class Fractal():
 
         q_th_order_msq_fluctuations = np.empty(
             (len(n_array), len(q_array)),
-            dtype=np.float
+            dtype='float'
         )
         for idx, n in enumerate(factor*n_array):
 
-            fluct = cls.fluctuations(ts.values, n=int(n), deg=deg)
+            fluct = cls.fluctuations(
+                ts.values,
+                n=int(n),
+                deg=deg,
+                overlap=overlap
+            )
             q_th_order_msq_fluctuations[idx] = [
                 cls.q_th_order_mean_square(fluct, q=q) for q in q_array
             ]
@@ -560,6 +711,7 @@ class Fractal():
         n_array,
         q_array,
         deg=1,
+        overlap=False,
         log=False,
         n_jobs=2,
         prefer=None,
@@ -581,6 +733,9 @@ class Fractal():
         deg: int, optional
             Degree(s) of the fitting polynomials.
             Default is 1.
+        overlap: bool, optional
+            If set to True, consecutive windows during segmentation
+            overlap by 50%. Default is False.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -620,7 +775,8 @@ class Fractal():
         )(delayed(cls.fluctuations)(
             ts.values,
             n=int(n),
-            deg=deg
+            deg=deg,
+            overlap=overlap
         ) for n in factor*n_array)
 
         q_th_order_msq_fluctuations = np.array([
@@ -632,3 +788,37 @@ class Fractal():
             q_th_order_msq_fluctuations = np.log(q_th_order_msq_fluctuations)
 
         return q_th_order_msq_fluctuations
+
+    @staticmethod
+    def equally_spaced_logscale_range(n, start=1, stop=1440):
+        """Equally spaced numbers in log-scale
+
+        Construct a series of equally spaced numbers in log scale
+
+        Parameters
+        ----------
+        n: int
+            Time scales (i.e window sizes). In minutes.
+        start: int, optional
+            Starting number.
+            Default is 1.
+        stop: int, optional
+            End number.
+            Default is 1440.
+
+        Returns
+        -------
+        n_array: numpy.array of int
+            Array of equally spaced numbers.
+        """
+
+        # Create series of exponentiated numbers evenly spaced in log-space.
+        units = np.geomspace(start, stop, num=n, endpoint=True, dtype=int)
+
+        # Cast as int and remove duplicates
+        n_array = np.unique(units)
+
+        # Filter out numbers < start
+        n_array = n_array[np.where(n_array >= start)]
+
+        return n_array

@@ -8,10 +8,15 @@
   :target: https://pypi.org/project/pyActigraphy
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg
   :target: https://doi.org/10.5281/zenodo.2537920
+.. image:: https://bestpractices.coreinfrastructure.org/projects/6933/badge
+  :target: https://bestpractices.coreinfrastructure.org/projects/6933
+.. image:: https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg
+  :target: CODE_OF_CONDUCT.md
+
 
 **pyActigraphy**
 ================
-Open-source python package for actigraphy data visualization and analysis.
+Open-source python package for actigraphy and light exposure data visualization and analysis.
 
 
 This package is meant to provide a comprehensive set of tools to:
@@ -27,6 +32,8 @@ This package is meant to provide a comprehensive set of tools to:
 
 ..
 
+* **NEW** read light exposure data recorded by the aforementioned devices (when available)
+
 * clean the raw data and mask spurious periods of inactivity
 
 * produce activity profile plots
@@ -41,6 +48,8 @@ This package is meant to provide a comprehensive set of tools to:
 
 ..
 
+* **NEW** compute light exposure metrics (TAT, :math:`MLit^{500}`, summary statistics, ...)
+
 * automatically detect rest periods using various algorithms (Cole-Kripke, Sadeh, ..., Crespo, Roenneberg)
 
 * perform complex analyses:
@@ -52,6 +61,23 @@ This package is meant to provide a comprehensive set of tools to:
   * Singular Spectrum Analysis (SSA)
   * and much more...
 
+Citation
+========
+
+We are very pleased to announce that the `v1.0 <https://github.com/ghammad/pyActigraphy/releases/tag/v1.0>`_ version of the pyActigraphy package has been published. So, if you find this package useful in your research, please consider citing:
+
+  Hammad G, Reyt M, Beliy N, Baillet M, Deantoni M, Lesoinne A, et al. (2021) pyActigraphy: Open-source python package for actigraphy data visualization and    analysis. PLoS Comput Biol 17(10): e1009514. https://doi.org/10.1371/journal.pcbi.1009514
+
+pyLight
+=======
+
+In the context of the Daylight Academy Project, `The role of daylight for humans <https://daylight.academy/projects/state-of-light-in-humans>`_ and
+thanks to the support of its members, Dr. Mirjam Münch and Prof. `Manuel Spitschan <https://github.com/spitschan>`_,
+a pyActigraphy module for analysing light exposure data has been developed, **pyLight**.
+This module is part of the Human Light Exposure Database and is included in pyActigraphy version `v1.1 <https://github.com/ghammad/pyActigraphy/releases/tag/v1.1>`_ and higher.
+
+A manuscript describing the *pyLight* module is available as a `preprint <https://osf.io/msk9n/>`_.
+
 Code and documentation
 ======================
 
@@ -59,10 +85,11 @@ The pyActigraphy package is open-source and its source code is accessible `onlin
 
 
 An online documentation of the package is also available `here <https://ghammad.github.io/pyActigraphy/index.html>`_.
-It contains `notebooks <https://ghammad.github.io/pyActigraphy/tutorials.html>`_ illustrating various functionalities of the package.
+It contains `notebooks <https://ghammad.github.io/pyActigraphy/tutorials.html>`_ illustrating various functionalities of the package. Specific tutorials for the processing and the analysis of light exposure data with pyLight are also available.
 
 Installation
 ============
+
 In a (bash) shell, simply type:
 
 * For users:

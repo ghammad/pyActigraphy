@@ -57,10 +57,10 @@ cosinor = Cosinor()
 def test_cosinor_default_params():
 
     assert (
-        (cosinor.fit_initial_params['Acrophase'] == np.pi) &
-        (cosinor.fit_initial_params['Amplitude'] == 50) &
-        (cosinor.fit_initial_params['Period'] == 1440) &
-        (cosinor.fit_initial_params['Mesor'] == 50)
+        (cosinor.fit_initial_params['Acrophase'] == np.pi)
+        & (cosinor.fit_initial_params['Amplitude'] == 50)
+        & (cosinor.fit_initial_params['Period'] == 1440)
+        & (cosinor.fit_initial_params['Mesor'] == 50)
     )
 
 
@@ -68,20 +68,20 @@ def test_cosinor_set_params():
 
     cosinor.fit_initial_params = fit_params
     assert (
-        (cosinor.fit_initial_params['Acrophase'] == 0) &
-        (cosinor.fit_initial_params['Amplitude'] == 50) &
-        (cosinor.fit_initial_params['Period'] == 1440) &
-        (cosinor.fit_initial_params['Mesor'] == 100)
+        (cosinor.fit_initial_params['Acrophase'] == 0)
+        & (cosinor.fit_initial_params['Amplitude'] == 50)
+        & (cosinor.fit_initial_params['Period'] == 1440)
+        & (cosinor.fit_initial_params['Mesor'] == 100)
     )
 
 
 def test_cosinor_fit():
 
     # From sinus (data) to cosinus (fit function): Add - Pi/2 to initial phase
-    results = cosinor.fit(raw_sinewave)
+    results = cosinor.fit(raw_sinewave.data)
     assert (
-        (results.params['Acrophase'].value == approx(-np.pi/2, abs=0.05)) &
-        (results.params['Amplitude'].value == approx(100.0, rel=0.05)) &
-        (results.params['Period'].value == approx(1440.0, rel=0.05)) &
-        (results.params['Mesor'].value == approx(100.0, rel=0.05))
+        (results.params['Acrophase'].value == approx(-np.pi/2, abs=0.05))
+        & (results.params['Amplitude'].value == approx(100.0, rel=0.05))
+        & (results.params['Period'].value == approx(1440.0, rel=0.05))
+        & (results.params['Mesor'].value == approx(100.0, rel=0.05))
     )

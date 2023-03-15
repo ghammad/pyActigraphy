@@ -84,6 +84,7 @@ celerybeat-schedule
 
 # Environments
 .env
+.envrc
 .venv
 env/
 venv/
@@ -103,3 +104,9 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# SonarQube
+.scannerwork/
+
+# Mac OS stuff
+.DS_Store

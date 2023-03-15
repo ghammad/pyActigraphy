@@ -43,6 +43,11 @@ def test_read_raw_dqt_length():
     assert rawDQT.length() == 43200
 
 
-# def test_mixin():
-#
-#     assert rawDQT.length() == 11718
+def test_read_raw_dqt_light():
+
+    assert len(rawDQT.light.get_channel('light')) == 43200
+
+
+def test_read_raw_dqt_white_light():
+
+    assert len(rawDQT.light.get_channel('light')) == len(rawDQT.white_light)

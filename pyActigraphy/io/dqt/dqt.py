@@ -1,9 +1,9 @@
 import pandas as pd
-import numpy as np
 import os
 import warnings
 
 from ..base import BaseRaw
+from pyActigraphy.light import LightRecording
 
 
 class RawDQT(BaseRaw):
@@ -72,12 +72,12 @@ class RawDQT(BaseRaw):
             index_col=0,
             parse_dates=[0],
             infer_datetime_format=True,
-            dtype=np.float,
+            dtype=float,
             na_values='x'
         ).asfreq(freq)
 
         # Convert activity from string to float
-        index_data['activity'] = index_data['activity'].astype(np.float)
+        index_data['activity'] = index_data['activity'].astype(float)
 
         if start_time is not None:
             start_time = pd.to_datetime(start_time)
@@ -93,6 +93,12 @@ class RawDQT(BaseRaw):
 
         index_data = index_data[start_time:stop_time]
 
+        # Light
+        if 'light' in index_data.columns:
+            index_light = index_data.loc[:, 'light']
+        else:
+            index_light = None
+
         # call __init__ function of the base class
         super().__init__(
             name=name,
@@ -103,8 +109,21 @@ class RawDQT(BaseRaw):
             period=period,
             frequency=freq,
             data=index_data['activity'],
-            light=index_data['light']
+            light=LightRecording(
+                name=name,
+                uuid=uuid,
+                data=index_light.to_frame(),
+                frequency=index_light.index.freq
+            ) if index_light is not None else None
         )
+
+    @property
+    def white_light(self):
+        r"""Value of the light intensity (lux)."""
+        if self.light is None:
+            return None
+        else:
+            return self.light.get_channel('light')
 
     @classmethod
     def __match_string(cls, header, match):

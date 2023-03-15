@@ -53,6 +53,22 @@ Analysis examples
 .. _ssa: pyActigraphy-SSA.ipynb
 
 
+pyLight examples
+================
+
+The *pyActigraphy* package contains a module dedicated to the analysis of light
+exposure data, named *pyLight*. The following tutorials specifically illustrate
+its functionalities:
+
+* A gentle introduction to the basics of *pyLight*: `pylight_intro`_
+* How to process light exposure data with *pyLight*: `pylight_manip`_
+* How to calculate various light exposure metrics with *pyLight*: `pylight_metrics`_
+
+.. _pylight_intro: pyLight-Intro.ipynb
+.. _pylight_manip: pyLight-DataManip.ipynb
+.. _pylight_metrics: pyLight-Metrics.ipynb
+
+
 Work-in-progress
 ================
 
