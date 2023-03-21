@@ -22,9 +22,11 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
         period,
         frequency,
         data,
-        light
+        light,
+        fpath=None
     ):
 
+        self.__fpath = fpath
         self.__name = name
         self.__display_name = name
         self.__uuid = uuid
@@ -43,6 +45,11 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
         self.__exclude_if_mask = True
 
         self.__sleep_diary = None
+
+    @property
+    def fpath(self):
+        r"""Absolute path of the raw input file."""
+        return self.__fpath
 
     @property
     def name(self):

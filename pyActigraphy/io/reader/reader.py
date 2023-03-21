@@ -57,6 +57,12 @@ class RawReader(ForwardMetricsMixin):
         else:
             self.__readers.append(raw_reader)
 
+    def fpaths(self):
+
+        return [
+            read.fpath for read in self.__readers
+        ]
+
     def names(self):
 
         return [

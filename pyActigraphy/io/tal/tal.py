@@ -135,6 +135,7 @@ class RawTAL(BaseRaw):
 
         # call __init__ function of the base class
         super().__init__(
+            fpath=input_fname,
             name=name,
             uuid=uuid,
             format='TAL',

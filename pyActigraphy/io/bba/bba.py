@@ -168,6 +168,7 @@ class RawBBA(BaseRaw):
 
         # call __init__ function of the base class
         super().__init__(
+            fpath=input_fname,
             name=name if name is not None else os.path.basename(input_fname),
             uuid=uuid,
             format='BAA',
