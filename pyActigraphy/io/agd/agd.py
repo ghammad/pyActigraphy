@@ -58,6 +58,7 @@ class RawAGD(BaseRaw):
             int(settings.at['epochlength', 'settingValue']),
             unit='s'
         )
+        self.__model = settings.at['devicename', 'settingValue']
 
         # extract proximity (wear/no-wear) informations
         try:
@@ -172,6 +173,11 @@ class RawAGD(BaseRaw):
     def white_light(self):
         r"""White light levels (in lux.)"""
         return self.__extract_light_channel("whitelight")
+
+    @property
+    def model(self):
+        r"""Model of the device: devicename"""
+        return self.__model
 
     @staticmethod
     def __to_timestamps(ticks):
