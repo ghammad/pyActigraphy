@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import re
 import warnings
 
 from ..base import BaseRaw
@@ -28,8 +29,9 @@ class RawAWD(BaseRaw):
         Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
         Default is None (i.e all the data).
-    dtype: dtype
-        The dtype of the raw data. Default is np.int.
+    engine: str, optional
+        Parser engine to use.
+        Default is 'python'.
     """
 
     frequency_code = {
@@ -75,7 +77,8 @@ class RawAWD(BaseRaw):
         header_size=7,
         frequency=None,
         start_time=None,
-        period=None
+        period=None,
+        engine='python'
     ):
 
         # get absolute file path
@@ -123,13 +126,13 @@ class RawAWD(BaseRaw):
         data = pd.read_csv(
             filepath_or_buffer=input_fname,
             encoding='utf-8',
-            engine='python',
+            engine=engine,
             header=None,
             delim_whitespace=True,
             names=all_channels,
             index_col=False,
             usecols=use_channels,
-            skiprows=7,
+            skiprows=header_size,
             dtype={
                 'Activity': int,
                 'Light': float,
@@ -211,8 +214,9 @@ class RawAWD(BaseRaw):
             'Only the first data column will be used, assuming it corresponds '
             'to activity counts.'
         )
-        if uuid[0].isalpha():  # check if character is alphabetic
-            dcode = uuid[0].capitalize()
+        match = re.match(pattern=r'^([A-Za-z])[0-9a-fA-F]+', string=uuid)
+        if match:  # check if UUID matches the expected pattern
+            dcode = match.groups()[0]
             if dcode in RawAWD.device_code.keys():
                 return dcode
             else:
@@ -245,7 +249,8 @@ def read_raw_awd(
     header_size=7,
     frequency=None,
     start_time=None,
-    period=None
+    period=None,
+    engine='python'
 ):
     r"""Reader function for raw AWD file.
 
@@ -268,6 +273,9 @@ def read_raw_awd(
         Cf. #timeseries-offset-aliases in
         <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
         Default is None (i.e all the data).
+    engine: str, optional
+        Parser engine to use.
+        Default is 'python'.
 
     Returns
     -------
@@ -280,5 +288,6 @@ def read_raw_awd(
         header_size=header_size,
         frequency=frequency,
         start_time=start_time,
-        period=period
+        period=period,
+        engine=engine
     )
