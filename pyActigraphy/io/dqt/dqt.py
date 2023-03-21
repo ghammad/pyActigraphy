@@ -112,7 +112,7 @@ class RawDQT(BaseRaw):
             light=LightRecording(
                 name=name,
                 uuid=uuid,
-                data=index_light.to_frame(),
+                data=index_light.to_frame(name='whitelight'),
                 frequency=index_light.index.freq
             ) if index_light is not None else None
         )
@@ -123,7 +123,7 @@ class RawDQT(BaseRaw):
         if self.light is None:
             return None
         else:
-            return self.light.get_channel('light')
+            return self.light.get_channel('whitelight')
 
     @classmethod
     def __match_string(cls, header, match):
