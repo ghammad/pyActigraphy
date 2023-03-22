@@ -48,6 +48,11 @@ def test_read_raw_agd_data_frequency():
     assert pd.Timedelta(rawAGD.data.index.freq) == rawAGD.frequency
 
 
+def test_agd_light():
+
+    assert rawAGD.light.get_channel_list() == ['whitelight']
+
+
 def test_agd_incline_off():
 
     assert rawAGD.inclineOff.sum() == 12710

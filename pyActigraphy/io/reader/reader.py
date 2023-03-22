@@ -1,6 +1,7 @@
 import glob
 import warnings
 
+from pandas import concat
 from pandas import Timedelta
 from pandas.tseries.frequencies import to_offset
 from pyActigraphy.metrics import ForwardMetricsMixin
@@ -55,6 +56,12 @@ class RawReader(ForwardMetricsMixin):
             ))
         else:
             self.__readers.append(raw_reader)
+
+    def fpaths(self):
+
+        return [
+            read.fpath for read in self.__readers
+        ]
 
     def names(self):
 
@@ -176,6 +183,37 @@ class RawReader(ForwardMetricsMixin):
             print('Could not find a SST log file. Please run the read_sst_log'
                   ' function before using the `apply_sst` function.')
 
+    def create_activity_report(self, *args, **kwargs):
+        r"""Activity report.
+
+        Create an activity report with the fraction of time spent with an
+        activity level comprised between the specified cut-points.
+
+        Parameters
+        ----------
+        *args
+            Variable length argument list passed to the individual
+            `create_activity_report` function.
+        **kwargs
+            Arbitrary keyword arguments passed to the individual
+            `create_activity_report` function.
+        """
+        # Create activity reports
+        for iread in self.readers:
+            iread.create_activity_report(*args, **kwargs)
+
+    @property
+    def activity_report(self):
+        r"""Activity report accessor"""
+
+        report = concat([iread.activity_report for iread in self.readers])
+        # Sort by subject ID
+        report.sort_values('ID', inplace=True)
+        # Reset index
+        report.reset_index(inplace=True, drop=True)
+
+        return report
+
 
 def read_raw(
     input_path, reader_type, n_jobs=1, prefer=None, verbose=0, **kwargs
@@ -209,7 +247,7 @@ def read_raw(
     verbose: int
         Display a progress meter if set to a value > 0.
         Default is 0.
-    kwargs
+    **kwargs
         Arbitrary keyword arguments passed to the underlying reader
         function.
 

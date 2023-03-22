@@ -5,6 +5,7 @@ import sqlite3
 import warnings
 
 from ..base import BaseRaw
+from pyActigraphy.light import LightRecording
 
 
 class RawAGD(BaseRaw):
@@ -57,6 +58,7 @@ class RawAGD(BaseRaw):
             int(settings.at['epochlength', 'settingValue']),
             unit='s'
         )
+        self.__model = settings.at['devicename', 'settingValue']
 
         # extract proximity (wear/no-wear) informations
         try:
@@ -136,6 +138,7 @@ class RawAGD(BaseRaw):
 
         # call __init__ function of the base class
         super().__init__(
+            fpath=input_fname,
             name=name,
             uuid=uuid,
             format='AGD',
@@ -144,7 +147,12 @@ class RawAGD(BaseRaw):
             period=period,
             frequency=freq,
             data=data['mag'],
-            light=data['lux'] if 'lux' in data.columns else None
+            light=LightRecording(
+                name=name,
+                uuid=uuid,
+                data=data['lux'].to_frame(name='whitelight'),
+                frequency=data.index.freq
+            ) if 'lux' in data.columns else None
         )
 
         # Close sqlite3 connection
@@ -155,6 +163,22 @@ class RawAGD(BaseRaw):
             return self.__position.loc[:, column]
         else:
             return None
+
+    def __extract_light_channel(self, channel):
+        if self.light is None:
+            return None
+        else:
+            return self.light.get_channel(channel)
+
+    @property
+    def white_light(self):
+        r"""White light levels (in lux.)"""
+        return self.__extract_light_channel("whitelight")
+
+    @property
+    def model(self):
+        r"""Model of the device: devicename"""
+        return self.__model
 
     @staticmethod
     def __to_timestamps(ticks):

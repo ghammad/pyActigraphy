@@ -17,11 +17,13 @@ Uniform API to read multiple actigraphy data formats.
 Currently, the supported formats are:
 
 * wGT3X-BT, Actigraph (.agd file format only);
-* Actiwatch 4 and MotionWatch 8, CamNtech (.awd and .mtn);
+* Actiwatch 4, 7, L(-Plus) and MotionWatch 8, CamNtech (.awd and .mtn);
 * ActTrust 2, Condor Instruments (.txt);
 * Daqtometer, Daqtix (.csv);
 * Actiwatch 2 and Actiwatch Spectrum Plus, Philips Respironics (.csv)
 * Tempatilumi (CE Brasil)
+* MESA dataset file format
+* Biobankaccelerometer file format (BBA)
 
 Associated functions:
 
@@ -34,7 +36,9 @@ Associated functions:
    read_raw_agd
    read_raw_atr
    read_raw_awd
+   read_raw_bba
    read_raw_dqt
+   read_raw_mesa
    read_raw_mtn
    read_raw_rpx
    read_raw_tal
@@ -75,6 +79,12 @@ Rest-Activity Rhythms
 =====================
 
 * Non-parametric and transition probability methods: :mod:`pyActigraphy.metrics.MetricsMixin`
+
+
+Rest and Activity reports
+=========================
+
+* Activity report: :mod:`pyActigraphy.reports.ActivityReport`
 
 
 Rest-activity scoring and sleep diary

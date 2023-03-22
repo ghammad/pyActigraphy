@@ -24,11 +24,20 @@ This package is meant to provide a comprehensive set of tools to:
 * read native actigraphy data files with various formats:
 
   * Actigraph: wGT3X-BT
-  * CamNtech: Actiwatch 4 and MotionWatch 8
+  * CamNtech: Actiwatch 4, 7, L(-Plus) and MotionWatch 8
   * Condor Instrument: ActTrust 2
   * Daqtix: Daqtometer
   * Respironics: Actiwatch 2 and Actiwatch Spectrum (plus)
   * Tempatilumi (CE Brasil)
+
+..
+
+* **NEW** read actigraphy data format from the `MESA dataset <https://sleepdata.org/datasets/mesa>`_, hosted by the `National Sleep Research Resource <https://sleepdata.org>`_.
+
+* **NEW** read actigraphy data files produced by the `accelerometer <https://biobankaccanalysis.readthedocs.io/en/latest/index.html>`_ package that can be used to calibrate and convert raw accelerometer data recorded with:
+
+  * Axivity: AX3, device used by UK Biobank,
+  * Activinsights: GENEActiv, used by the Whitehall II study.
 
 ..
 
