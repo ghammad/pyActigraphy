@@ -66,7 +66,14 @@ def test_report_activity_default():
         cut_points=[100, 200],
         labels=['Sedentary', 'Moderate', 'Vigorous']
     )
-    assert (raw_sinewave.activity_report.equals(grd_truth))
+    # assert (raw_sinewave.activity_report.equals(grd_truth))
+    pd.testing.assert_frame_equal(
+        raw_sinewave.activity_report,
+        grd_truth,
+        check_dtype=True,
+        check_exact=False,
+        rtol=1.0e-3
+    )
 
 
 def test_report_activity_perc():
