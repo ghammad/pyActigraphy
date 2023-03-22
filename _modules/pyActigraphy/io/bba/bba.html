@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyActigraphy.io.bba.bba &#8212; pyActigraphy 1.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../../_static/bootstrap-sphinx.js"></script>
+
+  </head><body>
+
+  <div id="navbar" class="navbar navbar-inverse navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../../../index.html">
+          pyActigraphy</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+                <li><a href="../../../../tutorials.html">Tutorials</a></li>
+                <li><a href="../../../../api.html">API</a></li>
+                <li><a href="../../../../changelog.html">What's new</a></li>
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"></ul>
+</li>
+              
+            
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="body col-md-12 content" role="main">
+      
+  <h1>Source code for pyActigraphy.io.bba.bba</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">BaseRaw</span>
+<span class="kn">from</span> <span class="nn">accelerometer.utils</span> <span class="kn">import</span> <span class="n">date_parser</span>
+<span class="kn">from</span> <span class="nn">accelerometer.summarisation</span> <span class="kn">import</span> <span class="n">imputeMissing</span>
+
+
+<span class="k">class</span> <span class="nc">RawBBA</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Raw object from files produced by the</span>
+<span class="sd">    [biobankanalysis](</span>
+<span class="sd">        https://biobankaccanalysis.readthedocs.io/en/latest/index.html</span>
+<span class="sd">    ) package.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_fname: str</span>
+<span class="sd">        Path to the .csv(.gz) file.</span>
+<span class="sd">    name: str, optional</span>
+<span class="sd">        Name of the recording.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    uuid: str, optional</span>
+<span class="sd">        Device UUID.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    frequency: str, optional</span>
+<span class="sd">        Sampling frequency.</span>
+<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        If None, the sampling frequency is inferred from the data. Otherwise,</span>
+<span class="sd">        the data are resampled to the specified frequency.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    start_time: datetime-like, optional</span>
+<span class="sd">        Read data from this time.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    period: str, optional</span>
+<span class="sd">        Length of the read data.</span>
+<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        Default is None (i.e all the data).</span>
+<span class="sd">    engine: str, optional</span>
+<span class="sd">        Parser engine to use. Argument passed to Pandas.</span>
+<span class="sd">        Default is &#39;c&#39;.</span>
+<span class="sd">    impute_missing: bool, optional</span>
+<span class="sd">        If set to True, use missing data imputation from the biobankanalysis</span>
+<span class="sd">        package.</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    use_metadata_json: bool, optional.</span>
+<span class="sd">        If set to True, extract meta-data from summary json file.</span>
+<span class="sd">        Default is True.</span>
+<span class="sd">    metadata_fname: str, optional</span>
+<span class="sd">        Path to the summary json file.</span>
+<span class="sd">        If None, the path to the summary json file is inferred from the input</span>
+<span class="sd">        file (/path/to/XXX-timeSeries.csv.gz -&gt; /path/to/XXX-summary.json).</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_fname</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">uuid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span>
+        <span class="n">impute_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">use_metadata_json</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">metadata_fname</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+
+        <span class="c1"># get absolute file path</span>
+        <span class="n">input_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span>
+
+        <span class="c1"># read file</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+            <span class="n">input_fname</span><span class="p">,</span>
+            <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span>
+            <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span>
+            <span class="n">date_parser</span><span class="o">=</span><span class="n">date_parser</span>
+        <span class="p">)</span>
+
+        <span class="c1"># read meta-data file (if found):</span>
+        <span class="k">if</span> <span class="n">use_metadata_json</span><span class="p">:</span>
+            <span class="n">meta_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__read_baa_metadata_json</span><span class="p">(</span>
+                <span class="n">input_fname</span><span class="p">,</span> <span class="n">metadata_fname</span>
+            <span class="p">)</span>
+
+            <span class="c1"># extract UUID if not provided</span>
+            <span class="k">if</span> <span class="n">uuid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">uuid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_baa_metadata</span><span class="p">(</span><span class="n">meta_data</span><span class="p">,</span> <span class="s1">&#39;file-deviceID&#39;</span><span class="p">)</span>
+
+            <span class="c1"># extract QC calibration marker</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__qc_calibrated_on_own_data</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__extract_baa_metadata</span><span class="p">(</span>
+                    <span class="n">meta_data</span><span class="p">,</span>
+                    <span class="s1">&#39;quality-calibratedOnOwnData&#39;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># extract QC DST cross-over marker</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__qc_daylight_savings_crossover</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__extract_baa_metadata</span><span class="p">(</span>
+                    <span class="n">meta_data</span><span class="p">,</span>
+                    <span class="s1">&#39;quality-daylightSavingsCrossover&#39;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="n">freq</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">frequency</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">inferred_freq</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;The sampling frequency:</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;- cannot be inferred from the data</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;AND</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;- is NOT explicity passed to the reader function.</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">asfreq</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">inferred_freq</span><span class="p">)</span>
+            <span class="n">freq</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="p">)</span>
+
+        <span class="c1"># set start and stop times</span>
+        <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_time</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">period</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">period</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
+            <span class="n">stop_time</span> <span class="o">=</span> <span class="n">start_time</span><span class="o">+</span><span class="n">period</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stop_time</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">period</span> <span class="o">=</span> <span class="n">stop_time</span> <span class="o">-</span> <span class="n">start_time</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_time</span><span class="p">:</span><span class="n">stop_time</span><span class="p">]</span>
+
+        <span class="c1"># Impute missing data (if required)</span>
+        <span class="k">if</span> <span class="n">impute_missing</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">imputeMissing</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># LIGHT</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__white_light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_baa_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;light&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># MVPA</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__mvpa</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_baa_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;moderate-vigorous&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Sedentary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sedentary</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_baa_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;sedentary&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Sleep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sleep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_baa_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;sleep&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># MET</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__met</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_baa_data</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;MET&#39;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># call __init__ function of the base class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">fpath</span><span class="o">=</span><span class="n">input_fname</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">input_fname</span><span class="p">),</span>
+            <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
+            <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;BAA&#39;</span><span class="p">,</span>
+            <span class="n">axial_mode</span><span class="o">=</span><span class="s1">&#39;tri-axial&#39;</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+            <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+            <span class="n">frequency</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;acc&#39;</span><span class="p">],</span>
+            <span class="n">light</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">white_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the white light illuminance in lux.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__white_light</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mvpa</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the moderate-vigorous physical activity binary index.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mvpa</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sedentary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the sedentary physical activity binary index.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sedentary</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the sleep binary index.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sleep</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">met</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the MET index.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__met</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isCalibratedOnOwnData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Boolean indicating if the data have been calibrated.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__qc_calibrated_on_own_data</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isDSTCrossing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Boolean indicating if the data have been acquired during a DST.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__qc_daylight_savings_crossover</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__extract_baa_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Data reader</span>
+
+<span class="sd">        Read requested data column.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data: pd.DataFrame</span>
+<span class="sd">            Input data frame.</span>
+<span class="sd">        column: str</span>
+<span class="sd">            Column name.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ts : pd.Series</span>
+<span class="sd">            Data contained in the requested column.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">column</span><span class="p">]</span> <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__read_baa_metadata_json</span><span class="p">(</span><span class="n">input_fname</span><span class="p">,</span> <span class="n">metadata_fname</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Meta-data reader</span>
+
+<span class="sd">        Read meta data summary json file produced when processing .CWA file</span>
+<span class="sd">        into X-timeSeries.csv.gz file with the biobank acc. package.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        input_fname: str</span>
+<span class="sd">            Path to the .csv(.gz) file.</span>
+<span class="sd">        metadata_fname: str</span>
+<span class="sd">            Path to the meta-data (summary.json) file.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        metadata : dict</span>
+<span class="sd">            Dictionnary containing the meta-data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># read meta-data file (if found):</span>
+        <span class="k">if</span> <span class="n">metadata_fname</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">input_metadata</span> <span class="o">=</span> <span class="n">input_fname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="s1">&#39;-timeSeries.csv.gz&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;-summary.json&#39;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">input_metadata</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">metadata_fname</span><span class="p">)</span>
+
+        <span class="c1"># load meta data json file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_metadata</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">meta_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+        <span class="c1"># check filename consistency:</span>
+        <span class="c1"># - META-DATA: file-name = &#39;basename&#39;.cwa[.gz]</span>
+        <span class="c1"># - INPUT DATA: input_fname = &#39;basename&#39;-timeSeries.csv[.gz]</span>
+
+        <span class="n">match_basename</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+            <span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;^(\w*)-timeSeries.csv(\.gz)?&#39;</span><span class="p">,</span>
+            <span class="n">string</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">match_basename</span><span class="p">:</span>
+            <span class="n">input_basename</span> <span class="o">=</span> <span class="n">match_basename</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Could extract file basename (XXX-timeSeries.csv.gz)&#39;</span>
+                <span class="o">+</span> <span class="s1">&#39; from input filename: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+            <span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.(cwa|CWA)(\.gz)?&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_basename</span><span class="p">),</span>
+            <span class="n">string</span><span class="o">=</span><span class="n">meta_data</span><span class="p">[</span><span class="s1">&#39;file-name&#39;</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Attempting to read a metadata file referring to another &#39;</span>
+                <span class="o">+</span> <span class="s1">&#39;input file.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="o">+</span> <span class="s1">&#39;- Input file: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">input_fname</span><span class="p">))</span>
+                <span class="o">+</span> <span class="s1">&#39;- Extracted basename: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_basename</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s1">&#39;- Metadata ref: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">meta_data</span><span class="p">[</span><span class="s1">&#39;file-name&#39;</span><span class="p">])</span>
+                <span class="p">)</span>
+                <span class="o">+</span> <span class="s1">&#39;- Metadata path: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_metadata</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">meta_data</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__extract_baa_metadata</span><span class="p">(</span><span class="n">meta_data</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Meta-data extractor</span>
+
+<span class="sd">        Extract meta data from summary json file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        meta_data : dict</span>
+<span class="sd">            Dictionnary containing the meta-data.</span>
+<span class="sd">        field: str</span>
+<span class="sd">            Field (key) to extract.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        value: str or int</span>
+<span class="sd">            Requested field extracted from the meta-data dict.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">meta_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">meta_data</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="s1">&#39;Information (</span><span class="si">{}</span><span class="s1">) not found in meta-data file.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+            <span class="p">)</span>
+
+
+<div class="viewcode-block" id="read_raw_bba"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_bba.html#pyActigraphy.io.read_raw_bba">[docs]</a><span class="k">def</span> <span class="nf">read_raw_bba</span><span class="p">(</span>
+    <span class="n">input_fname</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">uuid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">,</span>
+    <span class="n">impute_missing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_metadata_json</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">metadata_fname</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for files produced by the biobankAccelerometerAnalysis</span>
+<span class="sd">    package.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_fname: str</span>
+<span class="sd">        Path to the BAA file.</span>
+<span class="sd">    name: str, optional</span>
+<span class="sd">        Name of the recording.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    uuid: str, optional</span>
+<span class="sd">        Device UUID.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    frequency: str, optional</span>
+<span class="sd">        Sampling frequency.</span>
+<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        If None, the sampling frequency is inferred from the data. Otherwise,</span>
+<span class="sd">        the data are resampled to the specified frequency.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    start_time: datetime-like, optional</span>
+<span class="sd">        Read data from this time.</span>
+<span class="sd">        Default is None.</span>
+<span class="sd">    period: str, optional</span>
+<span class="sd">        Length of the read data.</span>
+<span class="sd">        Cf. #timeseries-offset-aliases in</span>
+<span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
+<span class="sd">        Default is None (i.e all the data).</span>
+<span class="sd">    engine: str, optional</span>
+<span class="sd">        Parser engine to use. Argument passed to Pandas.</span>
+<span class="sd">        Default is &#39;c&#39;.</span>
+<span class="sd">    impute_missing: bool, optional</span>
+<span class="sd">        If set to True, use missing data imputation from the biobankanalysis</span>
+<span class="sd">        package.</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    use_metadata_json: bool, optional.</span>
+<span class="sd">        If set to True, extract meta-data from summary json file.</span>
+<span class="sd">        Default is True.</span>
+<span class="sd">    metadata_fname: str, optional</span>
+<span class="sd">        Path to the summary json file.</span>
+<span class="sd">        If None, the path to the summary json file is inferred from the input</span>
+<span class="sd">        file (/path/to/XXX-timeSeries.csv.gz -&gt; /path/to/XXX-summary.json).</span>
+<span class="sd">        Default is None.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    raw : Instance of RawBBA</span>
+<span class="sd">        An object containing preprocessed data from raw accelerometers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">RawBBA</span><span class="p">(</span>
+        <span class="n">input_fname</span><span class="o">=</span><span class="n">input_fname</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
+        <span class="n">frequency</span><span class="o">=</span><span class="n">frequency</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+        <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+        <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
+        <span class="n">impute_missing</span><span class="o">=</span><span class="n">impute_missing</span><span class="p">,</span>
+        <span class="n">use_metadata_json</span><span class="o">=</span><span class="n">use_metadata_json</span><span class="p">,</span>
+        <span class="n">metadata_fname</span><span class="o">=</span><span class="n">metadata_fname</span>
+    <span class="p">)</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

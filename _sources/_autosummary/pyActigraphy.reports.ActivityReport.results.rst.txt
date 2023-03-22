@@ -1,0 +1,6 @@
+﻿pyActigraphy.reports.ActivityReport.results
+===========================================
+
+.. currentmodule:: pyActigraphy.reports
+
+.. autoproperty:: ActivityReport.results

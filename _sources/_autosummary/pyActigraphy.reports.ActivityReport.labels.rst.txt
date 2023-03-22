@@ -1,0 +1,6 @@
+﻿pyActigraphy.reports.ActivityReport.labels
+==========================================
+
+.. currentmodule:: pyActigraphy.reports
+
+.. autoproperty:: ActivityReport.labels

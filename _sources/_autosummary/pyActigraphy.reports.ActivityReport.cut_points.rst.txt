@@ -1,0 +1,6 @@
+﻿pyActigraphy.reports.ActivityReport.cut\_points
+===============================================
+
+.. currentmodule:: pyActigraphy.reports
+
+.. autoproperty:: ActivityReport.cut_points

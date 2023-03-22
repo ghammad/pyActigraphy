@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>RawReader class &#8212; pyActigraphy 1.1 documentation</title>
+    <title>RawReader class &#8212; pyActigraphy 1.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -40,7 +40,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -104,10 +104,34 @@
 <dd class="field-odd"><p><strong>readers</strong> (<em>list</em>) – List of instances of RawXXX classes</p>
 </dd>
 </dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pyActigraphy.io.RawReader.activity_report">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">activity_report</span></span><a class="headerlink" href="#pyActigraphy.io.RawReader.activity_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Activity report accessor</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pyActigraphy.io.RawReader.apply_sst">
 <span class="sig-name descname"><span class="pre">apply_sst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/reader/reader.html#RawReader.apply_sst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.RawReader.apply_sst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set start time and duration in all readers</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyActigraphy.io.RawReader.create_activity_report">
+<span class="sig-name descname"><span class="pre">create_activity_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/reader/reader.html#RawReader.create_activity_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.RawReader.create_activity_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Activity report.</p>
+<p>Create an activity report with the fraction of time spent with an
+activity level comprised between the specified cut-points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Variable length argument list passed to the individual
+<cite>create_activity_report</cite> function.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments passed to the individual
+<cite>create_activity_report</cite> function.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

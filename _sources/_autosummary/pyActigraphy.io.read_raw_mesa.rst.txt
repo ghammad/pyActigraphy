@@ -1,0 +1,10 @@
+﻿pyActigraphy.io.read_raw_mesa
+=============================
+
+.. currentmodule:: pyActigraphy.io
+
+.. autofunction:: read_raw_mesa
+
+.. raw:: html
+
+    <div style='clear:both'></div>
