@@ -1137,6 +1137,13 @@ class LIDS():
             duration_min=duration_min,
             duration_max=duration_max
         )
+        if nan_frac_max is not None:
+            nanfiltered_sleep_bouts = self.nafilter(
+                filtered_sleep_bouts,
+                nan_frac_max
+            )
+        else:
+            nanfiltered_sleep_bouts = filtered_sleep_bouts
 
         # LIDS conversion
         # Resample activity counts and apply LIDS transformation
@@ -1146,7 +1153,7 @@ class LIDS():
                 resampling_freq=resampling_freq,
                 method=smooth_method,
                 resolution=smooth_resolution
-            ) for ts in filtered_sleep_bouts
+            ) for ts in nanfiltered_sleep_bouts
         ]
 
         return smooth_lids
