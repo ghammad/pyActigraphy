@@ -419,6 +419,34 @@ class LIDS():
         return filtered
 
     @classmethod
+    def nafilter(cls, ts_list, nan_frac_max):
+        r'''Filter data according to their fraction of NaN.
+
+        Parameters
+        ----------
+        ts_list: list of pandas.Series
+            Data to filter.
+        nan_frac_max: float,
+            Maximal NaN fraction for a time series to be kept.
+
+        Returns
+        -------
+        filtered: list of pandas.Series
+            List of filtered time series.
+        '''
+
+        def na_frac(s):
+            return s.isna().sum()/len(s)
+
+        from itertools import filterfalse
+        filtered = []
+        filtered[:] = filterfalse(
+            lambda x: na_frac(x) > nan_frac_max,
+            ts_list
+        )
+        return filtered
+
+    @classmethod
     def smooth(cls, ts, method, resolution):
         r'''Smooth data using a rolling window
 
@@ -1045,7 +1073,8 @@ class LIDS():
         resampling_freq='10min',
         smooth_method='mva',
         smooth_resolution='30Min',
-        concat_time_delta=None
+        concat_time_delta=None,
+        nan_frac_max=None
     ):
         r'''Data preprocessing for LIDS analysis
 
@@ -1079,6 +1108,10 @@ class LIDS():
         concat_time_delta: str, optional
             If not set to None, consecutive sleep bouts separated by less than
             'concat_time_delta' are concatenated.
+            Default is None.
+        nan_frac_max: float, optional
+            Maximal NaN fraction for a LIDS bout to be kept for analysis.
+            If None, no filtering on the NaN fraction is applied.
             Default is None.
 
         Returns
