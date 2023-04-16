@@ -66,7 +66,11 @@ class RawALU(BaseRaw):
         # extract informations from the header
         uuid = header['DEVICE_ID'][0]
         name = header['SUBJECT_NAME'][0]
-        freq = pd.Timedelta(60, unit='s')
+        if (header['INTERVAL'][0] == '-'):
+            value = 60
+        else:
+            value = int(header['INTERVAL'][0])
+        freq = pd.Timedelta(value, unit='s')
         self.__tat_thr = self.__extract_from_header(header, 'TAT_THRESHOLD')
 
         index_data = pd.read_csv(
@@ -119,7 +123,8 @@ class RawALU(BaseRaw):
         )
 
         # LIGHT
-        index_light = index_data.filter(regex=("LIGHT|F[1-8]|CLEAR|MELANOPIC_LUX"))
+        index_light = index_data.filter(
+            regex=("LIGHT|F[1-8]|CLEAR|MELANOPIC_LUX"))
 
         # call __init__ function of the base class
         super().__init__(
@@ -225,12 +230,12 @@ class RawALU(BaseRaw):
     def uvb_light(self):
         r"""Value of the light intensity in µw/cm²."""
         return self.__extract_light_channel("UVB LIGHT")
-    
+
     @property
     def f1_light(self):
         r"""Value of the light intensity in µw/cm²."""
         return self.__extract_light_channel("F1")
-    
+
     @property
     def f2_light(self):
         r"""Value of the light intensity in µw/cm²."""
@@ -240,32 +245,32 @@ class RawALU(BaseRaw):
     def f3_light(self):
         r"""Value of the light intensity in µw/cm²."""
         return self.__extract_light_channel("F3")
-    
+
     @property
     def f4_light(self):
         r"""Value of the light intensity in µw/cm²."""
         return self.__extract_light_channel("F4")
-    
+
     @property
     def f5_light(self):
         r"""Value of the light intensity in µw/cm²."""
         return self.__extract_light_channel("F5")
-    
+
     @property
     def f6_light(self):
         r"""Value of the light intensity in µw/cm²."""
         return self.__extract_light_channel("F6")
-    
+
     @property
     def f7_light(self):
         r"""Value of the light intensity in µw/cm²."""
         return self.__extract_light_channel("F7")
-    
+
     @property
     def f8_light(self):
         r"""Value of the light intensity in µw/cm²."""
         return self.__extract_light_channel("F8")
-    
+
     @property
     def clear_light(self):
         r"""Value of the light intensity in µw/cm²."""

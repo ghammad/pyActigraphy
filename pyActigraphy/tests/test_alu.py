@@ -9,7 +9,7 @@ FILE = inspect.getfile(inspect.currentframe())
 data_dir = op.join(op.dirname(op.abspath(FILE)), 'data')
 alu_path = op.join(data_dir, 'test_sample_alu.txt')
 
-# read AWD with default parameters
+# read ALU with default parameters
 rawALU = pyActigraphy.io.read_raw_alu(alu_path)
 
 
@@ -81,6 +81,7 @@ def test_read_raw_alu_light():
         & len(rawALU.light.get_channel('MELANOPIC_LUX')) == 4*1440
     )
 
+
 def test_read_raw_alu_period():
 
-    assert (rawALU.period) == pd.Timedelta('3 days 23:59:00')
+    assert (rawALU.duration()) == pd.Timedelta('4 days 00:00:00')
