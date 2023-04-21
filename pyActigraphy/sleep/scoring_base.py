@@ -907,7 +907,7 @@ class ScoringMixin(object):
         # Condor Instrument. Verify if the reader has the appropriate type:
         if self.format != 'ATR' and self.format != 'ALU':
             raise ValueError(
-                "The CSM has been developed for ActTrust devices.\n"
+                "The CSM has been developed for ActTrust and ActLumus devices.\n"
                 "It has not been validated for other devices."
             )
 

@@ -123,7 +123,7 @@ def csm(
     """Condor Sleep Model
 
     Sleep-wake scoring algorithm developed by Condor Instrument for their
-    ActTrust devices.
+    ActTrust and ActLumus devices.
 
     This algorithm works in a two-step fashion. First, it classifies all epochs
     as wake or rest, as function of each epoch's score. Second, using a more

@@ -25,7 +25,7 @@ This package is meant to provide a comprehensive set of tools to:
 
   * Actigraph: wGT3X-BT
   * CamNtech: Actiwatch 4, 7, L(-Plus) and MotionWatch 8
-  * Condor Instrument: ActTrust 2
+  * Condor Instrument: ActTrust 2 and ActLumus
   * Daqtix: Daqtometer
   * Respironics: Actiwatch 2 and Actiwatch Spectrum (plus)
   * Tempatilumi (CE Brasil)
