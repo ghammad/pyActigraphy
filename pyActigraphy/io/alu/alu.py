@@ -88,12 +88,12 @@ class RawALU(BaseRaw):
                 set(self.__default_modes))))
 
         # Check requested sampling mode is available:
-        if mode not in self.__available_modes:  # header['MODE'][0].split('/'):
+        if mode not in self.__available_modes:
             raise ValueError(
                 "The requested mode ({}) is not available".format(mode)
                 + " for this recording.\n"
                 + "Available modes are {}.".format(
-                    self.__available_modes  # header['MODE'][0]
+                    self.__available_modes
                 )
             )
 
@@ -143,7 +143,6 @@ class RawALU(BaseRaw):
                 data=index_light,
                 frequency=index_light.index.freq
             ) if index_light is not None else None
-            # self.__extract_from_data(index_data, 'LIGHT')
         )
 
     @property

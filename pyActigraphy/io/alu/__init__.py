@@ -1,6 +1,6 @@
 """Module to read ActLumus files."""
 
-# Author: Carlos Baumont <baumont.carlos@gmail.com>
+# Authors: Grégory Hammad <gregory.hammad@uliege.be>, Carlos Baumont <baumont.carlos@gmail.com>
 #
 # License: BSD (3-clause)
 
