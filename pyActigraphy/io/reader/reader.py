@@ -9,7 +9,9 @@ from joblib import Parallel, delayed
 from ..agd import read_raw_agd
 from ..atr import read_raw_atr
 from ..awd import read_raw_awd
+from ..bba import read_raw_bba
 from ..dqt import read_raw_dqt
+from ..mesa import read_raw_mesa
 from ..mtn import read_raw_mtn
 from ..rpx import read_raw_rpx
 from ..tal import read_raw_tal
@@ -231,8 +233,10 @@ def read_raw(
 
         * AGD ((w)GT3X(+)), ActiGraph)
         * ATR (ActTrust, Condor Instruments)
-        * AWD (ActiWatch 4, CamNtech)
+        * AWD (ActiWatch 4/7/L/L-Plus/T, CamNtech)
+        * BBA (Biobankaccelerometer)
         * DQT (Daqtometers, Daqtix)
+        * MESA (MESA dataset, NSRR)
         * MTN (MotionWatch8, CamNtech)
         * RPX (Actiwatch, Respironics)
         * TAL (Tempatilumi, CE Brasil)
@@ -257,7 +261,9 @@ def read_raw(
         An object containing raw data
     """
 
-    supported_types = ['AGD', 'ATR', 'AWD', 'DQT', 'MTN', 'RPX', 'TAL']
+    supported_types = [
+        'AGD', 'ATR', 'AWD', 'BBA', 'DQT', 'MESA', 'MTN', 'RPX', 'TAL'
+    ]
     if reader_type not in supported_types:
         raise ValueError(
             'Type {0} unsupported. Supported types: {1}'.format(
@@ -284,8 +290,14 @@ def read_raw(
         'AWD': lambda files: parallel_reader(
             n_jobs, read_raw_awd, files, prefer, verbose, **kwargs
         ),
+        'BBA': lambda files: parallel_reader(
+            n_jobs, read_raw_bba, files, prefer, verbose, **kwargs
+        ),
         'DQT': lambda files: parallel_reader(
             n_jobs, read_raw_dqt, files, prefer, verbose, **kwargs
+        ),
+        'MESA': lambda files: parallel_reader(
+            n_jobs, read_raw_mesa, files, prefer, verbose, **kwargs
         ),
         'MTN': lambda files: parallel_reader(
             n_jobs, read_raw_mtn, files, prefer, verbose, **kwargs
