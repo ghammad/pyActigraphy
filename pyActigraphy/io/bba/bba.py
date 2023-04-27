@@ -274,7 +274,7 @@ class RawBBA(BaseRaw):
         # - INPUT DATA: input_fname = 'basename'-timeSeries.csv[.gz]
 
         match_basename = re.match(
-            pattern=r'^(\w*)-timeSeries.csv(\.gz)?',
+            pattern=r'^(.+?)-timeSeries.csv(\.gz)?',
             string=os.path.basename(input_fname)
         )
         if match_basename:
@@ -287,7 +287,7 @@ class RawBBA(BaseRaw):
 
         if not re.match(
             pattern=r'{}.(cwa|CWA)(\.gz)?'.format(input_basename),
-            string=meta_data['file-name']
+            string=os.path.basename(meta_data['file-name'])
         ):
             raise ValueError(
                 'Attempting to read a metadata file referring to another '

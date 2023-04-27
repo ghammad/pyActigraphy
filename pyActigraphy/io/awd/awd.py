@@ -217,7 +217,7 @@ class RawAWD(BaseRaw):
         )
         match = re.match(pattern=r'^([A-Za-z])[0-9a-fA-F]+', string=uuid)
         if match:  # check if UUID matches the expected pattern
-            dcode = match.groups()[0]
+            dcode = match.groups()[0].upper()
             if dcode in RawAWD.device_code.keys():
                 return dcode
             else:
