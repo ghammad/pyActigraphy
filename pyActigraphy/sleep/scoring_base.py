@@ -867,7 +867,7 @@ class ScoringMixin(object):
         """Condor Sleep Model
 
         Sleep-wake scoring algorithm developed by Condor Instrument for their
-        ActTrust devices.
+        ActTrust and ActLumus devices.
 
         This algorithm works in a two-step fashion. First, it classifies all
         epochs as wake or rest, as function of each epoch's score. Second,
@@ -903,11 +903,11 @@ class ScoringMixin(object):
         csm : pandas.Series
             Series of state indices.
         """
-        # This algorithm has been developed for ActTrust devices from
+        # This algorithm has been developed for ActTrust and ActLumus devices from
         # Condor Instrument. Verify if the reader has the appropriate type:
-        if self.format != 'ATR':
+        if self.format != 'ATR' and self.format != 'ALU':
             raise ValueError(
-                "The CSM has been developed for ActTrust devices.\n"
+                "The CSM has been developed for ActTrust and ActLumus devices.\n"
                 "It has not been validated for other devices."
             )
 
