@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>What’s new &#8212; pyActigraphy 1.2 documentation</title>
+    <title>What’s new &#8212; pyActigraphy 1.2.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -15,7 +15,6 @@
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
@@ -40,7 +39,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.1</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -100,16 +99,27 @@
 <ul class="simple">
 <li><p><a class="reference internal" href="#what-s-new" id="id1">What’s new</a></p>
 <ul>
-<li><p><a class="reference internal" href="#v1-2-let-s-go-3d-march-2023" id="id2">v1.2 (“Let’s go 3D”, March 2023)</a></p></li>
-<li><p><a class="reference internal" href="#v1-1-there-shall-be-light-january-2023" id="id3">v1.1 (“There shall be light”, January 2023)</a></p></li>
-<li><p><a class="reference internal" href="#v1-0-like-the-river-august-2020" id="id4">v1.0 (“Like the river”, August 2020)</a></p></li>
+<li><p><a class="reference internal" href="#v1-2-1-no-worries-april-2023" id="id2">v1.2.1 (“No worries”, April 2023)</a></p></li>
+<li><p><a class="reference internal" href="#v1-2-let-s-go-3d-march-2023" id="id3">v1.2 (“Let’s go 3D”, March 2023)</a></p></li>
+<li><p><a class="reference internal" href="#v1-1-there-shall-be-light-january-2023" id="id4">v1.1 (“There shall be light”, January 2023)</a></p></li>
+<li><p><a class="reference internal" href="#v1-0-like-the-river-august-2020" id="id5">v1.0 (“Like the river”, August 2020)</a></p></li>
 </ul>
 </li>
 </ul>
 </div>
 <hr class="docutils" />
+<section id="v1-2-1-no-worries-april-2023">
+<h2><a class="toc-backref" href="#id2">v1.2.1 (“No worries”, April 2023)</a><a class="headerlink" href="#v1-2-1-no-worries-april-2023" title="Permalink to this heading">¶</a></h2>
+<p>This release aims to fix:</p>
+<ul class="simple">
+<li><p>Biobank Accelerometer Analysis file format: support file paths containing numerical characters and/or whitespaces;</p></li>
+<li><p>Actiwatch (CamNtech) file format: fix <a class="reference external" href="https://github.com/ghammad/pyActigraphy/issues/123">issue #123</a> by upper casing the UUID.</p></li>
+<li><p>Batch reader: add missing types, ‘BBA’ and ‘MESA’.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
 <section id="v1-2-let-s-go-3d-march-2023">
-<h2><a class="toc-backref" href="#id2">v1.2 (“Let’s go 3D”, March 2023)</a><a class="headerlink" href="#v1-2-let-s-go-3d-march-2023" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id3">v1.2 (“Let’s go 3D”, March 2023)</a><a class="headerlink" href="#v1-2-let-s-go-3d-march-2023" title="Permalink to this heading">¶</a></h2>
 <p>This release contains new features:</p>
 <ul class="simple">
 <li><p>Activity reports: summary statistics about time spent above user-defined activity cut points (See <a class="reference external" href="https://ghammad.github.io/pyActigraphy/BaseRaw.html#pyActigraphy.io.BaseRaw.create_activity_report">pyActigraphy.io.BaseRaw.create_activity_report</a> function).</p></li>
@@ -120,13 +130,13 @@
 </section>
 <hr class="docutils" />
 <section id="v1-1-there-shall-be-light-january-2023">
-<h2><a class="toc-backref" href="#id3">v1.1 (“There shall be light”, January 2023)</a><a class="headerlink" href="#v1-1-there-shall-be-light-january-2023" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id4">v1.1 (“There shall be light”, January 2023)</a><a class="headerlink" href="#v1-1-there-shall-be-light-january-2023" title="Permalink to this heading">¶</a></h2>
 <p>This release contains a new module, <a class="reference external" href="https://ghammad.github.io/pyActigraphy/index.html#pylight">pyLight</a>, dedicated to the analysis of light
 exposure data. Please, see the corresponding section in <a class="reference external" href="https://ghammad.github.io/pyActigraphy/tutorials.html#pylight-examples">Tutorials</a> for more info.</p>
 </section>
 <hr class="docutils" />
 <section id="v1-0-like-the-river-august-2020">
-<h2><a class="toc-backref" href="#id4">v1.0 (“Like the river”, August 2020)</a><a class="headerlink" href="#v1-0-like-the-river-august-2020" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id5">v1.0 (“Like the river”, August 2020)</a><a class="headerlink" href="#v1-0-like-the-river-august-2020" title="Permalink to this heading">¶</a></h2>
 <p>This first official release includes all the features documented in the
 companion paper published in PLOS Computational Biology: <a class="reference external" href="https://doi.org/10.1371/journal.pcbi.1009514">Hammad et al. 2021</a>.</p>
 </section>
