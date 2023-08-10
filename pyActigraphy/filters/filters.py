@@ -64,6 +64,17 @@ def _create_inactivity_mask(data, duration, threshold):
 
     return pd.Series(mask, index=data.index)
 
+def _is_data_continuous(data, frequency):
+    """Check if the provided data appears to be continuous based 
+    on the provided frequency.
+    """
+    start = data.index[0]
+    end = data.index[-1]
+    
+    # +1 because the first epoch is not counted else while substracting
+    expected_length = ((end - start) / frequency) + 1
+    
+    return len(data) == expected_length
 
 class FiltersMixin(object):
     """ Mixin Class """
@@ -85,6 +96,12 @@ class FiltersMixin(object):
             Time offset strings (ex: '90min') can also be used.
         """
 
+        # Verify that the data is continuous before creating a mask
+        if not _is_data_continuous(self.raw_data, self.frequency):
+            raise ValueError('The underlying activity data seems to be '
+                             + 'discontinued. Make sure that the source data '
+                             + 'contains a continuous time series.')
+        
         if isinstance(duration, int):
             nepochs = duration
         elif isinstance(duration, str):
