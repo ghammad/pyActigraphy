@@ -18,7 +18,7 @@ Currently, the supported formats are:
 
 * wGT3X-BT, Actigraph (.agd file format only);
 * Actiwatch 4, 7, L(-Plus) and MotionWatch 8, CamNtech (.awd and .mtn);
-* ActTrust 2, Condor Instruments (.txt);
+* ActTrust 2, ActLumus, Condor Instruments (.txt);
 * Daqtometer, Daqtix (.csv);
 * Actiwatch 2 and Actiwatch Spectrum Plus, Philips Respironics (.csv)
 * Tempatilumi (CE Brasil)

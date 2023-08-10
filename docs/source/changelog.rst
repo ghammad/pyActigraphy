@@ -8,17 +8,6 @@ What's new
 
 *************
 
-v1.2.1 ("No worries", April 2023)
--------------------------------------------
-
-This release aims to fix:
-
-* Biobank Accelerometer Analysis file format: support file paths containing numerical characters and/or whitespaces;
-* Actiwatch (CamNtech) file format: fix `issue #123 <https://github.com/ghammad/pyActigraphy/issues/123>`_ by upper casing the UUID.
-* Batch reader: add missing types, 'BBA' and 'MESA'.
-
-*************
-
 v1.2 ("Let's go 3D", March 2023)
 -------------------------------------------
 
