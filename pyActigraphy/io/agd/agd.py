@@ -245,7 +245,7 @@ def read_raw_agd(
     start_time=None,
     period=None
 ):
-    r"""Reader function for raw AGD file.
+    r"""Reader function for raw .agd file recorded by wGT3X-BT (ActiGraph).
 
     Parameters
     ----------

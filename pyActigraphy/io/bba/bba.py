@@ -340,7 +340,7 @@ def read_raw_bba(
     use_metadata_json=True,
     metadata_fname=None
 ):
-    r"""Reader function for files produced by the biobankAccelerometerAnalysis
+    r"""Reader function for .csv files produced by the biobankAccelerometerAnalysis
     package.
 
     Parameters
