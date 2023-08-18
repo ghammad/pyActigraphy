@@ -72,7 +72,7 @@ def test_instance_rpx_fr_different_encoding():
     
     try:
         rawRPX_FR_cp1252 = pyActigraphy.io.read_raw_rpx(
-            rpx_path_fr_cp1252, language='FR', drop_na=False, file_encoding='cp1252')
+            rpx_path_fr_cp1252, language='FR', file_encoding='cp1252')
     except UnicodeDecodeError:
         pytest.fail('There occured an error while decoding the input file.')
     
