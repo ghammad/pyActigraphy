@@ -1,5 +1,6 @@
 import os.path as op
 
+import pytest
 import pyActigraphy
 import inspect
 import pandas as pd
@@ -9,6 +10,7 @@ FILE = inspect.getfile(inspect.currentframe())
 data_dir = op.join(op.dirname(op.abspath(FILE)), 'data')
 rpx_path_eng = op.join(data_dir, 'test_sample_rpx_eng.csv')
 rpx_path_fr = op.join(data_dir, 'test_sample_rpx_fr.csv')
+rpx_path_fr_cp1252 = op.join(data_dir, 'test_sample_rpx_fr_cp1252.csv')
 rpx_path_ger = op.join(data_dir, 'test_sample_rpx_ger_no_light.csv')
 rpx_path_ger_with_light = op.join(
     data_dir, 'test_sample_rpx_ger_with_light.csv'
@@ -64,6 +66,17 @@ def test_read_raw_rpx_eng_frequency():
 def test_instance_rpx_fr():
 
     assert isinstance(rawRPX_FR, pyActigraphy.io.rpx.RawRPX)
+
+
+def test_instance_rpx_fr_different_encoding():
+    
+    try:
+        rawRPX_FR_cp1252 = pyActigraphy.io.read_raw_rpx(
+            rpx_path_fr_cp1252, language='FR', drop_na=False, file_encoding='cp1252')
+    except UnicodeDecodeError:
+        pytest.fail('There occured an error while decoding the input file.')
+    
+    assert isinstance(rawRPX_FR_cp1252, pyActigraphy.io.rpx.RawRPX)
 
 
 def test_read_raw_rpx_fr_name():
