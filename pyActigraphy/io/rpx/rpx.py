@@ -119,7 +119,6 @@ class RawRPX(BaseRaw):
         index_data = pd.read_csv(
             # input_fname,
             io.StringIO(data.decode(file_encoding)),
-            encoding=file_encoding, # TODO: check if this is actually required. I think not!
             skiprows=header_offset+data_offset+1,
             header=0,
             delimiter=delimiter,
