@@ -68,7 +68,7 @@ def _create_inactivity_mask(data, duration, threshold):
 class FiltersMixin(object):
     """ Mixin Class """
 
-    def create_inactivity_mask(self, duration):
+    def create_inactivity_mask(self, duration, threshold=1):
         """Create a mask for inactivity (count equal to zero) periods.
 
         This mask has the same length as its underlying data and can be used
@@ -83,6 +83,8 @@ class FiltersMixin(object):
         duration: int or str
             Minimal number of consecutive zeroes for an inactive period.
             Time offset strings (ex: '90min') can also be used.
+        threshold: int or float
+            Limit below which the device might be considered as not worn.
         """
 
         if isinstance(duration, int):
@@ -101,7 +103,7 @@ class FiltersMixin(object):
         self.inactivity_length = nepochs
 
         # Create actual mask
-        self.mask = _create_inactivity_mask(self.raw_data, nepochs, 1)
+        self.mask = _create_inactivity_mask(self.raw_data, nepochs, threshold)
 
     def add_mask_period(self, start, stop):
         """ Add a period to the inactivity mask
