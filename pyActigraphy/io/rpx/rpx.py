@@ -44,13 +44,16 @@ class RawRPX(BaseRaw):
         Default is 'float'.
     delimiter: str, optional
         Delimiter to use when reading the input file.
-        Default is ','
+        Default is ','.
     decimal: str, optional
         Decimal character to use when reading the input file.
-        Default is '.'
+        Default is '.'.
     drop_na: bool, optional
         If set to True, drop epochs where activity is NaN.
         Default is True.
+    file_encoding: str, optional
+        Encoding to use when reading the input file.
+        Default is 'utf-8'.
     """
 
     def __init__(
@@ -64,7 +67,8 @@ class RawRPX(BaseRaw):
         light_dtype='float',
         delimiter=',',
         decimal='.',
-        drop_na=True
+        drop_na=True,
+        file_encoding='utf-8'
     ):
 
         # get absolute file path
@@ -86,7 +90,7 @@ class RawRPX(BaseRaw):
 
         # read file header info
         header_offset, data_offset, header, data_available_cols = \
-            self.__extract_rpx_header_info(input_fname, delimiter)
+            self.__extract_rpx_header_info(input_fname, delimiter, file_encoding)
 
         # Verify that the input file contains the needed information
         self.__check_rpx_header(
@@ -114,8 +118,7 @@ class RawRPX(BaseRaw):
 
         index_data = pd.read_csv(
             # input_fname,
-            io.StringIO(data.decode('utf-8')),
-            encoding='utf-8',
+            io.StringIO(data.decode(file_encoding)),
             skiprows=header_offset+data_offset+1,
             header=0,
             delimiter=delimiter,
@@ -258,17 +261,17 @@ class RawRPX(BaseRaw):
         r"""Manually set status (Forced wake, Forced sleep or Excluded)."""
         return self.__sleep_wake_status
 
-    def __extract_rpx_header_info(self, fname, delimiter):
+    def __extract_rpx_header_info(self, fname, delimiter, file_encoding):
         # extract file header and data header
         header = []
         data_available_cols = []
         with open(fname, mode='rb') as file:
             data = file.readlines()
         for header_offset, line in enumerate(data, 1):
-            if fields[self.language]['Data'] in line.decode('utf-8'):
+            if fields[self.language]['Data'] in line.decode(file_encoding):
                 break
             else:
-                header.append(line.decode('utf-8'))
+                header.append(line.decode(file_encoding))
         # Read file until the next blank line
         # First, skip blank line after section title
         # next(file)
@@ -279,7 +282,7 @@ class RawRPX(BaseRaw):
             else:
                 data_available_cols.append(
                     line_clean.decode(
-                        'utf-8'
+                        file_encoding
                     ).split(delimiter)[0].strip('"').rstrip(':')
                 )
 
@@ -400,7 +403,8 @@ def read_raw_rpx(
     light_dtype='float',
     delimiter=',',
     decimal='.',
-    drop_na=True
+    drop_na=True,
+    file_encoding='utf-8'
 ):
     """Reader function for .csv file recorded by Actiwatch 2 and Actiwatch Spectrum Plus (Philips Respironics).
 
@@ -434,13 +438,16 @@ def read_raw_rpx(
         Default is 'float'.
     delimiter: str, optional
         Delimiter to use when reading the input file.
-        Default is ','
+        Default is ','.
     decimal: str, optional
         Decimal character to use when reading the input file.
-        Default is '.'
+        Default is '.'.
     drop_na: bool, optional
         If set to True, drop epochs where activity is NaN.
         Default is True.
+    file_encoding: str, optional
+        Encoding to use when reading the input file.
+        Default is 'utf-8'.
 
     Returns
     -------
@@ -458,5 +465,6 @@ def read_raw_rpx(
         light_dtype=light_dtype,
         delimiter=delimiter,
         decimal=decimal,
-        drop_na=drop_na
+        drop_na=drop_na,
+        file_encoding=file_encoding
     )
