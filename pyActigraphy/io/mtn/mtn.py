@@ -245,7 +245,7 @@ def read_raw_mtn(
     data_dtype=int,
     light_dtype=float
 ):
-    """Reader function for raw MTN file.
+    """Reader function for raw .mtn file recorded by MotionWatch 8 (CamNtech).
 
     Parameters
     ----------

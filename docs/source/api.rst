@@ -16,7 +16,7 @@ Raw file reader
 Uniform API to read multiple actigraphy data formats.
 Currently, the supported formats are:
 
-* wGT3X-BT, Actigraph (.agd file format only);
+* wGT3X-BT, ActiGraph (.agd file format only);
 * Actiwatch 4, 7, L(-Plus) and MotionWatch 8, CamNtech (.awd and .mtn);
 * ActTrust 2, ActLumus, Condor Instruments (.txt);
 * Daqtometer, Daqtix (.csv);
