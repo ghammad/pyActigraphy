@@ -117,7 +117,7 @@ columns_ger = {
     # 'S/W Status': '??'
 }
 
-# In German
+# In Italian
 columns_it = {
     'Line': 'Linea',
     'Date': 'Data',
