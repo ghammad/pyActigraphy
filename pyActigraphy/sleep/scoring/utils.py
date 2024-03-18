@@ -134,7 +134,7 @@ def find_highest_peak_idx(x, n_succ=3):
     peak_candidate_idx, = np.apply_along_axis(
         is_a_peak,
         axis=1,
-        arr=rolling_window(x, n_succ+1)
+        arr=rolling_window(x, n_succ)
     ).nonzero()
 
     if(len(peak_candidate_idx) > 0):
