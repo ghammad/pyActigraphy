@@ -127,6 +127,10 @@ def find_highest_peak_idx(x, n_succ=3):
 
     '''
 
+    # Check if input is long enough to create windows
+    if n_succ > x.shape[0]:
+        return None
+
     peak_candidate_idx, = np.apply_along_axis(
         is_a_peak,
         axis=1,
