@@ -99,6 +99,50 @@ def is_a_peak(x):
     return np.all(x[0] > x[1:])
 
 
+def find_first_peak_idx(x, n_succ=3):
+    r'''Find the index of the first peak.
+
+    A peak is defined as an element whose value is higher than those of the
+    successive Nth elements.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Array containing the peak candidates.
+
+    n_succ : int, optional
+        Number of successive elements to consider when searching for a peak.
+        Default is 3.
+
+    Return
+    ----------
+    idx : int
+        Index of the first peak.
+
+
+    Notes
+    -----
+    When several peaks are found, the index of the first
+    peak is returned.
+
+    '''
+
+    # Check if input is long enough to create windows
+    if n_succ > x.shape[0]:
+        return None
+
+    peak_candidate_idx, = np.apply_along_axis(
+        is_a_peak,
+        axis=1,
+        arr=rolling_window(x, n_succ)
+    ).nonzero()
+
+    if(len(peak_candidate_idx) > 0):
+        return peak_candidate_idx[0]
+    else:
+        return None
+
+
 def find_highest_peak_idx(x, n_succ=3):
     r'''Find the index of the highest peak.
 
