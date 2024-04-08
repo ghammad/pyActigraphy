@@ -199,6 +199,7 @@ class Fractal():
             Default is False.
         nan_frac: float, optional
             Threshold on the maximal fraction of NaN in the returned segments.
+            Default is 0.
 
         Returns
         -------
@@ -255,7 +256,15 @@ class Fractal():
         return fit_result[0][0]/n if fit_result[0].size != 0 else np.nan
 
     @classmethod
-    def fluctuations(cls, X, n, deg, overlap=False):
+    def fluctuations(
+        cls,
+        X,
+        n,
+        deg,
+        overlap=False,
+        exclude_segment_with_nans=False,
+        nan_frac=0
+    ):
         r'''Fluctuation function
 
         The fluctuations are defined as the mean squared residuals
@@ -272,6 +281,13 @@ class Fractal():
         overlap: bool, optional
             If set to True, consecutive windows during segmentation
             overlap by 50%. Default is False.
+        exclude_segment_with_nans: bool, optional
+            If set to True, segments containing a NaN fraction equal or greater
+            than `nan_frac` are excluded.
+            Default is False.
+        nan_frac: float, optional
+            Threshold on the maximal fraction of NaN in the returned segments.
+            Default is 0.
 
         Returns
         -------
@@ -283,8 +299,22 @@ class Fractal():
         Y = cls.profile(X)
 
         # Define non-overlapping segments
-        segments_fwd = cls.segmentation(Y, n, backward=False, overlap=overlap)
-        segments_bwd = cls.segmentation(Y, n, backward=True, overlap=overlap)
+        segments_fwd = cls.segmentation(
+            Y,
+            n,
+            backward=False,
+            overlap=overlap,
+            exclude_segment_with_nans=exclude_segment_with_nans,
+            nan_frac=nan_frac
+        )
+        segments_bwd = cls.segmentation(
+            Y,
+            n,
+            backward=True,
+            overlap=overlap,
+            exclude_segment_with_nans=exclude_segment_with_nans,
+            nan_frac=nan_frac
+        )
 
         # Assert equal numbers of segments
         assert(segments_fwd.shape == segments_bwd.shape)
@@ -324,7 +354,16 @@ class Fractal():
         return qth_msq
 
     @classmethod
-    def dfa(cls, ts, n_array, deg=1, overlap=False, log=False):
+    def dfa(
+        cls,
+        ts,
+        n_array,
+        deg=1,
+        overlap=False,
+        exclude_segment_with_nans=False,
+        nan_frac=0,
+        log=False
+    ):
         r'''Detrended Fluctuation Analysis function
 
         Compute the q-th order mean squared fluctuations for different segment
@@ -342,6 +381,13 @@ class Fractal():
         overlap: bool, optional
             If set to True, consecutive windows during segmentation
             overlap by 50%. Default is False.
+        exclude_segment_with_nans: bool, optional
+            If set to True, segments containing a NaN fraction equal or greater
+            than `nan_frac` are excluded.
+            Default is False.
+        nan_frac: float, optional
+            Threshold on the maximal fraction of NaN in the returned segments.
+            Default is 0.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -369,7 +415,9 @@ class Fractal():
                     ts.values,
                     n=int(n),
                     deg=deg,
-                    overlap=overlap
+                    overlap=overlap,
+                    exclude_segment_with_nans=exclude_segment_with_nans,
+                    nan_frac=nan_frac
                 ),
                 q=2
             ) for n in factor*n_array
@@ -393,6 +441,8 @@ class Fractal():
         n_array,
         deg=1,
         overlap=False,
+        exclude_segment_with_nans=False,
+        nan_frac=0,
         log=False,
         n_jobs=2,
         prefer=None,
@@ -415,6 +465,13 @@ class Fractal():
         overlap: bool, optional
             If set to True, consecutive windows during segmentation
             overlap by 50%. Default is False.
+        exclude_segment_with_nans: bool, optional
+            If set to True, segments containing a NaN fraction equal or greater
+            than `nan_frac` are excluded.
+            Default is False.
+        nan_frac: float, optional
+            Threshold on the maximal fraction of NaN in the returned segments.
+            Default is 0.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -455,7 +512,9 @@ class Fractal():
             ts.values,
             n=int(n),
             deg=deg,
-            overlap=overlap
+            overlap=overlap,
+            exclude_segment_with_nans=exclude_segment_with_nans,
+            nan_frac=nan_frac
         ) for n in factor*n_array)
 
         q_th_order_msq_fluc = np.fromiter(
@@ -672,7 +731,17 @@ class Fractal():
         return alpha_loc, alpha_loc_err, n_x
 
     @classmethod
-    def mfdfa(cls, ts, n_array, q_array, deg=1, overlap=False, log=False):
+    def mfdfa(
+        cls,
+        ts,
+        n_array,
+        q_array,
+        deg=1,
+        overlap=False,
+        exclude_segment_with_nans=False,
+        nan_frac=0,
+        log=False
+    ):
         r'''Multifractal Detrended Fluctuation Analysis function
 
         Compute the q-th order mean squared fluctuations for different segment
@@ -692,6 +761,13 @@ class Fractal():
         overlap: bool, optional
             If set to True, consecutive windows during segmentation
             overlap by 50%. Default is False.
+        exclude_segment_with_nans: bool, optional
+            If set to True, segments containing a NaN fraction equal or greater
+            than `nan_frac` are excluded.
+            Default is False.
+        nan_frac: float, optional
+            Threshold on the maximal fraction of NaN in the returned segments.
+            Default is 0.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -723,7 +799,9 @@ class Fractal():
                 ts.values,
                 n=int(n),
                 deg=deg,
-                overlap=overlap
+                overlap=overlap,
+                exclude_segment_with_nans=exclude_segment_with_nans,
+                nan_frac=nan_frac
             )
             q_th_order_msq_fluctuations[idx] = [
                 cls.q_th_order_mean_square(fluct, q=q) for q in q_array
@@ -742,6 +820,8 @@ class Fractal():
         q_array,
         deg=1,
         overlap=False,
+        exclude_segment_with_nans=False,
+        nan_frac=0,
         log=False,
         n_jobs=2,
         prefer=None,
@@ -766,6 +846,13 @@ class Fractal():
         overlap: bool, optional
             If set to True, consecutive windows during segmentation
             overlap by 50%. Default is False.
+        exclude_segment_with_nans: bool, optional
+            If set to True, segments containing a NaN fraction equal or greater
+            than `nan_frac` are excluded.
+            Default is False.
+        nan_frac: float, optional
+            Threshold on the maximal fraction of NaN in the returned segments.
+            Default is 0.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -806,7 +893,9 @@ class Fractal():
             ts.values,
             n=int(n),
             deg=deg,
-            overlap=overlap
+            overlap=overlap,
+            exclude_segment_with_nans=exclude_segment_with_nans,
+            nan_frac=nan_frac
         ) for n in factor*n_array)
 
         q_th_order_msq_fluctuations = np.array([
