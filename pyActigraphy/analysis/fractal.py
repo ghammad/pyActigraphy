@@ -168,7 +168,15 @@ class Fractal():
         return _profile(X)
 
     @classmethod
-    def segmentation(cls, x, n, backward=False, overlap=False):
+    def segmentation(
+        cls,
+        x,
+        n,
+        backward=False,
+        overlap=False,
+        exclude_segment_with_nans=False,
+        nan_frac=0
+    ):
         r'''Segmentation function
 
         Segment the signal into non-overlapping windows of equal size.
@@ -185,13 +193,35 @@ class Fractal():
         overlap: bool, optional
             If set to True, consecutive windows overlap by 50%.
             Default is False.
+        exclude_segment_with_nans: bool, optional
+            If set to True, segments containing a NaN fraction equal or greater
+            than `nan_frac` are excluded.
+            Default is False.
+        nan_frac: float, optional
+            Threshold on the maximal fraction of NaN in the returned segments.
 
         Returns
         -------
         segments: numpy.array
             Non-overlappping windows of size n.
         '''
-        return _segmentation(x, n, backward, overlap)
+
+        segments = _segmentation(x, n, backward, overlap)
+
+        if exclude_segment_with_nans:
+            # Check if nan_frac is [0,1]:
+            if (nan_frac > 1) or (nan_frac < 0):
+                raise ValueError(
+                    'Input parameter `nan_frac` must be in [0,1].'
+                    + ' Current value: {}'.format(nan_frac)
+                )
+
+            # Flag rows with a NaN fraction above threshold
+            is_above_th = (np.isnan(segments).sum(axis=1)/n) >= nan_frac
+
+            return segments[~is_above_th]
+        else:
+            return segments
 
     @classmethod
     def local_msq_residuals(cls, segment, deg):
