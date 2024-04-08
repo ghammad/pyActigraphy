@@ -70,9 +70,9 @@ def _segmentation(x, n, backward=False, overlap=False):
 
     # Non-overlapping segments
     if backward:
-        segments = windows[::stride]
-    else:
         segments = windows[::-stride]
+    else:
+        segments = windows[::stride]
 
     return segments
 
