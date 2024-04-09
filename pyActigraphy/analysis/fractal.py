@@ -125,6 +125,13 @@ class Fractal():
       of human activity. Physica A: Statistical Mechanics and Its Applications,
       337(1–2), 307–318. https://doi.org/10.1016/j.physa.2004.01.042
 
+    A nice example of multifractal analysis of actigraphy data can be found in:
+
+    * França, L. G. S., Montoya, P., & Miranda, J. G. V. (2018).
+      On multifractals: A non-linear study of actigraphy data.
+      Physica A: Statistical Mechanics and Its Applications.
+      https://doi.org/10.1016/J.PHYSA.2018.09.122
+
 
     References
     ----------
