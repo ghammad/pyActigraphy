@@ -952,29 +952,34 @@ class Fractal():
         The computation of the singularity or multifractal spectrum follows
         the steps described in [1]_. It consists in:
 
-        1. Compute q-order Hurst exponents, :math:`H_{q}`:
+        1. Compute all q-order Hurst exponents, :math:`H_{q}`:
 
            .. math::
 
-               F_q(n) ~ n^{H_{q}}
+               F_q(n) \sim n^{H_{q}}
 
-           where :math:`F_q(n)` denotes detrended fluctuation amplitude
-           obtained at scale n;
+           where :math:`F_q(n)` denotes the detrended fluctuation amplitude
+           obtained at order q and scale n;
 
-        2. Compute the mass exponent (:math:`t_{q}`) from the Hurst exponent:
-
-           .. math::
-
-               t_{q} = {H_{q}}*q -1
-
-
-        3. Compute the q-order singularity (Hölder) exponent (:math:`h_{q}`)
-           and dimension (:math:`D_{q}`):
+        2. Compute the mass exponents (:math:`t_{q}`) from the Hurst exponents:
 
            .. math::
 
-               h_{q} &= \frac{\partial t_{q}}{\partial q}
-               D_{q} &= q*h_{q} - t_{q}
+               t_{q} = q \times H_{q} -1
+
+
+        3. Compute the q-order singularity (Hölder) exponents (:math:`h_{q}`)
+           and dimensions (:math:`D_{q}`):
+
+           .. math::
+
+               h_{q} = \frac{\partial t_{q}}{\partial q}
+
+               D_{q} = q \times h_{q} - t_{q}
+
+
+        Finally, the multifractal spectrum is obtained by plotting
+        :math:`D_{q}` as a function of :math:`h_{q}`.
 
 
         Parameters
