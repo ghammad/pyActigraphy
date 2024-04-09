@@ -317,7 +317,7 @@ class Fractal():
         )
 
         # Assert equal numbers of segments
-        assert(segments_fwd.shape == segments_bwd.shape)
+        assert (segments_fwd.shape == segments_bwd.shape)
 
         F = np.empty(len(segments_fwd)+len(segments_bwd))
         # Compute the sum of the squared residuals for each segment
@@ -617,13 +617,13 @@ class Fractal():
         h_ratios = np.empty(len(n_array)-2*n_min+1)
         h_ratios_err = np.empty(len(n_array)-2*n_min+1)
         # If the number of points for a single linear fit is less than 3
-        if(n_min < 3):
+        if (n_min < 3):
             print(
                 ("Cannot perform a linear fit on series of less than"
                  " 3 points. Exiting now.")
             )
         # If the number of points to fit is less than 2*3
-        elif((len(n_array)-2*n_min+1) < 1):
+        elif ((len(n_array)-2*n_min+1) < 1):
             print(
                 ("Total number of points to fit is less than 2*3."
                  "Exiting now.")
@@ -694,13 +694,13 @@ class Fractal():
         # Window size: 2*s + 1
         win_size = 2*s + 1
         # Check if the number of points for a single linear fit is at least 3
-        if(win_size < 3):
+        if (win_size < 3):
             raise ValueError(
                 ("Cannot perform a linear fit on series of less than"
                  " 3 points; `s` must be greater or equal to 1.")
             )
         # Check if the number of points to fit is less than 2*n_min
-        if(len(n_array) < win_size):
+        if (len(n_array) < win_size):
             raise ValueError(
                 ("Total number of points to fit is less than (2*s+1).")
             )
