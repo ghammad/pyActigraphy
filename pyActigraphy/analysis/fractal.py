@@ -941,3 +941,90 @@ class Fractal():
         n_array = n_array[np.where(n_array >= start)]
 
         return n_array
+
+    @staticmethod
+    def multifractal_spectrum(F_n, n_array, q_array, log=False):
+        r'''Multifractal Spectrum
+
+        Compute the q-th order singularity (Hölder) exponent (:math:`h_{q}`)
+        and dimension (:math:`D_{q}`) for different q values.
+
+        The computation of the singularity or multifractal spectrum follows
+        the steps described in [1]_. It consists in:
+
+        1. Compute q-order Hurst exponents, :math:`H_{q}`:
+
+           .. math::
+
+               F_q(n) ~ n^{H_{q}}
+
+           where :math:`F_q(n)` denotes detrended fluctuation amplitude
+           obtained at scale n;
+
+        2. Compute the mass exponent (:math:`t_{q}`) from the Hurst exponent:
+
+           .. math::
+
+               t_{q} = {H_{q}}*q -1
+
+
+        3. Compute the q-order singularity (Hölder) exponent (:math:`h_{q}`)
+           and dimension (:math:`D_{q}`):
+
+           .. math::
+
+               h_{q} &= \frac{\partial t_{q}}{\partial q}
+               D_{q} &= q*h_{q} - t_{q}
+
+
+        Parameters
+        ----------
+        F_n : array
+            Array of fluctuations.
+        n_array: array of int
+            Time scales (i.e window sizes). In minutes.
+        q_array: array of float
+            Orders of the mean squares.
+        log: bool, optional
+            If set to True, it assumes that the fluctuation values have been
+            log-transformed.
+            Default is False.
+
+        Returns
+        -------
+        h_q, D_q: numpy.array, numpy.array
+            Q-order singularity exponents and dimensions.
+
+        References
+        ----------
+
+        .. [1] Ihlen EA (2012) Introduction to multifractal detrended
+               fluctuation analysis in Matlab. Front. Physio. 3:141.
+               https://doi.org/10.3389/fphys.2012.00141
+
+        '''
+
+        # If dim(F_n)=NxM, assert:
+        # N == dim(n) and M == dim(q)
+        N, M = F_n.shape
+        assert (N == n_array.shape[0])
+        assert (M == q_array.shape[0])
+
+        # Compute q-order Hurst exponent
+        H_q = np.asarray([
+            Fractal.generalized_hurst_exponent(
+                F_n=F_n[:, q_idx], n_array=n_array, log=log, x_center=True
+            )[0]
+            for q_idx in range(len(q_array))
+        ])
+
+        # Compute mass exponent tq
+        t_q = H_q*q_array - 1
+
+        # Compute q-order singularity exponent
+        h_q = np.diff(t_q)/np.diff(q_array)
+
+        # Compute the q-order singularity dimension
+        D_q = h_q * q_array[:-1] - t_q[:-1]
+
+        return h_q, D_q
