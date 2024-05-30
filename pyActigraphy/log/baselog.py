@@ -56,7 +56,7 @@ class BaseLog():
             }
 
             log.loc[:,'DST_crossover'] = log.apply(
-                __is_straddling_dst_transitions,
+                self.__is_straddling_dst_transitions,
                 dst_transition_times_dict=transition_times_by_year,
                 axis=1
             )
