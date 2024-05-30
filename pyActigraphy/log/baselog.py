@@ -248,8 +248,8 @@ class BaseLog():
             # For (very) long recordings, spanning a New Year's Eve,
             # the date range should also be tested with DST transition times
             # of the next year (year stop)
-            cet2cest_start, cest2cet_start = transition_times_by_year[year_start]
-            cet2cest_stop, _ = transition_times_by_year[year_stop]
+            cet2cest_start, cest2cet_start = dst_transition_times_dict[year_start]
+            cet2cest_stop, _ = dst_transition_times_dict[year_stop]
 
             # Does the date range contain CET->CEST (Year=N):
             isCET2CEST_start = (times['Start_time'] <= cet2cest_start <= times['Stop_time'])
