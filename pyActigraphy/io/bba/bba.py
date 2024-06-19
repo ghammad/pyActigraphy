@@ -270,7 +270,7 @@ class RawBBA(BaseRaw):
             meta_data = json.load(file)
 
         # check filename consistency:
-        # - META-DATA: file-name = 'basename'.cwa[.gz]
+        # - META-DATA: file-name = 'basename'.(cwa|CWA|bin)[.gz]
         # - INPUT DATA: input_fname = 'basename'-timeSeries.csv[.gz]
 
         match_basename = re.match(
@@ -286,7 +286,7 @@ class RawBBA(BaseRaw):
             )
 
         if not re.match(
-            pattern=r'{}.(cwa|CWA)(\.gz)?'.format(input_basename),
+            pattern=r'{}.(cwa|CWA|bin)(\.gz)?'.format(input_basename),
             string=os.path.basename(meta_data['file-name'])
         ):
             raise ValueError(
