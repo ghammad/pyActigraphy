@@ -285,7 +285,7 @@ class RawBBA(BaseRaw):
                 + ' from input filename: {}'.format(input_fname)
             )
 
-        if not re.match(
+        if not re.search(
             pattern=r'{}.(cwa|CWA|bin)(\.gz)?'.format(input_basename),
             string=os.path.basename(meta_data['file-name'])
         ):
