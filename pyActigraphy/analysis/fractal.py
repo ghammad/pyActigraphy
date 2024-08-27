@@ -1034,9 +1034,9 @@ class Fractal():
         t_q = H_q*q_array - 1
 
         # Compute q-order singularity exponent
-        h_q = np.diff(t_q)/np.diff(q_array)
+        h_q = np.gradient(t_q)/np.gradient(q_array)
 
         # Compute the q-order singularity dimension
-        D_q = h_q * q_array[:-1] - t_q[:-1]
+        D_q = h_q * q_array - t_q
 
         return h_q, D_q
