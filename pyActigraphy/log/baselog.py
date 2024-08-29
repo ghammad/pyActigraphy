@@ -2,7 +2,6 @@ import os
 import numpy as np
 import pandas as pd
 import pyexcel as pxl
-from pytz import timezone
 
 
 class BaseLog():
@@ -16,8 +15,10 @@ class BaseLog():
         Dataframe containing the data found in the log file.
     time_zone: str, optional
         Time zone of time stamps. Ex: 'Europe/Brussels'.
-        If set to None, the time stamps in the log file are considered as tz-naive.
-        In this case, checking for overlaps between date range and DST times is not possible.
+        If set to None, the time stamps in the log file are considered
+        as tz-naive.
+        In this case, checking for overlaps between date range and DST times
+        is not possible.
         Default is None.
 
     """
@@ -40,14 +41,14 @@ class BaseLog():
             from pytz import timezone
             tz = timezone(time_zone)
             # Localize the log timestamps
-            log.loc[:,'Start_time'] = log.Start_time.dt.tz_localize(tz)
-            log.loc[:,'Stop_time'] = log.Stop_time.dt.tz_localize(tz)
-            # compute the DST transition times according to the specified time zone
+            log.loc[:, 'Start_time'] = log.Start_time.dt.tz_localize(tz)
+            log.loc[:, 'Stop_time'] = log.Stop_time.dt.tz_localize(tz)
+            # compute the DST transition times according to the specified TZ
             transition_times = [
                 t.replace(tzinfo=timezone('UTC')).astimezone(tz)
                 for t in tz._utc_transition_times[1:]
             ]
-            # Dictionary mapping the transition times to the corresponding year                                                                                                                                                    
+            # Dictionary mapping the transition times to the corresponding year
             transition_times_by_year = {
                 start_time.year: [start_time, stop_time]
                 for start_time, stop_time in zip(
@@ -55,12 +56,11 @@ class BaseLog():
                     )
             }
 
-            log.loc[:,'DST_crossover'] = log.apply(
+            log.loc[:, 'DST_crossover'] = log.apply(
                 self.__is_straddling_dst_transitions,
                 dst_transition_times_dict=transition_times_by_year,
                 axis=1
             )
-
 
         # Inplace drop of NA
         log.dropna(inplace=True)
@@ -104,19 +104,19 @@ class BaseLog():
         basename = os.path.basename(absname)
         _, ext = os.path.splitext(basename)
 
-        if(ext == '.csv'):
+        if (ext == '.csv'):
             log = cls.__from_csv(absname, index_name, *args, **kwargs)
-        elif((ext == '.xlsx') or (ext == '.xls') or (ext == '.ods')):
+        elif ((ext == '.xlsx') or (ext == '.xls') or (ext == '.ods')):
             log = cls.__from_excel(absname, index_name, *args, **kwargs)
         else:
             raise ValueError(
                 (
-                    'File format for the input file {}'.format(basename) +
-                    'is not currently supported.' +
-                    'Supported file format:\n' +
-                    '.csv (text),\n' +
-                    '.ods (OpenOffice spreadsheet),\n' +
-                    '.xls (Excel spreadsheet).'
+                    'File format for the input file {}'.format(basename)
+                    + 'is not currently supported.'
+                    + 'Supported file format:\n'
+                    + '.csv (text),\n'
+                    + '.ods (OpenOffice spreadsheet),\n'
+                    + '.xls (Excel spreadsheet).'
                 )
             )
         return absname, log
@@ -206,9 +206,10 @@ class BaseLog():
         Parameters
         ----------
         times: pd.Series
-            Series containing the following indices: 'Start_time' and 'Stop_time'.
+            Series containing the indices 'Start_time' and 'Stop_time'.
         dst_transition_times_dict: dict
-            Dictionary with years as keys and the corresponding DST transition datetimes as values (2-tuple).
+            Dictionary with years as keys and the corresponding DST transition
+            datetimes as values (2-tuple).
 
         Returns
         -------
@@ -216,31 +217,35 @@ class BaseLog():
             True if the date range straddles a DST. False otherwise.
 
         """
-    
+
         # Extract the year of the start AND stop times
         year_start = times['Start_time'].year
         year_stop = times['Stop_time'].year
-        
+
         # Check if start-stop range spans over new year's eve
-        span_nye = (year_start!=year_stop)
-        
+        span_nye = (year_start != year_stop)
+
         # Shortcut: if the recording is longer than a year, then
         # it has crossed DST transition times at least once.
         # NB: actually it is already the case for 7-month long recordings
         if (times['Stop_time']-times['Start_time']) >= pd.Timedelta('365D'):
             return True
-        
+
         if not span_nye:
-            # Simple case: 
+            # Simple case:
             # the date range should only be tested with DST
             # transition times of the current (i.e start) year
             cet2cest, cest2cet = dst_transition_times_dict[year_start]
 
             # Does the date range contain CET->CEST:
-            isCET2CEST = (times['Start_time'] <= cet2cest <= times['Stop_time'])
+            isCET2CEST = (
+                times['Start_time'] <= cet2cest <= times['Stop_time']
+            )
 
             # Does the date range contain CEST->CET:
-            isCEST2CET = (times['Start_time'] <= cest2cet <= times['Stop_time'])
+            isCEST2CET = (
+                times['Start_time'] <= cest2cet <= times['Stop_time']
+            )
 
             return (isCET2CEST or isCEST2CET)
         else:
@@ -248,30 +253,42 @@ class BaseLog():
             # For (very) long recordings, spanning a New Year's Eve,
             # the date range should also be tested with DST transition times
             # of the next year (year stop)
-            cet2cest_start, cest2cet_start = dst_transition_times_dict[year_start]
+            cet2cest_start, cest2cet_start = dst_transition_times_dict[
+                year_start
+            ]
             cet2cest_stop, _ = dst_transition_times_dict[year_stop]
 
             # Does the date range contain CET->CEST (Year=N):
-            isCET2CEST_start = (times['Start_time'] <= cet2cest_start <= times['Stop_time'])
+            isCET2CEST_start = (
+                times['Start_time'] <= cet2cest_start <= times['Stop_time']
+            )
 
             # Does the date range contain CEST->CET (Year=N):
-            isCEST2CET_start = (times['Start_time'] <= cest2cet_start <= times['Stop_time'])
+            isCEST2CET_start = (
+                times['Start_time'] <= cest2cet_start <= times['Stop_time']
+            )
 
             # Does the date range contain CET->CEST (Year=N+1):
-            isCET2CEST_stop = (times['Start_time'] <= cet2cest_stop <= times['Stop_time'])
+            isCET2CEST_stop = (
+                times['Start_time'] <= cet2cest_stop <= times['Stop_time']
+            )
 
             return (isCET2CEST_start or isCEST2CET_start or isCET2CEST_stop)
 
             year = times['Start_time'].year
-            cet2cest, cest2cet = transition_times_by_year[year]
-            
+            cet2cest, cest2cet = dst_transition_times_dict[year]
+
             # Does the date range contain CET->CEST:
-            isCET2CEST = (times['Start_time'] <= cet2cest <= times['Stop_time'])
-            
+            isCET2CEST = (
+                times['Start_time'] <= cet2cest <= times['Stop_time']
+            )
+
             # Does the date range contain CEST->CET:
-            isCEST2CET = (times['Start_time'] <= cest2cet <= times['Stop_time'])
-            
-            return (isCET2CEST or isCEST2CET)        
+            isCEST2CET = (
+                times['Start_time'] <= cest2cet <= times['Stop_time']
+            )
+
+            return (isCET2CEST or isCEST2CET)
 
     @property
     def fname(self):
