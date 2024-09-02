@@ -16,19 +16,26 @@ class SSTLog(BaseLog):
         Absolute filepath of the input log file.
     log: pandas.DataFrame
         Dataframe containing the data found in the SST log file.
+    time_zone: str, optional
+        Time zone of time stamps. Ex: 'Europe/Brussels'.
+        If set to None, the time stamps in the log file are considered as tz-naive.
+        In this case, checking for overlaps between date range and DST times is not possible.
+        Default is None.
 
     """
 
     def __init__(
         self,
         input_fname,
-        log
+        log,
+        time_zone=None
     ):
 
         # call __init__ function of the base class
         super().__init__(
             input_fname=input_fname,
-            log=log
+            log=log,
+            time_zone=time_zone
         )
 
     def summary(self):
@@ -36,7 +43,7 @@ class SSTLog(BaseLog):
         return super(SSTLog, self).summary('Duration')
 
 
-def read_sst_log(input_fname, *args, **kwargs):
+def read_sst_log(input_fname, time_zone=None, *args, **kwargs):
     """ Read start/stop-times from SST log files.
 
     Function to read start and stop times from SST log files. Supports
@@ -46,6 +53,11 @@ def read_sst_log(input_fname, *args, **kwargs):
     ----------
     input_fname: str
         Path to the log file.
+    time_zone: str, optional
+        Time zone of time stamps. Ex: 'Europe/Brussels'.
+        If set to None, the time stamps in the log file are considered as tz-naive.
+        In this case, checking for overlaps between date range and DST times is not possible.
+        Default is None.
     *args
         Variable length argument list passed to the subsequent reader
         function.
@@ -66,4 +78,4 @@ def read_sst_log(input_fname, *args, **kwargs):
         *args, **kwargs
     )
 
-    return SSTLog(input_fname, log)
+    return SSTLog(input_fname, log, time_zone)
