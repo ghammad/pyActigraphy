@@ -277,7 +277,7 @@ class RawRPX(BaseRaw):
         # next(file)
         for data_offset, line in enumerate(data[header_offset+1:]):
             line_clean = line.replace(b'\r\r\n', b'\r\n')
-            if line_clean == b'\r\n':
+            if (line_clean == b'\r\n') or (line_clean == b'\n'):
                 break
             else:
                 data_available_cols.append(
