@@ -222,6 +222,10 @@ class BaseLog():
         year_start = times['Start_time'].year
         year_stop = times['Stop_time'].year
 
+        # Shortcut if there is no DST this year:
+        if year_start not in dst_transition_times_dict.keys():
+            return False
+
         # Check if start-stop range spans over new year's eve
         span_nye = (year_start != year_stop)
 
@@ -232,6 +236,7 @@ class BaseLog():
             return True
 
         if not span_nye:
+
             # Simple case:
             # the date range should only be tested with DST
             # transition times of the current (i.e start) year
@@ -256,7 +261,11 @@ class BaseLog():
             cet2cest_start, cest2cet_start = dst_transition_times_dict[
                 year_start
             ]
-            cet2cest_stop, _ = dst_transition_times_dict[year_stop]
+            # Shortcut if there is no DST on year_stop:
+            if year_stop not in dst_transition_times_dict.keys():
+                cet2cest_stop = False
+            else:
+                cet2cest_stop, _ = dst_transition_times_dict[year_stop]
 
             # Does the date range contain CET->CEST (Year=N):
             isCET2CEST_start = (
