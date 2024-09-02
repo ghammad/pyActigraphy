@@ -275,21 +275,6 @@ class BaseLog():
 
             return (isCET2CEST_start or isCEST2CET_start or isCET2CEST_stop)
 
-            year = times['Start_time'].year
-            cet2cest, cest2cet = dst_transition_times_dict[year]
-
-            # Does the date range contain CET->CEST:
-            isCET2CEST = (
-                times['Start_time'] <= cet2cest <= times['Stop_time']
-            )
-
-            # Does the date range contain CEST->CET:
-            isCEST2CET = (
-                times['Start_time'] <= cest2cet <= times['Stop_time']
-            )
-
-            return (isCET2CEST or isCEST2CET)
-
     @property
     def fname(self):
         """The absolute filepath of the input log file."""
