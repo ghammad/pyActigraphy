@@ -1088,7 +1088,7 @@ class Fractal():
         '''
 
         # Compute mass exponent tq
-        t_q = multifractal_mass_exponents(F_n, n_array, q_array, log=log)
+        t_q = Fractal.multifractal_mass_exponents(F_n, n_array, q_array, log=log)
 
         # Compute q-order singularity exponent
         h_q = np.gradient(t_q,q_array)
