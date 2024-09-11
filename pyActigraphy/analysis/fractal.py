@@ -70,9 +70,9 @@ def _segmentation(x, n, backward=False, overlap=False):
 
     # Non-overlapping segments
     if backward:
-        segments = windows[::stride]
-    else:
         segments = windows[::-stride]
+    else:
+        segments = windows[::stride]
 
     return segments
 
@@ -125,6 +125,13 @@ class Fractal():
       of human activity. Physica A: Statistical Mechanics and Its Applications,
       337(1–2), 307–318. https://doi.org/10.1016/j.physa.2004.01.042
 
+    A nice example of multifractal analysis of actigraphy data can be found in:
+
+    * França, L. G. S., Montoya, P., & Miranda, J. G. V. (2018).
+      On multifractals: A non-linear study of actigraphy data.
+      Physica A: Statistical Mechanics and Its Applications.
+      https://doi.org/10.1016/J.PHYSA.2018.09.122
+
 
     References
     ----------
@@ -168,7 +175,15 @@ class Fractal():
         return _profile(X)
 
     @classmethod
-    def segmentation(cls, x, n, backward=False, overlap=False):
+    def segmentation(
+        cls,
+        x,
+        n,
+        backward=False,
+        overlap=False,
+        exclude_segment_with_nans=False,
+        nan_frac=0
+    ):
         r'''Segmentation function
 
         Segment the signal into non-overlapping windows of equal size.
@@ -185,13 +200,36 @@ class Fractal():
         overlap: bool, optional
             If set to True, consecutive windows overlap by 50%.
             Default is False.
+        exclude_segment_with_nans: bool, optional
+            If set to True, segments containing a NaN fraction equal or greater
+            than `nan_frac` are excluded.
+            Default is False.
+        nan_frac: float, optional
+            Threshold on the maximal fraction of NaN in the returned segments.
+            Default is 0.
 
         Returns
         -------
         segments: numpy.array
             Non-overlappping windows of size n.
         '''
-        return _segmentation(x, n, backward, overlap)
+
+        segments = _segmentation(x, n, backward, overlap)
+
+        if exclude_segment_with_nans:
+            # Check if nan_frac is [0,1]:
+            if (nan_frac > 1) or (nan_frac < 0):
+                raise ValueError(
+                    'Input parameter `nan_frac` must be in [0,1].'
+                    + ' Current value: {}'.format(nan_frac)
+                )
+
+            # Flag rows with a NaN fraction above threshold
+            is_above_th = (np.isnan(segments).sum(axis=1)/n) >= nan_frac
+
+            return segments[~is_above_th]
+        else:
+            return segments
 
     @classmethod
     def local_msq_residuals(cls, segment, deg):
@@ -225,7 +263,15 @@ class Fractal():
         return fit_result[0][0]/n if fit_result[0].size != 0 else np.nan
 
     @classmethod
-    def fluctuations(cls, X, n, deg, overlap=False):
+    def fluctuations(
+        cls,
+        X,
+        n,
+        deg,
+        overlap=False,
+        exclude_segment_with_nans=False,
+        nan_frac=0
+    ):
         r'''Fluctuation function
 
         The fluctuations are defined as the mean squared residuals
@@ -242,6 +288,13 @@ class Fractal():
         overlap: bool, optional
             If set to True, consecutive windows during segmentation
             overlap by 50%. Default is False.
+        exclude_segment_with_nans: bool, optional
+            If set to True, segments containing a NaN fraction equal or greater
+            than `nan_frac` are excluded.
+            Default is False.
+        nan_frac: float, optional
+            Threshold on the maximal fraction of NaN in the returned segments.
+            Default is 0.
 
         Returns
         -------
@@ -253,11 +306,25 @@ class Fractal():
         Y = cls.profile(X)
 
         # Define non-overlapping segments
-        segments_fwd = cls.segmentation(Y, n, backward=False, overlap=overlap)
-        segments_bwd = cls.segmentation(Y, n, backward=True, overlap=overlap)
+        segments_fwd = cls.segmentation(
+            Y,
+            n,
+            backward=False,
+            overlap=overlap,
+            exclude_segment_with_nans=exclude_segment_with_nans,
+            nan_frac=nan_frac
+        )
+        segments_bwd = cls.segmentation(
+            Y,
+            n,
+            backward=True,
+            overlap=overlap,
+            exclude_segment_with_nans=exclude_segment_with_nans,
+            nan_frac=nan_frac
+        )
 
         # Assert equal numbers of segments
-        assert(segments_fwd.shape == segments_bwd.shape)
+        assert (segments_fwd.shape == segments_bwd.shape)
 
         F = np.empty(len(segments_fwd)+len(segments_bwd))
         # Compute the sum of the squared residuals for each segment
@@ -294,7 +361,16 @@ class Fractal():
         return qth_msq
 
     @classmethod
-    def dfa(cls, ts, n_array, deg=1, overlap=False, log=False):
+    def dfa(
+        cls,
+        ts,
+        n_array,
+        deg=1,
+        overlap=False,
+        exclude_segment_with_nans=False,
+        nan_frac=0,
+        log=False
+    ):
         r'''Detrended Fluctuation Analysis function
 
         Compute the q-th order mean squared fluctuations for different segment
@@ -312,6 +388,13 @@ class Fractal():
         overlap: bool, optional
             If set to True, consecutive windows during segmentation
             overlap by 50%. Default is False.
+        exclude_segment_with_nans: bool, optional
+            If set to True, segments containing a NaN fraction equal or greater
+            than `nan_frac` are excluded.
+            Default is False.
+        nan_frac: float, optional
+            Threshold on the maximal fraction of NaN in the returned segments.
+            Default is 0.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -339,7 +422,9 @@ class Fractal():
                     ts.values,
                     n=int(n),
                     deg=deg,
-                    overlap=overlap
+                    overlap=overlap,
+                    exclude_segment_with_nans=exclude_segment_with_nans,
+                    nan_frac=nan_frac
                 ),
                 q=2
             ) for n in factor*n_array
@@ -363,6 +448,8 @@ class Fractal():
         n_array,
         deg=1,
         overlap=False,
+        exclude_segment_with_nans=False,
+        nan_frac=0,
         log=False,
         n_jobs=2,
         prefer=None,
@@ -385,6 +472,13 @@ class Fractal():
         overlap: bool, optional
             If set to True, consecutive windows during segmentation
             overlap by 50%. Default is False.
+        exclude_segment_with_nans: bool, optional
+            If set to True, segments containing a NaN fraction equal or greater
+            than `nan_frac` are excluded.
+            Default is False.
+        nan_frac: float, optional
+            Threshold on the maximal fraction of NaN in the returned segments.
+            Default is 0.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -425,7 +519,9 @@ class Fractal():
             ts.values,
             n=int(n),
             deg=deg,
-            overlap=overlap
+            overlap=overlap,
+            exclude_segment_with_nans=exclude_segment_with_nans,
+            nan_frac=nan_frac
         ) for n in factor*n_array)
 
         q_th_order_msq_fluc = np.fromiter(
@@ -528,13 +624,13 @@ class Fractal():
         h_ratios = np.empty(len(n_array)-2*n_min+1)
         h_ratios_err = np.empty(len(n_array)-2*n_min+1)
         # If the number of points for a single linear fit is less than 3
-        if(n_min < 3):
+        if (n_min < 3):
             print(
                 ("Cannot perform a linear fit on series of less than"
                  " 3 points. Exiting now.")
             )
         # If the number of points to fit is less than 2*3
-        elif((len(n_array)-2*n_min+1) < 1):
+        elif ((len(n_array)-2*n_min+1) < 1):
             print(
                 ("Total number of points to fit is less than 2*3."
                  "Exiting now.")
@@ -605,13 +701,13 @@ class Fractal():
         # Window size: 2*s + 1
         win_size = 2*s + 1
         # Check if the number of points for a single linear fit is at least 3
-        if(win_size < 3):
+        if (win_size < 3):
             raise ValueError(
                 ("Cannot perform a linear fit on series of less than"
                  " 3 points; `s` must be greater or equal to 1.")
             )
         # Check if the number of points to fit is less than 2*n_min
-        if(len(n_array) < win_size):
+        if (len(n_array) < win_size):
             raise ValueError(
                 ("Total number of points to fit is less than (2*s+1).")
             )
@@ -642,7 +738,17 @@ class Fractal():
         return alpha_loc, alpha_loc_err, n_x
 
     @classmethod
-    def mfdfa(cls, ts, n_array, q_array, deg=1, overlap=False, log=False):
+    def mfdfa(
+        cls,
+        ts,
+        n_array,
+        q_array,
+        deg=1,
+        overlap=False,
+        exclude_segment_with_nans=False,
+        nan_frac=0,
+        log=False
+    ):
         r'''Multifractal Detrended Fluctuation Analysis function
 
         Compute the q-th order mean squared fluctuations for different segment
@@ -662,6 +768,13 @@ class Fractal():
         overlap: bool, optional
             If set to True, consecutive windows during segmentation
             overlap by 50%. Default is False.
+        exclude_segment_with_nans: bool, optional
+            If set to True, segments containing a NaN fraction equal or greater
+            than `nan_frac` are excluded.
+            Default is False.
+        nan_frac: float, optional
+            Threshold on the maximal fraction of NaN in the returned segments.
+            Default is 0.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -693,7 +806,9 @@ class Fractal():
                 ts.values,
                 n=int(n),
                 deg=deg,
-                overlap=overlap
+                overlap=overlap,
+                exclude_segment_with_nans=exclude_segment_with_nans,
+                nan_frac=nan_frac
             )
             q_th_order_msq_fluctuations[idx] = [
                 cls.q_th_order_mean_square(fluct, q=q) for q in q_array
@@ -712,6 +827,8 @@ class Fractal():
         q_array,
         deg=1,
         overlap=False,
+        exclude_segment_with_nans=False,
+        nan_frac=0,
         log=False,
         n_jobs=2,
         prefer=None,
@@ -736,6 +853,13 @@ class Fractal():
         overlap: bool, optional
             If set to True, consecutive windows during segmentation
             overlap by 50%. Default is False.
+        exclude_segment_with_nans: bool, optional
+            If set to True, segments containing a NaN fraction equal or greater
+            than `nan_frac` are excluded.
+            Default is False.
+        nan_frac: float, optional
+            Threshold on the maximal fraction of NaN in the returned segments.
+            Default is 0.
         log: bool, optional
             If set to True, returned values are log-transformed.
             Default is False.
@@ -776,7 +900,9 @@ class Fractal():
             ts.values,
             n=int(n),
             deg=deg,
-            overlap=overlap
+            overlap=overlap,
+            exclude_segment_with_nans=exclude_segment_with_nans,
+            nan_frac=nan_frac
         ) for n in factor*n_array)
 
         q_th_order_msq_fluctuations = np.array([
@@ -822,3 +948,152 @@ class Fractal():
         n_array = n_array[np.where(n_array >= start)]
 
         return n_array
+
+    @staticmethod
+    def multifractal_mass_exponents(F_n, n_array, q_array, log=False):
+        r'''Multifractal Mass Exponents
+
+        Compute the q-th order mass exponents (:math:`t_{q}`) from the q-th
+        order Hurst exponents (:math:`H_{q}`) for different q values.
+
+        The computation follows the steps described in [1]_. It consists in:
+
+        1. Compute all q-order Hurst exponents, :math:`H_{q}`:
+
+           .. math::
+
+               F_q(n) \sim n^{H_{q}}
+
+           where :math:`F_q(n)` denotes the detrended fluctuation amplitude
+           obtained at order q and scale n;
+
+        2. Compute the mass exponents (:math:`t_{q}`) from the Hurst exponents:
+
+           .. math::
+
+               t_{q} = q \times H_{q} -1
+
+
+        Parameters
+        ----------
+        F_n : array
+            Array of fluctuations.
+        n_array: array of int
+            Time scales (i.e window sizes). In minutes.
+        q_array: array of float
+            Orders of the mean squares.
+        log: bool, optional
+            If set to True, it assumes that the fluctuation values have been
+            log-transformed.
+            Default is False.
+
+        Returns
+        -------
+        t_q: numpy.array
+            Q-order mass exponents.
+
+        References
+        ----------
+
+        .. [1] Ihlen EA (2012) Introduction to multifractal detrended
+               fluctuation analysis in Matlab. Front. Physio. 3:141.
+               https://doi.org/10.3389/fphys.2012.00141
+
+        '''
+
+        # If dim(F_n)=NxM, assert:
+        # N == dim(n) and M == dim(q)
+        N, M = F_n.shape
+        assert (N == n_array.shape[0])
+        assert (M == q_array.shape[0])
+
+        # Compute q-order Hurst exponent
+        H_q = np.asarray([
+            Fractal.generalized_hurst_exponent(
+                F_n=F_n[:, q_idx], n_array=n_array, log=log, x_center=True
+            )[0]
+            for q_idx in range(len(q_array))
+        ])
+
+        # Compute mass exponent tq
+        t_q = H_q*q_array - 1
+
+        return t_q
+
+    @staticmethod
+    def multifractal_spectrum(F_n, n_array, q_array, log=False):
+        r'''Multifractal Spectrum
+
+        Compute the q-th order singularity (Hölder) exponent (:math:`h_{q}`)
+        and dimension (:math:`D_{q}`) for different q values.
+
+        The computation of the singularity or multifractal spectrum follows
+        the steps described in [1]_. It consists in:
+
+        1. Compute all q-order Hurst exponents, :math:`H_{q}`:
+
+           .. math::
+
+               F_q(n) \sim n^{H_{q}}
+
+           where :math:`F_q(n)` denotes the detrended fluctuation amplitude
+           obtained at order q and scale n;
+
+        2. Compute the mass exponents (:math:`t_{q}`) from the Hurst exponents:
+
+           .. math::
+
+               t_{q} = q \times H_{q} -1
+
+
+        3. Compute the q-order singularity (Hölder) exponents (:math:`h_{q}`)
+           and dimensions (:math:`D_{q}`):
+
+           .. math::
+
+               h_{q} = \frac{\partial t_{q}}{\partial q}
+
+               D_{q} = q \times h_{q} - t_{q}
+
+
+        Finally, the multifractal spectrum is obtained by plotting
+        :math:`D_{q}` as a function of :math:`h_{q}`.
+
+
+        Parameters
+        ----------
+        F_n : array
+            Array of fluctuations.
+        n_array: array of int
+            Time scales (i.e window sizes). In minutes.
+        q_array: array of float
+            Orders of the mean squares.
+        log: bool, optional
+            If set to True, it assumes that the fluctuation values have been
+            log-transformed.
+            Default is False.
+
+        Returns
+        -------
+        h_q, D_q: numpy.array, numpy.array
+            Q-order singularity exponents and dimensions.
+
+        References
+        ----------
+
+        .. [1] Ihlen EA (2012) Introduction to multifractal detrended
+               fluctuation analysis in Matlab. Front. Physio. 3:141.
+               https://doi.org/10.3389/fphys.2012.00141
+
+        '''
+
+        # Compute mass exponent tq
+        t_q = multifractal_mass_exponents(F_n, n_array, q_array, log=log)
+
+        # Compute q-order singularity exponent
+        h_q = np.gradient(t_q,q_array)
+
+        # Compute the q-order singularity dimension
+        D_q = h_q * q_array - t_q
+
+        return h_q, D_q
