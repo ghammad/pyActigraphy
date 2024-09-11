@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from .utils import consecutive_values, correlation_series
-from .utils import find_highest_peak_idx
+from .utils import find_first_peak_idx
 
 
 def _extract_trend(data, period='24h', min_period='12h', closed='right'):
@@ -170,7 +170,8 @@ def _clean_sleep_bout(
 
     # Find the date_time index corresponding to the highest correlation peak
     n_succ = int(pd.Timedelta(r_consec_below)/uncleaned_binary_data.index.freq)
-    sleep_offset_idx = find_highest_peak_idx(corr, n_succ=n_succ+1)
+    #sleep_offset_idx = find_highest_peak_idx(corr, n_succ=n_succ+1)
+    sleep_offset_idx = find_first_peak_idx(corr, n_succ=n_succ+1)
 
     if sleep_offset_idx is not None:
         return uncleaned_binary_data.index[sleep_offset_idx]
