@@ -494,7 +494,7 @@ class LIDS():
             return ts
 
     def lids_transform(
-        self, ts, resampling_freq=None, method='mva', resolution='30min'
+        self, ts, resampling_freq=None, method='mva', resolution='30min', agg=np.sum
     ):
         r'''Apply LIDS transformation to activity data
 
@@ -529,7 +529,7 @@ class LIDS():
 
         # Resample data to the required frequency
         if resampling_freq is not None:
-            rs = ts.resample(resampling_freq).apply(lambda x: np.sum(x.values))
+            rs = ts.resample(resampling_freq).apply(lambda x: agg(x.values))
         else:
             rs = ts
 
@@ -1152,7 +1152,8 @@ class LIDS():
                 ts,
                 resampling_freq=resampling_freq,
                 method=smooth_method,
-                resolution=smooth_resolution
+                resolution=smooth_resolution,
+                agg=np.mean
             ) for ts in nanfiltered_sleep_bouts
         ]
 
