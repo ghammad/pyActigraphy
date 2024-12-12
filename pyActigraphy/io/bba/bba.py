@@ -4,8 +4,84 @@ import pandas as pd
 import re
 
 from ..base import BaseRaw
-from accelerometer.utils import date_parser
-from accelerometer.summarisation import imputeMissing
+from pandas.tseries.frequencies import to_offset
+
+# Native implementation of date_parser and imputeMissing
+def date_parser(t):
+    """
+    Copyright © 2022, University of Oxford
+    Adapted from [accelerometer 7.2.1](https://pypi.org/project/accelerometer/) (utils.py)
+    Parses a date string in the format `YYYY-MM-DD HH:mm:ss.SSS±HHmm [TimeZone]`.
+
+    Parameters
+    ----------
+    t: str
+        Date string to format
+
+    Returns
+    -------
+    datetime.datetime
+        A datetime object representing the parsed date and time.
+    """
+    tz = re.search(r'(?<=\[).+?(?=\])', t)
+    if tz is not None:
+        tz = tz.group()
+    t = re.sub(r'\[(.*?)\]', '', t)
+    return pd.to_datetime(t, utc=True).tz_convert(tz)
+
+def imputeMissing(data, extrapolate=True):
+    """
+    Copyright © 2022, University of Oxford
+    Adapted from [accelerometer 7.2.1](https://pypi.org/project/accelerometer/) (summarisation.py).
+
+    Impute non-wear data segments using the average of similar time-of-day values
+    with one minute granularity on different days of the measurement. This
+    imputation accounts for potential wear time diurnal bias where, for example,
+    if the device was systematically less worn during sleep in an individual,
+    the crude average vector magnitude during wear time would be a biased
+    overestimate of the true average. See
+    https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0169649#sec013
+
+    Parameters
+    ----------
+    data: pandas.DataFrame
+        DataFrame containing epoch data.
+    extrapolate: bool
+        If True, it adds padding at the boundaries to have full 24h
+
+    Returns
+    -------
+    pandas.DataFrame
+        The updated DataFrame with NaN values imputed using time-of-day averages.
+    """
+
+    if extrapolate:
+        # padding at the boundaries to have full 24h
+        data = data.reindex(
+            pd.date_range(
+                data.index[0].floor('D'),
+                data.index[-1].ceil('D'),
+                freq=to_offset(pd.infer_freq(data.index)),
+                closed='left',
+                name='time',
+            ),
+            method='nearest',
+            tolerance=pd.Timedelta('1m'),
+            limit=1)
+
+    def fillna(subframe):
+        # Transform will first pass the subframe column-by-column as a Series.
+        # After passing all columns, it will pass the entire subframe again as a DataFrame.
+        # Processing the entire subframe is optional (return value can be omitted). See 'Notes' in transform doc.
+        if isinstance(subframe, pd.Series):
+            x = subframe.to_numpy()
+            nan = np.isnan(x)
+            nanlen = len(x[nan])
+            if 0 < nanlen < len(x):  # check x contains a NaN and is not all NaN
+                x[nan] = np.nanmean(x)
+                return x  # will be cast back to a Series automatically
+            else:
+                return subframe
 
 
 class RawBBA(BaseRaw):
