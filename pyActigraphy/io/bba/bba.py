@@ -4,8 +4,39 @@ import pandas as pd
 import re
 
 from ..base import BaseRaw
-from accelerometer.utils import date_parser
-from accelerometer.summarisation import imputeMissing
+from pandas.tseries.frequencies import to_offset
+#from accelerometer.utils import date_parser
+#from accelerometer.summarisation import imputeMissing
+
+# Native implementation of date_parser and imputeMissing
+def date_parser(t):
+    """
+    Adapted from the accelerometer package (utils.py)
+    """
+    tz = re.search(r'(?<=\[).+?(?=\])', t)
+    if tz is not None:
+        tz = tz.group()
+    t = re.sub(r'\[(.*?)\]', '', t)
+    return pd.to_datetime(t, utc=True).tz_convert(tz)
+
+def imputeMissing(data, extrapolate=True):
+    """
+    Adapted from the accelerometer package (summarisation.py).
+    """
+
+    if extrapolate:
+        # padding at the boundaries to have full 24h
+        data = data.reindex(
+            pd.date_range(
+                data.index[0].floor('D'),
+                data.index[-1].ceil('D'),
+                freq=to_offset(pd.infer_freq(data.index)),
+                closed='left',
+                name='time',
+            ),
+            method='nearest',
+            tolerance=pd.Timedelta('1m'),
+            limit=1)
 
 
 class RawBBA(BaseRaw):
