@@ -14,7 +14,7 @@
   :target: CODE_OF_CONDUCT.md
 
 
-**pyActigraphy** 
+**pyActigraphy**
 ================
 Open-source python package for actigraphy and light exposure data visualization and analysis.
 
