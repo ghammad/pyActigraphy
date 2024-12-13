@@ -5,8 +5,6 @@ import re
 
 from ..base import BaseRaw
 from pandas.tseries.frequencies import to_offset
-#from accelerometer.utils import date_parser
-#from accelerometer.summarisation import imputeMissing
 
 # Native implementation of date_parser and imputeMissing
 def date_parser(t):
