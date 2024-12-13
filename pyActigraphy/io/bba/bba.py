@@ -1,6 +1,7 @@
 import json
 import os
 import pandas as pd
+import numpy as np
 import re
 
 from ..base import BaseRaw
@@ -83,6 +84,20 @@ def imputeMissing(data, extrapolate=True):
             else:
                 return subframe
 
+    data = (
+        data
+        # first attempt imputation using same day of week
+        .groupby([data.index.weekday, data.index.hour, data.index.minute])
+        .transform(fillna)
+        # then try within weekday/weekend
+        .groupby([data.index.weekday >= 5, data.index.hour, data.index.minute])
+        .transform(fillna)
+        # finally, use all other days
+        .groupby([data.index.hour, data.index.minute])
+        .transform(fillna)
+    )
+
+    return data
 
 class RawBBA(BaseRaw):
     r"""Raw object from files produced by the
