@@ -65,7 +65,7 @@ def _padded_data(data, value, periods, frequency):
             end=data.index[0],
             periods=periods,
             freq=date_offset,
-            closed='left'
+            inclusive='left'
         ),
         dtype=data.dtype
     )
@@ -75,7 +75,7 @@ def _padded_data(data, value, periods, frequency):
             start=data.index[-1],
             periods=periods,
             freq=date_offset,
-            closed='right'
+            inclusive='right'
         ),
         dtype=data.dtype
     )
@@ -1384,12 +1384,10 @@ class ScoringMixin(object):
         # symmetrical anymore. In the regions (start, start+alpha/2,
         # the median needs to be calculate by hand.
         # The range is start, start+alpha as the window is centered.
-        median_start = x_sp.iloc[0:L_w].expanding(
-                center=True
-            ).median()
+        median_start = x_sp.iloc[0:L_w].expanding().median()
         median_end = x_sp.iloc[-L_w-1:-1].sort_index(
                 ascending=False
-            ).expanding(center=True).median()[::-1]
+            ).expanding().median()[::-1]
 
         # replace values in the original x_fa series with the new values
         # within the range (start, start+alpha/2) only.
