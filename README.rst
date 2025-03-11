@@ -123,6 +123,52 @@ To update the package:
   git checkout develop
   pip3 install -e .
 
+Tutorials
+=========
+
+The `pyActigraphy` package provides a series of tutorial `notebooks <https://ghammad.github.io/pyActigraphy/tutorials.html>`_. These `Jupyter notebooks <https://jupyter.org/>`_ (file extension: .ipynb) are part of the package but can also be downloaded from the `Github repository <https://github.com/ghammad/pyActigraphy/tree/master/docs/source/>`_.
+In order to interactively run these tutorials, one needs to install the Jupyter Notebook application.
+
+While users are encouraged to install and tailor these tools to their needs, a simpler one-stop-shop solution consists in using `Anaconda <https://www.anaconda.com/docs/main>`_.
+
+Instructions:
+
+#. Download and install `Anaconda Distribution <https://www.anaconda.com/docs/getting-started/anaconda/install>`_
+#. Via the **Anaconda Prompt** (Windows) or a **Terminal** (Mac OS, Linux):
+
+   #. Create a virtual environment::
+
+       $ conda create -n pyActi39 python=3.9
+
+   #. Activate the newly created environment::
+
+       $ conda activate pyActi39
+
+   #. Install the `Numba <https://numba.readthedocs.io/en/stable/index.html>`_ package which is a dependency of :code:`pyActigraphy`::
+
+       $ pip install numba==0.57.1
+
+   #. Install :code:`pyActigraphy`::
+
+       $ pip install pyActigraphy
+
+#. Launch the Jupyter Notebook via the Anaconda Navigator:
+
+   #. Via the application menu (On Windows)
+   #. Via a **Terminal** (On Mac OS/Linux only)::
+
+      $ anaconda-navigator
+
+   .. warning:: Once the navigator is running, **before** launching the Jupyter Notebook app, select the **pyActi39** environment (instead of :code:`base (root)`)
+
+   .. image :: docs/source/img/anaconda-navigator-instructions.png
+      :width: 600
+
+
+#. Via the Jupyter interface, navigate to the tutorial notebooks you previously downloaded and simply launch them.
+
+#. Voilà. Good luck.
+
 Quick start
 ===========
 
