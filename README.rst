@@ -85,7 +85,9 @@ thanks to the support of its members, Dr. Mirjam Münch and Prof. `Manuel Spitsc
 a pyActigraphy module for analysing light exposure data has been developed, **pyLight**.
 This module is part of the Human Light Exposure Database and is included in pyActigraphy version `v1.1 <https://github.com/ghammad/pyActigraphy/releases/tag/v1.1>`_ and higher.
 
-A manuscript describing the *pyLight* module is available as a `preprint <https://osf.io/msk9n/>`_.
+When using this module, please consider citing:
+
+  Hammad, G., Wulff, K., Skene, D. J., Münch, M., & Spitschan, M. (2024). Open-Source Python Module for the Analysis of Personalized Light Exposure Data from   Wearable Light Loggers and Dosimeters. LEUKOS, 20(4), 380–389. https://doi.org/10.1080/15502724.2023.2296863
 
 Code and documentation
 ======================
