@@ -13,6 +13,7 @@ from ..bba import read_raw_bba
 from ..dqt import read_raw_dqt
 from ..mesa import read_raw_mesa
 from ..mtn import read_raw_mtn
+from ..nsrr import read_raw_nsrr
 from ..rpx import read_raw_rpx
 from ..tal import read_raw_tal
 from pyActigraphy.log import read_sst_log
@@ -238,6 +239,7 @@ def read_raw(
         * DQT (Daqtometers, Daqtix)
         * MESA (MESA dataset, NSRR)
         * MTN (MotionWatch8, CamNtech)
+        * NSRR (generic file, NSRR)
         * RPX (Actiwatch, Respironics)
         * TAL (Tempatilumi, CE Brasil)
 
@@ -262,7 +264,7 @@ def read_raw(
     """
 
     supported_types = [
-        'AGD', 'ATR', 'AWD', 'BBA', 'DQT', 'MESA', 'MTN', 'RPX', 'TAL'
+        'AGD', 'ATR', 'AWD', 'BBA', 'DQT', 'MESA', 'MTN', 'NSRR', 'RPX', 'TAL'
     ]
     if reader_type not in supported_types:
         raise ValueError(
@@ -302,6 +304,9 @@ def read_raw(
         'MTN': lambda files: parallel_reader(
             n_jobs, read_raw_mtn, files, prefer, verbose, **kwargs
         ),
+        'NSRR': lambda files: parallel_reader(
+            n_jobs, read_raw_nsrr, files, prefer, verbose, **kwargs
+        ),        
         'RPX': lambda files: parallel_reader(
             n_jobs, read_raw_rpx, files, prefer, verbose, **kwargs
         ),

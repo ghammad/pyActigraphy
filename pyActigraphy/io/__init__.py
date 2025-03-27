@@ -19,6 +19,7 @@ from .bba import read_raw_bba
 from .dqt import read_raw_dqt
 from .mesa import read_raw_mesa
 from .mtn import read_raw_mtn
+from .nsrr import read_raw_nsrr
 from .rpx import read_raw_rpx
 from .tal import read_raw_tal
 
@@ -32,6 +33,7 @@ __all__ = [
     "read_raw_dqt",
     "read_raw_mesa",
     "read_raw_mtn",
+    "read_raw_nsrr"
     "read_raw_rpx",
     "read_raw_tal"
 ]
