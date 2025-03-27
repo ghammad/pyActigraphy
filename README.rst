@@ -151,28 +151,40 @@ Instructions:
 #. Download and install `Anaconda Distribution <https://www.anaconda.com/docs/getting-started/anaconda/install>`_
 #. Via the **Anaconda Prompt** (Windows) or a **Terminal** (Mac OS, Linux):
 
-   #. Create a virtual environment::
+   #. Create a virtual environment:
 
-       conda create -n pyActi39 python=3.9
+   .. code-block:: shell
+  
+     conda create -n pyActi39 python=3.9
 
-   #. Activate the newly created environment::
 
-       conda activate pyActi39
+   #. Activate the newly created environment:
 
-   #. Install the `Numba <https://numba.readthedocs.io/en/stable/index.html>`_ package which is a dependency of :code:`pyActigraphy`::
+   .. code-block:: shell
 
-       pip install numba==0.57.1
+     conda activate pyActi39
 
-   #. Install :code:`pyActigraphy`::
 
-       pip install pyActigraphy
+   #. Install the `Numba <https://numba.readthedocs.io/en/stable/index.html>`_ package which is a dependency of :code:`pyActigraphy`:
+
+   .. code-block:: shell
+
+     python -m pip install numba==0.57.1
+
+   #. Install :code:`pyActigraphy`:
+
+   .. code-block:: shell
+
+     python -m pip install pyActigraphy
 
 #. Launch the Jupyter Notebook via the Anaconda Navigator:
 
    #. Via the application menu (On Windows)
-   #. Via a **Terminal** (On Mac OS/Linux only)::
+   #. Via a **Terminal** (On Mac OS/Linux only):
 
-      anaconda-navigator
+   .. code-block:: shell
+
+     anaconda-navigator
 
    .. warning::
       
