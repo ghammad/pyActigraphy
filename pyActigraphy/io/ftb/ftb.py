@@ -15,7 +15,10 @@ class RawFTB(BaseRaw):
     Parameters
     ----------
     path_to_fitbit: str, optional
-        Path to the folder structure from Fitbit download (.../Fitbit/...). 
+        Path to the folder structure from Fitbit download (.../Fitbit/...). Must be provided if no preloaded data is provided.
+        Default is None.
+    preloaded_data: pd.DataFrame, optional
+        Preloaded Fitbit data. Must contain columns 'calories' and 'heart'.
         Default is None.
     start_time: datetime-like, optional
         Read data from this time.
@@ -36,6 +39,7 @@ class RawFTB(BaseRaw):
     def __init__(
         self,
         path_to_fitbit=None,
+        preloaded_data=None,
         start_time=None,
         period=None,
         name=None
@@ -43,8 +47,8 @@ class RawFTB(BaseRaw):
         
         # read files
         self._url = path_to_fitbit
-        self.__assert_input(path_to_fitbit)
-        raw_data = self.__reading_and_parsing_file()
+        self.__assert_input(path_to_fitbit, preloaded_data)
+        raw_data = self.__reading_and_parsing_file(preloaded_data)
         raw_data = self.__preprocess_raw_data(raw_data)
 
         # extract informations from the header
@@ -122,13 +126,15 @@ class RawFTB(BaseRaw):
         else:
             return self.light.get_channel("whitelight")
     
-    def __assert_input(self, path_to_fitbit):
-        if path_to_fitbit is None:
-            raise ValueError("Must provide a path to the Fitbit data 'path_to_fitbit'.")
+    def __assert_input(self, path_to_fitbit, preloaded_data):
+        if path_to_fitbit is None and preloaded_data is None:
+            raise ValueError("Must provide a path to the Fitbit data 'path_to_fitbit' if no preloaded data is provided.")
     
-    def __reading_and_parsing_file(self):
-        """ Load the data from the JSON file(s) """
-        if os.path.isdir(self._url):
+    def __reading_and_parsing_file(self, preloaded_data):
+        """ Load the data from the JSON file(s) or return the preloaded data. """
+        if preloaded_data is not None:
+            return preloaded_data
+        elif os.path.isdir(self._url):
             return self.__reading_and_parsing_from_json(self._url)
         else:
             raise ValueError(f" Invalid path {self._url}.")
@@ -234,6 +240,7 @@ class RawFTB(BaseRaw):
 
 def read_raw_ftb(
     path_to_fitbit=None,
+    preloaded_data=None,
     start_time=None,
     period=None,
     name=None
@@ -243,7 +250,10 @@ def read_raw_ftb(
     Parameters
     ----------
     path_to_fitbit: str, optional
-        Path to the folder structure from Fitbit download (.../Fitbit/...).
+        Path to the folder structure from Fitbit download (.../Fitbit/...). Must be provided if no preloaded data is provided.
+        Default is None.
+    preloaded_data: pd.DataFrame, optional
+        Preloaded Fitbit data. Must contain columns 'calories' and 'heart'.
         Default is None.
     start_time: datetime-like str
         If not None, the start_time will be used to slice the data.
@@ -263,6 +273,7 @@ def read_raw_ftb(
 
     return RawFTB(
         path_to_fitbit=path_to_fitbit,
+        preloaded_data=preloaded_data,
         start_time=start_time,
         period=period,
         name=name
