@@ -10,6 +10,9 @@ from ..utils.utils import _shift_time_axis
 from statistics import mean
 import statsmodels.api as sm
 
+from pyActigraphy.register import register
+
+
 __all__ = [
     'MetricsMixin',
     'ForwardMetricsMixin',
@@ -637,6 +640,7 @@ class MetricsMixin(object):
 
         return (m10-l5)/(m10+l5)
 
+    @register("awake")
     def L5p(self, period='7D', binarize=True, threshold=4, verbose=False):
         r"""L5 per period
 
@@ -714,6 +718,7 @@ class MetricsMixin(object):
         ]
         return [res[1] for res in results]
 
+    @register("sleep")
     def M10p(self, period='7D', binarize=True, threshold=4, verbose=False):
         r"""M10 per period
 
@@ -791,6 +796,7 @@ class MetricsMixin(object):
         ]
         return [res[1] for res in results]
 
+    @register("awake")
     def RAp(self, period='7D', binarize=True, threshold=4, verbose=False):
         r"""RA per period
 
@@ -870,6 +876,7 @@ class MetricsMixin(object):
         return results
 
     # @lru_cache(maxsize=6)
+    @register("sleep")
     def IS(self, freq='1H', binarize=True, threshold=4):
         r"""Interdaily stability
 
@@ -956,6 +963,7 @@ class MetricsMixin(object):
         )
         return _interdaily_stability(data)
 
+    @register("sleep")
     def ISm(
         self,
         freqs=[
