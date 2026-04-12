@@ -6,7 +6,6 @@ import warnings
 
 from ..base import BaseRaw
 from pyActigraphy.light import LightRecording
-from pyActigraphy.register import register
 
 
 class RawAGD(BaseRaw):
@@ -240,7 +239,7 @@ class RawAGD(BaseRaw):
 
         return pos.map(pos_map) if pos_map is not None else pos
 
-@register("Not a metric!")
+
 def read_raw_agd(
     input_fname,
     start_time=None,

@@ -247,6 +247,7 @@ class MetricsMixin(object):
             Data resampling frequency.
             Cf. #timeseries-offset-aliases in
             <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+            Default is '5min'.
         cyclic: bool, optional
             If set to True, two daily profiles are concatenated to ensure
             continuity between the last point of the day and the first one.
@@ -257,6 +258,7 @@ class MetricsMixin(object):
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
+            Default is 4.
         time_origin: str or pd.Timedelta, optional
             If not None, origin of the time axis for the daily profile.
             Original time bins are translated as time delta with respect to
@@ -339,6 +341,7 @@ class MetricsMixin(object):
             Data resampling frequency.
             Cf. #timeseries-offset-aliases in
             <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+            Default is '5min'.
         cyclic: bool, optional
             If set to True, two daily profiles are concatenated to ensure
             continuity between the last point of the day and the first one.
@@ -373,6 +376,7 @@ class MetricsMixin(object):
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
+            Default is 4.
         rescale: bool, optional
             If set to True, the activity counts are rescaled to account for
             masked periods (if any).
@@ -418,12 +422,14 @@ class MetricsMixin(object):
         period: str, optional
             Time length of the period to be considered. Must be understandable
             by pandas.Timedelta
+            Default is '7D'.
         binarize: bool, optional
             If set to True, the data are binarized.
             Default is True.
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
+            Default is 4.
         rescale: bool, optional
             If set to True, the activity counts are rescaled to account for
             masked periods (if any).
@@ -987,16 +993,17 @@ class MetricsMixin(object):
 
         Parameters
         ----------
-        freq: str, optional
+        freqs: str, optional
             Data resampling `frequency strings
             <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
+            Default is '[1T, 2T]'.
         binarize: bool, optional
             If set to True, the data are binarized.
             Default is True.
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
-            Default is set to 4.
+            Default is 4.
 
         Returns
         -------
