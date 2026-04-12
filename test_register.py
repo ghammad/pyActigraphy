@@ -4,7 +4,7 @@ import pyActigraphy
 from inspect import signature
 from docstring_parser import parse
 
-from pyActigraphy.register import REGISTER
+from pyActigraphy.utils.register import REGISTER
 
 
 raw = pyActigraphy.io.read_raw_mtn(sys.argv[1])
