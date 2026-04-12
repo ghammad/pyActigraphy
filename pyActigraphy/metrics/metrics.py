@@ -6,11 +6,10 @@ from ..utils.utils import _average_daily_activity
 from ..utils.utils import _activity_onset_time
 from ..utils.utils import _activity_offset_time
 from ..utils.utils import _shift_time_axis
+from ..utils.register import register
 # from ..sleep.scoring import AonT, AoffT
 from statistics import mean
 import statsmodels.api as sm
-
-from pyActigraphy.register import register
 
 
 __all__ = [
@@ -227,6 +226,7 @@ def _td_format(td):
 class MetricsMixin(object):
     """ Mixin Class """
 
+    @register("activity", "daily")
     def average_daily_activity(
         self,
         freq='5min',
@@ -326,6 +326,7 @@ class MetricsMixin(object):
 
             return _shift_time_axis(avgdaily, shift)
 
+    @register("light", "daily")
     def average_daily_light(self, freq='5min', cyclic=False):
         r"""Average daily light distribution
 
@@ -356,6 +357,7 @@ class MetricsMixin(object):
 
         return avgdaily_light
 
+    @register("activity", "daily")
     def ADAT(
         self, binarize=True, threshold=4, rescale=True, exclude_ends=False
     ):
@@ -396,6 +398,7 @@ class MetricsMixin(object):
 
         return adat
 
+    @register("activity", "daily")
     def ADATp(
         self,
         period='7D',
@@ -457,6 +460,7 @@ class MetricsMixin(object):
 
         return results
 
+    @register("activity")
     def L5(self, binarize=True, threshold=4):
         r"""L5
 
@@ -517,6 +521,7 @@ class MetricsMixin(object):
 
         return l5
 
+    @register("activity")
     def M10(self, binarize=True, threshold=4):
         r"""M10
 
@@ -577,6 +582,7 @@ class MetricsMixin(object):
 
         return m10
 
+    @register("rest-activity")
     def RA(self, binarize=True, threshold=4):
         r"""Relative rest/activity amplitude
 
@@ -640,7 +646,7 @@ class MetricsMixin(object):
 
         return (m10-l5)/(m10+l5)
 
-    @register("awake")
+    @register("activity")
     def L5p(self, period='7D', binarize=True, threshold=4, verbose=False):
         r"""L5 per period
 
@@ -718,7 +724,7 @@ class MetricsMixin(object):
         ]
         return [res[1] for res in results]
 
-    @register("sleep")
+    @register("activity")
     def M10p(self, period='7D', binarize=True, threshold=4, verbose=False):
         r"""M10 per period
 
@@ -796,7 +802,7 @@ class MetricsMixin(object):
         ]
         return [res[1] for res in results]
 
-    @register("awake")
+    @register("NoIdea")
     def RAp(self, period='7D', binarize=True, threshold=4, verbose=False):
         r"""RA per period
 
@@ -876,7 +882,7 @@ class MetricsMixin(object):
         return results
 
     # @lru_cache(maxsize=6)
-    @register("sleep")
+    @register("rest-activity")
     def IS(self, freq='1H', binarize=True, threshold=4):
         r"""Interdaily stability
 
@@ -963,7 +969,7 @@ class MetricsMixin(object):
         )
         return _interdaily_stability(data)
 
-    @register("sleep")
+    @register("stability")
     def ISm(
         self,
         freqs=[
@@ -1029,6 +1035,7 @@ class MetricsMixin(object):
 
         return mean([_interdaily_stability(datum) for datum in data])
 
+    @register("stability")
     def ISp(self, period='7D', freq='1H',
             binarize=True, threshold=4, verbose=False):
         r"""Interdaily stability per period
