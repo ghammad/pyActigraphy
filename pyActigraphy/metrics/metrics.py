@@ -6,9 +6,11 @@ from ..utils.utils import _average_daily_activity
 from ..utils.utils import _activity_onset_time
 from ..utils.utils import _activity_offset_time
 from ..utils.utils import _shift_time_axis
+from ..utils.register import register
 # from ..sleep.scoring import AonT, AoffT
 from statistics import mean
 import statsmodels.api as sm
+
 
 __all__ = [
     'MetricsMixin',
@@ -224,6 +226,7 @@ def _td_format(td):
 class MetricsMixin(object):
     """ Mixin Class """
 
+    @register("activity", "daily")
     def average_daily_activity(
         self,
         freq='5min',
@@ -244,6 +247,7 @@ class MetricsMixin(object):
             Data resampling frequency.
             Cf. #timeseries-offset-aliases in
             <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+            Default is '5min'.
         cyclic: bool, optional
             If set to True, two daily profiles are concatenated to ensure
             continuity between the last point of the day and the first one.
@@ -254,6 +258,7 @@ class MetricsMixin(object):
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
+            Default is 4.
         time_origin: str or pd.Timedelta, optional
             If not None, origin of the time axis for the daily profile.
             Original time bins are translated as time delta with respect to
@@ -323,6 +328,7 @@ class MetricsMixin(object):
 
             return _shift_time_axis(avgdaily, shift)
 
+    @register("light", "daily")
     def average_daily_light(self, freq='5min', cyclic=False):
         r"""Average daily light distribution
 
@@ -335,6 +341,7 @@ class MetricsMixin(object):
             Data resampling frequency.
             Cf. #timeseries-offset-aliases in
             <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>.
+            Default is '5min'.
         cyclic: bool, optional
             If set to True, two daily profiles are concatenated to ensure
             continuity between the last point of the day and the first one.
@@ -353,6 +360,7 @@ class MetricsMixin(object):
 
         return avgdaily_light
 
+    @register("activity", "daily")
     def ADAT(
         self, binarize=True, threshold=4, rescale=True, exclude_ends=False
     ):
@@ -368,6 +376,7 @@ class MetricsMixin(object):
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
+            Default is 4.
         rescale: bool, optional
             If set to True, the activity counts are rescaled to account for
             masked periods (if any).
@@ -393,6 +402,7 @@ class MetricsMixin(object):
 
         return adat
 
+    @register("activity", "daily")
     def ADATp(
         self,
         period='7D',
@@ -412,12 +422,14 @@ class MetricsMixin(object):
         period: str, optional
             Time length of the period to be considered. Must be understandable
             by pandas.Timedelta
+            Default is '7D'.
         binarize: bool, optional
             If set to True, the data are binarized.
             Default is True.
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
+            Default is 4.
         rescale: bool, optional
             If set to True, the activity counts are rescaled to account for
             masked periods (if any).
@@ -454,6 +466,7 @@ class MetricsMixin(object):
 
         return results
 
+    @register("activity")
     def L5(self, binarize=True, threshold=4):
         r"""L5
 
@@ -514,6 +527,7 @@ class MetricsMixin(object):
 
         return l5
 
+    @register("activity")
     def M10(self, binarize=True, threshold=4):
         r"""M10
 
@@ -574,6 +588,7 @@ class MetricsMixin(object):
 
         return m10
 
+    @register("rest-activity")
     def RA(self, binarize=True, threshold=4):
         r"""Relative rest/activity amplitude
 
@@ -637,6 +652,7 @@ class MetricsMixin(object):
 
         return (m10-l5)/(m10+l5)
 
+    @register("activity")
     def L5p(self, period='7D', binarize=True, threshold=4, verbose=False):
         r"""L5 per period
 
@@ -714,6 +730,7 @@ class MetricsMixin(object):
         ]
         return [res[1] for res in results]
 
+    @register("activity")
     def M10p(self, period='7D', binarize=True, threshold=4, verbose=False):
         r"""M10 per period
 
@@ -791,6 +808,7 @@ class MetricsMixin(object):
         ]
         return [res[1] for res in results]
 
+    @register("NoIdea")
     def RAp(self, period='7D', binarize=True, threshold=4, verbose=False):
         r"""RA per period
 
@@ -870,6 +888,7 @@ class MetricsMixin(object):
         return results
 
     # @lru_cache(maxsize=6)
+    @register("rest-activity")
     def IS(self, freq='1H', binarize=True, threshold=4):
         r"""Interdaily stability
 
@@ -956,6 +975,7 @@ class MetricsMixin(object):
         )
         return _interdaily_stability(data)
 
+    @register("stability")
     def ISm(
         self,
         freqs=[
@@ -973,16 +993,17 @@ class MetricsMixin(object):
 
         Parameters
         ----------
-        freq: str, optional
+        freqs: str, optional
             Data resampling `frequency strings
             <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
+            Default is '[1T, 2T]'.
         binarize: bool, optional
             If set to True, the data are binarized.
             Default is True.
         threshold: int, optional
             If binarize is set to True, data above this threshold are set to 1
             and to 0 otherwise.
-            Default is set to 4.
+            Default is 4.
 
         Returns
         -------
@@ -1021,6 +1042,7 @@ class MetricsMixin(object):
 
         return mean([_interdaily_stability(datum) for datum in data])
 
+    @register("stability")
     def ISp(self, period='7D', freq='1H',
             binarize=True, threshold=4, verbose=False):
         r"""Interdaily stability per period
