@@ -253,7 +253,7 @@ def read_raw_awd(
     period=None,
     engine='python'
 ):
-    r"""Reader function for raw AWD file.
+    r"""Reader function for raw .awd file recorded by Actiwatch 4, 7, Plus (Philips Respironics).
 
     Parameters
     ----------

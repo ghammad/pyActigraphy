@@ -1,4 +1,5 @@
 from ..utils.filters import filter_ts_duration
+import numpy as np
 
 
 class SleepBoutMixin(object):
@@ -8,6 +9,7 @@ class SleepBoutMixin(object):
         self,
         duration_min=None,
         duration_max=None,
+        verbose=False,
         algo='Roenneberg',
         *args, **kwargs
     ):
@@ -23,6 +25,9 @@ class SleepBoutMixin(object):
         duration_max: str,optional
             Maximal time duration for a sleep period.
             Default is None (no filtering).
+        verbose: bool,optional
+            If set to True, display informations (start,end) about detected sleep bouts.
+            Default is False.
         algo: str, optional
             Sleep/wake scoring algorithm to use.
             Default is 'Roenneberg'.
@@ -54,9 +59,29 @@ class SleepBoutMixin(object):
 
         # For each inactivity period (from offset to onset times)
         sleep_bouts = []
-        for onset, offset in zip(onsets, offsets):
-            sleep_bout = self.data[offset:onset]
+        for offset in offsets:
+    #[(pd.Series(aont) > aofft[0]).idxmax()]
+            # Select candidates for the associated onset time
+            is_onset_later = onsets>offset
+            # If none was found, skip this offset time and warn users
+            if((is_onset_later==False).all()):
+                if verbose:
+                    print(
+                        "Could not find any onset time past "
+                        + "the current offset time ({}).".format(offset)
+                        + "\nSkipping current offset time."
+                    )
+                continue
+            # Search forward for its closest onset time: return its index
+            idx = np.argmax(is_onset_later)
+    
+            sleep_bout = self.data.loc[offset:onsets[idx]]
             sleep_bouts.append(sleep_bout)
+
+#    sleep_bouts = []
+#        for onset, offset in zip(onsets, offsets):
+#            sleep_bout = self.data[offset:onset]
+#            sleep_bouts.append(sleep_bout)
 
         return filter_ts_duration(sleep_bouts, duration_min, duration_max)
 

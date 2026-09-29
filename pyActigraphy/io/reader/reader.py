@@ -8,6 +8,7 @@ from pyActigraphy.metrics import ForwardMetricsMixin
 from joblib import Parallel, delayed
 from ..agd import read_raw_agd
 from ..atr import read_raw_atr
+from ..alu import read_raw_alu
 from ..awd import read_raw_awd
 from ..bba import read_raw_bba
 from ..dqt import read_raw_dqt
@@ -232,6 +233,7 @@ def read_raw(
         Supported types:
 
         * AGD ((w)GT3X(+)), ActiGraph)
+        * ALU (ActLumus, Condor Instruments)
         * ATR (ActTrust, Condor Instruments)
         * AWD (ActiWatch 4/7/L/L-Plus/T, CamNtech)
         * BBA (Biobankaccelerometer)
@@ -262,7 +264,7 @@ def read_raw(
     """
 
     supported_types = [
-        'AGD', 'ATR', 'AWD', 'BBA', 'DQT', 'MESA', 'MTN', 'RPX', 'TAL'
+        'AGD', 'ALU', 'ATR', 'AWD', 'BBA', 'DQT', 'MESA', 'MTN', 'RPX', 'TAL'
     ]
     if reader_type not in supported_types:
         raise ValueError(
@@ -286,6 +288,9 @@ def read_raw(
         ),
         'ATR': lambda files: parallel_reader(
             n_jobs, read_raw_atr, files, prefer, verbose, **kwargs
+        ),
+        'ALU': lambda files: parallel_reader(
+            n_jobs, read_raw_alu, files, prefer, verbose, **kwargs
         ),
         'AWD': lambda files: parallel_reader(
             n_jobs, read_raw_awd, files, prefer, verbose, **kwargs

@@ -64,11 +64,22 @@ def _create_inactivity_mask(data, duration, threshold):
 
     return pd.Series(mask, index=data.index)
 
+def _is_data_continuous(data, frequency):
+    """Check if the provided data appears to be continuous based 
+    on the provided frequency.
+    """
+    start = data.index[0]
+    end = data.index[-1]
+    
+    # +1 because the first epoch is not counted else while substracting
+    expected_length = ((end - start) / frequency) + 1
+    
+    return len(data) == expected_length
 
 class FiltersMixin(object):
     """ Mixin Class """
 
-    def create_inactivity_mask(self, duration):
+    def create_inactivity_mask(self, duration, threshold=1):
         """Create a mask for inactivity (count equal to zero) periods.
 
         This mask has the same length as its underlying data and can be used
@@ -83,8 +94,16 @@ class FiltersMixin(object):
         duration: int or str
             Minimal number of consecutive zeroes for an inactive period.
             Time offset strings (ex: '90min') can also be used.
+        threshold: int or float
+            Limit below which the device might be considered as not worn.
         """
 
+        # Verify that the data is continuous before creating a mask
+        if not _is_data_continuous(self.raw_data, self.frequency):
+            raise ValueError('The underlying activity data seems to be '
+                             + 'discontinued. Make sure that the source data '
+                             + 'contains a continuous time series.')
+        
         if isinstance(duration, int):
             nepochs = duration
         elif isinstance(duration, str):
@@ -101,9 +120,9 @@ class FiltersMixin(object):
         self.inactivity_length = nepochs
 
         # Create actual mask
-        self.mask = _create_inactivity_mask(self.raw_data, nepochs, 1)
+        self.mask = _create_inactivity_mask(self.raw_data, nepochs, threshold)
 
-    def add_mask_period(self, start, stop):
+    def add_mask_period(self, start, stop, error='raise'):
         """ Add a period to the inactivity mask
 
         Parameters
@@ -112,8 +131,21 @@ class FiltersMixin(object):
             Start time (YYYY-MM-DD HH:MM:SS) of the inactivity period.
         stop: str
             Stop time (YYYY-MM-DD HH:MM:SS) of the inactivity period.
+        error: str
+            If set to 'raise', raise a ValueError whenever the mask
+            period is not within the recording's start/stop times.
+            If set to 'warn', simply issue a warning.
+            Available options are: ['raise','warn']. Default is 'raise'.
         """
 
+        error_options = ['raise', 'warn']
+        if error not in error_options:
+            raise ValueError(
+                (
+                    "Error option ({}) is not available.\n".format(error)
+                    +"Available options are: {}.".format(",".join(error_options))
+                )
+            )
         # Check if a mask has already been created
         # NB : if the inactivity_length is not None, accessing the mask will
         # trigger its creation.
@@ -126,24 +158,41 @@ class FiltersMixin(object):
 
         # Check if start and stop are within the index range
         if (pd.Timestamp(start) < self.mask.index[0]):
-            raise ValueError((
-                "Attempting to set the start time of a mask period before "
-                + "the actual start time of the data.\n"
-                + "Mask start time: {}".format(start)
-                + "Data start time: {}".format(self.mask.index[0])
-            ))
+            if error == 'raise':
+                raise ValueError((
+                    "Attempting to set the start time of a mask period before "
+                    + "the actual start time of the data:\n"
+                    + "- Mask start time: {}\n".format(start)
+                    + "- Data start time: {}".format(self.mask.index[0])
+                ))
+            else:
+                print((
+                    "Attempting to set the start time of a mask period before "
+                    + "the actual start time of the data:\n"
+                    + "- Mask start time: {}\n".format(start)
+                    + "- Data start time: {}".format(self.mask.index[0])
+                ))
+
         if (pd.Timestamp(stop) > self.mask.index[-1]):
-            raise ValueError((
-                "Attempting to set the stop time of a mask period after "
-                + "the actual stop time of the data.\n"
-                + "Mask stop time: {}".format(stop)
-                + "Data stop time: {}".format(self.mask.index[-1])
-            ))
+            if error == 'raise':
+                raise ValueError((
+                    "Attempting to set the stop time of a mask period after "
+                    + "the actual stop time of the data:\n"
+                    + "- Mask stop time: {}\n".format(stop)
+                    + "- Data stop time: {}".format(self.mask.index[-1])
+                ))
+            else:
+                print((
+                    "Attempting to set the stop time of a mask period after "
+                    + "the actual stop time of the data:\n"
+                    + "- Mask stop time: {}\n".format(stop)
+                    + "- Data stop time: {}".format(self.mask.index[-1])
+                ))
 
         # Set mask values between start and stop to zeros
         self.mask.loc[start:stop] = 0
 
-    def add_mask_periods(self, input_fname, *args, **kwargs):
+    def add_mask_periods(self, input_fname, error='raise', *args, **kwargs):
         """ Add periods to the inactivity mask
 
         Function to read start and stop times from a Mask log file. Supports
@@ -153,6 +202,11 @@ class FiltersMixin(object):
         ----------
         input_fname: str
             Path to the log file.
+        error: str
+            If set to 'raise', raise a ValueError whenever the mask
+            period is not within the recording's start/stop times.
+            If set to 'warn', simply issue a warning.
+            Available options are: ['raise','warn']. Default is 'raise'.
         *args
             Variable length argument list passed to the subsequent reader
             function.
@@ -166,4 +220,4 @@ class FiltersMixin(object):
 
         # Iterate over the rows of the DataFrame
         for _, row in log.iterrows():
-            self.add_mask_period(row['Start_time'], row['Stop_time'])
+            self.add_mask_period(row['Start_time'], row['Stop_time'], error=error)

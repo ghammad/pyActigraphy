@@ -14,6 +14,7 @@ from .reader import RawReader
 from .reader import read_raw
 from .agd import read_raw_agd
 from .atr import read_raw_atr
+from .alu import read_raw_alu
 from .awd import read_raw_awd
 from .bba import read_raw_bba
 from .dqt import read_raw_dqt
@@ -27,6 +28,7 @@ __all__ = [
     "read_raw",
     "read_raw_agd",
     "read_raw_atr",
+    "read_raw_alu",
     "read_raw_awd",
     "read_raw_bba",
     "read_raw_dqt",
