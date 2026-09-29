@@ -40,11 +40,26 @@ fields_ger = {
     'NAN': 'kZ'
 }
 
+
+# In Italian
+fields_it = {
+    'Name': 'Identità',
+    'Device': 'Tipo di Actiwatch',
+    'Device_id': 'Numero di serie Actiwatch',
+    'Data': 'Dati periodo per periodo',
+    'Start_date': 'Data inizio acquisizione dati',
+    'Start_time': 'Ora di inizio acquisizione dati',
+    'Period': 'Lunghezza periodo',
+    'NAN': 'NaN'
+}
+
+
 fields = {
     'ENG_UK': fields_eng,
     'ENG_US': fields_eng,
     'FR': fields_fr,
-    'GER': fields_ger
+    'GER': fields_ger,
+    'IT': fields_it,
 }
 
 # Dictionary of the required columns in the data 'section' of the input file
@@ -102,11 +117,30 @@ columns_ger = {
     # 'S/W Status': '??'
 }
 
+# In Italian
+columns_it = {
+    'Line': 'Linea',
+    'Date': 'Data',
+    'Time': 'Ora',
+    'Off_Wrist': 'Stato fuori polso',
+    'Activity': 'Attività',
+    'Marker': 'Indicatore',
+    'White_light': 'Luce bianca',
+    'Red_light': 'Luce rossa',
+    'Green_light': 'Luce verde',
+    'Blue_light': 'Luce blu',
+    'Sleep/Wake': 'Sonno/veglia',
+    # 'Mobility': '??',
+    'Interval Status': 'Stato intervallo',
+    # 'S/W Status': '??'
+}
+
 columns = {
     'ENG_UK': columns_eng,
     'ENG_US': columns_eng,
     'FR': columns_fr,
-    'GER': columns_ger
+    'GER': columns_ger,
+    'IT': columns_it
 }
 
-day_first = {'ENG_UK': True, 'ENG_US': False, 'FR': True, 'GER': True}
+day_first = {'ENG_UK': True, 'ENG_US': False, 'FR': True, 'GER': True, 'IT': True}
