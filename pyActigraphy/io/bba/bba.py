@@ -1,11 +1,10 @@
+import importlib
 import json
 import os
 import pandas as pd
 import re
 
 from ..base import BaseRaw
-from accelerometer.utils import date_parser
-from accelerometer.summarisation import imputeMissing
 
 
 class RawBBA(BaseRaw):
@@ -69,6 +68,18 @@ class RawBBA(BaseRaw):
         use_metadata_json=True,
         metadata_fname=None
     ):
+        # The accelerometer package causes some dependency conflicts,
+        # so instead of always including it as a hard dependency, we
+        # try to import it as an optional one. Users with BBA files
+        # likely already have accelerometer installed, or should be
+        # able to sort out the dependency conflicts as needed.
+        try:
+            utils = importlib.import_module('accelerometer.utils')
+        except ModuleNotFoundError as e:
+            raise Exception(
+                'Unable to load the required accelerometer.utils module.'
+                ' Install the package with "pip install accelerometer".'
+            ) from e
 
         # get absolute file path
         input_fname = os.path.abspath(input_fname)
@@ -79,7 +90,7 @@ class RawBBA(BaseRaw):
             engine=engine,
             index_col=['time'],
             parse_dates=['time'],
-            date_parser=date_parser
+            date_parser=utils.date_parser
         )
 
         # read meta-data file (if found):
@@ -139,7 +150,8 @@ class RawBBA(BaseRaw):
 
         # Impute missing data (if required)
         if impute_missing:
-            data = imputeMissing(data)
+            s11n = importlib.import_module('accelerometer.summarization')
+            data = s11n.imputeMissing(data)
 
         # LIGHT
         self.__white_light = self.__extract_baa_data(
@@ -270,11 +282,11 @@ class RawBBA(BaseRaw):
             meta_data = json.load(file)
 
         # check filename consistency:
-        # - META-DATA: file-name = 'basename'.cwa[.gz]
+        # - META-DATA: file-name = 'basename'.(cwa|CWA|bin)[.gz]
         # - INPUT DATA: input_fname = 'basename'-timeSeries.csv[.gz]
 
         match_basename = re.match(
-            pattern=r'^(\w*)-timeSeries.csv(\.gz)?',
+            pattern=r'^(.+?)-timeSeries.csv(\.gz)?',
             string=os.path.basename(input_fname)
         )
         if match_basename:
@@ -285,9 +297,9 @@ class RawBBA(BaseRaw):
                 + ' from input filename: {}'.format(input_fname)
             )
 
-        if not re.match(
-            pattern=r'{}.(cwa|CWA)(\.gz)?'.format(input_basename),
-            string=meta_data['file-name']
+        if not re.search(
+            pattern=r'{}.(cwa|CWA|bin)(\.gz)?'.format(input_basename),
+            string=os.path.basename(meta_data['file-name'])
         ):
             raise ValueError(
                 'Attempting to read a metadata file referring to another '
@@ -342,6 +354,10 @@ def read_raw_bba(
 ):
     r"""Reader function for files produced by the biobankAccelerometerAnalysis
     package.
+
+    Note that the required 'accelerometer' package is not automatically
+    included as a dependency of pyActigraphy. You need to explicitly install
+    it with something like 'pip install accelerometer' to use this function.
 
     Parameters
     ----------
