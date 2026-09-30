@@ -73,13 +73,13 @@ class RawBBA(BaseRaw):
         # try to import it as an optional one. Users with BBA files
         # likely already have accelerometer installed, or should be
         # able to sort out the dependency conflicts as needed.
-        try:
-            utils = importlib.import_module('accelerometer.utils')
-        except ModuleNotFoundError as e:
-            raise Exception(
-                'Unable to load the required accelerometer.utils module.'
-                ' Install the package with "pip install accelerometer".'
-            ) from e
+        # try:
+        #     utils = importlib.import_module('accelerometer.utils')
+        # except ModuleNotFoundError as e:
+        #     raise Exception(
+        #         'Unable to load the required accelerometer.utils module.'
+        #         ' Install the package with "pip install accelerometer".'
+        #     ) from e
 
         # get absolute file path
         input_fname = os.path.abspath(input_fname)
@@ -89,9 +89,12 @@ class RawBBA(BaseRaw):
             input_fname,
             engine=engine,
             index_col=['time'],
-            parse_dates=['time'],
-            date_parser=utils.date_parser
+            #parse_dates=['time'],
+            #date_parser=self.__date_parser
         )
+
+        # parse and set new index
+        data.set_index(self.__parse_acc_dates(data=data), inplace=True)
 
         # read meta-data file (if found):
         if use_metadata_json:
@@ -338,6 +341,38 @@ class RawBBA(BaseRaw):
             raise KeyError(
                 'Information ({}) not found in meta-data file.'.format(field)
             )
+
+    @staticmethod
+    def __parse_acc_dates(data):
+        """ Date parser
+
+        Parse datetime format used by the biobankaccelerometer output files. 
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            Dataframe with the datatimes to transform as index.
+
+        Returns
+        -------
+        index: array of datetimes
+            Parsed and time-zone aware datetimes.
+        """
+
+        # Regex
+        dt_regex = re.compile(r'(?P<dt>.+)\W\[(?P<tz>(?<=\[).+?(?=\]))\]')
+
+        # Extract datetime and timezone
+        dts = data.index.str.extract(dt_regex, expand=True)
+
+        # Extracted TZ
+        tz = dts['tz'].iloc[0]
+
+        # Check if all extracted timezones are identical
+        if not all(x==tz for x in dts['tz']):
+            raise ValueError('Extracted timezones are not identical. Not supported.')
+
+        return pd.to_datetime(dts['dt'],utc=True).dt.tz_convert(tz)
 
 
 def read_raw_bba(
