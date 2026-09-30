@@ -1,5 +1,5 @@
-import importlib
 import json
+import numpy as np
 import os
 import pandas as pd
 import re
@@ -68,18 +68,6 @@ class RawBBA(BaseRaw):
         use_metadata_json=True,
         metadata_fname=None
     ):
-        # The accelerometer package causes some dependency conflicts,
-        # so instead of always including it as a hard dependency, we
-        # try to import it as an optional one. Users with BBA files
-        # likely already have accelerometer installed, or should be
-        # able to sort out the dependency conflicts as needed.
-        # try:
-        #     utils = importlib.import_module('accelerometer.utils')
-        # except ModuleNotFoundError as e:
-        #     raise Exception(
-        #         'Unable to load the required accelerometer.utils module.'
-        #         ' Install the package with "pip install accelerometer".'
-        #     ) from e
 
         # get absolute file path
         input_fname = os.path.abspath(input_fname)
@@ -88,9 +76,7 @@ class RawBBA(BaseRaw):
         data = pd.read_csv(
             input_fname,
             engine=engine,
-            index_col=['time'],
-            #parse_dates=['time'],
-            #date_parser=self.__date_parser
+            index_col=['time']
         )
 
         # parse and set new index
@@ -153,8 +139,7 @@ class RawBBA(BaseRaw):
 
         # Impute missing data (if required)
         if impute_missing:
-            s11n = importlib.import_module('accelerometer.summarization')
-            data = s11n.imputeMissing(data)
+            data = self.__imputeMissing(data)
 
         # LIGHT
         self.__white_light = self.__extract_baa_data(
@@ -346,7 +331,8 @@ class RawBBA(BaseRaw):
     def __parse_acc_dates(data):
         """ Date parser
 
-        Parse datetime format used by the biobankaccelerometer output files. 
+        Parse datetime format used by the biobankaccelerometer output files:
+        `YYYY-MM-DD HH:mm:ss.SSS±HHmm [TimeZone]`. 
 
         Parameters
         ----------
@@ -373,6 +359,67 @@ class RawBBA(BaseRaw):
             raise ValueError('Extracted timezones are not identical. Not supported.')
 
         return pd.to_datetime(dts['dt'],utc=True).dt.tz_convert(tz)
+
+    @staticmethod
+    def __imputeMissing(data):
+        """ Impute missing/nonwear segments
+
+        Copyright © 2025, University of Oxford
+        Adapted from [accelerometer 7.5.0](https://pypi.org/project/accelerometer/) (summarisation.py)
+        in order to remove the dependency of pyActigraphy on the accelerometer for the use of a single method.
+        This decision has been made in concertation with A. Doherty (email exchange: 17/12/2024). 
+        Licence terms: https://github.com/OxWearables/biobankAccelerometerAnalysis/blob/95e1d790f745bbb5b44112166b522e58a47c485d/LICENSE.md
+        WARNING: the `accelerometer` package is distributed royalty-free for academic use only.
+        For commercial use, please contact the University of Oxford.
+
+
+        Impute non-wear data segments using the average of similar time-of-day values
+        with one minute granularity on different days of the measurement. This
+        imputation accounts for potential wear time diurnal bias where, for example,
+        if the device was systematically less worn during sleep in an individual,
+        the crude average vector magnitude during wear time would be a biased
+        overestimate of the true average. See
+        https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0169649#sec013
+
+        Parameters
+        ----------
+        data: pd.DataFrame
+            Pandas dataframe of epoch data
+
+        Returns
+        -------
+        data: pd.DataFrame
+            Updated DataFrame with nan values replaced with time-of-day imputation
+        """
+
+        def fillna(subframe):
+            # Transform will first pass the subframe column-by-column as a Series.
+            # After passing all columns, it will pass the entire subframe again as a DataFrame.
+            # Processing the entire subframe is optional (return value can be omitted). See 'Notes' in transform doc.
+            if isinstance(subframe, pd.Series):
+                x = subframe.to_numpy()
+                nan = np.isnan(x)
+                nanlen = len(x[nan])
+                if 0 < nanlen < len(x):  # check x contains a NaN and is not all NaN
+                    x[nan] = np.nanmean(x)
+                    return x  # will be cast back to a Series automatically
+                else:
+                    return subframe
+
+        data = (
+            data
+            # first attempt imputation using same day of week
+            .groupby([data.index.weekday, data.index.hour, data.index.minute])
+            .transform(fillna)
+            # then try within weekday/weekend
+            .groupby([data.index.weekday >= 5, data.index.hour, data.index.minute])
+            .transform(fillna)
+            # finally, use all other days
+            .groupby([data.index.hour, data.index.minute])
+            .transform(fillna)
+        )
+
+        return data
 
 
 def read_raw_bba(
