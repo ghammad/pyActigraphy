@@ -15,12 +15,13 @@ from stochastic import random
 # Number of samples
 N = 7*1440*2  # *sampling_period
 
+# Random number generator
+rng = np.random.default_rng(0)
+
 # Stochastic generators
 bn = BrownianNoise(t=1,rng=rng)
 fbm = FractionalBrownianMotion(hurst=0.9, t=1,rng=rng)
 fgn = FractionalGaussianNoise(hurst=0.6, t=1,rng=rng)
-
-rng = np.random.default_rng(0)
 
 # Brownian noise: h(q) = 1+H with H=0.5
 bn_sample = bn.sample(N-1)
