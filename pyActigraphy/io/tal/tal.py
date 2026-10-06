@@ -70,16 +70,17 @@ class RawTAL(BaseRaw):
                 # encoding=encoding,
                 skipinitialspace=True,
                 sep=sep,
-                #infer_datetime_format=True,
-                index_col=False,
-                parse_dates={
-                    'Date_Time': [
-                        'Data',
-                        'Hora'
-                    ]
-                },
+                index_col=False
             )
-        index_data.set_index('Date_Time', inplace=True)
+
+        index_data.set_index(
+            pd.to_datetime(
+                index_data.loc[:,'Data']+' '+index_data.loc[:,'Hora']
+            ),
+            inplace=True
+        )
+
+        index_data.drop(columns=['Data','Hora'],inplace=True)
 
         # extract informations from the header
         uuid = self.__extract_tal_uuid(header)
