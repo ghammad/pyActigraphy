@@ -157,7 +157,6 @@ class BaseLog():
             usecols=[0, 1, 2],
             names=[index_name, 'Start_time', 'Stop_time'],
             parse_dates=[1, 2],
-            infer_datetime_format=False
         )
         return log
 
