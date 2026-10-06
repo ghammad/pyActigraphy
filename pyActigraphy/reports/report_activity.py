@@ -158,7 +158,7 @@ class ActivityReport(Report):
             duplicates='drop'
         )
 
-        results = data_mask_in.groupby(out).agg(
+        results = data_mask_in.groupby(out, observed=False).agg(
             ['sum', 'mean', 'median', 'std', 'count']
         )
 
