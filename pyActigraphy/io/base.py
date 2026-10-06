@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import warnings
 
-from pandas.tseries.frequencies import to_offset
 from ..filters import FiltersMixin
 from ..metrics import MetricsMixin, _interval_maker
 from ..reports import ActivityReport, create_sleep_report
@@ -251,14 +250,14 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
 
         if freq is None:
             return data
-        elif to_offset(freq).delta < self.frequency:
+        elif pd.Timedelta(freq) < self.frequency:
             warnings.warn(
                 'Resampling frequency lower than the acquisition'
                 + ' frequency. Returning original data.',
                 UserWarning
             )
             return data
-        elif to_offset(freq).delta == self.frequency:
+        elif pd.Timedelta(freq) == self.frequency:
             return data
 
         resampled_data = data.resample(freq, origin='start').sum()
@@ -287,7 +286,7 @@ class BaseRaw(SleepBoutMixin, ScoringMixin, MetricsMixin, FiltersMixin):
         """
         light = self.light
 
-        if to_offset(freq).delta <= self.frequency:
+        if pd.Timedelta(freq) <= self.frequency:
             warnings.warn(
                 'Resampling frequency equal to or lower than the acquisition'
                 + ' frequency. Returning original data.',
