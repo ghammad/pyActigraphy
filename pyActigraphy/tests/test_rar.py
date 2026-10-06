@@ -75,14 +75,28 @@ def test_rar_is_sinewave():
 
     assert raw_sinewave.IS(
         freq='1min', binarize=False
-        ) == approx(1.0, 0.01)
+        ) == approx(1.0, rel=0.01)
+
+
+def test_rar_ism_gaussian():
+
+    assert raw_gaussian.ISm(
+        binarize=False
+        ) == approx(1/period.days, rel=0.1)
+
+
+def test_rar_ism_sinewave():
+
+    assert raw_sinewave.ISm(
+        binarize=False
+        ) == approx(1.0, rel=0.015)
 
 
 def test_rar_iv_gaussian():
 
     assert raw_gaussian.IV(
         freq='1min', binarize=False
-        ) == approx(2.0, 0.01)
+        ) == approx(2.0, rel=0.01)
 
 
 def test_rar_iv_sinewave():
@@ -90,6 +104,20 @@ def test_rar_iv_sinewave():
     assert raw_sinewave.IV(
         freq='1min', binarize=False
         ) == approx(0.0, abs=0.001)
+
+
+def test_rar_ivm_gaussian():
+
+    assert raw_gaussian.IVm(
+        binarize=False
+        ) == approx(2.0, rel=0.01)
+
+
+def test_rar_ivm_sinewave():
+
+    assert raw_sinewave.IVm(
+        binarize=False
+        ) == approx(0.0, abs=0.015)
 
 
 def test_rar_l5_squarewave():
