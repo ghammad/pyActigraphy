@@ -70,7 +70,7 @@ class RawTAL(BaseRaw):
                 # encoding=encoding,
                 skipinitialspace=True,
                 sep=sep,
-                infer_datetime_format=True,
+                #infer_datetime_format=True,
                 index_col=False,
                 parse_dates={
                     'Date_Time': [

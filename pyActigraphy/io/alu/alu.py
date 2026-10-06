@@ -78,7 +78,6 @@ class RawALU(BaseRaw):
             skiprows=len(header)+3,
             sep=';',
             parse_dates=True,
-            infer_datetime_format=True,
             dayfirst=True,
             index_col=[0]
         ).resample(freq).sum()

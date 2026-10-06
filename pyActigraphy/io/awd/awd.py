@@ -128,7 +128,7 @@ class RawAWD(BaseRaw):
             encoding='utf-8',
             engine=engine,
             header=None,
-            delim_whitespace=True,
+            sep=r'\s+',
             names=all_channels,
             index_col=False,
             usecols=use_channels,
