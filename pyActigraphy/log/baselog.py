@@ -41,8 +41,14 @@ class BaseLog():
             from pytz import timezone
             tz = timezone(time_zone)
             # Localize the log timestamps
-            log.loc[:, 'Start_time'] = log.Start_time.dt.tz_localize(tz)
-            log.loc[:, 'Stop_time'] = log.Stop_time.dt.tz_localize(tz)
+            # (create new columns to avoid incompatible dtype issues)
+            log.loc[:, 'Start_time_loc'] = log.Start_time.dt.tz_localize(tz)
+            log.loc[:, 'Stop_time_loc'] = log.Stop_time.dt.tz_localize(tz)
+            log.drop(columns=['Start_time','Stop_time'], inplace=True)
+            log.rename(
+                columns={'Start_time_loc':'Start_time', 'Stop_time_loc':'Stop_time'},
+                inplace=True
+            )
             # compute the DST transition times according to the specified TZ
             transition_times = [
                 t.replace(tzinfo=timezone('UTC')).astimezone(tz)
