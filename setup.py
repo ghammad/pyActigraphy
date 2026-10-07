@@ -99,7 +99,7 @@ setup(
     # packages=['actimetry'],
     packages=find_packages(exclude=['docs', 'tests']),  # Required
 
-    python_requires="<=3.12",
+    python_requires=">=3.9,<3.13",
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
     # installed, so they must be valid existing projects.
@@ -107,8 +107,8 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'joblib', 'lmfit', 'pandas>=1.4.0', 'plotly', 'numba', 'numpy', 'pyexcel',
-        'pyexcel-ods3', 'pyexcel-xlsx', 'scipy', 'spm1d', 'statsmodels>=0.10'
+        'joblib', 'lmfit', 'pandas>=2.0.0', 'plotly', 'numba', 'numpy', 'pyexcel',
+        'pyexcel-ods3', 'pyexcel-xlsx', 'pytz', 'scipy', 'spm1d', 'statsmodels>=0.10'
     ],  # Optional
 
     # Data files included in your packages that need to be installed.
