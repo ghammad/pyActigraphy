@@ -174,8 +174,8 @@ class RawReader(ForwardMetricsMixin):
                               '{}'.format(reader.display_name))
                     # Retrieve start_time and duration from sst_log by position
                     # in order to avoid mis-spelling of the index names.
-                    start_time = self.sst_log.log.loc[reader.display_name][0]
-                    period = self.sst_log.log.loc[reader.display_name][2]
+                    start_time = self.sst_log.log.loc[reader.display_name,'Start_time']
+                    period = self.sst_log.log.loc[reader.display_name,'Duration']
                     reader.start_time = start_time
                     reader.period = period
                 else:

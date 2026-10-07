@@ -508,9 +508,9 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        # n_epochs = int(pd.Timedelta('5H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('5h')/self.frequency)
 
-        _, l5 = _lmx(data, '5H', lowest=True)
+        _, l5 = _lmx(data, '5h', lowest=True)
 
         return l5
 
@@ -568,9 +568,9 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        # n_epochs = int(pd.Timedelta('10H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('10h')/self.frequency)
 
-        _, m10 = _lmx(data, '10H', lowest=False)
+        _, m10 = _lmx(data, '10h', lowest=False)
 
         return m10
 
@@ -630,10 +630,10 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        # n_epochs = int(pd.Timedelta('5H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('5h')/self.frequency)
 
-        _, l5 = _lmx(data, '5H', lowest=True)
-        _, m10 = _lmx(data, '10H', lowest=False)
+        _, l5 = _lmx(data, '5h', lowest=True)
+        _, m10 = _lmx(data, '10h', lowest=False)
 
         return (m10-l5)/(m10+l5)
 
@@ -701,14 +701,14 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        # n_epochs = int(pd.Timedelta('5H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('5h')/self.frequency)
 
         intervals = _interval_maker(data.index, period, verbose)
 
         results = [
             _lmx(
                 data[time[0]:time[1]],
-                '5H',
+                '5h',
                 lowest=True
             ) for time in intervals
         ]
@@ -778,14 +778,14 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        # n_epochs = int(pd.Timedelta('10H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('10h')/self.frequency)
 
         intervals = _interval_maker(data.index, period, verbose)
 
         results = [
             _lmx(
                 data[time[0]:time[1]],
-                '10H',
+                '10h',
                 lowest=False
             ) for time in intervals
         ]
@@ -855,7 +855,7 @@ class MetricsMixin(object):
         else:
             data = self.data
 
-        # n_epochs = int(pd.Timedelta('5H')/self.frequency)
+        # n_epochs = int(pd.Timedelta('5h')/self.frequency)
 
         intervals = _interval_maker(data.index, period, verbose)
 
@@ -863,14 +863,14 @@ class MetricsMixin(object):
 
         for time in intervals:
             data_subset = data[time[0]:time[1]]
-            _, l5 = _lmx(data_subset, '5H', lowest=True)
-            _, m10 = _lmx(data_subset, '10H', lowest=False)
+            _, l5 = _lmx(data_subset, '5h', lowest=True)
+            _, m10 = _lmx(data_subset, '10h', lowest=False)
             results.append((m10-l5)/(m10+l5))
 
         return results
 
     # @lru_cache(maxsize=6)
-    def IS(self, freq='1H', binarize=True, threshold=4):
+    def IS(self, freq='1h', binarize=True, threshold=4):
         r"""Interdaily stability
 
         The Interdaily stability (IS) quantifies the repeatibilty of the
@@ -882,7 +882,7 @@ class MetricsMixin(object):
         freq: str, optional
             Data resampling `frequency string
             <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
-            Default is '1H'.
+            Default is '1h'.
         binarize: bool, optional
             If set to True, the data are binarized.
             Default is True.
@@ -945,7 +945,7 @@ class MetricsMixin(object):
             0.6900175913031027
             >>> rawAWD.IS(freq='30min', binarize=True, threshold=4)
             0.6245582891144925
-            >>> rawAWD.IS(freq='1H', binarize=False)
+            >>> rawAWD.IS(freq='1h', binarize=False)
             0.5257020914453097
         """
 
@@ -959,9 +959,9 @@ class MetricsMixin(object):
     def ISm(
         self,
         freqs=[
-            '1T', '2T', '3T', '4T', '5T', '6T', '8T', '9T', '10T',
-            '12T', '15T', '16T', '18T', '20T', '24T', '30T',
-            '32T', '36T', '40T', '45T', '48T', '60T'
+            '1min', '2min', '3min', '4min', '5min', '6min', '8min', '9min', '10min',
+            '12min', '15min', '16min', '18min', '20min', '24min', '30min',
+            '32min', '36min', '40min', '45min', '48min', '60min'
         ],
         binarize=True,
         threshold=4
@@ -1011,7 +1011,7 @@ class MetricsMixin(object):
             0.5758268227551039
             >>> rawAWD.ISm(binarize=False)
             0.3915874151855646
-            >>> rawAWD.ISm(freqs=['10min','30min','1H'], binarize=False)
+            >>> rawAWD.ISm(freqs=['10min','30min','1h'], binarize=False)
             0.44598210450842063
         """
 
@@ -1021,7 +1021,7 @@ class MetricsMixin(object):
 
         return mean([_interdaily_stability(datum) for datum in data])
 
-    def ISp(self, period='7D', freq='1H',
+    def ISp(self, period='7D', freq='1h',
             binarize=True, threshold=4, verbose=False):
         r"""Interdaily stability per period
 
@@ -1036,7 +1036,7 @@ class MetricsMixin(object):
         freq: str, optional
             Data resampling `frequency string
             <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
-            Default is '1H'.
+            Default is '1h'.
         binarize: bool, optional
             If set to True, the data are binarized.
             Default is True.
@@ -1084,7 +1084,7 @@ class MetricsMixin(object):
         return results
 
     # @lru_cache(maxsize=6)
-    def IV(self, freq='1H', binarize=True, threshold=4):
+    def IV(self, freq='1h', binarize=True, threshold=4):
         r"""Intradaily variability
 
         The Intradaily Variability (IV) quantifies the variability of the
@@ -1096,7 +1096,7 @@ class MetricsMixin(object):
         freq: str, optional
             Data resampling `frequency string
             <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
-            Default is '1H'.
+            Default is '1h'.
         binarize: bool, optional
             If set to True, the data are binarized.
             Default is True.
@@ -1153,7 +1153,7 @@ class MetricsMixin(object):
             0.46185426426324316
             >>> rawAWD.IV(freq='30min', binarize=True, threshold=4)
             0.4150769573937417
-            >>> rawAWD.IV(freq='1H', binarize=False)
+            >>> rawAWD.IV(freq='1h', binarize=False)
             0.7859579446494547
         """
         data = self.resampled_data(freq, binarize, threshold)
@@ -1163,9 +1163,9 @@ class MetricsMixin(object):
     def IVm(
         self,
         freqs=[
-            '1T', '2T', '3T', '4T', '5T', '6T', '8T', '9T', '10T',
-            '12T', '15T', '16T', '18T', '20T', '24T', '30T',
-            '32T', '36T', '40T', '45T', '48T', '60T'
+            '1min', '2min', '3min', '4min', '5min', '6min', '8min', '9min', '10min',
+            '12min', '15min', '16min', '18min', '20min', '24min', '30min',
+            '32min', '36min', '40min', '45min', '48min', '60min'
         ],
         binarize=True,
         threshold=4
@@ -1215,7 +1215,7 @@ class MetricsMixin(object):
             0.3482306825356382
             >>> rawAWD.IVm(binarize=False)
             0.6414533006190071
-            >>> rawAWD.IVm(freqs=['10min','30min','1H'], binarize=False)
+            >>> rawAWD.IVm(freqs=['10min','30min','1h'], binarize=False)
             0.7124465677737196
         """
 
@@ -1225,7 +1225,7 @@ class MetricsMixin(object):
 
         return mean([_intradaily_variability(datum) for datum in data])
 
-    def IVp(self, period='7D', freq='1H',
+    def IVp(self, period='7D', freq='1h',
             binarize=True, threshold=4, verbose=False):
         r"""Intradaily variability per period
 
@@ -1240,7 +1240,7 @@ class MetricsMixin(object):
         freq: str, optional
             Data resampling `frequency string
             <https://pandas.pydata.org/pandas-docs/stable/timeseries.html>`_.
-            Default is '1H'.
+            Default is '1h'.
         binarize: bool, optional
             If set to True, the data are binarized.
             Default is True.
@@ -1532,12 +1532,12 @@ class MetricsMixin(object):
             if start == 'AonT':
                 start_time = str(aont+offset).split(' ')[-1]
                 period = str(
-                    pd.Timedelta('24H') - ((aont+offset) - (aofft-offset))
+                    pd.Timedelta('24h') - ((aont+offset) - (aofft-offset))
                 ).split(' ')[-1]
             elif start == 'AoffT':
                 start_time = str(aofft+offset).split(' ')[-1]
                 period = str(
-                    pd.Timedelta('24H') - ((aofft+offset) - (aont-offset))
+                    pd.Timedelta('24h') - ((aofft+offset) - (aont-offset))
                 ).split(' ')[-1]
         else:
             start_time = start
@@ -1631,12 +1631,12 @@ class MetricsMixin(object):
             if start == 'AonT':
                 start_time = str(aont+offset).split(' ')[-1]
                 period = str(
-                    pd.Timedelta('24H') - ((aont+offset) - (aofft-offset))
+                    pd.Timedelta('24h') - ((aont+offset) - (aofft-offset))
                 ).split(' ')[-1]
             elif start == 'AoffT':
                 start_time = str(aofft+offset).split(' ')[-1]
                 period = str(
-                    pd.Timedelta('24H') - ((aofft+offset) - (aont-offset))
+                    pd.Timedelta('24h') - ((aofft+offset) - (aont-offset))
                 ).split(' ')[-1]
         else:
             start_time = start
@@ -1835,7 +1835,7 @@ class ForwardMetricsMixin(object):
             ) for iread in self.readers
         }
 
-    def IS(self, freq='1H', binarize=True, threshold=4):
+    def IS(self, freq='1h', binarize=True, threshold=4):
 
         return {
             iread.display_name: iread.IS(
@@ -1848,9 +1848,9 @@ class ForwardMetricsMixin(object):
     def ISm(
         self,
         freqs=[
-            '1T', '2T', '3T', '4T', '5T', '6T', '8T', '9T', '10T',
-            '12T', '15T', '16T', '18T', '20T', '24T', '30T',
-            '32T', '36T', '40T', '45T', '48T', '60T'
+            '1min', '2min', '3min', '4min', '5min', '6min', '8min', '9min', '10min',
+            '12min', '15min', '16min', '18min', '20min', '24min', '30min',
+            '32min', '36min', '40min', '45min', '48min', '60min'
         ],
         binarize=True,
         threshold=4
@@ -1864,7 +1864,7 @@ class ForwardMetricsMixin(object):
             ) for iread in self.readers
         }
 
-    def ISp(self, period='7D', freq='1H',
+    def ISp(self, period='7D', freq='1h',
             binarize=True, threshold=4, verbose=False):
 
         return {
@@ -1877,7 +1877,7 @@ class ForwardMetricsMixin(object):
             ) for iread in self.readers
         }
 
-    def IV(self, freq='1H', binarize=True, threshold=4):
+    def IV(self, freq='1h', binarize=True, threshold=4):
 
         return {
             iread.display_name: iread.IV(
@@ -1890,9 +1890,9 @@ class ForwardMetricsMixin(object):
     def IVm(
         self,
         freqs=[
-            '1T', '2T', '3T', '4T', '5T', '6T', '8T', '9T', '10T',
-            '12T', '15T', '16T', '18T', '20T', '24T', '30T',
-            '32T', '36T', '40T', '45T', '48T', '60T'
+            '1min', '2min', '3min', '4min', '5min', '6min', '8min', '9min', '10min',
+            '12min', '15min', '16min', '18min', '20min', '24min', '30min',
+            '32min', '36min', '40min', '45min', '48min', '60min'
         ],
         binarize=True,
         threshold=4
@@ -1906,7 +1906,7 @@ class ForwardMetricsMixin(object):
             ) for iread in self.readers
         }
 
-    def IVp(self, period='7D', freq='1H',
+    def IVp(self, period='7D', freq='1h',
             binarize=True, threshold=4, verbose=False):
 
         return {
@@ -2051,11 +2051,11 @@ class ForwardMetricsMixin(object):
         ldic['IVm'] = self.IVm()
         ldic['ISp'] = self.ISp()
         ldic['IVp'] = self.IVp()
-        ldic['kRA(Midnight-5H)'] = self.kRA(start='00:00:00', period='5h')
-        ldic['kAR(Noon-5H)'] = self.kAR(start='12:00:00', period='5h')
+        ldic['kRA(Midnight-5h)'] = self.kRA(start='00:00:00', period='5h')
+        ldic['kAR(Noon-5h)'] = self.kAR(start='12:00:00', period='5h')
         ldic['AonT'] = self.AonT()
         ldic['AoffT'] = self.AoffT()
-        ldic['fSoD(Noon-5H)'] = self.fSoD()
+        ldic['fSoD(Noon-5h)'] = self.fSoD()
         if self.reader_type == 'RPX':
             ldic['average_daily_light'] = self.average_daily_light()
 

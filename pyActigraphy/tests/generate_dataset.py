@@ -84,7 +84,8 @@ def generate_sinewave(
     A=100,
     add_noise=False,
     noise_power=100,
-    offset=False
+    offset=False,
+    seed=0
 ):
     """Generates a synthetic sine wave, corrupted by a white noise.
 
@@ -112,6 +113,9 @@ def generate_sinewave(
     offset: bool, optional
         If set to True, an offset is applied to the signal so that
         it is comprised between (0, 2A), instead of (-A, +A).
+    seed: int, optional
+        Seed for the random number generator.
+        Default is 0.
     """
 
     time = np.arange(N) * Ts
@@ -121,6 +125,9 @@ def generate_sinewave(
         signal += A
 
     if add_noise:
+        # Set the random generator seed
+        np.random.seed(seed)
+
         signal += np.random.normal(scale=np.sqrt(noise_power), size=time.shape)
 
     return signal
@@ -133,7 +140,8 @@ def generate_squarewave(
     A=100,
     add_noise=False,
     noise_power=100,
-    offset=False
+    offset=False,
+    seed=0
 ):
     """Generates a synthetic square wave, corrupted by a white noise.
 
@@ -161,7 +169,10 @@ def generate_squarewave(
     offset: bool, optional
         If set to True, an offset is applied to the signal so that
         it is comprised between (0, 2A), instead of (-A, +A).
-    """
+    seed: int, optional
+        Seed for the random number generator.
+        Default is 0.
+   """
 
     signal = A*np.sign(generate_sinewave(N, T, Ts, 1, False, 0))
 
@@ -169,6 +180,10 @@ def generate_squarewave(
         signal += A
 
     if add_noise:
+
+        # Set the random generator seed
+        np.random.seed(seed)
+
         signal += np.random.normal(
             scale=np.sqrt(noise_power),
             size=signal.shape
@@ -179,7 +194,7 @@ def generate_squarewave(
 # Non-Periodic datasets
 
 
-def generate_gaussian_noise(N=1000, mu=100, sigma=10):
+def generate_gaussian_noise(N=1000, mu=100, sigma=10, seed=0):
     """Generates a Gaussian noise signal
 
     Parameters
@@ -194,8 +209,13 @@ def generate_gaussian_noise(N=1000, mu=100, sigma=10):
     sigma: float, optional
         Standard deviation of the Gaussian distribution.
         Default is 10.
-
+    seed: int, optional
+        Seed for the random number generator.
+        Default is 0.
     """
+
+    # Set the random generator seed
+    np.random.seed(seed)
 
     signal = np.random.normal(mu, sigma, N)
 

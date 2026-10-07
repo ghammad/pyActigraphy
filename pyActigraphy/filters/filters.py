@@ -189,8 +189,12 @@ class FiltersMixin(object):
                     + "- Data stop time: {}".format(self.mask.index[-1])
                 ))
 
-        # Set mask values between start and stop to zeros
-        self.mask.loc[start:stop] = 0
+        # Set mask values between start and stop to zeros, avoiding ChainedAssignmentError
+        submask = (
+            (self.mask.index>=pd.Timestamp(start))
+            &(self.mask.index<=pd.Timestamp(stop))
+        )
+        self.mask = self.mask.mask(submask,0)
 
     def add_mask_periods(self, input_fname, error='raise', *args, **kwargs):
         """ Add periods to the inactivity mask

@@ -122,15 +122,7 @@ class RawRPX(BaseRaw):
             skiprows=header_offset+data_offset+1,
             header=0,
             delimiter=delimiter,
-            # infer_datetime_format=True,
             index_col=0,
-            parse_dates={
-                'Date_Time': [
-                    columns[self.language]['Date'],
-                    columns[self.language]['Time']
-                ]
-            },
-            dayfirst=dayfirst,
             usecols=data_available_cols[2:],
             na_values=fields[self.language]['NAN'],
             decimal=decimal,
@@ -139,6 +131,17 @@ class RawRPX(BaseRaw):
                 # columns[self.language]['White_light']: light_dtype
                 # columns[self.language]['Marker']: light_dtype
             }
+        )
+
+        # Make and Set index
+        index_data.set_index(
+            pd.to_datetime(
+                index_data.loc[:,columns[self.language]['Date']]
+                +' '
+                +index_data.loc[:,columns[self.language]['Time']],
+                dayfirst=dayfirst
+            ),
+            inplace=True
         )
 
         # verify that the start time and the first date index matches

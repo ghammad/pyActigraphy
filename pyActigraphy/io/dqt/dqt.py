@@ -71,7 +71,7 @@ class RawDQT(BaseRaw):
             names=['activity', 'light'],
             index_col=0,
             parse_dates=[0],
-            infer_datetime_format=True,
+            date_format='%Y-%m-%d %H:%M:%S',
             dtype=float,
             na_values='x'
         ).asfreq(freq)

@@ -53,7 +53,7 @@ grd_truth = pd.DataFrame.from_dict(
      'count': {0: 720, 1: 720, 2: 0},
      'ID': {0: 'raw_sinewave', 1: 'raw_sinewave', 2: 'raw_sinewave'}}
 )
-grd_truth.loc[:, 'activity level'] = pd.Categorical(
+grd_truth['activity level'] = pd.Categorical(
     ['Sedentary', 'Moderate', 'Vigorous'],
     categories=['Sedentary', 'Moderate', 'Vigorous'],
     ordered=True

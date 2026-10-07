@@ -243,7 +243,7 @@ def roenneberg(
     seeds = _find_sleep_bout_seeds(sw, min_period=min_seed_period)
 
     # Score all potential sleep epochs (1) before the first seed as wake (0)
-    sw.iloc[:sw.index.get_loc(seeds[0])].replace(1, 0, inplace=True)
+    sw.iloc[:sw.index.get_loc(seeds[0])] = sw.iloc[:sw.index.get_loc(seeds[0])].replace(1, 0)
 
     # Loop over the seeds
     sot = []  # list of sleep onset and offset times
@@ -254,9 +254,9 @@ def roenneberg(
 
         # Score all potential sleep epochs (1) before current seed as wake (0)
         if(len(sot) > 0):
-            sw.iloc[
+            sw.iloc[sw.index.get_loc(sot[-1][1])+1:sw.index.get_loc(seed)] = sw.iloc[
                 sw.index.get_loc(sot[-1][1])+1:sw.index.get_loc(seed)
-            ].replace(1, 0, inplace=True)
+            ].replace(1, 0)
 
         # Find sleep offset
         sleep_onset = seed
@@ -270,6 +270,8 @@ def roenneberg(
             sot.append((sleep_onset, sleep_offset))
 
     # Score all potential sleep epochs (1) after last sleep offset as wake (0)
-    sw.iloc[sw.index.get_loc(sot[-1][1])+1:].replace(1, 0, inplace=True)
+    sw.iloc[sw.index.get_loc(sot[-1][1])+1:] = sw.iloc[
+        sw.index.get_loc(sot[-1][1])+1:
+    ].replace(1, 0)
     # return sot
     return sw

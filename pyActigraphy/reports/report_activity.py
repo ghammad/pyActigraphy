@@ -130,7 +130,7 @@ class ActivityReport(Report):
 
         # Add min/max activity counts to form boundaries
         activity_thr = np.concatenate(
-            [[-np.infty], activity_thr, [np.infty]]
+            [[-np.inf], activity_thr, [np.inf]]
         )
 
         if threshold is not None:
@@ -158,7 +158,7 @@ class ActivityReport(Report):
             duplicates='drop'
         )
 
-        results = data_mask_in.groupby(out).agg(
+        results = data_mask_in.groupby(out, observed=False).agg(
             ['sum', 'mean', 'median', 'std', 'count']
         )
 
