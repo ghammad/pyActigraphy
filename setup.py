@@ -107,7 +107,7 @@ setup(
     # For an analysis of "install_requires" vs pip's requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'joblib', 'lmfit', 'pandas>=2.0.0', 'plotly', 'numba', 'numpy', 'pyexcel',
+        'joblib', 'lmfit', 'pandas=2.0.0,<3', 'plotly', 'numba', 'numpy', 'pyexcel',
         'pyexcel-ods3', 'pyexcel-xlsx', 'pytz', 'scipy', 'spm1d', 'statsmodels>=0.10'
     ],  # Optional
 
