@@ -130,7 +130,7 @@ class ActivityReport(Report):
 
         # Add min/max activity counts to form boundaries
         activity_thr = np.concatenate(
-            [[-np.infty], activity_thr, [np.infty]]
+            [[-np.inf], activity_thr, [np.inf]]
         )
 
         if threshold is not None:
