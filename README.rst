@@ -101,12 +101,12 @@ It contains `notebooks <https://ghammad.github.io/pyActigraphy/tutorials.html>`_
 Installation
 ============
 
-For the time being, :code:`pyActigraphy` has been tested for :code:`python>=3.9 & python<=3.12`. Dependencies will be installed automatically.
+For the time being, :code:`pyActigraphy` has been tested for :code:`python 3.9, 3.10, 3.11 & 3.12`. Dependencies will be installed automatically.
 
 Before installing python packages, it is often advised to create a virtual environment:
 
 #. Via `venv <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment>`_ (Linux/Mac OS)
-#. Via `miniconda <https://www.anaconda.com/docs/getting-started/miniconda/main>_` (Linux/Mac OS/Windows)
+#. Via `miniconda <https://www.anaconda.com/docs/getting-started/miniconda/main>`_ (Linux/Mac OS/Windows)
 
 Installing pyActigraphy (alone)
 -----------------------
@@ -227,8 +227,8 @@ There are plenty of ways to contribute to this package, including (but not limit
 * suggest improvements
 * improve the documentation
 
-Authors
-=======
+Authors and contributors
+========================
 
 * **Grégory Hammad** `@ghammad <https://github.com/ghammad>`_ - *Initial and main developer*
 * **Mathilde Reyt** `@ReytMathilde <https://github.com/ReytMathilde>`_
