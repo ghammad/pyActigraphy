@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyActigraphy &#8212; pyActigraphy 1.2.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <title>pyActigraphy &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="_static/documentation_options.js?v=590429e0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -41,7 +39,7 @@
         </button>
         <a class="navbar-brand" href="#">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -92,16 +90,53 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#"><strong>pyActigraphy</strong></a></li>
+<li><a class="reference internal" href="#citation">Citation</a></li>
+<li><a class="reference internal" href="#pylight">pyLight</a></li>
+<li><a class="reference internal" href="#code-and-documentation">Code and documentation</a></li>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
+<li><a class="reference internal" href="#installing-pyactigraphy-alone">Installing pyActigraphy (alone)</a></li>
+<li><a class="reference internal" href="#installing-pyactigraphy-jupyter-tutorials">Installing pyActigraphy+Jupyter (tutorials)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#quick-start">Quick start</a></li>
+<li><a class="reference internal" href="#contributing">Contributing</a></li>
+<li><a class="reference internal" href="#authors-and-contributors">Authors and contributors</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+<li><a class="reference internal" href="#acknowledgments">Acknowledgments</a></li>
+</ul>
+
+<div id="sourcelink">
+  <a href="_sources/index.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+<form action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
-  <a class="reference external image-reference" href="https://www.gnu.org/licenses/gpl-3.0"><img alt="https://img.shields.io/badge/License-GPL%20v3-blue.svg" src="https://img.shields.io/badge/License-GPL%20v3-blue.svg" /></a>
-<a class="reference external image-reference" href="https://gitlab.com/ghammad/pyActigraphy/commits/master"><img alt="https://gitlab.com/ghammad/pyActigraphy/badges/master/pipeline.svg?key_text=CI+tests" src="https://gitlab.com/ghammad/pyActigraphy/badges/master/pipeline.svg?key_text=CI+tests" /></a>
-<a class="reference external image-reference" href="https://pypi.org/project/pyActigraphy"><img alt="https://img.shields.io/pypi/v/pyActigraphy.svg" src="https://img.shields.io/pypi/v/pyActigraphy.svg" /></a>
-<a class="reference external image-reference" href="https://doi.org/10.5281/zenodo.2537920"><img alt="https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg" src="https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg" /></a>
-<a class="reference external image-reference" href="https://bestpractices.coreinfrastructure.org/projects/6933"><img alt="https://bestpractices.coreinfrastructure.org/projects/6933/badge" src="https://bestpractices.coreinfrastructure.org/projects/6933/badge" /></a>
-<a class="reference external image-reference" href="CODE_OF_CONDUCT.md"><img alt="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" /></a>
+  <a class="reference external image-reference" href="https://www.gnu.org/licenses/gpl-3.0"><img alt="https://img.shields.io/badge/License-GPL%20v3-blue.svg" src="https://img.shields.io/badge/License-GPL%20v3-blue.svg" />
+</a>
+<img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/ghammad/pyActigraphy/python-package.yml?style=flat" />
+<img alt="PyPI Python Version" src="https://img.shields.io/pypi/pyversions/pyActigraphy" />
+<a class="reference external image-reference" href="https://pypi.org/project/pyActigraphy"><img alt="https://img.shields.io/pypi/v/pyActigraphy.svg" src="https://img.shields.io/pypi/v/pyActigraphy.svg" />
+</a>
+<a class="reference external image-reference" href="https://doi.org/10.5281/zenodo.2537920"><img alt="https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg" src="https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg" />
+</a>
+<a class="reference external image-reference" href="https://bestpractices.coreinfrastructure.org/projects/6933"><img alt="https://bestpractices.coreinfrastructure.org/projects/6933/badge" src="https://bestpractices.coreinfrastructure.org/projects/6933/badge" />
+</a>
+<a class="reference external image-reference" href="CODE_OF_CONDUCT.md"><img alt="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" src="https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg" />
+</a>
 <section id="pyactigraphy">
-<h1><strong>pyActigraphy</strong><a class="headerlink" href="#pyactigraphy" title="Permalink to this heading">¶</a></h1>
+<h1><strong>pyActigraphy</strong><a class="headerlink" href="#pyactigraphy" title="Link to this heading">¶</a></h1>
 <p>Open-source python package for actigraphy and light exposure data visualization and analysis.</p>
 <p>This package is meant to provide a comprehensive set of tools to:</p>
 <ul class="simple">
@@ -109,7 +144,7 @@
 <ul>
 <li><p>Actigraph: wGT3X-BT</p></li>
 <li><p>CamNtech: Actiwatch 4, 7, L(-Plus) and MotionWatch 8</p></li>
-<li><p>Condor Instrument: ActTrust 2</p></li>
+<li><p>Condor Instrument: ActTrust 2 and ActLumus</p></li>
 <li><p>Daqtix: Daqtometer</p></li>
 <li><p>Respironics: Actiwatch 2 and Actiwatch Spectrum (plus)</p></li>
 <li><p>Tempatilumi (CE Brasil)</p></li>
@@ -154,37 +189,48 @@
 </ul>
 </section>
 <section id="citation">
-<h1>Citation<a class="headerlink" href="#citation" title="Permalink to this heading">¶</a></h1>
+<h1>Citation<a class="headerlink" href="#citation" title="Link to this heading">¶</a></h1>
 <p>We are very pleased to announce that the <a class="reference external" href="https://github.com/ghammad/pyActigraphy/releases/tag/v1.0">v1.0</a> version of the pyActigraphy package has been published. So, if you find this package useful in your research, please consider citing:</p>
 <blockquote>
 <div><p>Hammad G, Reyt M, Beliy N, Baillet M, Deantoni M, Lesoinne A, et al. (2021) pyActigraphy: Open-source python package for actigraphy data visualization and    analysis. PLoS Comput Biol 17(10): e1009514. <a class="reference external" href="https://doi.org/10.1371/journal.pcbi.1009514">https://doi.org/10.1371/journal.pcbi.1009514</a></p>
 </div></blockquote>
 </section>
 <section id="pylight">
-<h1>pyLight<a class="headerlink" href="#pylight" title="Permalink to this heading">¶</a></h1>
+<h1>pyLight<a class="headerlink" href="#pylight" title="Link to this heading">¶</a></h1>
 <p>In the context of the Daylight Academy Project, <a class="reference external" href="https://daylight.academy/projects/state-of-light-in-humans">The role of daylight for humans</a> and
 thanks to the support of its members, Dr. Mirjam Münch and Prof. <a class="reference external" href="https://github.com/spitschan">Manuel Spitschan</a>,
 a pyActigraphy module for analysing light exposure data has been developed, <strong>pyLight</strong>.
 This module is part of the Human Light Exposure Database and is included in pyActigraphy version <a class="reference external" href="https://github.com/ghammad/pyActigraphy/releases/tag/v1.1">v1.1</a> and higher.</p>
-<p>A manuscript describing the <em>pyLight</em> module is available as a <a class="reference external" href="https://osf.io/msk9n/">preprint</a>.</p>
+<p>When using this module, please consider citing:</p>
+<blockquote>
+<div><p>Hammad, G., Wulff, K., Skene, D. J., Münch, M., &amp; Spitschan, M. (2024). Open-Source Python Module for the Analysis of Personalized Light Exposure Data from   Wearable Light Loggers and Dosimeters. LEUKOS, 20(4), 380–389. <a class="reference external" href="https://doi.org/10.1080/15502724.2023.2296863">https://doi.org/10.1080/15502724.2023.2296863</a></p>
+</div></blockquote>
 </section>
 <section id="code-and-documentation">
-<h1>Code and documentation<a class="headerlink" href="#code-and-documentation" title="Permalink to this heading">¶</a></h1>
+<h1>Code and documentation<a class="headerlink" href="#code-and-documentation" title="Link to this heading">¶</a></h1>
 <p>The pyActigraphy package is open-source and its source code is accessible <a class="reference external" href="https://github.com/ghammad/pyActigraphy">online</a>.</p>
 <p>An online documentation of the package is also available <a class="reference external" href="https://ghammad.github.io/pyActigraphy/index.html">here</a>.
 It contains <a class="reference external" href="https://ghammad.github.io/pyActigraphy/tutorials.html">notebooks</a> illustrating various functionalities of the package. Specific tutorials for the processing and the analysis of light exposure data with pyLight are also available.</p>
 </section>
 <section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h1>
-<p>In a (bash) shell, simply type:</p>
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
+<p>For the time being, <code class="code docutils literal notranslate"><span class="pre">pyActigraphy</span></code> has been tested for <code class="code docutils literal notranslate"><span class="pre">python</span> <span class="pre">3.9,</span> <span class="pre">3.10,</span> <span class="pre">3.11</span> <span class="pre">&amp;</span> <span class="pre">3.12</span></code>. Dependencies will be installed automatically.</p>
+<p>Before installing python packages, it is often advised to create a virtual environment:</p>
+<ol class="arabic simple">
+<li><p>Via <a class="reference external" href="https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment">venv</a> (Linux/Mac OS)</p></li>
+<li><p>Via <a class="reference external" href="https://www.anaconda.com/docs/getting-started/miniconda/main">miniconda</a> (Linux/Mac OS/Windows)</p></li>
+</ol>
+<section id="installing-pyactigraphy-alone">
+<h2>Installing pyActigraphy (alone)<a class="headerlink" href="#installing-pyactigraphy-alone" title="Link to this heading">¶</a></h2>
+<p>Within a virtual env, in a Terminal (Linux/Mac OS) or in an Anaconda Prompt (if you installed miniconda/anaconda), simply type:</p>
 <ul class="simple">
 <li><p>For users:</p></li>
 </ul>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>pyActigraphy
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pyActigraphy
 </pre></div>
 </div>
 <p>To update the package:</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip3<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>pyActigraphy
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-U<span class="w"> </span>pyActigraphy
 </pre></div>
 </div>
 <ul class="simple">
@@ -193,15 +239,74 @@ It contains <a class="reference external" href="https://ghammad.github.io/pyActi
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:ghammad/pyActigraphy.git
 <span class="nb">cd</span><span class="w"> </span>pyActigraphy/
 git<span class="w"> </span>checkout<span class="w"> </span>develop
-pip3<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
 </pre></div>
 </div>
 </section>
+<section id="installing-pyactigraphy-jupyter-tutorials">
+<h2>Installing pyActigraphy+Jupyter (tutorials)<a class="headerlink" href="#installing-pyactigraphy-jupyter-tutorials" title="Link to this heading">¶</a></h2>
+<p>The <cite>pyActigraphy</cite> package provides a series of tutorial <a class="reference external" href="https://ghammad.github.io/pyActigraphy/tutorials.html">notebooks</a>. These <a class="reference external" href="https://jupyter.org/">Jupyter notebooks</a> (file extension: .ipynb) are part of the package but can also be downloaded from the <a class="reference external" href="https://github.com/ghammad/pyActigraphy/tree/master/docs/source/">Github repository</a>.
+In order to interactively run these tutorials, one needs to install the Jupyter Notebook application.</p>
+<p>While users are encouraged to install and tailor these tools to their needs, a simpler one-stop-shop solution consists in using <a class="reference external" href="https://www.anaconda.com/docs/main">Anaconda</a>.</p>
+<p>Instructions:</p>
+<ol class="arabic">
+<li><p>Download and install <a class="reference external" href="https://www.anaconda.com/docs/getting-started/anaconda/install">Anaconda Distribution</a></p></li>
+<li><p>Via the <strong>Anaconda Prompt</strong> (Windows) or a <strong>Terminal</strong> (Mac OS, Linux):</p>
+<ol class="arabic simple">
+<li><p>Create a virtual environment:</p></li>
+</ol>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>create<span class="w"> </span>-n<span class="w"> </span>pyActi39<span class="w"> </span><span class="nv">python</span><span class="o">=</span><span class="m">3</span>.9
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li><p>Activate the newly created environment:</p></li>
+</ol>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>conda<span class="w"> </span>activate<span class="w"> </span>pyActi39
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li><p>Install <code class="code docutils literal notranslate"><span class="pre">pyActigraphy</span></code>:</p></li>
+</ol>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>pyActigraphy
+</pre></div>
+</div>
+</li>
+<li><p>Launch the Jupyter Notebook via the Anaconda Navigator:</p>
+<ol class="arabic simple">
+<li><p>Via the application menu (On Windows)</p></li>
+<li><p>Via a <strong>Terminal</strong> (On Mac OS/Linux only):</p></li>
+</ol>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>anaconda-navigator
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Once the navigator is running, <strong>before</strong> launching the Jupyter Notebook app, select the <strong>pyActi39</strong> environment (instead of <code class="code docutils literal notranslate"><span class="pre">base</span> <span class="pre">(root)</span></code>)</p>
+</div>
+<a class="reference internal image-reference" href="docs/source/img/anaconda-navigator-instructions.png"><img alt="docs/source/img/anaconda-navigator-instructions.png" src="docs/source/img/anaconda-navigator-instructions.png" style="width: 600px;" />
+</a>
+</li>
+<li><p>Download the tutorial <a class="reference external" href="https://github.com/ghammad/pyActigraphy/tree/master/docs/source/">notebooks</a>:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/ghammad/pyActigraphy/blob/cce641bb09bd1ac1912aa5eb09894ed152844475/docs/source/pyActigraphy-Intro.ipynb">pyActigraphy-Intro.ipynb</a></p></li>
+<li><p><a class="reference external" href="https://github.com/ghammad/pyActigraphy/blob/cce641bb09bd1ac1912aa5eb09894ed152844475/docs/source/pyActigraphy-Batch.ipynb">pyActigraphy-Batch.ipynb</a></p></li>
+<li><p><a class="reference external" href="https://github.com/ghammad/pyActigraphy/blob/cce641bb09bd1ac1912aa5eb09894ed152844475/docs/source/pyActigraphy-Masking.ipynb">pyActigraphy-Masking.ipynb</a></p></li>
+<li><p><a class="reference external" href="https://github.com/ghammad/pyActigraphy/blob/cce641bb09bd1ac1912aa5eb09894ed152844475/docs/source/pyActigraphy-SSt-log.ipynb">pyActigraphy-SSt-log.ipynb</a></p></li>
+<li><p><a class="reference external" href="https://github.com/ghammad/pyActigraphy/blob/cce641bb09bd1ac1912aa5eb09894ed152844475/docs/source/pyActigraphy-Sleep-Algorithms.ipynb">pyActigraphy-Sleep-Algorithms.ipynb</a></p></li>
+<li><p><a class="reference external" href="https://github.com/ghammad/pyActigraphy/blob/cce641bb09bd1ac1912aa5eb09894ed152844475/docs/source/pyActigraphy-Sleep-Diary.ipynb">pyActigraphy-Sleep-Diary.ipynb</a></p></li>
+<li><p><a class="reference external" href="https://github.com/ghammad/pyActigraphy/blob/cce641bb09bd1ac1912aa5eb09894ed152844475/docs/source/pyActigraphy-StateTransitionProb.ipynb">pyActigraphy-StateTransitionProb.ipynb</a></p></li>
+</ul>
+</li>
+<li><p>Via the Jupyter interface, navigate to the tutorial notebooks you previously downloaded and simply launch them.</p></li>
+<li><p>Voilà. Good luck.</p></li>
+</ol>
+</section>
+</section>
 <section id="quick-start">
-<h1>Quick start<a class="headerlink" href="#quick-start" title="Permalink to this heading">¶</a></h1>
+<h1>Quick start<a class="headerlink" href="#quick-start" title="Link to this heading">¶</a></h1>
 <p>The following example illustrates how to calculate the interdaily stability
 with the pyActigraphy package:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pyActigraphy</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span> <span class="o">=</span> <span class="n">pyActigraphy</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read_raw_awd</span><span class="p">(</span><span class="s1">&#39;/path/to/your/favourite/file.AWD&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rawAWD</span><span class="o">.</span><span class="n">IS</span><span class="p">()</span>
 <span class="go">0.6900175913031027</span>
@@ -213,7 +318,7 @@ with the pyActigraphy package:</p>
 </div>
 </section>
 <section id="contributing">
-<h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this heading">¶</a></h1>
+<h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading">¶</a></h1>
 <p>There are plenty of ways to contribute to this package, including (but not limiting to):</p>
 <ul class="simple">
 <li><p>report bugs (and, ideally, how to reproduce the bug)</p></li>
@@ -221,20 +326,22 @@ with the pyActigraphy package:</p>
 <li><p>improve the documentation</p></li>
 </ul>
 </section>
-<section id="authors">
-<h1>Authors<a class="headerlink" href="#authors" title="Permalink to this heading">¶</a></h1>
+<section id="authors-and-contributors">
+<h1>Authors and contributors<a class="headerlink" href="#authors-and-contributors" title="Link to this heading">¶</a></h1>
 <ul class="simple">
 <li><p><strong>Grégory Hammad</strong> <a class="reference external" href="https://github.com/ghammad">&#64;ghammad</a> - <em>Initial and main developer</em></p></li>
 <li><p><strong>Mathilde Reyt</strong> <a class="reference external" href="https://github.com/ReytMathilde">&#64;ReytMathilde</a></p></li>
+<li><p><strong>Carlos Beaumont</strong> <a class="reference external" href="https://github.com/cbaumont">&#64;cbaumont</a></p></li>
+<li><p><strong>Nikita Beliy</strong> <a class="reference external" href="https://github.com/nbeliy">&#64;nbeliy</a></p></li>
 </ul>
 <p>See also the list of <a class="reference external" href="https://github.com/ghammad/pyActigraphy/contributors">contributors</a> who participated in this project.</p>
 </section>
 <section id="license">
-<h1>License<a class="headerlink" href="#license" title="Permalink to this heading">¶</a></h1>
+<h1>License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h1>
 <p>This project is licensed under the GNU GPL-3.0 License - see the <a class="reference external" href="LICENSE">LICENSE</a> file for details</p>
 </section>
 <section id="acknowledgments">
-<h1>Acknowledgments<a class="headerlink" href="#acknowledgments" title="Permalink to this heading">¶</a></h1>
+<h1>Acknowledgments<a class="headerlink" href="#acknowledgments" title="Link to this heading">¶</a></h1>
 <ul class="simple">
 <li><p><strong>Aubin Ardois</strong> <a class="reference external" href="https://github.com/aardoi">&#64;aardoi</a> developed the first version of the MTN class during his internship at the CRC, in May-August 2018.</p></li>
 <li><p>The CRC colleagues for their support, ideas, etc.</p></li>
@@ -253,8 +360,8 @@ with the pyActigraphy package:</p>
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

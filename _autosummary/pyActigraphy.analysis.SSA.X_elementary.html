@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyActigraphy.analysis.SSA.X_elementary &#8212; pyActigraphy 1.2.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <title>pyActigraphy.analysis.SSA.X_elementary &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="../_static/documentation_options.js?v=590429e0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -41,7 +39,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -92,23 +90,44 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">pyActigraphy.analysis.SSA.X_elementary</a><ul>
+<li><a class="reference internal" href="#pyActigraphy.analysis.SSA.X_elementary"><code class="docutils literal notranslate"><span class="pre">SSA.X_elementary()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div id="sourcelink">
+  <a href="../_sources/_autosummary/pyActigraphy.analysis.SSA.X_elementary.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+<form action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <section id="pyactigraphy-analysis-ssa-x-elementary">
-<h1>pyActigraphy.analysis.SSA.X_elementary<a class="headerlink" href="#pyactigraphy-analysis-ssa-x-elementary" title="Permalink to this heading">¶</a></h1>
+<h1>pyActigraphy.analysis.SSA.X_elementary<a class="headerlink" href="#pyactigraphy-analysis-ssa-x-elementary" title="Link to this heading">¶</a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyActigraphy.analysis.SSA.X_elementary">
-<span class="sig-prename descclassname"><span class="pre">SSA.</span></span><span class="sig-name descname"><span class="pre">X_elementary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/analysis/ssa.html#SSA.X_elementary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.analysis.SSA.X_elementary" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">SSA.</span></span><span class="sig-name descname"><span class="pre">X_elementary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">r</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/analysis/ssa.html#SSA.X_elementary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.analysis.SSA.X_elementary" title="Link to this definition">¶</a></dt>
 <dd><p>Elementary matrix</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>r</strong> (<em>int</em>) – Index of the elementary matrix.
 Must lower or equal to the embedding dimension, L.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>x_elem</strong></p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>ndarray of shape (L,K)</p>
 </dd>
 </dl>
@@ -118,13 +137,14 @@ Must lower or equal to the embedding dimension, L.</p>
 <p>The matrices <span class="math notranslate nohighlight">\(X_r\)</span> have rank 1. Such matrices are sometimes
 called <em>elementary</em> matrices.</p>
 <p class="rubric">References</p>
-<dl class="citation">
-<dt class="label" id="r1e5dc3fff9f7-1"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
-<dd><p>Golyandina, N., &amp; Zhigljavsky, A. (2013). Singular Spectrum
+<div role="list" class="citation-list">
+<div class="citation" id="r1e5dc3fff9f7-1" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Golyandina, N., &amp; Zhigljavsky, A. (2013). Singular Spectrum
 Analysis for Time Series. Springer Berlin Heidelberg
 <a class="reference external" href="http://doi.org/10.1007/978-3-642-34913-3">http://doi.org/10.1007/978-3-642-34913-3</a></p>
-</dd>
-</dl>
+</div>
+</div>
 </dd></dl>
 
 </section>
@@ -141,8 +161,8 @@ Analysis for Time Series. Springer Berlin Heidelberg
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

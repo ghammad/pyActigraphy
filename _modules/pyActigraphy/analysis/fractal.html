@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyActigraphy.analysis.fractal &#8212; pyActigraphy 1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <title>pyActigraphy.analysis.fractal &#8212; pyActigraphy 1.2.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="../../../_static/documentation_options.js?v=fd7cadf9"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -39,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -86,20 +83,31 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <h1>Source code for pyActigraphy.analysis.fractal</h1><div class="highlight"><pre>
 <span></span><span class="c1"># # (Multi-fractal)Detrended fluctuation analysis</span>
-<span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
-<span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">njit</span>  <span class="c1"># , prange</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">numpy.polynomial</span> <span class="kn">import</span> <span class="n">polynomial</span>
-<span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">linregress</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numba</span><span class="w"> </span><span class="kn">import</span> <span class="n">njit</span>  <span class="c1"># , prange</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.polynomial</span><span class="w"> </span><span class="kn">import</span> <span class="n">polynomial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">linregress</span>
 
 
 <span class="nd">@njit</span>
-<span class="k">def</span> <span class="nf">_profile</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_profile</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
 
     <span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
@@ -109,7 +117,7 @@
 
 
 <span class="nd">@njit</span>
-<span class="k">def</span> <span class="nf">_rolling_window</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rolling_window</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Split input array in an array of window-sized arrays, shifted by one</span>
 <span class="sd">    element. Emulate rolling function of pandas.Series.</span>
 
@@ -131,7 +139,7 @@
 
 
 <span class="nd">@njit</span>  <span class="c1"># (float64[:,:](float64[:],int64,boolean))</span>
-<span class="k">def</span> <span class="nf">_segmentation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_segmentation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Split input array in an array of window-sized arrays, shifted by one</span>
 <span class="sd">    element. Emulate rolling function of pandas.Series.</span>
 
@@ -161,14 +169,16 @@
 
     <span class="c1"># Non-overlapping segments</span>
     <span class="k">if</span> <span class="n">backward</span><span class="p">:</span>
-        <span class="n">segments</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[::</span><span class="n">stride</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
         <span class="n">segments</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[::</span><span class="o">-</span><span class="n">stride</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="n">windows</span><span class="p">[::</span><span class="n">stride</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">segments</span>
 
 
-<div class="viewcode-block" id="Fractal"><a class="viewcode-back" href="../../../Fractal.html#pyActigraphy.analysis.Fractal">[docs]</a><span class="k">class</span> <span class="nc">Fractal</span><span class="p">():</span>
+<div class="viewcode-block" id="Fractal">
+<a class="viewcode-back" href="../../../Fractal.html#pyActigraphy.analysis.Fractal">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Fractal</span><span class="p">():</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39; Class for Fractality Analysis</span>
 
 <span class="sd">    This class implements methods used to perform a (multifractal) detrended</span>
@@ -216,6 +226,13 @@
 <span class="sd">      of human activity. Physica A: Statistical Mechanics and Its Applications,</span>
 <span class="sd">      337(1–2), 307–318. https://doi.org/10.1016/j.physa.2004.01.042</span>
 
+<span class="sd">    A nice example of multifractal analysis of actigraphy data can be found in:</span>
+
+<span class="sd">    * França, L. G. S., Montoya, P., &amp; Miranda, J. G. V. (2018).</span>
+<span class="sd">      On multifractals: A non-linear study of actigraphy data.</span>
+<span class="sd">      Physica A: Statistical Mechanics and Its Applications.</span>
+<span class="sd">      https://doi.org/10.1016/J.PHYSA.2018.09.122</span>
+
 
 <span class="sd">    References</span>
 <span class="sd">    ----------</span>
@@ -232,13 +249,15 @@
 
 <span class="sd">    &#39;&#39;&#39;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_array</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_array</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_array</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__n_array</span> <span class="o">=</span> <span class="n">n_array</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__q_array</span> <span class="o">=</span> <span class="n">q_array</span>
 
-<div class="viewcode-block" id="Fractal.profile"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.profile.html#pyActigraphy.analysis.Fractal.profile">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">profile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+<div class="viewcode-block" id="Fractal.profile">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.profile.html#pyActigraphy.analysis.Fractal.profile">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">profile</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Profile function</span>
 
 <span class="sd">        Detrend and integrate the signal.</span>
@@ -258,8 +277,19 @@
 
         <span class="k">return</span> <span class="n">_profile</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Fractal.segmentation"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.segmentation.html#pyActigraphy.analysis.Fractal.segmentation">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">segmentation</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Fractal.segmentation">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.segmentation.html#pyActigraphy.analysis.Fractal.segmentation">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">segmentation</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">n</span><span class="p">,</span>
+        <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">exclude_segment_with_nans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">nan_frac</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Segmentation function</span>
 
 <span class="sd">        Segment the signal into non-overlapping windows of equal size.</span>
@@ -276,16 +306,42 @@
 <span class="sd">        overlap: bool, optional</span>
 <span class="sd">            If set to True, consecutive windows overlap by 50%.</span>
 <span class="sd">            Default is False.</span>
+<span class="sd">        exclude_segment_with_nans: bool, optional</span>
+<span class="sd">            If set to True, segments containing a NaN fraction equal or greater</span>
+<span class="sd">            than `nan_frac` are excluded.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        nan_frac: float, optional</span>
+<span class="sd">            Threshold on the maximal fraction of NaN in the returned segments.</span>
+<span class="sd">            Default is 0.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        segments: numpy.array</span>
 <span class="sd">            Non-overlappping windows of size n.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="n">_segmentation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Fractal.local_msq_residuals"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.local_msq_residuals.html#pyActigraphy.analysis.Fractal.local_msq_residuals">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">local_msq_residuals</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">segment</span><span class="p">,</span> <span class="n">deg</span><span class="p">):</span>
+        <span class="n">segments</span> <span class="o">=</span> <span class="n">_segmentation</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="p">,</span> <span class="n">overlap</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">exclude_segment_with_nans</span><span class="p">:</span>
+            <span class="c1"># Check if nan_frac is [0,1]:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">nan_frac</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">nan_frac</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s1">&#39;Input parameter `nan_frac` must be in [0,1].&#39;</span>
+                    <span class="o">+</span> <span class="s1">&#39; Current value: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nan_frac</span><span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Flag rows with a NaN fraction above threshold</span>
+            <span class="n">is_above_th</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">segments</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="n">n</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">nan_frac</span>
+
+            <span class="k">return</span> <span class="n">segments</span><span class="p">[</span><span class="o">~</span><span class="n">is_above_th</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">segments</span></div>
+
+
+<div class="viewcode-block" id="Fractal.local_msq_residuals">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.local_msq_residuals.html#pyActigraphy.analysis.Fractal.local_msq_residuals">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">local_msq_residuals</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">segment</span><span class="p">,</span> <span class="n">deg</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Mean squared residuals</span>
 
 <span class="sd">        Mean squared residuals of the least squares polynomial fit.</span>
@@ -315,8 +371,19 @@
         <span class="c1"># Return mean squared residuals</span>
         <span class="k">return</span> <span class="n">fit_result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">n</span> <span class="k">if</span> <span class="n">fit_result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span></div>
 
-<div class="viewcode-block" id="Fractal.fluctuations"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.fluctuations.html#pyActigraphy.analysis.Fractal.fluctuations">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">fluctuations</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">deg</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Fractal.fluctuations">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.fluctuations.html#pyActigraphy.analysis.Fractal.fluctuations">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fluctuations</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">,</span>
+        <span class="n">n</span><span class="p">,</span>
+        <span class="n">deg</span><span class="p">,</span>
+        <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">exclude_segment_with_nans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">nan_frac</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Fluctuation function</span>
 
 <span class="sd">        The fluctuations are defined as the mean squared residuals</span>
@@ -333,6 +400,13 @@
 <span class="sd">        overlap: bool, optional</span>
 <span class="sd">            If set to True, consecutive windows during segmentation</span>
 <span class="sd">            overlap by 50%. Default is False.</span>
+<span class="sd">        exclude_segment_with_nans: bool, optional</span>
+<span class="sd">            If set to True, segments containing a NaN fraction equal or greater</span>
+<span class="sd">            than `nan_frac` are excluded.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        nan_frac: float, optional</span>
+<span class="sd">            Threshold on the maximal fraction of NaN in the returned segments.</span>
+<span class="sd">            Default is 0.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -344,11 +418,25 @@
         <span class="n">Y</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">profile</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 
         <span class="c1"># Define non-overlapping segments</span>
-        <span class="n">segments_fwd</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">segmentation</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">)</span>
-        <span class="n">segments_bwd</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">segmentation</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">backward</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">)</span>
+        <span class="n">segments_fwd</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">segmentation</span><span class="p">(</span>
+            <span class="n">Y</span><span class="p">,</span>
+            <span class="n">n</span><span class="p">,</span>
+            <span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">,</span>
+            <span class="n">exclude_segment_with_nans</span><span class="o">=</span><span class="n">exclude_segment_with_nans</span><span class="p">,</span>
+            <span class="n">nan_frac</span><span class="o">=</span><span class="n">nan_frac</span>
+        <span class="p">)</span>
+        <span class="n">segments_bwd</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">segmentation</span><span class="p">(</span>
+            <span class="n">Y</span><span class="p">,</span>
+            <span class="n">n</span><span class="p">,</span>
+            <span class="n">backward</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">,</span>
+            <span class="n">exclude_segment_with_nans</span><span class="o">=</span><span class="n">exclude_segment_with_nans</span><span class="p">,</span>
+            <span class="n">nan_frac</span><span class="o">=</span><span class="n">nan_frac</span>
+        <span class="p">)</span>
 
         <span class="c1"># Assert equal numbers of segments</span>
-        <span class="k">assert</span><span class="p">(</span><span class="n">segments_fwd</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">segments_bwd</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">segments_fwd</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">segments_bwd</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 
         <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">segments_fwd</span><span class="p">)</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">segments_bwd</span><span class="p">))</span>
         <span class="c1"># Compute the sum of the squared residuals for each segment</span>
@@ -358,8 +446,9 @@
 
         <span class="k">return</span> <span class="n">F</span></div>
 
+
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">q_th_order_mean_square</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">q_th_order_mean_square</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Qth-order mean square function</span>
 
 <span class="sd">        Compute the q-th order mean squares.</span>
@@ -384,8 +473,19 @@
 
         <span class="k">return</span> <span class="n">qth_msq</span>
 
-<div class="viewcode-block" id="Fractal.dfa"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.dfa.html#pyActigraphy.analysis.Fractal.dfa">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">dfa</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Fractal.dfa">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.dfa.html#pyActigraphy.analysis.Fractal.dfa">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dfa</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">ts</span><span class="p">,</span>
+        <span class="n">n_array</span><span class="p">,</span>
+        <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">exclude_segment_with_nans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">nan_frac</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">log</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Detrended Fluctuation Analysis function</span>
 
 <span class="sd">        Compute the q-th order mean squared fluctuations for different segment</span>
@@ -403,6 +503,13 @@
 <span class="sd">        overlap: bool, optional</span>
 <span class="sd">            If set to True, consecutive windows during segmentation</span>
 <span class="sd">            overlap by 50%. Default is False.</span>
+<span class="sd">        exclude_segment_with_nans: bool, optional</span>
+<span class="sd">            If set to True, segments containing a NaN fraction equal or greater</span>
+<span class="sd">            than `nan_frac` are excluded.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        nan_frac: float, optional</span>
+<span class="sd">            Threshold on the maximal fraction of NaN in the returned segments.</span>
+<span class="sd">            Default is 0.</span>
 <span class="sd">        log: bool, optional</span>
 <span class="sd">            If set to True, returned values are log-transformed.</span>
 <span class="sd">            Default is False.</span>
@@ -430,7 +537,9 @@
                     <span class="n">ts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
                     <span class="n">n</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
                     <span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">,</span>
-                    <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span>
+                    <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">,</span>
+                    <span class="n">exclude_segment_with_nans</span><span class="o">=</span><span class="n">exclude_segment_with_nans</span><span class="p">,</span>
+                    <span class="n">nan_frac</span><span class="o">=</span><span class="n">nan_frac</span>
                 <span class="p">),</span>
                 <span class="n">q</span><span class="o">=</span><span class="mi">2</span>
             <span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">factor</span><span class="o">*</span><span class="n">n_array</span>
@@ -447,13 +556,18 @@
 
         <span class="k">return</span> <span class="n">q_th_order_msq_fluc</span></div>
 
-<div class="viewcode-block" id="Fractal.dfa_parallel"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.dfa_parallel.html#pyActigraphy.analysis.Fractal.dfa_parallel">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">dfa_parallel</span><span class="p">(</span>
+
+<div class="viewcode-block" id="Fractal.dfa_parallel">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.dfa_parallel.html#pyActigraphy.analysis.Fractal.dfa_parallel">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dfa_parallel</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">ts</span><span class="p">,</span>
         <span class="n">n_array</span><span class="p">,</span>
         <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">exclude_segment_with_nans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">nan_frac</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -476,6 +590,13 @@
 <span class="sd">        overlap: bool, optional</span>
 <span class="sd">            If set to True, consecutive windows during segmentation</span>
 <span class="sd">            overlap by 50%. Default is False.</span>
+<span class="sd">        exclude_segment_with_nans: bool, optional</span>
+<span class="sd">            If set to True, segments containing a NaN fraction equal or greater</span>
+<span class="sd">            than `nan_frac` are excluded.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        nan_frac: float, optional</span>
+<span class="sd">            Threshold on the maximal fraction of NaN in the returned segments.</span>
+<span class="sd">            Default is 0.</span>
 <span class="sd">        log: bool, optional</span>
 <span class="sd">            If set to True, returned values are log-transformed.</span>
 <span class="sd">            Default is False.</span>
@@ -516,7 +637,9 @@
             <span class="n">ts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="n">n</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
             <span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">,</span>
-            <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span>
+            <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">,</span>
+            <span class="n">exclude_segment_with_nans</span><span class="o">=</span><span class="n">exclude_segment_with_nans</span><span class="p">,</span>
+            <span class="n">nan_frac</span><span class="o">=</span><span class="n">nan_frac</span>
         <span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">factor</span><span class="o">*</span><span class="n">n_array</span><span class="p">)</span>
 
         <span class="n">q_th_order_msq_fluc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromiter</span><span class="p">(</span>
@@ -530,8 +653,11 @@
 
         <span class="k">return</span> <span class="n">q_th_order_msq_fluc</span></div>
 
-<div class="viewcode-block" id="Fractal.generalized_hurst_exponent"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.generalized_hurst_exponent.html#pyActigraphy.analysis.Fractal.generalized_hurst_exponent">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">generalized_hurst_exponent</span><span class="p">(</span>
+
+<div class="viewcode-block" id="Fractal.generalized_hurst_exponent">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.generalized_hurst_exponent.html#pyActigraphy.analysis.Fractal.generalized_hurst_exponent">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">generalized_hurst_exponent</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">F_n</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">x_center</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Generalized Hurst exponent</span>
@@ -568,8 +694,11 @@
 
         <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">slope</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">stderr</span></div>
 
-<div class="viewcode-block" id="Fractal.crossover_search"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.crossover_search.html#pyActigraphy.analysis.Fractal.crossover_search">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">crossover_search</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">F_n</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">n_min</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Fractal.crossover_search">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.crossover_search.html#pyActigraphy.analysis.Fractal.crossover_search">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">crossover_search</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">F_n</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">n_min</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Search for crossovers</span>
 
 <span class="sd">        A crossover is defined as a change in scaling properties of the</span>
@@ -619,13 +748,13 @@
         <span class="n">h_ratios</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">n_min</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">h_ratios_err</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">n_min</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
         <span class="c1"># If the number of points for a single linear fit is less than 3</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">n_min</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">n_min</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span>
                 <span class="p">(</span><span class="s2">&quot;Cannot perform a linear fit on series of less than&quot;</span>
                  <span class="s2">&quot; 3 points. Exiting now.&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="c1"># If the number of points to fit is less than 2*3</span>
-        <span class="k">elif</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">n_min</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">n_min</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span>
                 <span class="p">(</span><span class="s2">&quot;Total number of points to fit is less than 2*3.&quot;</span>
                  <span class="s2">&quot;Exiting now.&quot;</span><span class="p">)</span>
@@ -657,8 +786,9 @@
 
         <span class="k">return</span> <span class="n">h_ratios</span><span class="p">,</span> <span class="n">h_ratios_err</span><span class="p">,</span> <span class="n">n_x</span></div>
 
+
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">local_slopes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">F_n</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">local_slopes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">F_n</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Local slopes of log(F(n)) versus log(n).</span>
 
 <span class="sd">        The local slope of the curve log(F(n)) is calculated at each point by</span>
@@ -696,13 +826,13 @@
         <span class="c1"># Window size: 2*s + 1</span>
         <span class="n">win_size</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">s</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="c1"># Check if the number of points for a single linear fit is at least 3</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">win_size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">win_size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="p">(</span><span class="s2">&quot;Cannot perform a linear fit on series of less than&quot;</span>
                  <span class="s2">&quot; 3 points; `s` must be greater or equal to 1.&quot;</span><span class="p">)</span>
             <span class="p">)</span>
         <span class="c1"># Check if the number of points to fit is less than 2*n_min</span>
-        <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">win_size</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">n_array</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">win_size</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="p">(</span><span class="s2">&quot;Total number of points to fit is less than (2*s+1).&quot;</span><span class="p">)</span>
             <span class="p">)</span>
@@ -732,8 +862,20 @@
 
         <span class="k">return</span> <span class="n">alpha_loc</span><span class="p">,</span> <span class="n">alpha_loc_err</span><span class="p">,</span> <span class="n">n_x</span>
 
-<div class="viewcode-block" id="Fractal.mfdfa"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.mfdfa.html#pyActigraphy.analysis.Fractal.mfdfa">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">mfdfa</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">q_array</span><span class="p">,</span> <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="Fractal.mfdfa">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.mfdfa.html#pyActigraphy.analysis.Fractal.mfdfa">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mfdfa</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">ts</span><span class="p">,</span>
+        <span class="n">n_array</span><span class="p">,</span>
+        <span class="n">q_array</span><span class="p">,</span>
+        <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">exclude_segment_with_nans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">nan_frac</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">log</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Multifractal Detrended Fluctuation Analysis function</span>
 
 <span class="sd">        Compute the q-th order mean squared fluctuations for different segment</span>
@@ -753,6 +895,13 @@
 <span class="sd">        overlap: bool, optional</span>
 <span class="sd">            If set to True, consecutive windows during segmentation</span>
 <span class="sd">            overlap by 50%. Default is False.</span>
+<span class="sd">        exclude_segment_with_nans: bool, optional</span>
+<span class="sd">            If set to True, segments containing a NaN fraction equal or greater</span>
+<span class="sd">            than `nan_frac` are excluded.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        nan_frac: float, optional</span>
+<span class="sd">            Threshold on the maximal fraction of NaN in the returned segments.</span>
+<span class="sd">            Default is 0.</span>
 <span class="sd">        log: bool, optional</span>
 <span class="sd">            If set to True, returned values are log-transformed.</span>
 <span class="sd">            Default is False.</span>
@@ -784,7 +933,9 @@
                 <span class="n">ts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
                 <span class="n">n</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
                 <span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">,</span>
-                <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span>
+                <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">,</span>
+                <span class="n">exclude_segment_with_nans</span><span class="o">=</span><span class="n">exclude_segment_with_nans</span><span class="p">,</span>
+                <span class="n">nan_frac</span><span class="o">=</span><span class="n">nan_frac</span>
             <span class="p">)</span>
             <span class="n">q_th_order_msq_fluctuations</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="bp">cls</span><span class="o">.</span><span class="n">q_th_order_mean_square</span><span class="p">(</span><span class="n">fluct</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="n">q</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">q_array</span>
@@ -795,14 +946,19 @@
 
         <span class="k">return</span> <span class="n">q_th_order_msq_fluctuations</span></div>
 
-<div class="viewcode-block" id="Fractal.mfdfa_parallel"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.mfdfa_parallel.html#pyActigraphy.analysis.Fractal.mfdfa_parallel">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">mfdfa_parallel</span><span class="p">(</span>
+
+<div class="viewcode-block" id="Fractal.mfdfa_parallel">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.mfdfa_parallel.html#pyActigraphy.analysis.Fractal.mfdfa_parallel">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mfdfa_parallel</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">ts</span><span class="p">,</span>
         <span class="n">n_array</span><span class="p">,</span>
         <span class="n">q_array</span><span class="p">,</span>
         <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">overlap</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">exclude_segment_with_nans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">nan_frac</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -827,6 +983,13 @@
 <span class="sd">        overlap: bool, optional</span>
 <span class="sd">            If set to True, consecutive windows during segmentation</span>
 <span class="sd">            overlap by 50%. Default is False.</span>
+<span class="sd">        exclude_segment_with_nans: bool, optional</span>
+<span class="sd">            If set to True, segments containing a NaN fraction equal or greater</span>
+<span class="sd">            than `nan_frac` are excluded.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        nan_frac: float, optional</span>
+<span class="sd">            Threshold on the maximal fraction of NaN in the returned segments.</span>
+<span class="sd">            Default is 0.</span>
 <span class="sd">        log: bool, optional</span>
 <span class="sd">            If set to True, returned values are log-transformed.</span>
 <span class="sd">            Default is False.</span>
@@ -867,7 +1030,9 @@
             <span class="n">ts</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="n">n</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">),</span>
             <span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">,</span>
-            <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span>
+            <span class="n">overlap</span><span class="o">=</span><span class="n">overlap</span><span class="p">,</span>
+            <span class="n">exclude_segment_with_nans</span><span class="o">=</span><span class="n">exclude_segment_with_nans</span><span class="p">,</span>
+            <span class="n">nan_frac</span><span class="o">=</span><span class="n">nan_frac</span>
         <span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">factor</span><span class="o">*</span><span class="n">n_array</span><span class="p">)</span>
 
         <span class="n">q_th_order_msq_fluctuations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
@@ -880,8 +1045,9 @@
 
         <span class="k">return</span> <span class="n">q_th_order_msq_fluctuations</span></div>
 
+
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">equally_spaced_logscale_range</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mi">1440</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">equally_spaced_logscale_range</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mi">1440</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Equally spaced numbers in log-scale</span>
 
 <span class="sd">        Construct a series of equally spaced numbers in log scale</span>
@@ -912,7 +1078,160 @@
         <span class="c1"># Filter out numbers &lt; start</span>
         <span class="n">n_array</span> <span class="o">=</span> <span class="n">n_array</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">n_array</span> <span class="o">&gt;=</span> <span class="n">start</span><span class="p">)]</span>
 
-        <span class="k">return</span> <span class="n">n_array</span></div>
+        <span class="k">return</span> <span class="n">n_array</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">multifractal_mass_exponents</span><span class="p">(</span><span class="n">F_n</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">q_array</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Multifractal Mass Exponents</span>
+
+<span class="sd">        Compute the q-th order mass exponents (:math:`t_{q}`) from the q-th</span>
+<span class="sd">        order Hurst exponents (:math:`H_{q}`) for different q values.</span>
+
+<span class="sd">        The computation follows the steps described in [1]_. It consists in:</span>
+
+<span class="sd">        1. Compute all q-order Hurst exponents, :math:`H_{q}`:</span>
+
+<span class="sd">           .. math::</span>
+
+<span class="sd">               F_q(n) \sim n^{H_{q}}</span>
+
+<span class="sd">           where :math:`F_q(n)` denotes the detrended fluctuation amplitude</span>
+<span class="sd">           obtained at order q and scale n;</span>
+
+<span class="sd">        2. Compute the mass exponents (:math:`t_{q}`) from the Hurst exponents:</span>
+
+<span class="sd">           .. math::</span>
+
+<span class="sd">               t_{q} = q \times H_{q} -1</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        F_n : array</span>
+<span class="sd">            Array of fluctuations.</span>
+<span class="sd">        n_array: array of int</span>
+<span class="sd">            Time scales (i.e window sizes). In minutes.</span>
+<span class="sd">        q_array: array of float</span>
+<span class="sd">            Orders of the mean squares.</span>
+<span class="sd">        log: bool, optional</span>
+<span class="sd">            If set to True, it assumes that the fluctuation values have been</span>
+<span class="sd">            log-transformed.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        t_q: numpy.array</span>
+<span class="sd">            Q-order mass exponents.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Ihlen EA (2012) Introduction to multifractal detrended</span>
+<span class="sd">               fluctuation analysis in Matlab. Front. Physio. 3:141.</span>
+<span class="sd">               https://doi.org/10.3389/fphys.2012.00141</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># If dim(F_n)=NxM, assert:</span>
+        <span class="c1"># N == dim(n) and M == dim(q)</span>
+        <span class="n">N</span><span class="p">,</span> <span class="n">M</span> <span class="o">=</span> <span class="n">F_n</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">N</span> <span class="o">==</span> <span class="n">n_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">assert</span> <span class="p">(</span><span class="n">M</span> <span class="o">==</span> <span class="n">q_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># Compute q-order Hurst exponent</span>
+        <span class="n">H_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span>
+            <span class="n">Fractal</span><span class="o">.</span><span class="n">generalized_hurst_exponent</span><span class="p">(</span>
+                <span class="n">F_n</span><span class="o">=</span><span class="n">F_n</span><span class="p">[:,</span> <span class="n">q_idx</span><span class="p">],</span> <span class="n">n_array</span><span class="o">=</span><span class="n">n_array</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">,</span> <span class="n">x_center</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">q_idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">q_array</span><span class="p">))</span>
+        <span class="p">])</span>
+
+        <span class="c1"># Compute mass exponent tq</span>
+        <span class="n">t_q</span> <span class="o">=</span> <span class="n">H_q</span><span class="o">*</span><span class="n">q_array</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">t_q</span>
+
+<div class="viewcode-block" id="Fractal.multifractal_spectrum">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.Fractal.multifractal_spectrum.html#pyActigraphy.analysis.Fractal.multifractal_spectrum">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">multifractal_spectrum</span><span class="p">(</span><span class="n">F_n</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">q_array</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&#39;&#39;&#39;Multifractal Spectrum</span>
+
+<span class="sd">        Compute the q-th order singularity (Hölder) exponent (:math:`h_{q}`)</span>
+<span class="sd">        and dimension (:math:`D_{q}`) for different q values.</span>
+
+<span class="sd">        The computation of the singularity or multifractal spectrum follows</span>
+<span class="sd">        the steps described in [1]_. It consists in:</span>
+
+<span class="sd">        1. Compute all q-order Hurst exponents, :math:`H_{q}`:</span>
+
+<span class="sd">           .. math::</span>
+
+<span class="sd">               F_q(n) \sim n^{H_{q}}</span>
+
+<span class="sd">           where :math:`F_q(n)` denotes the detrended fluctuation amplitude</span>
+<span class="sd">           obtained at order q and scale n;</span>
+
+<span class="sd">        2. Compute the mass exponents (:math:`t_{q}`) from the Hurst exponents:</span>
+
+<span class="sd">           .. math::</span>
+
+<span class="sd">               t_{q} = q \times H_{q} -1</span>
+
+
+<span class="sd">        3. Compute the q-order singularity (Hölder) exponents (:math:`h_{q}`)</span>
+<span class="sd">           and dimensions (:math:`D_{q}`):</span>
+
+<span class="sd">           .. math::</span>
+
+<span class="sd">               h_{q} = \frac{\partial t_{q}}{\partial q}</span>
+
+<span class="sd">               D_{q} = q \times h_{q} - t_{q}</span>
+
+
+<span class="sd">        Finally, the multifractal spectrum is obtained by plotting</span>
+<span class="sd">        :math:`D_{q}` as a function of :math:`h_{q}`.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        F_n : array</span>
+<span class="sd">            Array of fluctuations.</span>
+<span class="sd">        n_array: array of int</span>
+<span class="sd">            Time scales (i.e window sizes). In minutes.</span>
+<span class="sd">        q_array: array of float</span>
+<span class="sd">            Orders of the mean squares.</span>
+<span class="sd">        log: bool, optional</span>
+<span class="sd">            If set to True, it assumes that the fluctuation values have been</span>
+<span class="sd">            log-transformed.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        h_q, D_q: numpy.array, numpy.array</span>
+<span class="sd">            Q-order singularity exponents and dimensions.</span>
+
+<span class="sd">        References</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        .. [1] Ihlen EA (2012) Introduction to multifractal detrended</span>
+<span class="sd">               fluctuation analysis in Matlab. Front. Physio. 3:141.</span>
+<span class="sd">               https://doi.org/10.3389/fphys.2012.00141</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Compute mass exponent tq</span>
+        <span class="n">t_q</span> <span class="o">=</span> <span class="n">Fractal</span><span class="o">.</span><span class="n">multifractal_mass_exponents</span><span class="p">(</span><span class="n">F_n</span><span class="p">,</span> <span class="n">n_array</span><span class="p">,</span> <span class="n">q_array</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="n">log</span><span class="p">)</span>
+
+        <span class="c1"># Compute q-order singularity exponent</span>
+        <span class="n">h_q</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">t_q</span><span class="p">,</span><span class="n">q_array</span><span class="p">)</span>
+
+        <span class="c1"># Compute the q-order singularity dimension</span>
+        <span class="n">D_q</span> <span class="o">=</span> <span class="n">h_q</span> <span class="o">*</span> <span class="n">q_array</span> <span class="o">-</span> <span class="n">t_q</span>
+
+        <span class="k">return</span> <span class="n">h_q</span><span class="p">,</span> <span class="n">D_q</span></div>
+</div>
+
 </pre></div>
 
     </div>
@@ -926,8 +1245,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

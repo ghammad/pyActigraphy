@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyActigraphy.analysis.Fractal.crossover_search &#8212; pyActigraphy 1.2.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
+    <title>pyActigraphy.analysis.Fractal.crossover_search &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="../_static/documentation_options.js?v=590429e0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -41,7 +39,7 @@
         </button>
         <a class="navbar-brand" href="../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -92,13 +90,34 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">pyActigraphy.analysis.Fractal.crossover_search</a><ul>
+<li><a class="reference internal" href="#pyActigraphy.analysis.Fractal.crossover_search"><code class="docutils literal notranslate"><span class="pre">Fractal.crossover_search()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div id="sourcelink">
+  <a href="../_sources/_autosummary/pyActigraphy.analysis.Fractal.crossover_search.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+<form action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <section id="pyactigraphy-analysis-fractal-crossover-search">
-<h1>pyActigraphy.analysis.Fractal.crossover_search<a class="headerlink" href="#pyactigraphy-analysis-fractal-crossover-search" title="Permalink to this heading">¶</a></h1>
+<h1>pyActigraphy.analysis.Fractal.crossover_search<a class="headerlink" href="#pyactigraphy-analysis-fractal-crossover-search" title="Link to this heading">¶</a></h1>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyActigraphy.analysis.Fractal.crossover_search">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Fractal.</span></span><span class="sig-name descname"><span class="pre">crossover_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">F_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/analysis/fractal.html#Fractal.crossover_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.analysis.Fractal.crossover_search" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Fractal.</span></span><span class="sig-name descname"><span class="pre">crossover_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">F_n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pyActigraphy/analysis/fractal.html#Fractal.crossover_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.analysis.Fractal.crossover_search" title="Link to this definition">¶</a></dt>
 <dd><p>Search for crossovers</p>
 <p>A crossover is defined as a change in scaling properties of the
 fluctuations with respect time scales. A search is performed by
@@ -106,7 +125,7 @@ calculating the series of ratios between the generalized Hurst exponent
 <span class="math notranslate nohighlight">\(h(q)\)</span> obtained at time scales <span class="math notranslate nohighlight">\(n&lt;n_x\)</span> and time scales
 <span class="math notranslate nohighlight">\(n&gt;n_x\)</span>, for various values of <span class="math notranslate nohighlight">\(n_x\)</span>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>F_n</strong> (<em>array</em>) – Array of fluctuations.</p></li>
 <li><p><strong>n_array</strong> (<em>array</em><em> of </em><em>int</em>) – Time scales (i.e window sizes). In minutes.</p></li>
@@ -118,11 +137,11 @@ log-transformed.
 Default is False.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>h_ratios, h_ratios_err, n_x</strong> – Ratio of h(q), and associated uncertainties, obtained for various
 time scales n_x.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>arrays of floats</p>
 </dd>
 </dl>
@@ -155,8 +174,8 @@ magnitude of the calculated uncertainty provides a rough estimate.</p>
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Singular spectrum analysis for time series &#8212; pyActigraphy 1.2.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <title>Singular spectrum analysis for time series &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=9afac83c" />
+    <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <script src="_static/documentation_options.js?v=590429e0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -41,7 +40,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -92,269 +91,48 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Singular spectrum analysis for time series</a><ul>
+<li><a class="reference internal" href="#Imports-and-input-data">Imports and input data</a></li>
+<li><a class="reference internal" href="#SSA-methodology">SSA methodology</a><ul>
+<li><a class="reference internal" href="#Embedding">Embedding</a></li>
+<li><a class="reference internal" href="#Singular-value-decomposition">Singular value decomposition</a></li>
+<li><a class="reference internal" href="#Fractional-partial-variances-and-Scree-diagram">Fractional partial variances and Scree diagram</a></li>
+<li><a class="reference internal" href="#Elementary-matrices">Elementary matrices</a></li>
+<li><a class="reference internal" href="#Grouping">Grouping</a></li>
+<li><a class="reference internal" href="#Diagonal-averaging">Diagonal averaging</a><ul>
+<li><a class="reference internal" href="#Trend-(k=0)">Trend (k=0)</a></li>
+<li><a class="reference internal" href="#Rhythmic-components-(k=1,2)">Rhythmic components (k=1,2)</a></li>
+<li><a class="reference internal" href="#Rhythmic-components-(k=3,4)">Rhythmic components (k=3,4)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Compare-original-signal-with-its-reconstruction">Compare original signal with its reconstruction</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="sourcelink">
+  <a href="_sources/pyActigraphy-SSA.ipynb.txt"
+     rel="nofollow">Source</a>
+</div>
+<form action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars and line breaks on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-    white-space: pre;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-.jp-RenderedHTMLCommon table,
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-.jp-RenderedHTMLCommon thead,
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td,
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-.jp-RenderedHTMLCommon th,
-div.rendered_html th {
-  font-weight: bold;
-}
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-.jp-RenderedHTMLCommon tbody tr:hover,
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-</style>
-<section id="Singular-spectrum-analysis-for-time-series">
-<h1>Singular spectrum analysis for time series<a class="headerlink" href="#Singular-spectrum-analysis-for-time-series" title="Permalink to this heading">¶</a></h1>
+  <section id="Singular-spectrum-analysis-for-time-series">
+<h1>Singular spectrum analysis for time series<a class="headerlink" href="#Singular-spectrum-analysis-for-time-series" title="Link to this heading">¶</a></h1>
 <p>This notebook illustrates how to perform a singular spectrum analysis (SSA) with the pyActigraphy package.</p>
-<p>Briefly, the SSA is related to the Principal Component Analysis (PCA) for time series. The input signal is decomposed into additive components and their relative importance (i.e. variance) is quantified.</p>
+<p>Briefly, the SSA is related to the Principal Component Analysis (PCA) for time series. The input signal is decomposed into additive components and their relative importance (i.e. variance) is quantified.</p>
 <p>More informations about the SSA methodology:</p>
 <ul class="simple">
 <li><p>Vautard, R., Yiou, P., &amp; Ghil, M. (1992). Singular-spectrum analysis: A toolkit for short, noisy chaotic signals. Physica D: Nonlinear Phenomena, 58(1–4), 95–126. <a class="reference external" href="https://doi.org/10.1016/0167-2789(92)90103-T">https://doi.org/10.1016/0167-2789(92)90103-T</a></p></li>
@@ -365,12 +143,12 @@ div.rendered_html tbody tr:hover {
 <li><p>Fossion, R., Rivera, A. L., Toledo-Roy, J. C., &amp; Angelova, M. (2018). Quantification of Irregular Rhythms in Chronobiology: A Time- Series Perspective. In Circadian Rhythm - Cellular and Molecular Mechanisms. InTech. <a class="reference external" href="https://doi.org/10.5772/intechopen.74742">https://doi.org/10.5772/intechopen.74742</a></p></li>
 </ul>
 <section id="Imports-and-input-data">
-<h2>Imports and input data<a class="headerlink" href="#Imports-and-input-data" title="Permalink to this heading">¶</a></h2>
+<h2>Imports and input data<a class="headerlink" href="#Imports-and-input-data" title="Link to this heading">¶</a></h2>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyActigraphy</span>
 </pre></div>
 </div>
 </div>
@@ -378,7 +156,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyActigraphy.analysis</span> <span class="kn">import</span> <span class="n">SSA</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pyActigraphy.analysis</span><span class="w"> </span><span class="kn">import</span> <span class="n">SSA</span>
 </pre></div>
 </div>
 </div>
@@ -386,7 +164,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 </pre></div>
 </div>
 </div>
@@ -394,7 +172,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">plotly.graph_objs</span> <span class="k">as</span> <span class="nn">go</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
 </pre></div>
 </div>
 </div>
@@ -402,7 +180,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 </pre></div>
 </div>
 </div>
@@ -426,9 +204,9 @@ div.rendered_html tbody tr:hover {
 </div>
 </section>
 <section id="SSA-methodology">
-<h2>SSA methodology<a class="headerlink" href="#SSA-methodology" title="Permalink to this heading">¶</a></h2>
+<h2>SSA methodology<a class="headerlink" href="#SSA-methodology" title="Link to this heading">¶</a></h2>
 <section id="Embedding">
-<h3>Embedding<a class="headerlink" href="#Embedding" title="Permalink to this heading">¶</a></h3>
+<h3>Embedding<a class="headerlink" href="#Embedding" title="Link to this heading">¶</a></h3>
 <p>Time-series <span class="math notranslate nohighlight">\(x=(x_0,x_1,\dots,x_n,\dots,x_{N−1})^\intercal\)</span>, with length N, represents the signal under analysis. The mapping of this signal into a matrix A, of dimension L × K , assuming <span class="math notranslate nohighlight">\(L \leq K\)</span> , is called embedding, and can be defined as:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}A = \begin{bmatrix}
@@ -469,7 +247,7 @@ div.rendered_html tbody tr:hover {
 <p>In our example file, the acquisition frequency is <span class="math notranslate nohighlight">\(1\)</span> min. Therefore, the trajectory matrix dimension is 1440, ie. <span class="math notranslate nohighlight">\(24\)</span> h.</p>
 </section>
 <section id="Singular-value-decomposition">
-<h3>Singular value decomposition<a class="headerlink" href="#Singular-value-decomposition" title="Permalink to this heading">¶</a></h3>
+<h3>Singular value decomposition<a class="headerlink" href="#Singular-value-decomposition" title="Link to this heading">¶</a></h3>
 <p>Factorization of the trajectory matrix A, using Singular Value Decomposition (SVD), yields to:</p>
 <div class="math notranslate nohighlight">
 \[A = U\Sigma V^\intercal =\sum_{r=1}^{R} \sigma_r u_r v_{r}^\intercal\]</div>
@@ -486,7 +264,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </section>
 <section id="Fractional-partial-variances-and-Scree-diagram">
-<h3>Fractional partial variances and Scree diagram<a class="headerlink" href="#Fractional-partial-variances-and-Scree-diagram" title="Permalink to this heading">¶</a></h3>
+<h3>Fractional partial variances and Scree diagram<a class="headerlink" href="#Fractional-partial-variances-and-Scree-diagram" title="Link to this heading">¶</a></h3>
 <p>One of the main results of SSA analysis is the so-called scree diagram that visually represents the partial variances <span class="math notranslate nohighlight">\(\lambda_k = \sigma^2_k\)</span>, ordered according to magnitude from the most to the least dominant, where <span class="math notranslate nohighlight">\(\lambda_k\)</span> can be interpreted as the variance of the “sub phase-space” of time-series component <span class="math notranslate nohighlight">\(g_k(n)\)</span> and where <span class="math notranslate nohighlight">\(\lambda_{tot} = \sum^r_{k=1} \lambda_k\)</span> is the total variance of the phase space of the original time series x(n).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
@@ -586,7 +364,7 @@ if (outputEl) {{
 </div>
 </section>
 <section id="Elementary-matrices">
-<h3>Elementary matrices<a class="headerlink" href="#Elementary-matrices" title="Permalink to this heading">¶</a></h3>
+<h3>Elementary matrices<a class="headerlink" href="#Elementary-matrices" title="Link to this heading">¶</a></h3>
 <p>The SVD of the trajectory matrix X can thus be written as:</p>
 <div class="math notranslate nohighlight">
 \[X = X_1 + \ldots + X_R\]</div>
@@ -620,7 +398,7 @@ if (outputEl) {{
 <p>A 1k-by-10k matrix is about 100MB… So calculating and storing 1k of them is NOT a good idea</p>
 </section>
 <section id="Grouping">
-<h3>Grouping<a class="headerlink" href="#Grouping" title="Permalink to this heading">¶</a></h3>
+<h3>Grouping<a class="headerlink" href="#Grouping" title="Link to this heading">¶</a></h3>
 <p>Prior to reconstructing the different signal components, It makes sense to group the elementary matrices based on the separability of their corresponding reconstructed series (i.e diagonal-averaged elementary matrices, <span class="math notranslate nohighlight">\(\tilde{x}_n\)</span>, see next step).</p>
 <p>One measure of separability can be obtained via the so-called <em>w-correlation matrix</em>. This matrix is obtained by calculating the weighted correlation between all possible combinations of two reconstructed series (<span class="math notranslate nohighlight">\(\tilde{\mathbb{X}}^{(i)}, \tilde{\mathbb{X}}^{(j)}\)</span>):</p>
 <div class="math notranslate nohighlight">
@@ -680,7 +458,7 @@ if (outputEl) {{
 <p>Side remark: the same conclusion can be drawn from the Scree diagram; the singular values <span class="math notranslate nohighlight">\(1\)</span> and <span class="math notranslate nohighlight">\(2\)</span> are almost degenerate.</p>
 </section>
 <section id="Diagonal-averaging">
-<h3>Diagonal averaging<a class="headerlink" href="#Diagonal-averaging" title="Permalink to this heading">¶</a></h3>
+<h3>Diagonal averaging<a class="headerlink" href="#Diagonal-averaging" title="Link to this heading">¶</a></h3>
 <p>If the components of the series are separable and the indices are being split accordingly, then all the matrices in the expansion <span class="math notranslate nohighlight">\(X = X_{I_1} + \ldots + X_{I_m}\)</span> are the Hankel matrices. We thus immediately obtain the decomposition <span class="math notranslate nohighlight">\(x_n = \sum_{k=1}^m \tilde{x}_n^{(k)}\)</span> of the original series: for all k and n, <span class="math notranslate nohighlight">\(\tilde{x}_n^{(k)}\)</span> is equal to all entries <span class="math notranslate nohighlight">\(x^{(k)}_{ij}\)</span> along the antidiagonal <span class="math notranslate nohighlight">\({(i, j)| i + j = n+1}\)</span> of the matrix <span class="math notranslate nohighlight">\(X_{Ik}\)</span>.</p>
 <p>In practice, however, this situation is not realistic. In the general case, no antidiagonal consists of equal elements. We thus need a formal procedure of transforming an arbitrary matrix into a Hankel matrix and therefore into a series. As such, we shall consider the procedure of <em>diagonal averaging</em>, which defines the values of the time series <span class="math notranslate nohighlight">\(\tilde{\mathbb{X}}^{(k)} = (\tilde{x}^{(k)}_1,\ldots,\tilde{x}^{(k)}_N)\)</span> as averages for the corresponding antidiagonals of the matrices
 <span class="math notranslate nohighlight">\(X_{I_k}\)</span>.</p>
@@ -699,7 +477,7 @@ if (outputEl) {{
 </li>
 </ul>
 <section id="Trend-(k=0)">
-<h4>Trend (k=0)<a class="headerlink" href="#Trend-(k=0)" title="Permalink to this heading">¶</a></h4>
+<h4>Trend (k=0)<a class="headerlink" href="#Trend-(k=0)" title="Link to this heading">¶</a></h4>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
@@ -728,7 +506,7 @@ True
 </div>
 </section>
 <section id="Rhythmic-components-(k=1,2)">
-<h4>Rhythmic components (k=1,2)<a class="headerlink" href="#Rhythmic-components-(k=1,2)" title="Permalink to this heading">¶</a></h4>
+<h4>Rhythmic components (k=1,2)<a class="headerlink" href="#Rhythmic-components-(k=1,2)" title="Link to this heading">¶</a></h4>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
@@ -739,7 +517,7 @@ True
 </div>
 </section>
 <section id="Rhythmic-components-(k=3,4)">
-<h4>Rhythmic components (k=3,4)<a class="headerlink" href="#Rhythmic-components-(k=3,4)" title="Permalink to this heading">¶</a></h4>
+<h4>Rhythmic components (k=3,4)<a class="headerlink" href="#Rhythmic-components-(k=3,4)" title="Link to this heading">¶</a></h4>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
@@ -811,7 +589,7 @@ if (outputEl) {{
 </section>
 </section>
 <section id="Compare-original-signal-with-its-reconstruction">
-<h2>Compare original signal with its reconstruction<a class="headerlink" href="#Compare-original-signal-with-its-reconstruction" title="Permalink to this heading">¶</a></h2>
+<h2>Compare original signal with its reconstruction<a class="headerlink" href="#Compare-original-signal-with-its-reconstruction" title="Link to this heading">¶</a></h2>
 <p>Finally, it is possible to reconstruct a signal with an appropriate subset of components (i.e circadian and ultradian components).</p>
 <p>For example, let’s reconstruct the signal from its 7 first components (0: trend, 1-2:circadian comp., 3-6:ultradian comp.):</p>
 <div class="nbinput nblast docutils container">
@@ -880,8 +658,8 @@ if (outputEl) {{
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

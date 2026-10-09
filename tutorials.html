@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>pyActigraphy tutorials &#8212; pyActigraphy 1.2.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <title>pyActigraphy tutorials &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="_static/documentation_options.js?v=590429e0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
@@ -39,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -90,21 +88,47 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">pyActigraphy tutorials</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#feature-examples">Feature examples</a></li>
+<li><a class="reference internal" href="#analysis-examples">Analysis examples</a></li>
+<li><a class="reference internal" href="#pylight-examples">pyLight examples</a></li>
+<li><a class="reference internal" href="#work-in-progress">Work-in-progress</a></li>
+<li><a class="reference internal" href="#suggestions-requests">Suggestions &amp; Requests</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="sourcelink">
+  <a href="_sources/tutorials.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+<form action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <section id="pyactigraphy-tutorials">
-<h1>pyActigraphy tutorials<a class="headerlink" href="#pyactigraphy-tutorials" title="Permalink to this heading">¶</a></h1>
+<h1>pyActigraphy tutorials<a class="headerlink" href="#pyactigraphy-tutorials" title="Link to this heading">¶</a></h1>
 <p>This series of notebooks are meant to illustrate the different features of the
 <em>pyActigraphy</em> package.</p>
 <section id="introduction">
-<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this heading">¶</a></h2>
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>A gentle introduction to the basic functionalities: <a class="reference internal" href="pyActigraphy-Intro.html"><span class="doc">intro</span></a></p></li>
 <li><p>How to read files by batch: <a class="reference internal" href="pyActigraphy-Batch.html"><span class="doc">batch</span></a></p></li>
 </ul>
 </section>
 <section id="feature-examples">
-<h2>Feature examples<a class="headerlink" href="#feature-examples" title="Permalink to this heading">¶</a></h2>
+<h2>Feature examples<a class="headerlink" href="#feature-examples" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>How to discard invalid sequences in actigraphy recordings before analysis:</p>
 <ul>
@@ -121,7 +145,7 @@
 </ul>
 </section>
 <section id="analysis-examples">
-<h2>Analysis examples<a class="headerlink" href="#analysis-examples" title="Permalink to this heading">¶</a></h2>
+<h2>Analysis examples<a class="headerlink" href="#analysis-examples" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>How to perform a Cosinor analysis with pyActigraphy: <a class="reference internal" href="pyActigraphy-Cosinor.html"><span class="doc">cosinor</span></a></p></li>
 <li><p>How to perform a Functional linear modelling with pyActigraphy: <a class="reference internal" href="pyActigraphy-FLM.html"><span class="doc">flm</span></a></p></li>
@@ -130,7 +154,7 @@
 </ul>
 </section>
 <section id="pylight-examples">
-<h2>pyLight examples<a class="headerlink" href="#pylight-examples" title="Permalink to this heading">¶</a></h2>
+<h2>pyLight examples<a class="headerlink" href="#pylight-examples" title="Link to this heading">¶</a></h2>
 <p>The <em>pyActigraphy</em> package contains a module dedicated to the analysis of light
 exposure data, named <em>pyLight</em>. The following tutorials specifically illustrate
 its functionalities:</p>
@@ -141,7 +165,7 @@ its functionalities:</p>
 </ul>
 </section>
 <section id="work-in-progress">
-<h2>Work-in-progress<a class="headerlink" href="#work-in-progress" title="Permalink to this heading">¶</a></h2>
+<h2>Work-in-progress<a class="headerlink" href="#work-in-progress" title="Link to this heading">¶</a></h2>
 <p>The features illustrated in this section have to be considered as work-in-progress;
 most likely, they will be turned into full-fledged features in a next release.
 However, for impatient and brave users, it provides a starting point for testing:</p>
@@ -150,7 +174,7 @@ However, for impatient and brave users, it provides a starting point for testing
 </ul>
 </section>
 <section id="suggestions-requests">
-<h2>Suggestions &amp; Requests<a class="headerlink" href="#suggestions-requests" title="Permalink to this heading">¶</a></h2>
+<h2>Suggestions &amp; Requests<a class="headerlink" href="#suggestions-requests" title="Link to this heading">¶</a></h2>
 <p>If a feature of the <em>pyActigraphy</em> package is not illustrated here, do not
 hesitate to suggest it by fill an issue.</p>
 <p>Or, even better, contribute to this section by providing us with your favourite
@@ -170,8 +194,8 @@ notebook where you illustrate how this feature is relevant for your analysis.</p
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

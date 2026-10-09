@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyActigraphy.filters.filters &#8212; pyActigraphy 1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <title>pyActigraphy.filters.filters &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="../../../_static/documentation_options.js?v=590429e0"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -39,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -86,16 +83,27 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <h1>Source code for pyActigraphy.filters.filters</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">..log</span> <span class="kn">import</span> <span class="n">BaseLog</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..log</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseLog</span>
 
 
-<span class="k">def</span> <span class="nf">_create_inactivity_mask</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_create_inactivity_mask</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">duration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -155,11 +163,26 @@
 
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_data_continuous</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">frequency</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if the provided data appears to be continuous based </span>
+<span class="sd">    on the provided frequency.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="c1"># +1 because the first epoch is not counted else while substracting</span>
+    <span class="n">expected_length</span> <span class="o">=</span> <span class="p">((</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span> <span class="o">/</span> <span class="n">frequency</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="n">expected_length</span>
 
-<div class="viewcode-block" id="FiltersMixin"><a class="viewcode-back" href="../../../FiltersMixin.html#pyActigraphy.filters.FiltersMixin">[docs]</a><span class="k">class</span> <span class="nc">FiltersMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="FiltersMixin">
+<a class="viewcode-back" href="../../../FiltersMixin.html#pyActigraphy.filters.FiltersMixin">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FiltersMixin</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Mixin Class &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="FiltersMixin.create_inactivity_mask"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.filters.FiltersMixin.create_inactivity_mask.html#pyActigraphy.filters.FiltersMixin.create_inactivity_mask">[docs]</a>    <span class="k">def</span> <span class="nf">create_inactivity_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">):</span>
+<div class="viewcode-block" id="FiltersMixin.create_inactivity_mask">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.filters.FiltersMixin.create_inactivity_mask.html#pyActigraphy.filters.FiltersMixin.create_inactivity_mask">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_inactivity_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a mask for inactivity (count equal to zero) periods.</span>
 
 <span class="sd">        This mask has the same length as its underlying data and can be used</span>
@@ -174,8 +197,16 @@
 <span class="sd">        duration: int or str</span>
 <span class="sd">            Minimal number of consecutive zeroes for an inactive period.</span>
 <span class="sd">            Time offset strings (ex: &#39;90min&#39;) can also be used.</span>
+<span class="sd">        threshold: int or float</span>
+<span class="sd">            Limit below which the device might be considered as not worn.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="c1"># Verify that the data is continuous before creating a mask</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_data_continuous</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The underlying activity data seems to be &#39;</span>
+                             <span class="o">+</span> <span class="s1">&#39;discontinued. Make sure that the source data &#39;</span>
+                             <span class="o">+</span> <span class="s1">&#39;contains a continuous time series.&#39;</span><span class="p">)</span>
+        
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">nepochs</span> <span class="o">=</span> <span class="n">duration</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
@@ -192,9 +223,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">inactivity_length</span> <span class="o">=</span> <span class="n">nepochs</span>
 
         <span class="c1"># Create actual mask</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">_create_inactivity_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">nepochs</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">_create_inactivity_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">nepochs</span><span class="p">,</span> <span class="n">threshold</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FiltersMixin.add_mask_period"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.filters.FiltersMixin.add_mask_period.html#pyActigraphy.filters.FiltersMixin.add_mask_period">[docs]</a>    <span class="k">def</span> <span class="nf">add_mask_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">):</span>
+
+<div class="viewcode-block" id="FiltersMixin.add_mask_period">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.filters.FiltersMixin.add_mask_period.html#pyActigraphy.filters.FiltersMixin.add_mask_period">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_mask_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Add a period to the inactivity mask</span>
 
 <span class="sd">        Parameters</span>
@@ -203,8 +237,21 @@
 <span class="sd">            Start time (YYYY-MM-DD HH:MM:SS) of the inactivity period.</span>
 <span class="sd">        stop: str</span>
 <span class="sd">            Stop time (YYYY-MM-DD HH:MM:SS) of the inactivity period.</span>
+<span class="sd">        error: str</span>
+<span class="sd">            If set to &#39;raise&#39;, raise a ValueError whenever the mask</span>
+<span class="sd">            period is not within the recording&#39;s start/stop times.</span>
+<span class="sd">            If set to &#39;warn&#39;, simply issue a warning.</span>
+<span class="sd">            Available options are: [&#39;raise&#39;,&#39;warn&#39;]. Default is &#39;raise&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
+        <span class="n">error_options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;raise&#39;</span><span class="p">,</span> <span class="s1">&#39;warn&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">error</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">error_options</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="s2">&quot;Error option (</span><span class="si">{}</span><span class="s2">) is not available.</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+                    <span class="o">+</span><span class="s2">&quot;Available options are: </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">error_options</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
         <span class="c1"># Check if a mask has already been created</span>
         <span class="c1"># NB : if the inactivity_length is not None, accessing the mask will</span>
         <span class="c1"># trigger its creation.</span>
@@ -217,24 +264,48 @@
 
         <span class="c1"># Check if start and stop are within the index range</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span>
-                <span class="s2">&quot;Attempting to set the start time of a mask period before &quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;the actual start time of the data.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Mask start time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
-                <span class="o">+</span> <span class="s2">&quot;Data start time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="p">))</span>
+            <span class="k">if</span> <span class="n">error</span> <span class="o">==</span> <span class="s1">&#39;raise&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span>
+                    <span class="s2">&quot;Attempting to set the start time of a mask period before &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;the actual start time of the data:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;- Mask start time: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="s2">&quot;- Data start time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">((</span>
+                    <span class="s2">&quot;Attempting to set the start time of a mask period before &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;the actual start time of the data:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;- Mask start time: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="s2">&quot;- Data start time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="p">))</span>
+
         <span class="k">if</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span>
-                <span class="s2">&quot;Attempting to set the stop time of a mask period after &quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;the actual stop time of the data.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                <span class="o">+</span> <span class="s2">&quot;Mask stop time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span>
-                <span class="o">+</span> <span class="s2">&quot;Data stop time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-            <span class="p">))</span>
+            <span class="k">if</span> <span class="n">error</span> <span class="o">==</span> <span class="s1">&#39;raise&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">((</span>
+                    <span class="s2">&quot;Attempting to set the stop time of a mask period after &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;the actual stop time of the data:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;- Mask stop time: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="s2">&quot;- Data stop time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">((</span>
+                    <span class="s2">&quot;Attempting to set the stop time of a mask period after &quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;the actual stop time of the data:</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="o">+</span> <span class="s2">&quot;- Mask stop time: </span><span class="si">{}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">stop</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="s2">&quot;- Data stop time: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="p">))</span>
 
-        <span class="c1"># Set mask values between start and stop to zeros</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span></div>
+        <span class="c1"># Set mask values between start and stop to zeros, avoiding ChainedAssignmentError</span>
+        <span class="n">submask</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="o">&gt;=</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">start</span><span class="p">))</span>
+            <span class="o">&amp;</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">index</span><span class="o">&lt;=</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="n">stop</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">submask</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FiltersMixin.add_mask_periods"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.filters.FiltersMixin.add_mask_periods.html#pyActigraphy.filters.FiltersMixin.add_mask_periods">[docs]</a>    <span class="k">def</span> <span class="nf">add_mask_periods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_fname</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="FiltersMixin.add_mask_periods">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.filters.FiltersMixin.add_mask_periods.html#pyActigraphy.filters.FiltersMixin.add_mask_periods">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_mask_periods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_fname</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="s1">&#39;raise&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Add periods to the inactivity mask</span>
 
 <span class="sd">        Function to read start and stop times from a Mask log file. Supports</span>
@@ -244,6 +315,11 @@
 <span class="sd">        ----------</span>
 <span class="sd">        input_fname: str</span>
 <span class="sd">            Path to the log file.</span>
+<span class="sd">        error: str</span>
+<span class="sd">            If set to &#39;raise&#39;, raise a ValueError whenever the mask</span>
+<span class="sd">            period is not within the recording&#39;s start/stop times.</span>
+<span class="sd">            If set to &#39;warn&#39;, simply issue a warning.</span>
+<span class="sd">            Available options are: [&#39;raise&#39;,&#39;warn&#39;]. Default is &#39;raise&#39;.</span>
 <span class="sd">        *args</span>
 <span class="sd">            Variable length argument list passed to the subsequent reader</span>
 <span class="sd">            function.</span>
@@ -257,7 +333,9 @@
 
         <span class="c1"># Iterate over the rows of the DataFrame</span>
         <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">log</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_mask_period</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Start_time&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Stop_time&#39;</span><span class="p">])</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_mask_period</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;Start_time&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;Stop_time&#39;</span><span class="p">],</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">)</span></div>
+</div>
+
 </pre></div>
 
     </div>
@@ -271,8 +349,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

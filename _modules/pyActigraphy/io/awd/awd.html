@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en" data-content_root="../../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyActigraphy.io.awd.awd &#8212; pyActigraphy 1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css" />
-    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
-    <script src="../../../../_static/doctools.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+    <title>pyActigraphy.io.awd.awd &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="../../../../_static/documentation_options.js?v=590429e0"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
 <meta charset='utf-8'>
@@ -37,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -84,17 +83,31 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <h1>Source code for pyActigraphy.io.awd.awd</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">BaseRaw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseRaw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyActigraphy.light</span><span class="w"> </span><span class="kn">import</span> <span class="n">LightRecording</span>
 
 
-<span class="k">class</span> <span class="nc">RawAWD</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Raw object from .AWD file (recorded by ActiWatches)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RawAWD</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Raw object from .AWD file (recorded by ActiWatches)</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -115,8 +128,9 @@
 <span class="sd">        Cf. #timeseries-offset-aliases in</span>
 <span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
 <span class="sd">        Default is None (i.e all the data).</span>
-<span class="sd">    dtype: dtype</span>
-<span class="sd">        The dtype of the raw data. Default is np.int.</span>
+<span class="sd">    engine: str, optional</span>
+<span class="sd">        Parser engine to use.</span>
+<span class="sd">        Default is &#39;python&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">frequency_code</span> <span class="o">=</span> <span class="p">{</span>
@@ -130,13 +144,40 @@
         <span class="s1">&#39;C2&#39;</span><span class="p">:</span> <span class="s1">&#39;10s&#39;</span>
     <span class="p">}</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="n">device_code</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="s1">&#39;Actiwatch-7&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I&#39;</span><span class="p">:</span> <span class="s1">&#39;Actiwatch-Insomnia (pressure sens.)&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;L&#39;</span><span class="p">:</span> <span class="s1">&#39;Actiwatch-L (amb. light)&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="s1">&#39;Actiwatch-Mini&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;P&#39;</span><span class="p">:</span> <span class="s1">&#39;Actiwatch-L-Plus (amb. light)&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="s1">&#39;Actiwatch-S (env. sound)&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;Actiwatch-T (temp.)&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;V&#39;</span><span class="p">:</span> <span class="s1">&#39;Actiwatch-4&#39;</span>
+    <span class="p">}</span>
+
+    <span class="n">device_default_channels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Activity&#39;</span><span class="p">,</span> <span class="s1">&#39;Marker&#39;</span><span class="p">]</span>
+
+    <span class="n">device_additional_channel</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;D&#39;</span><span class="p">:</span> <span class="s1">&#39;Light&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;I&#39;</span><span class="p">:</span> <span class="s1">&#39;Pressure&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;L&#39;</span><span class="p">:</span> <span class="s1">&#39;Light&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;M&#39;: None,</span>
+        <span class="s1">&#39;P&#39;</span><span class="p">:</span> <span class="s1">&#39;Light&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;S&#39;</span><span class="p">:</span> <span class="s1">&#39;Sound&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;T&#39;</span><span class="p">:</span> <span class="s1">&#39;Temp.&#39;</span><span class="p">,</span>
+        <span class="c1"># &#39;V&#39;: None,</span>
+        <span class="c1"># &#39;U&#39;: None,</span>
+        <span class="c1"># &#39;X&#39;: None</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_fname</span><span class="p">,</span>
         <span class="n">header_size</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
         <span class="n">frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">period</span><span class="o">=</span><span class="kc">None</span>
+        <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;python&#39;</span>
     <span class="p">):</span>
 
         <span class="c1"># get absolute file path</span>
@@ -147,13 +188,15 @@
         <span class="c1"># extract header and data size</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="nb">next</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">header_size</span><span class="p">)]</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span>
 
         <span class="c1"># extract informations from the header</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">__extract_awd_name</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
         <span class="n">freq</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">__extract_awd_frequency</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
         <span class="n">uuid</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">__extract_awd_uuid</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">__extract_awd_start_time</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">uuid</span><span class="p">:</span>
+            <span class="c1"># extract model from UUID:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__device_type</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">__extract_awd_model</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">frequency</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -166,13 +209,43 @@
                     <span class="s2">&quot; this issue.&quot;</span>
                 <span class="p">)</span>
 
-        <span class="n">index_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-            <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span>
-                <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
-                <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-                <span class="n">freq</span><span class="o">=</span><span class="n">freq</span>
-            <span class="p">)</span>
+        <span class="c1"># set up channel configuration as a function of the device</span>
+        <span class="n">all_channels</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">device_default_channels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">use_channels</span> <span class="o">=</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">device_default_channels</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__device_type</span> <span class="ow">in</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">device_additional_channel</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1"># whitespace delimiter introduces the comma as an additional col.</span>
+            <span class="n">all_channels</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;sep&#39;</span><span class="p">,</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">device_additional_channel</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__device_type</span><span class="p">]</span>
+            <span class="p">]</span>
+            <span class="n">use_channels</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">RawAWD</span><span class="o">.</span><span class="n">device_additional_channel</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__device_type</span><span class="p">]</span>
+            <span class="p">]</span>
+
+        <span class="c1"># extract data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+            <span class="n">filepath_or_buffer</span><span class="o">=</span><span class="n">input_fname</span><span class="p">,</span>
+            <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
+            <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
+            <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;\s+&#39;</span><span class="p">,</span>
+            <span class="n">names</span><span class="o">=</span><span class="n">all_channels</span><span class="p">,</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">usecols</span><span class="o">=</span><span class="n">use_channels</span><span class="p">,</span>
+            <span class="n">skiprows</span><span class="o">=</span><span class="n">header_size</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;Activity&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                <span class="s1">&#39;Light&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="s1">&#39;Pressure&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="s1">&#39;Sound&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="s1">&#39;Temp.&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                <span class="s1">&#39;Marker&#39;</span><span class="p">:</span> <span class="nb">str</span>
+                <span class="p">}</span>
+        <span class="p">)</span>
+
+        <span class="n">data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span>
+            <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+            <span class="n">periods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">freq</span><span class="o">=</span><span class="n">freq</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -184,13 +257,14 @@
             <span class="n">period</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">period</span><span class="p">)</span>
             <span class="n">stop_time</span> <span class="o">=</span> <span class="n">start_time</span><span class="o">+</span><span class="n">period</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">stop_time</span> <span class="o">=</span> <span class="n">index_data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">stop_time</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">period</span> <span class="o">=</span> <span class="n">stop_time</span> <span class="o">-</span> <span class="n">start_time</span>
 
-        <span class="n">index_data</span> <span class="o">=</span> <span class="n">index_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_time</span><span class="p">:</span><span class="n">stop_time</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_time</span><span class="p">:</span><span class="n">stop_time</span><span class="p">]</span>
 
         <span class="c1"># call __init__ function of the base class</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">fpath</span><span class="o">=</span><span class="n">input_fname</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
             <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;AWD&#39;</span><span class="p">,</span>
@@ -198,16 +272,26 @@
             <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
             <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
             <span class="n">frequency</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">freq</span><span class="p">),</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">index_data</span><span class="p">,</span>
-            <span class="n">light</span><span class="o">=</span><span class="kc">None</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Activity&#39;</span><span class="p">],</span>
+            <span class="n">light</span><span class="o">=</span><span class="n">LightRecording</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;Light&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;whitelight&#39;</span><span class="p">),</span>
+                <span class="n">frequency</span><span class="o">=</span><span class="n">freq</span>
+            <span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;Light&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Actiwatch Model as inferred from the header info.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">device_code</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__device_type</span><span class="p">]</span>
+
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__extract_awd_name</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_awd_name</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__extract_awd_frequency</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_awd_frequency</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
         <span class="n">freq</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">freq</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">frequency_code</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Could not find acquisition frequency in header info.&quot;</span><span class="p">)</span>
@@ -216,22 +300,61 @@
             <span class="k">return</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">frequency_code</span><span class="p">[</span><span class="n">freq</span><span class="p">]</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__extract_awd_uuid</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_awd_uuid</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">header</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__extract_awd_start_time</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_awd_start_time</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">header</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_awd_model</span><span class="p">(</span><span class="n">uuid</span><span class="p">):</span>
+        <span class="c1"># extract model from UUID:</span>
+        <span class="n">wrn_msg</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">&#39;Only the first data column will be used, assuming it corresponds &#39;</span>
+            <span class="s1">&#39;to activity counts.&#39;</span>
+        <span class="p">)</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;^([A-Za-z])[0-9a-fA-F]+&#39;</span><span class="p">,</span> <span class="n">string</span><span class="o">=</span><span class="n">uuid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>  <span class="c1"># check if UUID matches the expected pattern</span>
+            <span class="n">dcode</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">dcode</span> <span class="ow">in</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">device_code</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">dcode</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s1">&#39;The model specified in the UUID (</span><span class="si">{}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dcode</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="s1">&#39; is not supported at the moment.</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="o">+</span> <span class="s1">&#39;List of supported Actiwatch models:</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="s1">&#39;- </span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">dev</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">RawAWD</span><span class="o">.</span><span class="n">device_code</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="o">+</span> <span class="n">wrn_msg</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="s1">&#39;U&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s1">&#39;Cannot detect from the header info (UUID) &#39;</span>
+                <span class="o">+</span> <span class="s1">&#39;which Actiwatch model was used to acquire the data.&#39;</span>
+                <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="o">+</span> <span class="n">wrn_msg</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="s1">&#39;X&#39;</span>
 
-<div class="viewcode-block" id="read_raw_awd"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_awd.html#pyActigraphy.io.read_raw_awd">[docs]</a><span class="k">def</span> <span class="nf">read_raw_awd</span><span class="p">(</span>
+
+<div class="viewcode-block" id="read_raw_awd">
+<a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_awd.html#pyActigraphy.io.read_raw_awd">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_raw_awd</span><span class="p">(</span>
     <span class="n">input_fname</span><span class="p">,</span>
     <span class="n">header_size</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
     <span class="n">frequency</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">period</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">period</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;python&#39;</span>
 <span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for raw AWD file.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for raw .awd file recorded by Actiwatch 4, 7, Plus (Philips Respironics).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -252,6 +375,9 @@
 <span class="sd">        Cf. #timeseries-offset-aliases in</span>
 <span class="sd">        &lt;https://pandas.pydata.org/pandas-docs/stable/timeseries.html&gt;.</span>
 <span class="sd">        Default is None (i.e all the data).</span>
+<span class="sd">    engine: str, optional</span>
+<span class="sd">        Parser engine to use.</span>
+<span class="sd">        Default is &#39;python&#39;.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -264,8 +390,10 @@
         <span class="n">header_size</span><span class="o">=</span><span class="n">header_size</span><span class="p">,</span>
         <span class="n">frequency</span><span class="o">=</span><span class="n">frequency</span><span class="p">,</span>
         <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
-        <span class="n">period</span><span class="o">=</span><span class="n">period</span>
+        <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
+        <span class="n">engine</span><span class="o">=</span><span class="n">engine</span>
     <span class="p">)</span></div>
+
 </pre></div>
 
     </div>
@@ -279,8 +407,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

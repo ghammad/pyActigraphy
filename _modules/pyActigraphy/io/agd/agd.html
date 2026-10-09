@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyActigraphy.io.agd.agd &#8212; pyActigraphy 1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css" />
-    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
-    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <title>pyActigraphy.io.agd.agd &#8212; pyActigraphy 1.2.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="../../../../_static/documentation_options.js?v=fd7cadf9"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -39,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -86,19 +83,31 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <h1>Source code for pyActigraphy.io.agd.agd</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sqlite3</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sqlite3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">BaseRaw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseRaw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyActigraphy.light</span><span class="w"> </span><span class="kn">import</span> <span class="n">LightRecording</span>
 
 
-<span class="k">class</span> <span class="nc">RawAGD</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RawAGD</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Raw object from .agd file (recorded by Actigraph)</span>
 
 <span class="sd">    Parameters</span>
@@ -115,7 +124,7 @@
 <span class="sd">        Default is None (i.e all the data).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_fname</span><span class="p">,</span>
         <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -148,6 +157,7 @@
             <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="s1">&#39;epochlength&#39;</span><span class="p">,</span> <span class="s1">&#39;settingValue&#39;</span><span class="p">]),</span>
             <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span>
         <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__model</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="s1">&#39;devicename&#39;</span><span class="p">,</span> <span class="s1">&#39;settingValue&#39;</span><span class="p">]</span>
 
         <span class="c1"># extract proximity (wear/no-wear) informations</span>
         <span class="k">try</span><span class="p">:</span>
@@ -227,6 +237,7 @@
 
         <span class="c1"># call __init__ function of the base class</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">fpath</span><span class="o">=</span><span class="n">input_fname</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
             <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;AGD&#39;</span><span class="p">,</span>
@@ -235,46 +246,67 @@
             <span class="n">period</span><span class="o">=</span><span class="n">period</span><span class="p">,</span>
             <span class="n">frequency</span><span class="o">=</span><span class="n">freq</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">],</span>
-            <span class="n">light</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;lux&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;lux&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">light</span><span class="o">=</span><span class="n">LightRecording</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;lux&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;whitelight&#39;</span><span class="p">),</span>
+                <span class="n">frequency</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span>
+            <span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;lux&#39;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="p">)</span>
 
         <span class="c1"># Close sqlite3 connection</span>
         <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">__extract_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__position</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__position</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">column</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_light_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">light</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">light</span><span class="o">.</span><span class="n">get_channel</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">white_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;White light levels (in lux.)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;whitelight&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Model of the device: devicename&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__model</span>
+
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__to_timestamps</span><span class="p">(</span><span class="n">ticks</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__to_timestamps</span><span class="p">(</span><span class="n">ticks</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
             <span class="p">(</span><span class="n">ticks</span><span class="o">/</span><span class="mi">10000000</span><span class="p">)</span> <span class="o">-</span> <span class="mi">62135596800</span><span class="p">,</span>
             <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span>
         <span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">inclineOff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inclineOff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hourly positional information: inclineOff &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_position</span><span class="p">(</span><span class="s1">&#39;inclineOff&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">inclineStanding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inclineStanding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hourly positional information: inclineStanding &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_position</span><span class="p">(</span><span class="s1">&#39;inclineStanding&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">inclineSitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inclineSitting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hourly positional information: inclineSitting &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_position</span><span class="p">(</span><span class="s1">&#39;inclineSitting&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">inclineLying</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inclineLying</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Hourly positional information: inclineLying &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_position</span><span class="p">(</span><span class="s1">&#39;inclineLying&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">inclinePosition</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inclinePosition</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pos_map</span><span class="o">=</span><span class="p">{</span>
             <span class="s1">&#39;inclineOff&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
@@ -283,7 +315,7 @@
             <span class="s1">&#39;inclineStanding&#39;</span><span class="p">:</span> <span class="mi">2</span>
         <span class="p">}</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for raw AWD file.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for raw AGD file.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -307,12 +339,14 @@
         <span class="k">return</span> <span class="n">pos</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">pos_map</span><span class="p">)</span> <span class="k">if</span> <span class="n">pos_map</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">pos</span>
 
 
-<div class="viewcode-block" id="read_raw_agd"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_agd.html#pyActigraphy.io.read_raw_agd">[docs]</a><span class="k">def</span> <span class="nf">read_raw_agd</span><span class="p">(</span>
+<div class="viewcode-block" id="read_raw_agd">
+<a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_agd.html#pyActigraphy.io.read_raw_agd">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_raw_agd</span><span class="p">(</span>
     <span class="n">input_fname</span><span class="p">,</span>
     <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">period</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for raw AWD file.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for raw .agd file recorded by wGT3X-BT (ActiGraph).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -338,6 +372,7 @@
         <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
         <span class="n">period</span><span class="o">=</span><span class="n">period</span>
     <span class="p">)</span></div>
+
 </pre></div>
 
     </div>
@@ -351,8 +386,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

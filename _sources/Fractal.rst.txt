@@ -19,3 +19,4 @@ Fractal class
         mfdfa_parallel
         generalized_hurst_exponent
         crossover_search
+	multifractal_spectrum

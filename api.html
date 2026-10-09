@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Python API Reference &#8212; pyActigraphy 1.2.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <title>Python API Reference &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="_static/documentation_options.js?v=590429e0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
@@ -39,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -90,11 +88,43 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Python API Reference</a><ul>
+<li><a class="reference internal" href="#reading-actigraphy-data">Reading actigraphy data</a><ul>
+<li><a class="reference internal" href="#raw-file-reader">Raw file reader</a></li>
+<li><a class="reference internal" href="#batch-reader">Batch reader</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#spurious-activity-masking">Spurious activity masking</a></li>
+<li><a class="reference internal" href="#log-files">Log files</a></li>
+<li><a class="reference internal" href="#rest-activity-rhythms">Rest-Activity Rhythms</a></li>
+<li><a class="reference internal" href="#rest-and-activity-reports">Rest and Activity reports</a></li>
+<li><a class="reference internal" href="#rest-activity-scoring-and-sleep-diary">Rest-activity scoring and sleep diary</a></li>
+<li><a class="reference internal" href="#light-specific-modules">Light-specific modules</a></li>
+<li><a class="reference internal" href="#analysis">Analysis</a></li>
+</ul>
+</li>
+</ul>
+
+<div id="sourcelink">
+  <a href="_sources/api.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+<form action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <section id="python-api-reference">
-<h1>Python API Reference<a class="headerlink" href="#python-api-reference" title="Permalink to this heading">¶</a></h1>
-<div class="contents local topic" id="table-of-contents">
+<h1>Python API Reference<a class="headerlink" href="#python-api-reference" title="Link to this heading">¶</a></h1>
+<nav class="contents local" id="table-of-contents">
 <p class="topic-title">Table of Contents</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#reading-actigraphy-data" id="id1">Reading actigraphy data</a></p>
@@ -111,17 +141,17 @@
 <li><p><a class="reference internal" href="#light-specific-modules" id="id9">Light-specific modules</a></p></li>
 <li><p><a class="reference internal" href="#analysis" id="id10">Analysis</a></p></li>
 </ul>
-</div>
+</nav>
 <section id="reading-actigraphy-data">
-<h2><a class="toc-backref" href="#id1">Reading actigraphy data</a><a class="headerlink" href="#reading-actigraphy-data" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Reading actigraphy data</a><a class="headerlink" href="#reading-actigraphy-data" title="Link to this heading">¶</a></h2>
 <section id="raw-file-reader">
-<h3><a class="toc-backref" href="#id2">Raw file reader</a><a class="headerlink" href="#raw-file-reader" title="Permalink to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id2" role="doc-backlink">Raw file reader</a><a class="headerlink" href="#raw-file-reader" title="Link to this heading">¶</a></h3>
 <p>Uniform API to read multiple actigraphy data formats.
 Currently, the supported formats are:</p>
 <ul class="simple">
-<li><p>wGT3X-BT, Actigraph (.agd file format only);</p></li>
+<li><p>wGT3X-BT, ActiGraph (.agd file format only);</p></li>
 <li><p>Actiwatch 4, 7, L(-Plus) and MotionWatch 8, CamNtech (.awd and .mtn);</p></li>
-<li><p>ActTrust 2, Condor Instruments (.txt);</p></li>
+<li><p>ActTrust 2, ActLumus, Condor Instruments (.txt);</p></li>
 <li><p>Daqtometer, Daqtix (.csv);</p></li>
 <li><p>Actiwatch 2 and Actiwatch Spectrum Plus, Philips Respironics (.csv)</p></li>
 <li><p>Tempatilumi (CE Brasil)</p></li>
@@ -130,19 +160,15 @@ Currently, the supported formats are:</p>
 </ul>
 <p>Associated functions:</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.io.read_raw_agd.html#pyActigraphy.io.read_raw_agd" title="pyActigraphy.io.read_raw_agd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_raw_agd</span></code></a>(input_fname[, start_time, period])</p></td>
-<td><p>Reader function for raw AWD file.</p></td>
+<td><p>Reader function for raw .agd file recorded by wGT3X-BT (ActiGraph).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.io.read_raw_atr.html#pyActigraphy.io.read_raw_atr" title="pyActigraphy.io.read_raw_atr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_raw_atr</span></code></a>(input_fname[, mode, ...])</p></td>
 <td><p>Reader function for .txt file recorded by ActTrust (Condor Instruments)</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.io.read_raw_awd.html#pyActigraphy.io.read_raw_awd" title="pyActigraphy.io.read_raw_awd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_raw_awd</span></code></a>(input_fname[, header_size, ...])</p></td>
-<td><p>Reader function for raw AWD file.</p></td>
+<td><p>Reader function for raw .awd file recorded by Actiwatch 4, 7, Plus (Philips Respironics).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.io.read_raw_bba.html#pyActigraphy.io.read_raw_bba" title="pyActigraphy.io.read_raw_bba"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_raw_bba</span></code></a>(input_fname[, name, uuid, ...])</p></td>
 <td><p>Reader function for files produced by the biobankAccelerometerAnalysis package.</p></td>
@@ -154,10 +180,10 @@ Currently, the supported formats are:</p>
 <td><p>Reader function for MESA files</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.io.read_raw_mtn.html#pyActigraphy.io.read_raw_mtn" title="pyActigraphy.io.read_raw_mtn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_raw_mtn</span></code></a>(input_fname[, start_time, ...])</p></td>
-<td><p>Reader function for raw MTN file.</p></td>
+<td><p>Reader function for raw .mtn file recorded by MotionWatch 8 (CamNtech).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.io.read_raw_rpx.html#pyActigraphy.io.read_raw_rpx" title="pyActigraphy.io.read_raw_rpx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_raw_rpx</span></code></a>(input_fname[, language, ...])</p></td>
-<td><p>Reader function for raw Respironics file.</p></td>
+<td><p>Reader function for .csv file recorded by Actiwatch 2 and Actiwatch Spectrum Plus (Philips Respironics).</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.io.read_raw_tal.html#pyActigraphy.io.read_raw_tal" title="pyActigraphy.io.read_raw_tal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_raw_tal</span></code></a>(input_fname[, name, sep, ...])</p></td>
 <td><p>Raw object from .txt file recorded by Tempatilumi (CE Brasil)</p></td>
@@ -168,13 +194,9 @@ Currently, the supported formats are:</p>
 pyActigraphy: <a class="reference internal" href="BaseRaw.html#pyActigraphy.io.BaseRaw" title="pyActigraphy.io.BaseRaw"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyActigraphy.io.BaseRaw</span></code></a></p>
 </section>
 <section id="batch-reader">
-<h3><a class="toc-backref" href="#id3">Batch reader</a><a class="headerlink" href="#batch-reader" title="Permalink to this heading">¶</a></h3>
+<h3><a class="toc-backref" href="#id3" role="doc-backlink">Batch reader</a><a class="headerlink" href="#batch-reader" title="Link to this heading">¶</a></h3>
 <p>Reading actigraphy files by batch:</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.io.read_raw.html#pyActigraphy.io.read_raw" title="pyActigraphy.io.read_raw"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_raw</span></code></a>(input_path, reader_type[, n_jobs, ...])</p></td>
 <td><p>Reader function for multiple raw files.</p></td>
@@ -185,32 +207,32 @@ pyActigraphy: <a class="reference internal" href="BaseRaw.html#pyActigraphy.io.B
 </section>
 </section>
 <section id="spurious-activity-masking">
-<h2><a class="toc-backref" href="#id4">Spurious activity masking</a><a class="headerlink" href="#spurious-activity-masking" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Spurious activity masking</a><a class="headerlink" href="#spurious-activity-masking" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Masking: <a class="reference internal" href="FiltersMixin.html#pyActigraphy.filters.FiltersMixin" title="pyActigraphy.filters.FiltersMixin"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pyActigraphy.filters.FiltersMixin</span></code></a></p></li>
 </ul>
 </section>
 <section id="log-files">
-<h2><a class="toc-backref" href="#id5">Log files</a><a class="headerlink" href="#log-files" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Log files</a><a class="headerlink" href="#log-files" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Base log: <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyActigraphy.log.BaseLog</span></code></p></li>
 <li><p>Start/Stop time log: <a class="reference internal" href="SSTLog.html#pyActigraphy.log.SSTLog" title="pyActigraphy.log.SSTLog"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pyActigraphy.log.SSTLog</span></code></a></p></li>
 </ul>
 </section>
 <section id="rest-activity-rhythms">
-<h2><a class="toc-backref" href="#id6">Rest-Activity Rhythms</a><a class="headerlink" href="#rest-activity-rhythms" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Rest-Activity Rhythms</a><a class="headerlink" href="#rest-activity-rhythms" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Non-parametric and transition probability methods: <a class="reference internal" href="MetricsMixin.html#pyActigraphy.metrics.MetricsMixin" title="pyActigraphy.metrics.MetricsMixin"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pyActigraphy.metrics.MetricsMixin</span></code></a></p></li>
 </ul>
 </section>
 <section id="rest-and-activity-reports">
-<h2><a class="toc-backref" href="#id7">Rest and Activity reports</a><a class="headerlink" href="#rest-and-activity-reports" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Rest and Activity reports</a><a class="headerlink" href="#rest-and-activity-reports" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Activity report: <a class="reference internal" href="ActivityReport.html#pyActigraphy.reports.ActivityReport" title="pyActigraphy.reports.ActivityReport"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pyActigraphy.reports.ActivityReport</span></code></a></p></li>
 </ul>
 </section>
 <section id="rest-activity-scoring-and-sleep-diary">
-<h2><a class="toc-backref" href="#id8">Rest-activity scoring and sleep diary</a><a class="headerlink" href="#rest-activity-scoring-and-sleep-diary" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">Rest-activity scoring and sleep diary</a><a class="headerlink" href="#rest-activity-scoring-and-sleep-diary" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Rest-activity scoring: <a class="reference internal" href="ScoringMixin.html#pyActigraphy.sleep.ScoringMixin" title="pyActigraphy.sleep.ScoringMixin"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pyActigraphy.sleep.ScoringMixin</span></code></a></p></li>
 <li><p>Sleep diary: <a class="reference internal" href="SleepDiary.html#pyActigraphy.sleep.SleepDiary" title="pyActigraphy.sleep.SleepDiary"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pyActigraphy.sleep.SleepDiary</span></code></a></p></li>
@@ -218,7 +240,7 @@ pyActigraphy: <a class="reference internal" href="BaseRaw.html#pyActigraphy.io.B
 </ul>
 </section>
 <section id="light-specific-modules">
-<h2><a class="toc-backref" href="#id9">Light-specific modules</a><a class="headerlink" href="#light-specific-modules" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id9" role="doc-backlink">Light-specific modules</a><a class="headerlink" href="#light-specific-modules" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Light recording class: <a class="reference internal" href="LightRecording.html#pyActigraphy.light.LightRecording" title="pyActigraphy.light.LightRecording"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pyActigraphy.light.LightRecording</span></code></a></p></li>
 <li><p>Light exposure metrics: <a class="reference internal" href="LightMetricsMixin.html#pyActigraphy.light.LightMetricsMixin" title="pyActigraphy.light.LightMetricsMixin"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pyActigraphy.light.LightMetricsMixin</span></code></a></p></li>
@@ -226,7 +248,7 @@ pyActigraphy: <a class="reference internal" href="BaseRaw.html#pyActigraphy.io.B
 </ul>
 </section>
 <section id="analysis">
-<h2><a class="toc-backref" href="#id10">Analysis</a><a class="headerlink" href="#analysis" title="Permalink to this heading">¶</a></h2>
+<h2><a class="toc-backref" href="#id10" role="doc-backlink">Analysis</a><a class="headerlink" href="#analysis" title="Link to this heading">¶</a></h2>
 <ul class="simple">
 <li><p>Cosinor analysis: <a class="reference internal" href="Cosinor.html#pyActigraphy.analysis.Cosinor" title="pyActigraphy.analysis.Cosinor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pyActigraphy.analysis.Cosinor</span></code></a></p></li>
 <li><p>Functional linear modeling: <a class="reference internal" href="FLM.html#pyActigraphy.analysis.FLM" title="pyActigraphy.analysis.FLM"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pyActigraphy.analysis.FLM</span></code></a></p></li>
@@ -249,8 +271,8 @@ pyActigraphy: <a class="reference internal" href="BaseRaw.html#pyActigraphy.io.B
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

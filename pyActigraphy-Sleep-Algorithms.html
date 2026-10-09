@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Automatic detection of rest/activity periods with pyActigraphy &#8212; pyActigraphy 1.2.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <title>Automatic detection of rest/activity periods with pyActigraphy &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=9afac83c" />
+    <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+    <script src="_static/documentation_options.js?v=590429e0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -41,7 +40,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -92,267 +91,46 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Automatic detection of rest/activity periods with pyActigraphy</a><ul>
+<li><a class="reference internal" href="#Epoch-by-epoch-rest/activity-scoring-algorithms">Epoch-by-epoch rest/activity scoring algorithms</a><ul>
+<li><a class="reference internal" href="#My-opinion-regarding-these-algorithms">My opinion regarding these algorithms</a></li>
+<li><a class="reference internal" href="#Cole-Kripke">Cole-Kripke</a></li>
+<li><a class="reference internal" href="#Sadeh's-and-Scripps'-algorithms">Sadeh’s and Scripps’ algorithms</a></li>
+<li><a class="reference internal" href="#Oakley's-algorithm">Oakley’s algorithm</a><ul>
+<li><a class="reference internal" href="#Medium-threshold">Medium threshold</a></li>
+<li><a class="reference internal" href="#Automatic-threshold">Automatic threshold</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#Consolidated-activity/rest-period-detection">Consolidated activity/rest period detection</a><ul>
+<li><a class="reference internal" href="#Crespo's-algorithm">Crespo’s algorithm</a></li>
+<li><a class="reference internal" href="#Roenneberg's-algorithm">Roenneberg’s algorithm</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<div id="sourcelink">
+  <a href="_sources/pyActigraphy-Sleep-Algorithms.ipynb.txt"
+     rel="nofollow">Source</a>
+</div>
+<form action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
-  
-<style>
-/* CSS for nbsphinx extension */
-
-/* remove conflicting styling from Sphinx themes */
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt *,
-div.nbinput.container div.input_area pre,
-div.nboutput.container div.output_area pre,
-div.nbinput.container div.input_area .highlight,
-div.nboutput.container div.output_area .highlight {
-    border: none;
-    padding: 0;
-    margin: 0;
-    box-shadow: none;
-}
-
-div.nbinput.container > div[class*=highlight],
-div.nboutput.container > div[class*=highlight] {
-    margin: 0;
-}
-
-div.nbinput.container div.prompt *,
-div.nboutput.container div.prompt * {
-    background: none;
-}
-
-div.nboutput.container div.output_area .highlight,
-div.nboutput.container div.output_area pre {
-    background: unset;
-}
-
-div.nboutput.container div.output_area div.highlight {
-    color: unset;  /* override Pygments text color */
-}
-
-/* avoid gaps between output lines */
-div.nboutput.container div[class*=highlight] pre {
-    line-height: normal;
-}
-
-/* input/output containers */
-div.nbinput.container,
-div.nboutput.container {
-    display: -webkit-flex;
-    display: flex;
-    align-items: flex-start;
-    margin: 0;
-    width: 100%;
-}
-@media (max-width: 540px) {
-    div.nbinput.container,
-    div.nboutput.container {
-        flex-direction: column;
-    }
-}
-
-/* input container */
-div.nbinput.container {
-    padding-top: 5px;
-}
-
-/* last container */
-div.nblast.container {
-    padding-bottom: 5px;
-}
-
-/* input prompt */
-div.nbinput.container div.prompt pre {
-    color: #307FC1;
-}
-
-/* output prompt */
-div.nboutput.container div.prompt pre {
-    color: #BF5B3D;
-}
-
-/* all prompts */
-div.nbinput.container div.prompt,
-div.nboutput.container div.prompt {
-    width: 4.5ex;
-    padding-top: 5px;
-    position: relative;
-    user-select: none;
-}
-
-div.nbinput.container div.prompt > div,
-div.nboutput.container div.prompt > div {
-    position: absolute;
-    right: 0;
-    margin-right: 0.3ex;
-}
-
-@media (max-width: 540px) {
-    div.nbinput.container div.prompt,
-    div.nboutput.container div.prompt {
-        width: unset;
-        text-align: left;
-        padding: 0.4em;
-    }
-    div.nboutput.container div.prompt.empty {
-        padding: 0;
-    }
-
-    div.nbinput.container div.prompt > div,
-    div.nboutput.container div.prompt > div {
-        position: unset;
-    }
-}
-
-/* disable scrollbars and line breaks on prompts */
-div.nbinput.container div.prompt pre,
-div.nboutput.container div.prompt pre {
-    overflow: hidden;
-    white-space: pre;
-}
-
-/* input/output area */
-div.nbinput.container div.input_area,
-div.nboutput.container div.output_area {
-    -webkit-flex: 1;
-    flex: 1;
-    overflow: auto;
-}
-@media (max-width: 540px) {
-    div.nbinput.container div.input_area,
-    div.nboutput.container div.output_area {
-        width: 100%;
-    }
-}
-
-/* input area */
-div.nbinput.container div.input_area {
-    border: 1px solid #e0e0e0;
-    border-radius: 2px;
-    /*background: #f5f5f5;*/
-}
-
-/* override MathJax center alignment in output cells */
-div.nboutput.container div[class*=MathJax] {
-    text-align: left !important;
-}
-
-/* override sphinx.ext.imgmath center alignment in output cells */
-div.nboutput.container div.math p {
-    text-align: left;
-}
-
-/* standard error */
-div.nboutput.container div.output_area.stderr {
-    background: #fdd;
-}
-
-/* ANSI colors */
-.ansi-black-fg { color: #3E424D; }
-.ansi-black-bg { background-color: #3E424D; }
-.ansi-black-intense-fg { color: #282C36; }
-.ansi-black-intense-bg { background-color: #282C36; }
-.ansi-red-fg { color: #E75C58; }
-.ansi-red-bg { background-color: #E75C58; }
-.ansi-red-intense-fg { color: #B22B31; }
-.ansi-red-intense-bg { background-color: #B22B31; }
-.ansi-green-fg { color: #00A250; }
-.ansi-green-bg { background-color: #00A250; }
-.ansi-green-intense-fg { color: #007427; }
-.ansi-green-intense-bg { background-color: #007427; }
-.ansi-yellow-fg { color: #DDB62B; }
-.ansi-yellow-bg { background-color: #DDB62B; }
-.ansi-yellow-intense-fg { color: #B27D12; }
-.ansi-yellow-intense-bg { background-color: #B27D12; }
-.ansi-blue-fg { color: #208FFB; }
-.ansi-blue-bg { background-color: #208FFB; }
-.ansi-blue-intense-fg { color: #0065CA; }
-.ansi-blue-intense-bg { background-color: #0065CA; }
-.ansi-magenta-fg { color: #D160C4; }
-.ansi-magenta-bg { background-color: #D160C4; }
-.ansi-magenta-intense-fg { color: #A03196; }
-.ansi-magenta-intense-bg { background-color: #A03196; }
-.ansi-cyan-fg { color: #60C6C8; }
-.ansi-cyan-bg { background-color: #60C6C8; }
-.ansi-cyan-intense-fg { color: #258F8F; }
-.ansi-cyan-intense-bg { background-color: #258F8F; }
-.ansi-white-fg { color: #C5C1B4; }
-.ansi-white-bg { background-color: #C5C1B4; }
-.ansi-white-intense-fg { color: #A1A6B2; }
-.ansi-white-intense-bg { background-color: #A1A6B2; }
-
-.ansi-default-inverse-fg { color: #FFFFFF; }
-.ansi-default-inverse-bg { background-color: #000000; }
-
-.ansi-bold { font-weight: bold; }
-.ansi-underline { text-decoration: underline; }
-
-
-div.nbinput.container div.input_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight] > pre,
-div.nboutput.container div.output_area div[class*=highlight].math,
-div.nboutput.container div.output_area.rendered_html,
-div.nboutput.container div.output_area > div.output_javascript,
-div.nboutput.container div.output_area:not(.rendered_html) > img{
-    padding: 5px;
-    margin: 0;
-}
-
-/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
-div.nbinput.container div.input_area > div[class^='highlight'],
-div.nboutput.container div.output_area > div[class^='highlight']{
-    overflow-y: hidden;
-}
-
-/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt .copybtn {
-    display: none;
-}
-
-/* Some additional styling taken form the Jupyter notebook CSS */
-.jp-RenderedHTMLCommon table,
-div.rendered_html table {
-  border: none;
-  border-collapse: collapse;
-  border-spacing: 0;
-  color: black;
-  font-size: 12px;
-  table-layout: fixed;
-}
-.jp-RenderedHTMLCommon thead,
-div.rendered_html thead {
-  border-bottom: 1px solid black;
-  vertical-align: bottom;
-}
-.jp-RenderedHTMLCommon tr,
-.jp-RenderedHTMLCommon th,
-.jp-RenderedHTMLCommon td,
-div.rendered_html tr,
-div.rendered_html th,
-div.rendered_html td {
-  text-align: right;
-  vertical-align: middle;
-  padding: 0.5em 0.5em;
-  line-height: normal;
-  white-space: normal;
-  max-width: none;
-  border: none;
-}
-.jp-RenderedHTMLCommon th,
-div.rendered_html th {
-  font-weight: bold;
-}
-.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
-div.rendered_html tbody tr:nth-child(odd) {
-  background: #f5f5f5;
-}
-.jp-RenderedHTMLCommon tbody tr:hover,
-div.rendered_html tbody tr:hover {
-  background: rgba(66, 165, 245, 0.2);
-}
-</style>
-<section id="Automatic-detection-of-rest/activity-periods-with-pyActigraphy">
-<h1>Automatic detection of rest/activity periods with pyActigraphy<a class="headerlink" href="#Automatic-detection-of-rest/activity-periods-with-pyActigraphy" title="Permalink to this heading">¶</a></h1>
+  <section id="Automatic-detection-of-rest/activity-periods-with-pyActigraphy">
+<h1>Automatic detection of rest/activity periods with pyActigraphy<a class="headerlink" href="#Automatic-detection-of-rest/activity-periods-with-pyActigraphy" title="Link to this heading">¶</a></h1>
 <p>The <strong>pyActigraphy</strong> package implements several rest/activity detection algorithms.</p>
 <p>Broadly speaking, they can be divided in two categories:</p>
 <ul class="simple">
@@ -372,7 +150,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyActigraphy</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyActigraphy</span>
 </pre></div>
 </div>
 </div>
@@ -380,7 +158,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">plotly.graph_objs</span> <span class="k">as</span> <span class="nn">go</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
 </pre></div>
 </div>
 </div>
@@ -388,7 +166,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="n">fpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">pyActigraphy</span><span class="o">.</span><span class="vm">__file__</span><span class="p">),</span><span class="s1">&#39;tests/data/&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -404,14 +182,14 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <section id="Epoch-by-epoch-rest/activity-scoring-algorithms">
-<h2>Epoch-by-epoch rest/activity scoring algorithms<a class="headerlink" href="#Epoch-by-epoch-rest/activity-scoring-algorithms" title="Permalink to this heading">¶</a></h2>
+<h2>Epoch-by-epoch rest/activity scoring algorithms<a class="headerlink" href="#Epoch-by-epoch-rest/activity-scoring-algorithms" title="Link to this heading">¶</a></h2>
 <p>All based on the same idea;</p>
 <ul class="simple">
 <li><p>use a rolling window over the data and convolute them with a “gaussian”-like kernel.</p></li>
 <li><p>if the resulting data is above a predefined threshold, classify as activity. Rest otherwise…</p></li>
 </ul>
 <section id="My-opinion-regarding-these-algorithms">
-<h3>My opinion regarding these algorithms<a class="headerlink" href="#My-opinion-regarding-these-algorithms" title="Permalink to this heading">¶</a></h3>
+<h3>My opinion regarding these algorithms<a class="headerlink" href="#My-opinion-regarding-these-algorithms" title="Link to this heading">¶</a></h3>
 <p>The weights of these “gaussian”-like kernels as well as the applied thresholds are very much device and population dependant. Using these algorithms would thus require to adapt these parameters to the population under study and the actigraph device… Possible but seldom done.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
@@ -423,7 +201,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </section>
 <section id="Cole-Kripke">
-<h3>Cole-Kripke<a class="headerlink" href="#Cole-Kripke" title="Permalink to this heading">¶</a></h3>
+<h3>Cole-Kripke<a class="headerlink" href="#Cole-Kripke" title="Link to this heading">¶</a></h3>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -615,8 +393,8 @@ if (outputEl) {{
                         })                };                });            </script>        </div></div>
 </div>
 </section>
-<section id="Sadeh’s-and-Scripps’-algorithms">
-<h3>Sadeh’s and Scripps’ algorithms<a class="headerlink" href="#Sadeh’s-and-Scripps’-algorithms" title="Permalink to this heading">¶</a></h3>
+<section id="Sadeh's-and-Scripps'-algorithms">
+<h3>Sadeh’s and Scripps’ algorithms<a class="headerlink" href="#Sadeh's-and-Scripps'-algorithms" title="Link to this heading">¶</a></h3>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
@@ -669,8 +447,8 @@ if (outputEl) {{
                         })                };                });            </script>        </div></div>
 </div>
 </section>
-<section id="Oakley’s-algorithm">
-<h3>Oakley’s algorithm<a class="headerlink" href="#Oakley’s-algorithm" title="Permalink to this heading">¶</a></h3>
+<section id="Oakley's-algorithm">
+<h3>Oakley’s algorithm<a class="headerlink" href="#Oakley's-algorithm" title="Link to this heading">¶</a></h3>
 <p>This is the sleep/wake scoring algorithm used by the Actiware software from Respironics. The various activity thresholds have thus been tailored for Actiwatch devices. Be careful when applying this algorithm on data acquired with other devices.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
@@ -796,7 +574,7 @@ Oakley(threshold=40) method of pyActigraphy.io.rpx.rpx.RawRPX instance
 </pre></div></div>
 </div>
 <section id="Medium-threshold">
-<h4>Medium threshold<a class="headerlink" href="#Medium-threshold" title="Permalink to this heading">¶</a></h4>
+<h4>Medium threshold<a class="headerlink" href="#Medium-threshold" title="Link to this heading">¶</a></h4>
 <p>A threshold of 40 corresponds to a <em>medium</em> wake threshold.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
@@ -808,7 +586,7 @@ Oakley(threshold=40) method of pyActigraphy.io.rpx.rpx.RawRPX instance
 </div>
 </section>
 <section id="Automatic-threshold">
-<h4>Automatic threshold<a class="headerlink" href="#Automatic-threshold" title="Permalink to this heading">¶</a></h4>
+<h4>Automatic threshold<a class="headerlink" href="#Automatic-threshold" title="Link to this heading">¶</a></h4>
 <p>It is also possible to compute a threshold value automatically, based on activity data.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
@@ -864,9 +642,9 @@ if (outputEl) {{
 </section>
 </section>
 <section id="Consolidated-activity/rest-period-detection">
-<h2>Consolidated activity/rest period detection<a class="headerlink" href="#Consolidated-activity/rest-period-detection" title="Permalink to this heading">¶</a></h2>
-<section id="Crespo’s-algorithm">
-<h3>Crespo’s algorithm<a class="headerlink" href="#Crespo’s-algorithm" title="Permalink to this heading">¶</a></h3>
+<h2>Consolidated activity/rest period detection<a class="headerlink" href="#Consolidated-activity/rest-period-detection" title="Link to this heading">¶</a></h2>
+<section id="Crespo's-algorithm">
+<h3>Crespo’s algorithm<a class="headerlink" href="#Crespo's-algorithm" title="Link to this heading">¶</a></h3>
 <p>This is a threshold-based algorithm that used morphological filters to “clean” short periods of activity (rest) surrounded by periods of rest (acitivity).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
@@ -1092,8 +870,8 @@ TimedeltaIndex([&#39;0 days 00:59:30&#39;, &#39;0 days 08:05:30&#39;, &#39;0 day
 </pre></div></div>
 </div>
 </section>
-<section id="Roenneberg’s-algorithm">
-<h3>Roenneberg’s algorithm<a class="headerlink" href="#Roenneberg’s-algorithm" title="Permalink to this heading">¶</a></h3>
+<section id="Roenneberg's-algorithm">
+<h3>Roenneberg’s algorithm<a class="headerlink" href="#Roenneberg's-algorithm" title="Link to this heading">¶</a></h3>
 <p>Also threshold-based but uses correlations with test series of various lengths to find the consolidated period that best matches best the data.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
@@ -1306,8 +1084,8 @@ TimedeltaIndex([&#39;0 days 00:18:30&#39;, &#39;0 days 09:44:00&#39;, &#39;0 day
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

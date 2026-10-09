@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyActigraphy.io.bba.bba &#8212; pyActigraphy 1.2 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css" />
-    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
-    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <title>pyActigraphy.io.bba.bba &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="../../../../_static/documentation_options.js?v=590429e0"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -39,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -86,20 +83,30 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <h1>Source code for pyActigraphy.io.bba.bba</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">re</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 
-<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">BaseRaw</span>
-<span class="kn">from</span> <span class="nn">accelerometer.utils</span> <span class="kn">import</span> <span class="n">date_parser</span>
-<span class="kn">from</span> <span class="nn">accelerometer.summarisation</span> <span class="kn">import</span> <span class="n">imputeMissing</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseRaw</span>
 
 
-<span class="k">class</span> <span class="nc">RawBBA</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RawBBA</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Raw object from files produced by the</span>
 <span class="sd">    [biobankanalysis](</span>
 <span class="sd">        https://biobankaccanalysis.readthedocs.io/en/latest/index.html</span>
@@ -147,7 +154,7 @@
 <span class="sd">        Default is None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_fname</span><span class="p">,</span>
         <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -168,10 +175,11 @@
         <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
             <span class="n">input_fname</span><span class="p">,</span>
             <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
-            <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span>
-            <span class="n">parse_dates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span>
-            <span class="n">date_parser</span><span class="o">=</span><span class="n">date_parser</span>
+            <span class="n">index_col</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span>
         <span class="p">)</span>
+
+        <span class="c1"># parse and set new index</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__parse_acc_dates</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="c1"># read meta-data file (if found):</span>
         <span class="k">if</span> <span class="n">use_metadata_json</span><span class="p">:</span>
@@ -230,7 +238,7 @@
 
         <span class="c1"># Impute missing data (if required)</span>
         <span class="k">if</span> <span class="n">impute_missing</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">imputeMissing</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__imputeMissing</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
         <span class="c1"># LIGHT</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__white_light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_baa_data</span><span class="p">(</span>
@@ -272,42 +280,42 @@
         <span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">white_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">white_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the white light illuminance in lux.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__white_light</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mvpa</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mvpa</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the moderate-vigorous physical activity binary index.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mvpa</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">sedentary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sedentary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the sedentary physical activity binary index.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sedentary</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sleep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the sleep binary index.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sleep</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">met</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">met</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Value of the MET index.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__met</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">isCalibratedOnOwnData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">isCalibratedOnOwnData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Boolean indicating if the data have been calibrated.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__qc_calibrated_on_own_data</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">isDSTCrossing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">isDSTCrossing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Boolean indicating if the data have been acquired during a DST.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__qc_daylight_savings_crossover</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__extract_baa_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_baa_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Data reader</span>
 
 <span class="sd">        Read requested data column.</span>
@@ -328,7 +336,7 @@
         <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">column</span><span class="p">]</span> <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="kc">None</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__read_baa_metadata_json</span><span class="p">(</span><span class="n">input_fname</span><span class="p">,</span> <span class="n">metadata_fname</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__read_baa_metadata_json</span><span class="p">(</span><span class="n">input_fname</span><span class="p">,</span> <span class="n">metadata_fname</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Meta-data reader</span>
 
 <span class="sd">        Read meta data summary json file produced when processing .CWA file</span>
@@ -361,11 +369,11 @@
             <span class="n">meta_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
 
         <span class="c1"># check filename consistency:</span>
-        <span class="c1"># - META-DATA: file-name = &#39;basename&#39;.cwa[.gz]</span>
+        <span class="c1"># - META-DATA: file-name = &#39;basename&#39;.(cwa|CWA|bin)[.gz]</span>
         <span class="c1"># - INPUT DATA: input_fname = &#39;basename&#39;-timeSeries.csv[.gz]</span>
 
         <span class="n">match_basename</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
-            <span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;^(\w*)-timeSeries.csv(\.gz)?&#39;</span><span class="p">,</span>
+            <span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;^(.+?)-timeSeries.csv(\.gz)?&#39;</span><span class="p">,</span>
             <span class="n">string</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">match_basename</span><span class="p">:</span>
@@ -376,9 +384,9 @@
                 <span class="o">+</span> <span class="s1">&#39; from input filename: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_fname</span><span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
-            <span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.(cwa|CWA)(\.gz)?&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_basename</span><span class="p">),</span>
-            <span class="n">string</span><span class="o">=</span><span class="n">meta_data</span><span class="p">[</span><span class="s1">&#39;file-name&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+            <span class="n">pattern</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.(cwa|CWA|bin)(\.gz)?&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">input_basename</span><span class="p">),</span>
+            <span class="n">string</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">meta_data</span><span class="p">[</span><span class="s1">&#39;file-name&#39;</span><span class="p">])</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s1">&#39;Attempting to read a metadata file referring to another &#39;</span>
@@ -393,7 +401,7 @@
         <span class="k">return</span> <span class="n">meta_data</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">__extract_baa_metadata</span><span class="p">(</span><span class="n">meta_data</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_baa_metadata</span><span class="p">(</span><span class="n">meta_data</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; Meta-data extractor</span>
 
 <span class="sd">        Extract meta data from summary json file.</span>
@@ -418,8 +426,104 @@
                 <span class="s1">&#39;Information (</span><span class="si">{}</span><span class="s1">) not found in meta-data file.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
             <span class="p">)</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__parse_acc_dates</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Date parser</span>
 
-<div class="viewcode-block" id="read_raw_bba"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_bba.html#pyActigraphy.io.read_raw_bba">[docs]</a><span class="k">def</span> <span class="nf">read_raw_bba</span><span class="p">(</span>
+<span class="sd">        Parse datetime format used by the biobankaccelerometer output files:</span>
+<span class="sd">        `YYYY-MM-DD HH:mm:ss.SSS±HHmm [TimeZone]`. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : pd.DataFrame</span>
+<span class="sd">            Dataframe with the datatimes to transform as index.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        index: array of datetimes</span>
+<span class="sd">            Parsed and time-zone aware datetimes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Regex</span>
+        <span class="n">dt_regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(?P&lt;dt&gt;.+)\W\[(?P&lt;tz&gt;(?&lt;=\[).+?(?=\]))\]&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Extract datetime and timezone</span>
+        <span class="n">dts</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">dt_regex</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Extracted TZ</span>
+        <span class="n">tz</span> <span class="o">=</span> <span class="n">dts</span><span class="p">[</span><span class="s1">&#39;tz&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Check if all extracted timezones are identical</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">x</span><span class="o">==</span><span class="n">tz</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dts</span><span class="p">[</span><span class="s1">&#39;tz&#39;</span><span class="p">]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Extracted timezones are not identical. Not supported.&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">dts</span><span class="p">[</span><span class="s1">&#39;dt&#39;</span><span class="p">],</span><span class="n">utc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">tz_convert</span><span class="p">(</span><span class="n">tz</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__imputeMissing</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot; Impute missing/nonwear segments</span>
+
+<span class="sd">        Copyright © 2025, University of Oxford</span>
+<span class="sd">        Adapted from [accelerometer 7.5.0](https://pypi.org/project/accelerometer/) (summarisation.py)</span>
+<span class="sd">        in order to remove the dependency of pyActigraphy on the accelerometer for the use of a single method.</span>
+<span class="sd">        This decision has been made in concertation with A. Doherty (email exchange: 17/12/2024). </span>
+<span class="sd">        Licence terms: https://github.com/OxWearables/biobankAccelerometerAnalysis/blob/95e1d790f745bbb5b44112166b522e58a47c485d/LICENSE.md</span>
+<span class="sd">        WARNING: the `accelerometer` package is distributed royalty-free for academic use only.</span>
+<span class="sd">        For commercial use, please contact the University of Oxford.</span>
+
+
+<span class="sd">        Impute non-wear data segments using the average of similar time-of-day values</span>
+<span class="sd">        with one minute granularity on different days of the measurement. This</span>
+<span class="sd">        imputation accounts for potential wear time diurnal bias where, for example,</span>
+<span class="sd">        if the device was systematically less worn during sleep in an individual,</span>
+<span class="sd">        the crude average vector magnitude during wear time would be a biased</span>
+<span class="sd">        overestimate of the true average. See</span>
+<span class="sd">        https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0169649#sec013</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data: pd.DataFrame</span>
+<span class="sd">            Pandas dataframe of epoch data</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        data: pd.DataFrame</span>
+<span class="sd">            Updated DataFrame with nan values replaced with time-of-day imputation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">fillna</span><span class="p">(</span><span class="n">subframe</span><span class="p">):</span>
+            <span class="c1"># Transform will first pass the subframe column-by-column as a Series.</span>
+            <span class="c1"># After passing all columns, it will pass the entire subframe again as a DataFrame.</span>
+            <span class="c1"># Processing the entire subframe is optional (return value can be omitted). See &#39;Notes&#39; in transform doc.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subframe</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">subframe</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+                <span class="n">nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                <span class="n">nanlen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">nan</span><span class="p">])</span>
+                <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">nanlen</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>  <span class="c1"># check x contains a NaN and is not all NaN</span>
+                    <span class="n">x</span><span class="p">[</span><span class="n">nan</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">x</span>  <span class="c1"># will be cast back to a Series automatically</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">subframe</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">data</span>
+            <span class="c1"># first attempt imputation using same day of week</span>
+            <span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">weekday</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">minute</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">fillna</span><span class="p">)</span>
+            <span class="c1"># then try within weekday/weekend</span>
+            <span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">weekday</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">minute</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">fillna</span><span class="p">)</span>
+            <span class="c1"># finally, use all other days</span>
+            <span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">minute</span><span class="p">])</span>
+            <span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">fillna</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+
+<div class="viewcode-block" id="read_raw_bba">
+<a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_bba.html#pyActigraphy.io.read_raw_bba">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_raw_bba</span><span class="p">(</span>
     <span class="n">input_fname</span><span class="p">,</span>
     <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">uuid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -433,6 +537,10 @@
 <span class="p">):</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reader function for files produced by the biobankAccelerometerAnalysis</span>
 <span class="sd">    package.</span>
+
+<span class="sd">    Note that the required &#39;accelerometer&#39; package is not automatically</span>
+<span class="sd">    included as a dependency of pyActigraphy. You need to explicitly install</span>
+<span class="sd">    it with something like &#39;pip install accelerometer&#39; to use this function.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -493,6 +601,7 @@
         <span class="n">use_metadata_json</span><span class="o">=</span><span class="n">use_metadata_json</span><span class="p">,</span>
         <span class="n">metadata_fname</span><span class="o">=</span><span class="n">metadata_fname</span>
     <span class="p">)</span></div>
+
 </pre></div>
 
     </div>
@@ -506,8 +615,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

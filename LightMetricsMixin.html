@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Light metrics class &#8212; pyActigraphy 1.2.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <title>Light metrics class &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="_static/documentation_options.js?v=590429e0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
@@ -39,7 +39,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -90,20 +90,37 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">Light metrics class</a><ul>
+<li><a class="reference internal" href="#pyActigraphy.light.LightMetricsMixin"><code class="docutils literal notranslate"><span class="pre">LightMetricsMixin</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div id="sourcelink">
+  <a href="_sources/LightMetricsMixin.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+<form action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <section id="light-metrics-class">
-<h1>Light metrics class<a class="headerlink" href="#light-metrics-class" title="Permalink to this heading">¶</a></h1>
+<h1>Light metrics class<a class="headerlink" href="#light-metrics-class" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyActigraphy.light.LightMetricsMixin">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyActigraphy.light.</span></span><span class="sig-name descname"><span class="pre">LightMetricsMixin</span></span><a class="reference internal" href="_modules/pyActigraphy/light/light_metrics.html#LightMetricsMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.light.LightMetricsMixin" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyActigraphy.light.</span></span><span class="sig-name descname"><span class="pre">LightMetricsMixin</span></span><a class="reference internal" href="_modules/pyActigraphy/light/light_metrics.html#LightMetricsMixin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.light.LightMetricsMixin" title="Link to this definition">¶</a></dt>
 <dd><p>Mixin Class</p>
 <p class="rubric">Light profile</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.light.LightMetricsMixin.average_daily_profile.html#pyActigraphy.light.LightMetricsMixin.average_daily_profile" title="pyActigraphy.light.LightMetricsMixin.average_daily_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">average_daily_profile</span></code></a>(channel[, rsfreq, ...])</p></td>
 <td><p>Average daily light profile</p></td>
@@ -115,10 +132,6 @@
 </table>
 <p class="rubric">Light exposure characteristics</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.light.LightMetricsMixin.light_exposure_level.html#pyActigraphy.light.LightMetricsMixin.light_exposure_level" title="pyActigraphy.light.LightMetricsMixin.light_exposure_level"><code class="xref py py-obj docutils literal notranslate"><span class="pre">light_exposure_level</span></code></a>([threshold, ...])</p></td>
 <td><p>Light exposure level</p></td>
@@ -136,10 +149,6 @@
 </table>
 <p class="rubric">Summary statistics</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.light.LightMetricsMixin.summary_statistics_per_time_bin.html#pyActigraphy.light.LightMetricsMixin.summary_statistics_per_time_bin" title="pyActigraphy.light.LightMetricsMixin.summary_statistics_per_time_bin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">summary_statistics_per_time_bin</span></code></a>([bins, agg_func])</p></td>
 <td><p>Summary statistics.</p></td>
@@ -148,10 +157,6 @@
 </table>
 <p class="rubric">Light timing</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.light.LightMetricsMixin.MLiT.html#pyActigraphy.light.LightMetricsMixin.MLiT" title="pyActigraphy.light.LightMetricsMixin.MLiT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MLiT</span></code></a>(threshold)</p></td>
 <td><p>Mean light timing.</p></td>
@@ -169,10 +174,6 @@
 </table>
 <p class="rubric">Non-parametric methods</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.light.LightMetricsMixin.IS.html#pyActigraphy.light.LightMetricsMixin.IS" title="pyActigraphy.light.LightMetricsMixin.IS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IS</span></code></a>([binarize, threshold])</p></td>
 <td><p>Interdaily stability</p></td>
@@ -184,10 +185,6 @@
 </table>
 <p class="rubric">Filtering</p>
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/pyActigraphy.light.LightMetricsMixin.filter_butterworth.html#pyActigraphy.light.LightMetricsMixin.filter_butterworth" title="pyActigraphy.light.LightMetricsMixin.filter_butterworth"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter_butterworth</span></code></a>(fc_low, fc_high, N[, ...])</p></td>
 <td><p>Butterworth filtering</p></td>
@@ -210,8 +207,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

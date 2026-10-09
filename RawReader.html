@@ -1,20 +1,18 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>RawReader class &#8212; pyActigraphy 1.2.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <title>RawReader class &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="_static/documentation_options.js?v=590429e0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
 <meta charset='utf-8'>
@@ -39,7 +37,7 @@
         </button>
         <a class="navbar-brand" href="index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -90,39 +88,70 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary"><ul>
+<li><a class="reference internal" href="#">RawReader class</a><ul>
+<li><a class="reference internal" href="#pyActigraphy.io.RawReader"><code class="docutils literal notranslate"><span class="pre">RawReader</span></code></a><ul>
+<li><a class="reference internal" href="#pyActigraphy.io.RawReader.activity_report"><code class="docutils literal notranslate"><span class="pre">RawReader.activity_report</span></code></a></li>
+<li><a class="reference internal" href="#pyActigraphy.io.RawReader.apply_sst"><code class="docutils literal notranslate"><span class="pre">RawReader.apply_sst()</span></code></a></li>
+<li><a class="reference internal" href="#pyActigraphy.io.RawReader.create_activity_report"><code class="docutils literal notranslate"><span class="pre">RawReader.create_activity_report()</span></code></a></li>
+<li><a class="reference internal" href="#pyActigraphy.io.RawReader.read_sst_log"><code class="docutils literal notranslate"><span class="pre">RawReader.read_sst_log()</span></code></a></li>
+<li><a class="reference internal" href="#pyActigraphy.io.RawReader.reader_type"><code class="docutils literal notranslate"><span class="pre">RawReader.reader_type</span></code></a></li>
+<li><a class="reference internal" href="#pyActigraphy.io.RawReader.readers"><code class="docutils literal notranslate"><span class="pre">RawReader.readers</span></code></a></li>
+<li><a class="reference internal" href="#pyActigraphy.io.RawReader.resampled_data"><code class="docutils literal notranslate"><span class="pre">RawReader.resampled_data()</span></code></a></li>
+<li><a class="reference internal" href="#pyActigraphy.io.RawReader.sst_log"><code class="docutils literal notranslate"><span class="pre">RawReader.sst_log</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+<div id="sourcelink">
+  <a href="_sources/RawReader.rst.txt"
+     rel="nofollow">Source</a>
+</div>
+<form action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <section id="rawreader-class">
-<h1>RawReader class<a class="headerlink" href="#rawreader-class" title="Permalink to this heading">¶</a></h1>
+<h1>RawReader class<a class="headerlink" href="#rawreader-class" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pyActigraphy.io.RawReader">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyActigraphy.io.</span></span><span class="sig-name descname"><span class="pre">RawReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reader_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/reader/reader.html#RawReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.RawReader" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyActigraphy.io.</span></span><span class="sig-name descname"><span class="pre">RawReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reader_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/reader/reader.html#RawReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.RawReader" title="Link to this definition">¶</a></dt>
 <dd><p>Reader for multiple Raw files</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>readers</strong> (<em>list</em>) – List of instances of RawXXX classes</p>
 </dd>
 </dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="pyActigraphy.io.RawReader.activity_report">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">activity_report</span></span><a class="headerlink" href="#pyActigraphy.io.RawReader.activity_report" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">activity_report</span></span><a class="headerlink" href="#pyActigraphy.io.RawReader.activity_report" title="Link to this definition">¶</a></dt>
 <dd><p>Activity report accessor</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyActigraphy.io.RawReader.apply_sst">
-<span class="sig-name descname"><span class="pre">apply_sst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/reader/reader.html#RawReader.apply_sst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.RawReader.apply_sst" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">apply_sst</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/reader/reader.html#RawReader.apply_sst"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.RawReader.apply_sst" title="Link to this definition">¶</a></dt>
 <dd><p>Set start time and duration in all readers</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyActigraphy.io.RawReader.create_activity_report">
-<span class="sig-name descname"><span class="pre">create_activity_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/reader/reader.html#RawReader.create_activity_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.RawReader.create_activity_report" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">create_activity_report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/reader/reader.html#RawReader.create_activity_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.RawReader.create_activity_report" title="Link to this definition">¶</a></dt>
 <dd><p>Activity report.</p>
 <p>Create an activity report with the fraction of time spent with an
 activity level comprised between the specified cut-points.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>*args</strong> – Variable length argument list passed to the individual
 <cite>create_activity_report</cite> function.</p></li>
@@ -135,10 +164,10 @@ activity level comprised between the specified cut-points.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyActigraphy.io.RawReader.read_sst_log">
-<span class="sig-name descname"><span class="pre">read_sst_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_fname</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/reader/reader.html#RawReader.read_sst_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.RawReader.read_sst_log" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">read_sst_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_fname</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/reader/reader.html#RawReader.read_sst_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.RawReader.read_sst_log" title="Link to this definition">¶</a></dt>
 <dd><p>Reader function for start/stop-time log files.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_fname</strong> (<em>str</em>) – Path to the start/stop-time log file.</p></li>
 <li><p><strong>*args</strong> – Variable length argument list passed to the subsequent reader
@@ -152,26 +181,26 @@ function.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyActigraphy.io.RawReader.reader_type">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reader_type</span></span><a class="headerlink" href="#pyActigraphy.io.RawReader.reader_type" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reader_type</span></span><a class="headerlink" href="#pyActigraphy.io.RawReader.reader_type" title="Link to this definition">¶</a></dt>
 <dd><p>The type of RawXXX readers.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyActigraphy.io.RawReader.readers">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">readers</span></span><a class="headerlink" href="#pyActigraphy.io.RawReader.readers" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">readers</span></span><a class="headerlink" href="#pyActigraphy.io.RawReader.readers" title="Link to this definition">¶</a></dt>
 <dd><p>The list of RawXXX readers.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyActigraphy.io.RawReader.resampled_data">
-<span class="sig-name descname"><span class="pre">resampled_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binarize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/reader/reader.html#RawReader.resampled_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.RawReader.resampled_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">resampled_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binarize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pyActigraphy/io/reader/reader.html#RawReader.resampled_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyActigraphy.io.RawReader.resampled_data" title="Link to this definition">¶</a></dt>
 <dd><p>Data resampled at the specified frequency.
 If mask_inactivity is True, inactive data (0 count) are masked.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pyActigraphy.io.RawReader.sst_log">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sst_log</span></span><a class="headerlink" href="#pyActigraphy.io.RawReader.sst_log" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sst_log</span></span><a class="headerlink" href="#pyActigraphy.io.RawReader.sst_log" title="Link to this definition">¶</a></dt>
 <dd><p><code class="xref py py-class docutils literal notranslate"><span class="pre">SSTLog</span></code> class instanciation.</p>
 </dd></dl>
 
@@ -191,8 +220,8 @@ If mask_inactivity is True, inactive data (0 count) are masked.</p>
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

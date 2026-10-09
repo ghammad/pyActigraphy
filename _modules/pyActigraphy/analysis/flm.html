@@ -1,29 +1,27 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="en" data-content_root="../../../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pyActigraphy.analysis.flm &#8212; pyActigraphy 1.0 documentation</title>
-    <link rel="stylesheet" href="../../../_static/bootstrap-sphinx.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/language_data.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script src="../../../_static/js/jquery-1.11.0.min.js"></script>
-    <script src="../../../_static/js/jquery-fix.js"></script>
-    <script src="../../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script src="../../../_static/bootstrap-sphinx.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pyActigraphy.analysis.flm &#8212; pyActigraphy 1.2.2 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="../../../_static/documentation_options.js?v=fd7cadf9"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<script type="text/javascript" src="../../../_static/js/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="../../../_static/js/jquery-fix.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../../_static/bootstrap-sphinx.js"></script>
 
   </head><body>
 
@@ -38,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.0</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -46,6 +44,7 @@
             
                 <li><a href="../../../tutorials.html">Tutorials</a></li>
                 <li><a href="../../../api.html">API</a></li>
+                <li><a href="../../../changelog.html">What's new</a></li>
             
             
               <li class="dropdown globaltoc-container">
@@ -84,28 +83,39 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <h1>Source code for pyActigraphy.analysis.flm</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="c1"># import pandas as pd</span>
-<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="k">import</span> <span class="n">gaussian_filter1d</span>
-<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.ndimage</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussian_filter1d</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">statsmodels.api</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sm</span>
 <span class="c1"># from ..io.base import BaseRaw</span>
-<span class="kn">from</span> <span class="nn">joblib</span> <span class="k">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
 
 
-<span class="k">def</span> <span class="nf">_A</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_A</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="n">norm_factor</span> <span class="o">=</span> <span class="mf">1.349</span>
     <span class="n">IQR</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">75</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">25</span><span class="p">))</span><span class="o">/</span><span class="n">norm_factor</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">IQR</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_bandwith_factor</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_bandwith_factor</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">_A</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_get_kernel_size</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_kernel_size</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
 
     <span class="c1"># Calculate optimal kernel bandwith (i.e sigma)</span>
     <span class="n">bw</span> <span class="o">=</span> <span class="n">_bandwith_factor</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -136,10 +146,12 @@
     <span class="k">return</span> <span class="n">kernel_size</span>
 
 
-<div class="viewcode-block" id="FLM"><a class="viewcode-back" href="../../../FLM.html#pyActigraphy.analysis.FLM">[docs]</a><span class="k">class</span> <span class="nc">FLM</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot; Class for Functional Linear Modelling&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="FLM">
+<a class="viewcode-back" href="../../../FLM.html#pyActigraphy.analysis.FLM">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FLM</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Class for Functional Linear Modelling&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">sampling_freq</span><span class="p">,</span> <span class="n">max_order</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">basis</span><span class="p">,</span> <span class="n">sampling_freq</span><span class="p">,</span> <span class="n">max_order</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
         <span class="n">bases</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;fourier&#39;</span><span class="p">,</span> <span class="s1">&#39;spline&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">basis</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
@@ -155,7 +167,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__basis_functions</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__beta</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="nf">__create_basis_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__create_basis_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
 
         <span class="n">phi</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Construct the fourier functions (cosine and sine)</span>
@@ -170,8 +182,10 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">basis_functions</span> <span class="o">=</span> <span class="n">phi</span>
 
-<div class="viewcode-block" id="FLM.fit"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.FLM.fit.html#pyActigraphy.analysis.FLM.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Fit the actigraphy data using a basis function expansion.</span>
+<div class="viewcode-block" id="FLM.fit">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.FLM.fit.html#pyActigraphy.analysis.FLM.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the actigraphy data using a basis function expansion.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -212,7 +226,7 @@
         <span class="c1"># Spline</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__basis</span> <span class="o">==</span> <span class="s1">&#39;spline&#39;</span><span class="p">:</span>
 
-            <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">splrep</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">splrep</span>
 
             <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -226,8 +240,11 @@
                 <span class="n">splrep</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">daily_avg</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
             <span class="p">)</span></div>
 
-<div class="viewcode-block" id="FLM.evaluate"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.FLM.evaluate.html#pyActigraphy.analysis.FLM.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Evaluate the basis function expansion.</span>
+
+<div class="viewcode-block" id="FLM.evaluate">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.FLM.evaluate.html#pyActigraphy.analysis.FLM.evaluate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the basis function expansion.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -260,18 +277,21 @@
 
         <span class="c1"># Spline</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__basis</span> <span class="o">==</span> <span class="s1">&#39;spline&#39;</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">BSpline</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">BSpline</span>
             <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsamples</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">r</span><span class="o">*</span><span class="n">T</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
             <span class="n">y_est</span> <span class="o">=</span> <span class="n">BSpline</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="p">[</span><span class="n">raw</span><span class="o">.</span><span class="n">display_name</span><span class="p">],</span> <span class="n">extrapolate</span><span class="o">=</span><span class="kc">False</span><span class="p">)(</span><span class="n">t</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">y_est</span></div>
 
-<div class="viewcode-block" id="FLM.fit_reader"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.FLM.fit_reader.html#pyActigraphy.analysis.FLM.fit_reader">[docs]</a>    <span class="k">def</span> <span class="nf">fit_reader</span><span class="p">(</span>
+
+<div class="viewcode-block" id="FLM.fit_reader">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.FLM.fit_reader.html#pyActigraphy.analysis.FLM.fit_reader">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_reader</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span>
         <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose_parallel</span><span class="o">=</span><span class="mi">0</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Fit the actigraphy data contained in a reader using a basis function</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit the actigraphy data contained in a reader using a basis function</span>
 <span class="sd">        expansion.</span>
 
 <span class="sd">        Parameters</span>
@@ -301,7 +321,7 @@
             <span class="k">for</span> <span class="n">raw</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">readers</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="n">binarize</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose_fit</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">def</span> <span class="nf">parallel_fitting</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="n">verbose_fit</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">parallel_fitting</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="n">verbose_fit</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">binarize</span><span class="p">,</span> <span class="n">verbose_fit</span><span class="p">)</span>
             <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose_parallel</span><span class="p">)(</span>
                 <span class="n">delayed</span><span class="p">(</span><span class="n">parallel_fitting</span><span class="p">)(</span>
@@ -309,12 +329,15 @@
                 <span class="p">)</span> <span class="k">for</span> <span class="n">raw</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">readers</span>
             <span class="p">)</span></div>
 
-<div class="viewcode-block" id="FLM.evaluate_reader"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.FLM.evaluate_reader.html#pyActigraphy.analysis.FLM.evaluate_reader">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_reader</span><span class="p">(</span>
+
+<div class="viewcode-block" id="FLM.evaluate_reader">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.FLM.evaluate_reader.html#pyActigraphy.analysis.FLM.evaluate_reader">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evaluate_reader</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span>
         <span class="n">r</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="n">n_jobs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbose_parallel</span><span class="o">=</span><span class="mi">0</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Evaluate the basis function expansion made on actigraphy data</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Evaluate the basis function expansion made on actigraphy data</span>
 <span class="sd">        contained in a reader.</span>
 
 <span class="sd">        Parameters</span>
@@ -350,7 +373,7 @@
                 <span class="k">for</span> <span class="n">raw</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">readers</span>
             <span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">def</span> <span class="nf">parallel_evaluating</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">parallel_evaluating</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
                 <span class="k">return</span> <span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">display_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">raw</span><span class="p">,</span> <span class="n">r</span><span class="p">))</span>
             <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">Parallel</span><span class="p">(</span>
                 <span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span> <span class="n">prefer</span><span class="o">=</span><span class="n">prefer</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose_parallel</span>
@@ -360,8 +383,11 @@
                 <span class="p">)</span> <span class="k">for</span> <span class="n">raw</span> <span class="ow">in</span> <span class="n">reader</span><span class="o">.</span><span class="n">readers</span>
             <span class="p">))</span></div>
 
-<div class="viewcode-block" id="FLM.smooth"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.FLM.smooth.html#pyActigraphy.analysis.FLM.smooth">[docs]</a>    <span class="k">def</span> <span class="nf">smooth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;scott&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Smooth the actigraphy data using a gaussian kernel.</span>
+
+<div class="viewcode-block" id="FLM.smooth">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.analysis.FLM.smooth.html#pyActigraphy.analysis.FLM.smooth">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">smooth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;scott&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Smooth the actigraphy data using a gaussian kernel.</span>
 
 <span class="sd">        Wrapper for the scipy.ndimage.gaussian_filter1d function.</span>
 
@@ -404,28 +430,29 @@
             <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;wrap&#39;</span>
         <span class="p">)</span></div>
 
+
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">sampling_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The sampling frequency of the basis functions.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sampling_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The sampling frequency of the basis functions.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sampling_freq</span>
 
     <span class="nd">@sampling_freq</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">sampling_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sampling_freq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__sampling_freq</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">nsamples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The number of sample points for the basis functions.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">nsamples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The number of sample points for the basis functions.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nsamples</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">max_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The maximal number of basis functions.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">max_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The maximal number of basis functions.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__max_order</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">basis_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The basis functions.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">basis_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The basis functions.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__basis_functions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Create first the basis functions: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__basis</span>
@@ -435,13 +462,14 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__basis_functions</span>
 
     <span class="nd">@basis_functions</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">basis_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">basis_functions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__basis_functions</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">beta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The scalar parameters of the basis function expansion.&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">beta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The scalar parameters of the basis function expansion.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__beta</span></div>
+
 </pre></div>
 
     </div>
@@ -455,8 +483,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2020, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.1.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

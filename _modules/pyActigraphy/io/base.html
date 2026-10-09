@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyActigraphy.io.base &#8212; pyActigraphy 1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css" />
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <title>pyActigraphy.io.base &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="../../../_static/documentation_options.js?v=590429e0"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -39,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -86,23 +83,36 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <h1>Source code for pyActigraphy.io.base</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">pandas.tseries.frequencies</span> <span class="kn">import</span> <span class="n">to_offset</span>
-<span class="kn">from</span> <span class="nn">..filters</span> <span class="kn">import</span> <span class="n">FiltersMixin</span>
-<span class="kn">from</span> <span class="nn">..metrics</span> <span class="kn">import</span> <span class="n">MetricsMixin</span><span class="p">,</span> <span class="n">_interval_maker</span>
-<span class="kn">from</span> <span class="nn">..sleep</span> <span class="kn">import</span> <span class="n">SleepDiary</span><span class="p">,</span> <span class="n">ScoringMixin</span><span class="p">,</span> <span class="n">SleepBoutMixin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..filters</span><span class="w"> </span><span class="kn">import</span> <span class="n">FiltersMixin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">MetricsMixin</span><span class="p">,</span> <span class="n">_interval_maker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..reports</span><span class="w"> </span><span class="kn">import</span> <span class="n">ActivityReport</span><span class="p">,</span> <span class="n">create_sleep_report</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..sleep</span><span class="w"> </span><span class="kn">import</span> <span class="n">SleepDiary</span><span class="p">,</span> <span class="n">ScoringMixin</span><span class="p">,</span> <span class="n">SleepBoutMixin</span>
 
 
-<div class="viewcode-block" id="BaseRaw"><a class="viewcode-back" href="../../../BaseRaw.html#pyActigraphy.io.BaseRaw">[docs]</a><span class="k">class</span> <span class="nc">BaseRaw</span><span class="p">(</span><span class="n">SleepBoutMixin</span><span class="p">,</span> <span class="n">ScoringMixin</span><span class="p">,</span> <span class="n">MetricsMixin</span><span class="p">,</span> <span class="n">FiltersMixin</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseRaw">
+<a class="viewcode-back" href="../../../BaseRaw.html#pyActigraphy.io.BaseRaw">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseRaw</span><span class="p">(</span><span class="n">SleepBoutMixin</span><span class="p">,</span> <span class="n">ScoringMixin</span><span class="p">,</span> <span class="n">MetricsMixin</span><span class="p">,</span> <span class="n">FiltersMixin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for raw data.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">,</span>
         <span class="n">uuid</span><span class="p">,</span>
@@ -112,9 +122,11 @@
         <span class="n">period</span><span class="p">,</span>
         <span class="n">frequency</span><span class="p">,</span>
         <span class="n">data</span><span class="p">,</span>
-        <span class="n">light</span>
+        <span class="n">light</span><span class="p">,</span>
+        <span class="n">fpath</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">):</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">__fpath</span> <span class="o">=</span> <span class="n">fpath</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__display_name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__uuid</span> <span class="o">=</span> <span class="n">uuid</span>
@@ -135,67 +147,72 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_diary</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fpath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Absolute path of the raw input file.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fpath</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Study name as extracted from the raw file.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__name</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Name to be used for display.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__display_name</span>
 
     <span class="nd">@display_name</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__display_name</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;UUID of the device used to acquire the data&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__uuid</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Format of the raw data file (AWD,RPX,MTN,...)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__format</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">axial_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">axial_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Acquistion mode (mono-axial or tri-axial)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__axial_mode</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Start time of data acquistion as extracted from the raw file or</span>
 <span class="sd">        specified by the user.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__start_time</span>
 
     <span class="nd">@start_time</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__start_time</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">period</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">period</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Period of data acquistion as extracted from the raw file or</span>
 <span class="sd">        specified by the user.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__period</span>
 
     <span class="nd">@period</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__period</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Acquisition frequency as extracted from the raw file.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__frequency</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Indexed data extracted from the raw file.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data</span>
 
     <span class="c1"># TODO: @lru_cache(maxsize=6) ???</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Indexed data extracted from the raw file.</span>
 <span class="sd">        If mask_inactivity is set to true, the `mask` is used</span>
 <span class="sd">        to filter out inactive data.</span>
@@ -221,32 +238,32 @@
         <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">]</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">raw_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">raw_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light measurement performed by the device&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__light</span>
 
     <span class="c1"># TODO: @lru_cache(maxsize=6) ???</span>
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Light measurement performed by the device&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__light</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mask_inactivity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask_inactivity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Switch to mask inactive data.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mask_inactivity</span>
 
     <span class="nd">@mask_inactivity</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">mask_inactivity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask_inactivity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__mask_inactivity</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">inactivity_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inactivity_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Length of the inactivity mask.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__inactivity_length</span>
 
     <span class="nd">@inactivity_length</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">inactivity_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">inactivity_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__inactivity_length</span> <span class="o">=</span> <span class="n">value</span>
         <span class="c1"># Discard current mask (will be recreated upon access if needed)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="kc">None</span>
@@ -255,7 +272,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">mask_inactivity</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mask used to filter out inactive data.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Create a mask if it does not exist</span>
@@ -273,25 +290,30 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mask</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">period</span><span class="p">]</span>
 
     <span class="nd">@mask</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__mask</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">exclude_if_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exclude_if_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Boolean to exclude partially masked data when resampling&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__exclude_if_mask</span>
 
     <span class="nd">@exclude_if_mask</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">exclude_if_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exclude_if_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__exclude_if_mask</span> <span class="o">=</span> <span class="n">value</span>
 
-<div class="viewcode-block" id="BaseRaw.mask_fraction"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.mask_fraction.html#pyActigraphy.io.BaseRaw.mask_fraction">[docs]</a>    <span class="k">def</span> <span class="nf">mask_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseRaw.mask_fraction">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.mask_fraction.html#pyActigraphy.io.BaseRaw.mask_fraction">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask_fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Fraction of masked data&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mf">1.</span><span class="o">-</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">])</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseRaw.mask_fraction_period"><a class="viewcode-back" href="../../../BaseRaw.html#pyActigraphy.io.BaseRaw.mask_fraction_period">[docs]</a>    <span class="k">def</span> <span class="nf">mask_fraction_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BaseRaw.mask_fraction_period">
+<a class="viewcode-back" href="../../../BaseRaw.html#pyActigraphy.io.BaseRaw.mask_fraction_period">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mask_fraction_period</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="s1">&#39;7D&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mask fraction per consecutive periods&quot;&quot;&quot;</span>
 
         <span class="c1"># Compute consecutive intervals</span>
@@ -303,27 +325,42 @@
         <span class="p">]</span>
         <span class="k">return</span> <span class="n">results</span></div>
 
-<div class="viewcode-block" id="BaseRaw.length"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.length.html#pyActigraphy.io.BaseRaw.length">[docs]</a>    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BaseRaw.length">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.length.html#pyActigraphy.io.BaseRaw.length">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Number of data acquisition points&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseRaw.time_range"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.time_range.html#pyActigraphy.io.BaseRaw.time_range">[docs]</a>    <span class="k">def</span> <span class="nf">time_range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BaseRaw.time_range">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.time_range.html#pyActigraphy.io.BaseRaw.time_range">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">time_range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Range (in days, hours, etc) of the data acquistion period&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="BaseRaw.duration"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.duration.html#pyActigraphy.io.BaseRaw.duration">[docs]</a>    <span class="k">def</span> <span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BaseRaw.duration">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.duration.html#pyActigraphy.io.BaseRaw.duration">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">duration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Duration (in days, hours, etc) of the data acquistion period&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BaseRaw.binarized_data"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.binarized_data.html#pyActigraphy.io.BaseRaw.binarized_data">[docs]</a>    <span class="k">def</span> <span class="nf">binarized_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
+
+<div class="viewcode-block" id="BaseRaw.binarized_data">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.binarized_data.html#pyActigraphy.io.BaseRaw.binarized_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">binarized_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">threshold</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Boolean thresholding of Pandas Series&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
             <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">index</span>
         <span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">notna</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span></div>
 
+
     <span class="c1"># TODO: @lru_cache(maxsize=6) ???</span>
-<div class="viewcode-block" id="BaseRaw.resampled_data"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.resampled_data.html#pyActigraphy.io.BaseRaw.resampled_data">[docs]</a>    <span class="k">def</span> <span class="nf">resampled_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseRaw.resampled_data">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.resampled_data.html#pyActigraphy.io.BaseRaw.resampled_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resampled_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">binarize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Data resampled at the specified frequency.</span>
 <span class="sd">        If mask_inactivity is True, the `mask` is used to filter inactive data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -334,14 +371,14 @@
 
         <span class="k">if</span> <span class="n">freq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">data</span>
-        <span class="k">elif</span> <span class="n">to_offset</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span><span class="o">.</span><span class="n">delta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="s1">&#39;Resampling frequency lower than the acquisition&#39;</span>
                 <span class="o">+</span> <span class="s1">&#39; frequency. Returning original data.&#39;</span><span class="p">,</span>
                 <span class="ne">UserWarning</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">data</span>
-        <span class="k">elif</span> <span class="n">to_offset</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span><span class="o">.</span><span class="n">delta</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">data</span>
 
         <span class="n">resampled_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;start&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
@@ -364,13 +401,16 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">resampled_data</span></div>
 
+
     <span class="c1"># TODO: @lru_cache(maxsize=6) ???</span>
-<div class="viewcode-block" id="BaseRaw.resampled_light"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.resampled_light.html#pyActigraphy.io.BaseRaw.resampled_light">[docs]</a>    <span class="k">def</span> <span class="nf">resampled_light</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseRaw.resampled_light">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.resampled_light.html#pyActigraphy.io.BaseRaw.resampled_light">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">resampled_light</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freq</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Light measurement, resampled at the specified frequency.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">light</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">light</span>
 
-        <span class="k">if</span> <span class="n">to_offset</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span><span class="o">.</span><span class="n">delta</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="s1">&#39;Resampling frequency equal to or lower than the acquisition&#39;</span>
                 <span class="o">+</span> <span class="s1">&#39; frequency. Returning original data.&#39;</span><span class="p">,</span>
@@ -380,7 +420,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">light</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">freq</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;start&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="BaseRaw.read_sleep_diary"><a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.read_sleep_diary.html#pyActigraphy.io.BaseRaw.read_sleep_diary">[docs]</a>    <span class="k">def</span> <span class="nf">read_sleep_diary</span><span class="p">(</span>
+
+<div class="viewcode-block" id="BaseRaw.read_sleep_diary">
+<a class="viewcode-back" href="../../../_autosummary/pyActigraphy.io.BaseRaw.read_sleep_diary.html#pyActigraphy.io.BaseRaw.read_sleep_diary">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_sleep_diary</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">input_fname</span><span class="p">,</span>
             <span class="n">header_size</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
@@ -418,14 +461,167 @@
             <span class="n">state_colour</span><span class="o">=</span><span class="n">state_colour</span>
         <span class="p">)</span></div>
 
+
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">sleep_diary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sleep_diary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot; :class:`SleepDiary` class instanciation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_diary</span>
 
     <span class="nd">@sleep_diary</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">sleep_diary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_diary</span> <span class="o">=</span> <span class="n">value</span></div>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sleep_diary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_diary</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="BaseRaw.create_activity_report">
+<a class="viewcode-back" href="../../../BaseRaw.html#pyActigraphy.io.BaseRaw.create_activity_report">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_activity_report</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cut_points</span><span class="p">,</span>
+        <span class="n">labels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">stop_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">oformat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity report.</span>
+
+<span class="sd">        Create an activity report with aggregated statistics on activity levels</span>
+<span class="sd">        and time spent between the specified cut-points.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        cut_points: array</span>
+<span class="sd">            Activity cut-points. If all the values are below 1, they are</span>
+<span class="sd">            interpreted as percentiles of the activity counts. Lower</span>
+<span class="sd">            (i.e -infinity count) and upper (i.e infinity count) boundaries are</span>
+<span class="sd">            automatically added.</span>
+<span class="sd">        labels: array, optional</span>
+<span class="sd">            Labels for the intervals defined by the cut points.</span>
+<span class="sd">            The number of labels should be N+1 for N cut-points.</span>
+<span class="sd">            If set to None, the cut points are used to define the labels.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        threshold: float, optional</span>
+<span class="sd">            If not set to None, discard data below threshold before computing</span>
+<span class="sd">            activity ranges.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        start_time: str, optional</span>
+<span class="sd">            If not set to None, discard data before start time,</span>
+<span class="sd">            on a daily basis.</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        stop_time: str, optional</span>
+<span class="sd">            If not set to None, discard data after stop time, on a daily basis.</span>
+<span class="sd">            Supported time string: &#39;HH:MM:SS&#39;</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        oformat: str, optional</span>
+<span class="sd">            Output format. Available formats: &#39;minute&#39; or &#39;timedelta&#39;.</span>
+<span class="sd">            If set to &#39;minute&#39;, the result is in number of minutes.</span>
+<span class="sd">            If set to &#39;timedelta&#39;, the result is a pd.Timedelta.</span>
+<span class="sd">            If set to None, the result is in number of epochs.</span>
+<span class="sd">            Default is None.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            If set to True, print out info about the cut points.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create activity report</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__activity_report</span> <span class="o">=</span> <span class="n">ActivityReport</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">cut_points</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+        <span class="c1"># Fill the activity report</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__activity_report</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+            <span class="n">threshold</span><span class="o">=</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+            <span class="n">stop_time</span><span class="o">=</span><span class="n">stop_time</span><span class="p">,</span>
+            <span class="n">oformat</span><span class="o">=</span><span class="n">oformat</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+        <span class="p">)</span>
+        <span class="c1"># Reset and rename index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__activity_report</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__activity_report</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;activity level&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Add recording name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__activity_report</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s1">&#39;ID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">activity_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Activity report accessor&quot;&quot;&quot;</span>
+        <span class="c1"># self.__activity_report.results.name = self.name</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__activity_report</span><span class="o">.</span><span class="n">pretty_results</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BaseRaw.create_sleep_report">
+<a class="viewcode-back" href="../../../BaseRaw.html#pyActigraphy.io.BaseRaw.create_sleep_report">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_sleep_report</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">states</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;NIGHT&#39;</span><span class="p">],</span>
+        <span class="n">state_scoring</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;NIGHT&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+        <span class="n">convert_td_to_num_min</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">scoring_algo</span><span class="o">=</span><span class="s1">&#39;Scripps&#39;</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sleep report.</span>
+
+<span class="sd">        Create an sleep report using the periods reported in the sleep diary as</span>
+<span class="sd">        periods of interest.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        states: list</span>
+<span class="sd">            List of types of periods of interest. Should match the types</span>
+<span class="sd">            reported in the sleep diary file.</span>
+<span class="sd">        state_scoring: dict</span>
+<span class="sd">            Expected scores from the sleep algorithm for the states of</span>
+<span class="sd">            interest.</span>
+<span class="sd">        convert_dt_to_num_min: bool, optional</span>
+<span class="sd">            If set to True, all durations are reported in minutes instead of</span>
+<span class="sd">            pd.Timedelta.</span>
+<span class="sd">        verbose: bool, optional</span>
+<span class="sd">            If set to True, print out info about periods found in the sleep</span>
+<span class="sd">            diary.</span>
+<span class="sd">            Default is False.</span>
+<span class="sd">        scoring_algo: str, optional</span>
+<span class="sd">            Sleep/wake scoring algorithm to use.</span>
+<span class="sd">            Default is &#39;Scripps&#39;.</span>
+<span class="sd">        *args</span>
+<span class="sd">            Variable length argument list passed to the scoring algorithm.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Arbitrary keyword arguments passed to the scoring algorithm.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check if sleep diary is available</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sleep_diary</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warning_msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;The sleep diary is None. &#39;</span>
+                <span class="s1">&#39;Please run the &quot;read_sleep_diary&quot; function.&#39;</span>
+            <span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">warning_msg</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Retrieve sleep scoring function dynamically by name</span>
+        <span class="n">sleep_algo</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scoring_algo</span><span class="p">)</span>
+
+        <span class="c1"># Sleep scoring</span>
+        <span class="n">scoring</span> <span class="o">=</span> <span class="n">sleep_algo</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Create sleep report</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_report</span> <span class="o">=</span> <span class="n">create_sleep_report</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sleep_diary</span><span class="p">,</span>
+            <span class="n">scoring</span><span class="p">,</span>
+            <span class="n">states</span><span class="o">=</span><span class="n">states</span><span class="p">,</span>
+            <span class="n">state_scoring</span><span class="o">=</span><span class="n">state_scoring</span><span class="p">,</span>
+            <span class="n">convert_td_to_num_min</span><span class="o">=</span><span class="n">convert_td_to_num_min</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sleep_report</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sleep report accessor&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_report</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_report</span></div>
+
 </pre></div>
 
     </div>
@@ -439,8 +635,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>

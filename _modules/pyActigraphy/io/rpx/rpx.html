@@ -1,18 +1,15 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="../../../../">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pyActigraphy.io.rpx.rpx &#8212; pyActigraphy 1.1 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css" />
-    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
-    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <title>pyActigraphy.io.rpx.rpx &#8212; pyActigraphy 1.2.3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/bootstrap-sphinx.css?v=9afac83c" />
+    <script src="../../../../_static/documentation_options.js?v=590429e0"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -39,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="../../../../index.html">
           pyActigraphy</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.2.3</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -86,23 +83,34 @@
 
 <div class="container">
   <div class="row">
-    <div class="body col-md-12 content" role="main">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="body col-md-9 content" role="main">
       
   <h1>Source code for pyActigraphy.io.rpx.rpx</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">datetime</span>
-<span class="kn">import</span> <span class="nn">io</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="c1"># import numpy as np</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">.multilang</span> <span class="kn">import</span> <span class="n">fields</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">day_first</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">BaseRaw</span>
-<span class="kn">from</span> <span class="nn">pyActigraphy.light</span> <span class="kn">import</span> <span class="n">LightRecording</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.multilang</span><span class="w"> </span><span class="kn">import</span> <span class="n">fields</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">day_first</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseRaw</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyActigraphy.light</span><span class="w"> </span><span class="kn">import</span> <span class="n">LightRecording</span>
 
 
-<span class="k">class</span> <span class="nc">RawRPX</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">RawRPX</span><span class="p">(</span><span class="n">BaseRaw</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Raw object from .CSV file (recorded by Respironics)</span>
 
 <span class="sd">    Parameters</span>
@@ -135,16 +143,19 @@
 <span class="sd">        Default is &#39;float&#39;.</span>
 <span class="sd">    delimiter: str, optional</span>
 <span class="sd">        Delimiter to use when reading the input file.</span>
-<span class="sd">        Default is &#39;,&#39;</span>
+<span class="sd">        Default is &#39;,&#39;.</span>
 <span class="sd">    decimal: str, optional</span>
 <span class="sd">        Decimal character to use when reading the input file.</span>
-<span class="sd">        Default is &#39;.&#39;</span>
+<span class="sd">        Default is &#39;.&#39;.</span>
 <span class="sd">    drop_na: bool, optional</span>
 <span class="sd">        If set to True, drop epochs where activity is NaN.</span>
 <span class="sd">        Default is True.</span>
+<span class="sd">    file_encoding: str, optional</span>
+<span class="sd">        Encoding to use when reading the input file.</span>
+<span class="sd">        Default is &#39;utf-8&#39;.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_fname</span><span class="p">,</span>
         <span class="n">language</span><span class="o">=</span><span class="s1">&#39;ENG_US&#39;</span><span class="p">,</span>
@@ -155,7 +166,8 @@
         <span class="n">light_dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">,</span>
         <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span>
         <span class="n">decimal</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span>
-        <span class="n">drop_na</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">drop_na</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">file_encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span>
     <span class="p">):</span>
 
         <span class="c1"># get absolute file path</span>
@@ -177,7 +189,7 @@
 
         <span class="c1"># read file header info</span>
         <span class="n">header_offset</span><span class="p">,</span> <span class="n">data_offset</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data_available_cols</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">__extract_rpx_header_info</span><span class="p">(</span><span class="n">input_fname</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__extract_rpx_header_info</span><span class="p">(</span><span class="n">input_fname</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">,</span> <span class="n">file_encoding</span><span class="p">)</span>
 
         <span class="c1"># Verify that the input file contains the needed information</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__check_rpx_header</span><span class="p">(</span>
@@ -205,20 +217,11 @@
 
         <span class="n">index_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
             <span class="c1"># input_fname,</span>
-            <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)),</span>
-            <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span>
+            <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">file_encoding</span><span class="p">)),</span>
             <span class="n">skiprows</span><span class="o">=</span><span class="n">header_offset</span><span class="o">+</span><span class="n">data_offset</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
             <span class="n">delimiter</span><span class="o">=</span><span class="n">delimiter</span><span class="p">,</span>
-            <span class="c1"># infer_datetime_format=True,</span>
             <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-            <span class="n">parse_dates</span><span class="o">=</span><span class="p">{</span>
-                <span class="s1">&#39;Date_Time&#39;</span><span class="p">:</span> <span class="p">[</span>
-                    <span class="n">columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;Date&#39;</span><span class="p">],</span>
-                    <span class="n">columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;Time&#39;</span><span class="p">]</span>
-                <span class="p">]</span>
-            <span class="p">},</span>
-            <span class="n">dayfirst</span><span class="o">=</span><span class="n">dayfirst</span><span class="p">,</span>
             <span class="n">usecols</span><span class="o">=</span><span class="n">data_available_cols</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span>
             <span class="n">na_values</span><span class="o">=</span><span class="n">fields</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;NAN&#39;</span><span class="p">],</span>
             <span class="n">decimal</span><span class="o">=</span><span class="n">decimal</span><span class="p">,</span>
@@ -227,6 +230,17 @@
                 <span class="c1"># columns[self.language][&#39;White_light&#39;]: light_dtype</span>
                 <span class="c1"># columns[self.language][&#39;Marker&#39;]: light_dtype</span>
             <span class="p">}</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Make and Set index</span>
+        <span class="n">index_data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
+                <span class="n">index_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="n">columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;Date&#39;</span><span class="p">]]</span>
+                <span class="o">+</span><span class="s1">&#39; &#39;</span>
+                <span class="o">+</span><span class="n">index_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="n">columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;Time&#39;</span><span class="p">]],</span>
+                <span class="n">dayfirst</span><span class="o">=</span><span class="n">dayfirst</span>
+            <span class="p">),</span>
+            <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
 
         <span class="c1"># verify that the start time and the first date index matches</span>
@@ -282,6 +296,7 @@
 
         <span class="c1"># call __init__ function of the base class</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">fpath</span><span class="o">=</span><span class="n">input_fname</span><span class="p">,</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
             <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;RPX&#39;</span><span class="p">,</span>
@@ -299,83 +314,83 @@
         <span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">language</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">language</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Language (ENG_UK, FR, GER, etc) used to set up the device&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__language</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">white_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">white_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;White light levels (in lux.)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;White_light&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">red_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">red_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Red light levels (in microwatt per cm2.)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;Red_light&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">green_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">green_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Green light levels (in microwatt per cm2.)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;Green_light&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">blue_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">blue_light</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Blue light levels (in microwatt per cm2.)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extract_light_channel</span><span class="p">(</span><span class="s2">&quot;Blue_light&quot;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">off_wrist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">off_wrist</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Off-wrist status (1 : device not wrist-worn)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__off_wrist</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">sleep_wake</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sleep_wake</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Sleep/Wake score (0:sleep, 1:wake).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_wake</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">mobility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mobility</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Mobility score (0:immobile, 1:mobile).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mobility</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">interval_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">interval_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Interval status (ACTIVE, REST, REST-S or Excluded).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval_status</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">sleep_wake_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sleep_wake_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Manually set status (Forced wake, Forced sleep or Excluded).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sleep_wake_status</span>
 
-    <span class="k">def</span> <span class="nf">__extract_rpx_header_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_rpx_header_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">,</span> <span class="n">file_encoding</span><span class="p">):</span>
         <span class="c1"># extract file header and data header</span>
         <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">data_available_cols</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">header_offset</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;Data&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;Data&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">file_encoding</span><span class="p">):</span>
                 <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">file_encoding</span><span class="p">))</span>
         <span class="c1"># Read file until the next blank line</span>
         <span class="c1"># First, skip blank line after section title</span>
         <span class="c1"># next(file)</span>
         <span class="k">for</span> <span class="n">data_offset</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">header_offset</span><span class="o">+</span><span class="mi">1</span><span class="p">:]):</span>
             <span class="n">line_clean</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\r\r\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">line_clean</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">line_clean</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">line_clean</span> <span class="o">==</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
                 <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">data_available_cols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">line_clean</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span>
-                        <span class="s1">&#39;utf-8&#39;</span>
+                        <span class="n">file_encoding</span>
                     <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
                 <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">header_offset</span><span class="p">,</span> <span class="n">data_offset</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data_available_cols</span>
 
-    <span class="k">def</span> <span class="nf">__extract_rpx_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_rpx_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;Name&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span>
@@ -384,14 +399,14 @@
                 <span class="k">break</span>
         <span class="k">return</span> <span class="n">name</span>
 
-    <span class="k">def</span> <span class="nf">__extract_rpx_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_rpx_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;Device_id&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                 <span class="n">uuid</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[\W_]+&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">delimiter</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
                 <span class="k">break</span>
         <span class="k">return</span> <span class="n">uuid</span>
 
-    <span class="k">def</span> <span class="nf">__extract_rpx_start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">,</span> <span class="n">dayfirst</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_rpx_start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">,</span> <span class="n">dayfirst</span><span class="p">):</span>
         <span class="n">start_time</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;Start_date&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
@@ -407,7 +422,7 @@
             <span class="n">dayfirst</span><span class="o">=</span><span class="n">dayfirst</span>  <span class="c1"># (self.language in day_first)</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__extract_rpx_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_rpx_frequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">delimiter</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">fields</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="s1">&#39;Period&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                 <span class="n">frequency</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span>
@@ -418,7 +433,7 @@
                 <span class="k">break</span>
         <span class="k">return</span> <span class="n">frequency</span>
 
-    <span class="k">def</span> <span class="nf">__extract_rpx_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_rpx_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">col_name</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="n">column</span><span class="p">]</span>
@@ -427,7 +442,7 @@
 
         <span class="k">return</span> <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">col_name</span><span class="p">]</span> <span class="k">if</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span> <span class="k">else</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">__extract_rpx_light</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_rpx_light</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
 
         <span class="c1"># List available light columns</span>
         <span class="n">light_cols</span> <span class="o">=</span> <span class="p">[</span>
@@ -443,13 +458,13 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">__extract_light_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__extract_light_channel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">light</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">light</span><span class="o">.</span><span class="n">get_channel</span><span class="p">(</span><span class="n">columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">][</span><span class="n">channel</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">__check_rpx_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">cols_available</span><span class="p">,</span> <span class="n">cols_required</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__check_rpx_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">cols_available</span><span class="p">,</span> <span class="n">cols_required</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="nb">set</span><span class="p">(</span><span class="n">cols_available</span><span class="p">)</span>
             <span class="o">&lt;=</span> <span class="nb">set</span><span class="p">(</span><span class="n">cols_required</span><span class="p">)</span>
@@ -465,7 +480,7 @@
                 <span class="p">)</span>
             <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__check_rpx_start_time</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__check_rpx_start_time</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="n">warning_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
@@ -480,7 +495,9 @@
             <span class="p">)</span>
 
 
-<div class="viewcode-block" id="read_raw_rpx"><a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_rpx.html#pyActigraphy.io.read_raw_rpx">[docs]</a><span class="k">def</span> <span class="nf">read_raw_rpx</span><span class="p">(</span>
+<div class="viewcode-block" id="read_raw_rpx">
+<a class="viewcode-back" href="../../../../_autosummary/pyActigraphy.io.read_raw_rpx.html#pyActigraphy.io.read_raw_rpx">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_raw_rpx</span><span class="p">(</span>
     <span class="n">input_fname</span><span class="p">,</span>
     <span class="n">language</span><span class="o">=</span><span class="s1">&#39;ENG_US&#39;</span><span class="p">,</span>
     <span class="n">dayfirst</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -490,9 +507,10 @@
     <span class="n">light_dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">,</span>
     <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span>
     <span class="n">decimal</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span>
-    <span class="n">drop_na</span><span class="o">=</span><span class="kc">True</span>
+    <span class="n">drop_na</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">file_encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span>
 <span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reader function for raw Respironics file.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reader function for .csv file recorded by Actiwatch 2 and Actiwatch Spectrum Plus (Philips Respironics).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -524,13 +542,16 @@
 <span class="sd">        Default is &#39;float&#39;.</span>
 <span class="sd">    delimiter: str, optional</span>
 <span class="sd">        Delimiter to use when reading the input file.</span>
-<span class="sd">        Default is &#39;,&#39;</span>
+<span class="sd">        Default is &#39;,&#39;.</span>
 <span class="sd">    decimal: str, optional</span>
 <span class="sd">        Decimal character to use when reading the input file.</span>
-<span class="sd">        Default is &#39;.&#39;</span>
+<span class="sd">        Default is &#39;.&#39;.</span>
 <span class="sd">    drop_na: bool, optional</span>
 <span class="sd">        If set to True, drop epochs where activity is NaN.</span>
 <span class="sd">        Default is True.</span>
+<span class="sd">    file_encoding: str, optional</span>
+<span class="sd">        Encoding to use when reading the input file.</span>
+<span class="sd">        Default is &#39;utf-8&#39;.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -548,8 +569,10 @@
         <span class="n">light_dtype</span><span class="o">=</span><span class="n">light_dtype</span><span class="p">,</span>
         <span class="n">delimiter</span><span class="o">=</span><span class="n">delimiter</span><span class="p">,</span>
         <span class="n">decimal</span><span class="o">=</span><span class="n">decimal</span><span class="p">,</span>
-        <span class="n">drop_na</span><span class="o">=</span><span class="n">drop_na</span>
+        <span class="n">drop_na</span><span class="o">=</span><span class="n">drop_na</span><span class="p">,</span>
+        <span class="n">file_encoding</span><span class="o">=</span><span class="n">file_encoding</span>
     <span class="p">)</span></div>
+
 </pre></div>
 
     </div>
@@ -563,8 +586,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2018-2023, Grégory Hammad.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br/>
+        &copy; Copyright 2018-2026, Grégory Hammad.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 7.4.7.<br/>
     </p>
   </div>
 </footer>
