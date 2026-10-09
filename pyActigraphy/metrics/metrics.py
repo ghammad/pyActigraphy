@@ -60,9 +60,9 @@ def _interdaily_stability(data):
         data.index.hour,
         data.index.minute,
         data.index.second]
-    ).mean().var()
+    ).mean().var(ddof=0)
 
-    d_1h = data.var()
+    d_1h = data.var(ddof=0)
 
     return (d_24h / d_1h)
 
@@ -72,7 +72,7 @@ def _intradaily_variability(data):
 
     c_1h = data.diff(1).pow(2).mean()
 
-    d_1h = data.var()
+    d_1h = data.var(ddof=0)
 
     return (c_1h / d_1h)
 
