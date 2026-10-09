@@ -1,9 +1,9 @@
 .. image:: https://img.shields.io/badge/License-GPL%20v3-blue.svg
   :target: https://www.gnu.org/licenses/gpl-3.0
-.. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/pipeline.svg?key_text=CI+tests
-  :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
-.. .. image:: https://gitlab.com/ghammad/pyActigraphy/badges/master/coverage.svg
-..   :target: https://gitlab.com/ghammad/pyActigraphy/commits/master
+.. image:: https://img.shields.io/github/actions/workflow/status/ghammad/pyActigraphy/python-package.yml?style=flat
+   :alt: GitHub Actions Workflow Status
+.. image:: https://img.shields.io/pypi/pyversions/pyActigraphy
+   :alt: PyPI Python Version
 .. image:: https://img.shields.io/pypi/v/pyActigraphy.svg
   :target: https://pypi.org/project/pyActigraphy
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg
@@ -101,12 +101,12 @@ It contains `notebooks <https://ghammad.github.io/pyActigraphy/tutorials.html>`_
 Installation
 ============
 
-For the time being, :code:`pyActigraphy` has been tested for :code:`python>=3.7 & python<=3.9`. Dependencies will be installed automatically.
+For the time being, :code:`pyActigraphy` has been tested for :code:`python 3.9, 3.10, 3.11 & 3.12`. Dependencies will be installed automatically.
 
 Before installing python packages, it is often advised to create a virtual environment:
 
 #. Via `venv <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/#creating-a-virtual-environment>`_ (Linux/Mac OS)
-#. Via `miniconda <https://www.anaconda.com/docs/getting-started/miniconda/main>_` (Linux/Mac OS/Windows)
+#. Via `miniconda <https://www.anaconda.com/docs/getting-started/miniconda/main>`_ (Linux/Mac OS/Windows)
 
 Installing pyActigraphy (alone)
 -----------------------
@@ -117,7 +117,6 @@ Within a virtual env, in a Terminal (Linux/Mac OS) or in an Anaconda Prompt (if 
   
 .. code-block:: shell
   
-  python -m pip install numba==0.57.1
   python -m pip install pyActigraphy
   
 To update the package:
@@ -131,7 +130,6 @@ To update the package:
   
 .. code-block:: shell
 
-  python -m pip install numba==0.57.1
   git clone git@github.com:ghammad/pyActigraphy.git
   cd pyActigraphy/
   git checkout develop
@@ -164,12 +162,6 @@ Instructions:
 
      conda activate pyActi39
 
-
-   #. Install the `Numba <https://numba.readthedocs.io/en/stable/index.html>`_ package which is a dependency of :code:`pyActigraphy`:
-
-   .. code-block:: shell
-
-     python -m pip install numba==0.57.1
 
    #. Install :code:`pyActigraphy`:
 
@@ -235,11 +227,14 @@ There are plenty of ways to contribute to this package, including (but not limit
 * suggest improvements
 * improve the documentation
 
-Authors
-=======
+Authors and contributors
+========================
 
 * **Grégory Hammad** `@ghammad <https://github.com/ghammad>`_ - *Initial and main developer*
 * **Mathilde Reyt** `@ReytMathilde <https://github.com/ReytMathilde>`_
+* **Carlos Beaumont** `@cbaumont <https://github.com/cbaumont>`_
+* **Nikita Beliy** `@nbeliy <https://github.com/nbeliy>`_
+
 
 See also the list of `contributors <https://github.com/ghammad/pyActigraphy/contributors>`_ who participated in this project.
 

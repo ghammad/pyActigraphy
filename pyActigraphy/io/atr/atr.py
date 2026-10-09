@@ -74,7 +74,6 @@ class RawATR(BaseRaw):
             skiprows=len(header)+2,
             sep=';',
             parse_dates=True,
-            infer_datetime_format=True,
             dayfirst=True,
             index_col=[0]
         ).resample(freq).sum()
