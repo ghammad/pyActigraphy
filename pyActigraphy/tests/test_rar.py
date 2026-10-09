@@ -5,6 +5,8 @@ from generate_dataset import generate_sinewave
 
 import pandas as pd
 import pyActigraphy
+from pyActigraphy.metrics import _interdaily_stability
+from pyActigraphy.metrics import _intradaily_variability
 from pytest import approx
 
 sampling_period = 60
@@ -105,3 +107,35 @@ def test_rar_m10_squarewave():
 def test_rar_ra_squarewave():
 
     assert raw_squarewave.RA(binarize=True) == approx(1.0)
+
+
+def test_rar_is_uncorrected_variance():
+
+    # IS is defined with the uncorrected (population) variance
+    short_series = pd.Series(
+        [0, 0, 0, 0, 0, 0, 50, 100, 100, 100, 50, 0] * 3,
+        index=pd.date_range('2018-01-01', periods=36, freq='1h')
+    )
+
+    d_24h = short_series.groupby([
+        short_series.index.hour,
+        short_series.index.minute,
+        short_series.index.second]
+    ).mean().var(ddof=0)
+    d_1h = short_series.var(ddof=0)
+
+    assert _interdaily_stability(short_series) == approx(d_24h / d_1h)
+
+
+def test_rar_iv_uncorrected_variance():
+
+    # IV is defined with the uncorrected (population) variance
+    short_series = pd.Series(
+        [0, 0, 0, 0, 0, 0, 50, 100, 100, 100, 50, 0] * 3,
+        index=pd.date_range('2018-01-01', periods=36, freq='1h')
+    )
+
+    c_1h = short_series.diff(1).pow(2).mean()
+    d_1h = short_series.var(ddof=0)
+
+    assert _intradaily_variability(short_series) == approx(c_1h / d_1h)
