@@ -59,6 +59,21 @@ grd_truth['activity level'] = pd.Categorical(
     ordered=True
 )
 
+grd_truth_betweentime = pd.DataFrame.from_dict(
+    {'activity level': {0: 'Sedentary', 1: 'Moderate', 2: 'Vigorous'},
+     'sum': {0: 13031.724556, 1: 59068.275444, 2: 0.0},
+     'mean': {0: 36.300068, 1: 163.624032, 2: np.nan},
+     'median': {0: 29.289322, 1: 170.710678, 2: np.nan},
+     'std': {0: 30.740054, 1: 30.897038, 2: np.nan},
+     'count': {0: 359, 1: 361, 2: 0},
+     'ID': {0: 'raw_sinewave', 1: 'raw_sinewave', 2: 'raw_sinewave'}}
+)
+grd_truth_betweentime['activity level'] = pd.Categorical(
+    ['Sedentary', 'Moderate', 'Vigorous'],
+    categories=['Sedentary', 'Moderate', 'Vigorous'],
+    ordered=True
+)
+
 
 def test_report_activity_default():
 
@@ -91,4 +106,22 @@ def test_report_activity_perc():
         & (report_sum['mean'] == pytest.approx(2*A, rel=0.01))
         & (report_sum['median'] == pytest.approx(2*A, rel=0.01))
         & (report_sum['count'] == pytest.approx(N, rel=0.05))
+    )
+
+
+def test_report_activity_between_time():
+
+    raw_sinewave.create_activity_report(
+        cut_points=[100, 200],
+        labels=['Sedentary', 'Moderate', 'Vigorous'],
+        start_time='14:00:00',
+        stop_time='02:00:00'
+    )
+    # assert (raw_sinewave.activity_report.equals(grd_truth))
+    pd.testing.assert_frame_equal(
+        raw_sinewave.activity_report,
+        grd_truth_betweentime,
+        check_dtype=True,
+        check_exact=False,
+        rtol=1.0e-3
     )
