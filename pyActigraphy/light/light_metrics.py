@@ -298,7 +298,7 @@ class LightMetricsMixin(object):
             )
         else:
             return data_mask.between_time(
-                start_time=start_time, end_time=stop_time, include_end=False
+                start_time=start_time, end_time=stop_time, inclusive='left'
             )
 
     def light_exposure_level(

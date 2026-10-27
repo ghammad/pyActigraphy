@@ -146,7 +146,7 @@ class ActivityReport(Report):
             )
         else:
             data_mask_in = data_mask.between_time(
-                start_time=start_time, end_time=stop_time, include_end=False
+                start_time=start_time, end_time=stop_time, inclusive='left'
             )
 
         out, bins = pd.cut(
