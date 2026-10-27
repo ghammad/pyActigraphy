@@ -1,9 +1,9 @@
 .. image:: https://img.shields.io/badge/License-GPL%20v3-blue.svg
   :target: https://www.gnu.org/licenses/gpl-3.0
 .. image:: https://img.shields.io/github/actions/workflow/status/ghammad/pyActigraphy/python-package.yml?style=flat
-   :alt: GitHub Actions Workflow Status
+  :alt: GitHub Actions Workflow Status
 .. image:: https://img.shields.io/pypi/pyversions/pyActigraphy
-   :alt: PyPI Python Version
+  :alt: PyPI Python Version
 .. image:: https://img.shields.io/pypi/v/pyActigraphy.svg
   :target: https://pypi.org/project/pyActigraphy
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.2537920.svg
@@ -109,7 +109,7 @@ Before installing python packages, it is often advised to create a virtual envir
 #. Via `miniconda <https://www.anaconda.com/docs/getting-started/miniconda/main>`_ (Linux/Mac OS/Windows)
 
 Installing pyActigraphy (alone)
------------------------
+-------------------------------
   
 Within a virtual env, in a Terminal (Linux/Mac OS) or in an Anaconda Prompt (if you installed miniconda/anaconda), simply type:
   
@@ -137,7 +137,7 @@ To update the package:
 
 
 Installing pyActigraphy+Jupyter (tutorials)
---------------------------------------------------
+-------------------------------------------
 
 The `pyActigraphy` package provides a series of tutorial `notebooks <https://ghammad.github.io/pyActigraphy/tutorials.html>`_. These `Jupyter notebooks <https://jupyter.org/>`_ (file extension: .ipynb) are part of the package but can also be downloaded from the `Github repository <https://github.com/ghammad/pyActigraphy/tree/master/docs/source/>`_.
 In order to interactively run these tutorials, one needs to install the Jupyter Notebook application.
@@ -185,7 +185,7 @@ Instructions:
    .. image:: docs/source/img/anaconda-navigator-instructions.png
       :width: 600
 
-#. Download the tutorial `notebooks <https://github.com/ghammad/pyActigraphy/tree/master/docs/source/>`_:
+#. Download the tutorial `notebooks <https://ghammad.github.io/pyActigraphy/tutorials.html>`_:
 
    * `pyActigraphy-Intro.ipynb <https://github.com/ghammad/pyActigraphy/blob/cce641bb09bd1ac1912aa5eb09894ed152844475/docs/source/pyActigraphy-Intro.ipynb>`_
    * `pyActigraphy-Batch.ipynb <https://github.com/ghammad/pyActigraphy/blob/cce641bb09bd1ac1912aa5eb09894ed152844475/docs/source/pyActigraphy-Batch.ipynb>`_
