@@ -51,8 +51,11 @@ grd_truth = pd.DataFrame.from_dict(
      'median': {0: 29.289321881345245, 1: 170.71067811865476, 2: np.nan},
      'std': {0: 30.797448785194323, 1: 30.797448785194312, 2: np.nan},
      'count': {0: 720, 1: 720, 2: 0},
+     'Time elapsed (min.)': {0: 720.0, 1: 720.0, 2: 0.0},
+     'Time elapsed': {0: 720*frequency, 1: 720*frequency, 2: 0*frequency},
      'ID': {0: 'raw_sinewave', 1: 'raw_sinewave', 2: 'raw_sinewave'}}
 )
+grd_truth['Time elapsed'] = grd_truth.loc[:,'Time elapsed'].astype("timedelta64[s]")
 grd_truth['activity level'] = pd.Categorical(
     ['Sedentary', 'Moderate', 'Vigorous'],
     categories=['Sedentary', 'Moderate', 'Vigorous'],
@@ -66,8 +69,11 @@ grd_truth_betweentime = pd.DataFrame.from_dict(
      'median': {0: 29.289322, 1: 170.710678, 2: np.nan},
      'std': {0: 30.740054, 1: 30.897038, 2: np.nan},
      'count': {0: 359, 1: 361, 2: 0},
+     'Time elapsed (min.)': {0: 359.0, 1: 361.0, 2: 0.0},
+     'Time elapsed': {0: 359*frequency, 1: 361*frequency, 2: 0*frequency},
      'ID': {0: 'raw_sinewave', 1: 'raw_sinewave', 2: 'raw_sinewave'}}
 )
+grd_truth_betweentime['Time elapsed'] = grd_truth_betweentime.loc[:,'Time elapsed'].astype("timedelta64[s]")
 grd_truth_betweentime['activity level'] = pd.Categorical(
     ['Sedentary', 'Moderate', 'Vigorous'],
     categories=['Sedentary', 'Moderate', 'Vigorous'],

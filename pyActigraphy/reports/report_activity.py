@@ -78,33 +78,22 @@ class ActivityReport(Report):
             If not set to None, discard data after stop time, on a daily basis.
             Supported time string: 'HH:MM:SS'
             Default is None.
-        oformat: str, optional
-            Output format. Available formats: 'minute' or 'timedelta'.
-            If set to 'minute', the result is in number of minutes.
-            If set to 'timedelta', the result is a pd.Timedelta.
-            If set to None, the result is in number of epochs.
-            Default is None.
         Returns
         -------
         tat : pd.Series
             Report on the time spent within activity ranges.
         """
 
-        available_formats = [None, 'minute', 'timedelta']
-        if oformat not in available_formats:
-            raise ValueError(
-                'Specified output format ({}) not supported. '.format(oformat)
-                + 'Available formats are: {}'.format(str(available_formats))
-            )
-
-        if oformat == 'minute':
-            scale = self.data.index.freq.delta/pd.Timedelta('1min')
-            time_label = 'Time elapsed (min.)'
-        elif oformat == 'timedelta':
-            scale = self.data.index.freq.delta
-            time_label = 'Time elapsed'
-        else:
-            scale = None
+        oformat = {
+            'Minute':{
+                'scale':pd.Timedelta(self.data.index.freq)/pd.Timedelta('1min'),
+                'time_label':'Time elapsed (min.)'
+            },
+            'TimeDelta':{
+                'scale':pd.Timedelta(self.data.index.freq),
+                'time_label':'Time elapsed'
+            }
+        }
 
         if not self.cut_points:
             print('Set cut points before running the fit method.')
@@ -162,9 +151,11 @@ class ActivityReport(Report):
             ['sum', 'mean', 'median', 'std', 'count']
         )
 
-        if scale:
-            results.loc[:, 'count'] *= scale
-            results.rename(columns={'count': time_label}, inplace=True)
+        # Convert 'counts' into minutes
+        results[oformat['Minute']['time_label']] = results.loc[:, 'count'] * oformat['Minute']['scale']
+
+        # Convert 'counts' into time delta
+        results[oformat['TimeDelta']['time_label']] = results.loc[:, 'count'] * oformat['TimeDelta']['scale']
 
         self.__results = results
         # Reset index name
